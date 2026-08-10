@@ -1,0 +1,26 @@
+# Agent tooling and local config
+.agent/
+.agents/
+.claude/
+
+# Generated knowledge-graph artifacts
+graphify-out/
+
+# Media
+*.mp4
+architecture-out/.video-frames/
+
+# Dependencies and build output
+node_modules/
+dist/
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# OS and editor cruft
+.DS_Store
+Thumbs.db
+*.log

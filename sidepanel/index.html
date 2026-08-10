@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Context</title>
+
+    <!-- DNS Prefetch and Preconnect for faster resource loading -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Preload Google Fonts CSS (highest priority) -->
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        as="style">
+
+    <!-- Load Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        rel="stylesheet">
+
+    <!-- Local CSS (after fonts for proper cascade) -->
+    <link rel="stylesheet" href="sidepanel.css">
+</head>
+
+<body>
+    <div class="panel-container">
+        <!-- Header -->
+        <header class="panel-header">
+            <div class="header-row">
+                <h1>Gemini Context</h1>
+                <div class="header-actions">
+                    <button id="theme-toggle-btn" class="header-action-btn" title="Toggle Theme">
+                        <span class="material-symbols-outlined theme-toggle-icon">dark_mode</span>
+                    </button>
+                    <button id="split-view-btn" class="header-action-btn" title="Toggle Split View">
+                        <span class="material-symbols-outlined">split_scene</span>
+                    </button>
+                    <button id="open-options-btn" class="header-action-btn" title="Settings">
+                        <span class="material-symbols-outlined">settings</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="session-info">
+                <span id="session-id" class="session-id">Waiting for tab...</span>
+                <div id="llm-status" class="llm-status">
+                    <span class="status-dot"></span>
+                    <span class="status-icon material-symbols-outlined">warning</span>
+                    <span class="status-text">Not Connected</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="context">
+                <span class="material-symbols-outlined">psychology</span> Context
+            </button>
+            <button class="tab-btn" data-tab="persona">
+                <span class="material-symbols-outlined">emoji_people</span> Persona
+            </button>
+            <button class="tab-btn" data-tab="logs">
+                <span class="material-symbols-outlined">terminal</span> Logs
+                <span class="badge badge-count tab-log-count" id="tab-log-count">0</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="panel-content">
+
+            <!-- Context Tab -->
+            <div id="tab-content-context" class="tab-content active">
+
+                <!-- State: No Gemini Tab -->
+                <div id="no-session" class="no-session hidden">
+                    <span class="material-symbols-outlined empty-state-icon">chat</span>
+                    <p>Open a chat on gemini.google.com to see context.</p>
+                </div>
+
+                <!-- State: No Model -->
+                <div id="no-model-context" class="no-model-overlay hidden">
+                    <span class="material-symbols-outlined empty-state-icon">auto_awesome</span>
+                    <h2 class="no-model-title">Welcome to Gemini Context</h2>
+                    <p class="no-model-description">Connect an AI model to unlock persona synthesis and memory.</p>
+                    <button id="open-settings-btn-context" class="btn btn-primary no-model-btn">
+                        <span class="material-symbols-outlined">link</span> Connect Model
+                    </button>
+                </div>
+
+                <!-- Active Memory Content -->
+                <div id="memory-sections" class="memory-sections">
+
+                    <!-- Active Persona Name (non-collapsible) -->
+                    <section class="accordion accordion-static" data-section="active_persona_name">
+                        <div class="accordion-header-wrapper">
+                            <div class="accordion-header static">
+                                <span class="accordion-icon material-symbols-outlined">person</span>
+                                <span id="persona-name-display" class="persona-name-text">No Persona Active</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Persona Section (7-Dimension: persona) -->
+                    <section class="accordion" data-section="persona">
+                        <div class="accordion-header-wrapper">
+                            <button class="accordion-header" aria-expanded="true">
+                                <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                                <span class="accordion-title">Persona</span>
+                                <div class="header-controls">
+                                    <span class="badge badge-auto" id="persona-mode-badge">AUTO</span>
+                                    <span id="pin-persona-btn" class="pin-toggle" role="button" tabindex="0"
+                                        title="Pin Persona">
+                                        <span class="material-symbols-outlined">push_pin</span>
+                                    </span>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="persona-name-display">
+                                <span class="meta-label">Active:</span>
+                                <span id="active-persona-name" class="persona-name-value">Auto-generated</span>
+                            </div>
+                            <div class="textarea-container">
+                                <textarea id="synthesized-persona-input" class="persona-textarea"
+                                    placeholder="waiting for analysis..." rows="4"></textarea>
+                                <button class="expand-btn" data-target="synthesized-persona-input" title="Expand">
+                                    <span class="material-symbols-outlined">expand_content</span>
+                                </button>
+                            </div>
+
+                            <div class="persona-actions">
+                                <button id="save-synthesized-persona" class="btn btn-secondary">
+                                    Save
+                                </button>
+                            </div>
+
+                            <div id="synthesis-metadata" class="synthesis-metadata hidden">
+                                <span class="meta-label">Role:</span>
+                                <span class="meta-value" id="persona-role">-</span>
+                                <span class="meta-label">Purpose:</span>
+                                <span class="meta-value" id="persona-purpose">-</span>
+                                <span class="meta-label">Expertise:</span>
+                                <span class="meta-value" id="expertise-level">-</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Context Section (7-Dimension: context) -->
+                    <section class="accordion" data-section="context">
+                        <button class="accordion-header">
+                            <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                            <span class="accordion-title">Domain Context</span>
+                            <div class="header-controls">
+                                <span class="badge hidden" id="badge-context"></span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" data-component="context" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </button>
+                        <div class="accordion-content collapsed">
+                            <div id="context-content" class="component-content">
+                                <p class="empty-state">No domain context yet.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tone Section (7-Dimension: tone) -->
+                    <section class="accordion" data-section="tone">
+                        <button class="accordion-header">
+                            <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                            <span class="accordion-title">Tone & Style</span>
+                            <div class="header-controls">
+                                <span class="badge hidden" id="badge-tone"></span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" data-component="tone" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </button>
+                        <div class="accordion-content collapsed">
+                            <div id="tone-content" class="component-content">
+                                <p class="empty-state">No tone profile yet.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Framework Section (7-Dimension: framework) -->
+                    <section class="accordion" data-section="framework">
+                        <button class="accordion-header">
+                            <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                            <span class="accordion-title">Framework</span>
+                            <div class="header-controls">
+                                <span class="badge hidden" id="badge-framework"></span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" data-component="framework" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </button>
+                        <div class="accordion-content collapsed">
+                            <div id="framework-content" class="component-content">
+                                <p class="empty-state">No methodology defined.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Constraints Section (7-Dimension: constraints) -->
+                    <section class="accordion" data-section="constraints">
+                        <button class="accordion-header">
+                            <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                            <span class="accordion-title">Constraints</span>
+                            <div class="header-controls">
+                                <span class="badge hidden" id="badge-constraints"></span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" data-component="constraints" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </button>
+                        <div class="accordion-content collapsed">
+                            <div id="constraints-content" class="component-content">
+                                <p class="empty-state">No constraints defined.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Format Section (7-Dimension: format) -->
+                    <section class="accordion" data-section="format">
+                        <button class="accordion-header">
+                            <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                            <span class="accordion-title">Output Format</span>
+                            <div class="header-controls">
+                                <span class="badge hidden" id="badge-format"></span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" data-component="format" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </button>
+                        <div class="accordion-content collapsed">
+                            <div id="format-content" class="component-content">
+                                <p class="empty-state">No format preferences.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Exemplar Section (7-Dimension: exemplar) -->
+                    <section class="accordion" data-section="exemplar">
+                        <button class="accordion-header">
+                            <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                            <span class="accordion-title">Examples</span>
+                            <div class="header-controls">
+                                <span class="badge hidden" id="badge-exemplar"></span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" data-component="exemplar" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </button>
+                        <div class="accordion-content collapsed">
+                            <div id="exemplar-content" class="component-content">
+                                <p class="empty-state">No examples captured.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Custom Context (user-injected context) -->
+                    <section class="accordion" data-section="injected_context">
+                        <button class="accordion-header" aria-expanded="false">
+                            <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                            <span class="accordion-title">Custom Context</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" data-component="injected_context" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </button>
+                        <div class="accordion-content collapsed">
+                            <p class="help-text">
+                                Inject custom context or constraints:
+                            </p>
+                            <div class="textarea-container">
+                                <textarea id="injected-context-input" class="context-textarea"
+                                    placeholder="e.g. 'Always use Python 3.11'" rows="3"></textarea>
+                                <button class="expand-btn" data-target="injected-context-input" title="Expand">
+                                    <span class="material-symbols-outlined">expand_content</span>
+                                </button>
+                            </div>
+                            <button id="save-injected-context" class="btn btn-secondary btn-full">
+                                Save Extensions
+                            </button>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- Context Footer -->
+                <footer id="context-footer" class="panel-footer">
+                    <button id="rebuild-memory" class="btn btn-primary btn-large btn-with-spinner">
+                        <span class="btn-content">
+                            <span class="material-symbols-outlined">auto_awesome</span> Rebuild Memory
+                        </span>
+                        <span class="btn-spinner">
+                            <svg class="spinner-svg" viewBox="0 0 50 50">
+                                <circle class="spinner-track" cx="25" cy="25" r="20" fill="none" stroke-width="4" />
+                                <circle class="spinner-progress" cx="25" cy="25" r="20" fill="none" stroke-width="4" />
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="footer-info">
+                        <span id="last-updated">Updated: Never</span>
+                        <span>v1.0.0</span>
+                    </div>
+                </footer>
+            </div>
+
+            <!-- Logs Tab -->
+            <div id="tab-content-logs" class="tab-content hidden">
+                <!-- State: No Gemini Tab (Logs) -->
+                <div id="no-session-logs" class="no-session hidden">
+                    <p>Navigate to Gemini to view logs.</p>
+                </div>
+
+                <!-- State: No Model (Logs) -->
+                <div id="no-model-logs" class="no-model-overlay hidden">
+                    <span class="material-symbols-outlined empty-state-icon">warning</span>
+                    <h2>No Model Connected</h2>
+                    <p>Logs will appear here once configured.</p>
+                    <button id="open-settings-btn-logs" class="btn btn-primary no-model-btn">
+                        <span class="material-symbols-outlined">settings</span> Configure
+                    </button>
+                </div>
+
+                <div id="logs-page-content" class="logs-page hidden">
+                    <div class="log-page-header">
+                        <h2>System Logs</h2>
+                        <div class="log-controls">
+                            <!-- M3 Outlined Dropdown for Log Level -->
+                            <div class="m3-dropdown" id="log-level-dropdown">
+                                <button type="button" class="m3-dropdown-trigger" aria-haspopup="listbox"
+                                    aria-expanded="false">
+                                    <span class="m3-dropdown-value">DEBUG</span>
+                                    <span class="material-symbols-outlined m3-dropdown-icon">arrow_drop_down</span>
+                                </button>
+                                <ul class="m3-dropdown-menu" role="listbox" aria-label="Log level filter">
+                                    <li class="m3-dropdown-item" role="option" data-value="TRACE">TRACE</li>
+                                    <li class="m3-dropdown-item selected" role="option" data-value="DEBUG"
+                                        aria-selected="true">DEBUG</li>
+                                    <li class="m3-dropdown-item" role="option" data-value="INFO">INFO</li>
+                                    <li class="m3-dropdown-item" role="option" data-value="WARN">WARN</li>
+                                    <li class="m3-dropdown-item" role="option" data-value="ERROR">ERROR</li>
+                                </ul>
+                                <!-- Hidden input to maintain form compatibility -->
+                                <input type="hidden" id="log-level-filter-page" value="DEBUG">
+                            </div>
+                            <button id="clear-logs-page" class="btn btn-secondary btn-small">Clear</button>
+                            <button id="export-logs-page" class="btn btn-secondary btn-small">Export</button>
+                        </div>
+                    </div>
+                    <div id="log-viewer-page" class="log-viewer">
+                        <div class="log-empty">No logs recorded.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persona Tab -->
+            <div id="tab-content-persona" class="tab-content hidden">
+
+                <!-- Page Stack Container -->
+                <div class="persona-page-stack">
+
+                    <!-- Browse Page (Default) -->
+                    <div id="persona-page-browse" class="persona-page active" data-page="browse">
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <span class="material-symbols-outlined search-icon">search</span>
+                                <input type="text" id="persona-search" class="search-input"
+                                    placeholder="Search personas by keyword, intent...">
+                                <button id="search-clear-btn" class="search-clear hidden" title="Clear">✕</button>
+                            </div>
+                            <button id="search-filters-btn" class="btn btn-icon" title="Filters">
+                                <span class="material-symbols-outlined">tune</span>
+                            </button>
+
+                            <!-- Filter Panel (hidden by default) -->
+                            <div id="search-filters" class="filter-panel hidden">
+                                <!-- Domain Chips -->
+                                <div class="filter-chip-group" data-filter="domain">
+                                    <span class="chip-group-label"><span
+                                            class="material-symbols-outlined">category</span> Domain</span>
+                                    <div class="chip-row">
+                                        <button class="filter-chip" data-value="tech">Tech</button>
+                                        <button class="filter-chip" data-value="creative">Creative</button>
+                                        <button class="filter-chip" data-value="business">Business</button>
+                                        <button class="filter-chip" data-value="education">Education</button>
+                                        <button class="filter-chip" data-value="health">Health</button>
+                                        <button class="filter-chip" data-value="lifestyle">Lifestyle</button>
+                                    </div>
+                                </div>
+
+                                <!-- Tone Chips -->
+                                <div class="filter-chip-group" data-filter="tone">
+                                    <span class="chip-group-label"><span
+                                            class="material-symbols-outlined">record_voice_over</span> Tone</span>
+                                    <div class="chip-row">
+                                        <button class="filter-chip" data-value="formal">Formal</button>
+                                        <button class="filter-chip" data-value="casual">Casual</button>
+                                        <button class="filter-chip" data-value="friendly">Friendly</button>
+                                        <button class="filter-chip" data-value="professional">Professional</button>
+                                        <button class="filter-chip" data-value="academic">Academic</button>
+                                    </div>
+                                </div>
+
+                                <!-- Complexity Chips -->
+                                <div class="filter-chip-group" data-filter="complexity">
+                                    <span class="chip-group-label"><span class="material-symbols-outlined">speed</span>
+                                        Level</span>
+                                    <div class="chip-row">
+                                        <button class="filter-chip" data-value="beginner">Beginner</button>
+                                        <button class="filter-chip" data-value="intermediate">Intermediate</button>
+                                        <button class="filter-chip" data-value="advanced">Advanced</button>
+                                    </div>
+                                </div>
+
+                                <!-- Provider Chips -->
+                                <div class="filter-chip-group" data-filter="provider">
+                                    <span class="chip-group-label"><span class="material-symbols-outlined">cloud</span>
+                                        Provider</span>
+                                    <div class="chip-row">
+                                        <button class="filter-chip" data-value="google">Gemini</button>
+                                        <button class="filter-chip" data-value="openai">OpenAI</button>
+                                        <button class="filter-chip" data-value="anthropic">Anthropic</button>
+                                        <button class="filter-chip" data-value="deepseek">DeepSeek</button>
+                                    </div>
+                                </div>
+
+                                <!-- Sort Chips (single select) -->
+                                <div class="filter-chip-group" data-filter="sort" data-single="true">
+                                    <span class="chip-group-label"><span class="material-symbols-outlined">sort</span>
+                                        Sort</span>
+                                    <div class="chip-row">
+                                        <button class="filter-chip selected" data-value="popular">Popular</button>
+                                        <button class="filter-chip" data-value="newest">Newest</button>
+                                        <button class="filter-chip" data-value="rating">Top Rated</button>
+                                    </div>
+                                </div>
+
+                                <!-- Reset -->
+                                <div class="filter-reset-row">
+                                    <button id="filter-reset-btn" class="filter-reset" title="Reset Filters">✕</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Results List -->
+                        <div id="persona-results" class="persona-list">
+                            <div class="empty-state">
+                                <span class="material-symbols-outlined">search</span>
+                                <p>Search for personas or browse popular ones</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create Page (Child) -->
+                    <div id="persona-page-create" class="persona-page hidden" data-page="create">
+                        <div class="page-header">
+                            <button class="back-nav-btn" data-back="browse">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <h3>Create Persona</h3>
+                        </div>
+
+                        <div class="create-page-content">
+                            <div class="create-form">
+                                <label class="form-label">Paste External Prompt</label>
+                                <p class="help-text">Paste a user or system prompt to extract a persona from it.</p>
+                                <div class="textarea-container">
+                                    <textarea id="extract-prompt-input" class="persona-textarea"
+                                        placeholder="Paste your user or system prompt here..." rows="6"></textarea>
+                                    <button class="expand-btn" data-target="extract-prompt-input" title="Expand">
+                                        <span class="material-symbols-outlined">expand_content</span>
+                                    </button>
+                                </div>
+
+                                <div class="divider-or">
+                                    <span>or</span>
+                                </div>
+
+                                <button id="btn-import-persona" class="btn btn-secondary btn-full">
+                                    <span class="material-symbols-outlined">upload</span> Import from File
+                                </button>
+                                <input type="file" id="import-persona-file" accept=".json,.txt,.xml,.md" hidden>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- My Personas Page (Child) -->
+                    <div id="persona-page-my-personas" class="persona-page hidden" data-page="my-personas">
+                        <div class="page-header">
+                            <button class="back-nav-btn" data-back="browse">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <h3>My Personas</h3>
+                        </div>
+
+                        <div id="my-personas-list" class="persona-list">
+                            <div class="empty-state">
+                                <span class="material-symbols-outlined">folder_open</span>
+                                <p>No personas yet. Create one to get started!</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Saved Prompts Page (Child of My Personas) -->
+                    <div id="persona-page-prompts" class="persona-page hidden" data-page="prompts">
+                        <div class="page-header">
+                            <button class="back-nav-btn" data-back="my-personas">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <h3>Saved Prompts</h3>
+                        </div>
+
+                        <div id="saved-prompts-list" class="persona-list">
+                            <div class="empty-state">
+                                <span class="material-symbols-outlined">description</span>
+                                <p>No saved prompts. Tap + to save one!</p>
+                            </div>
+                        </div>
+
+                        <!-- FAB: Add Prompt -->
+                        <button id="add-prompt-fab" class="fab fab-bottom-right" title="Save Prompt">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+
+                    <!-- Add Prompt Page (Child of Saved Prompts) -->
+                    <div id="persona-page-add-prompt" class="persona-page hidden" data-page="add-prompt">
+                        <div class="page-header">
+                            <button class="back-nav-btn" data-back="prompts">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <h3>Add Prompt</h3>
+                        </div>
+
+                        <div class="create-page-content">
+                            <div class="create-form">
+                                <div class="form-group">
+                                    <label class="form-label">Prompt Title</label>
+                                    <input type="text" id="add-prompt-title" class="form-input"
+                                        placeholder="e.g., Marketing Expert Prompt">
+                                </div>
+
+                                <label class="form-label">Prompt Content</label>
+                                <p class="help-text">Paste a user or system prompt to save for later extraction.</p>
+                                <div class="textarea-container">
+                                    <textarea id="add-prompt-content" class="persona-textarea"
+                                        placeholder="Paste your user or system prompt here..." rows="10"></textarea>
+                                    <button class="expand-btn" data-target="add-prompt-content" title="Expand">
+                                        <span class="material-symbols-outlined">expand_content</span>
+                                    </button>
+                                </div>
+
+                                <div class="divider-or">
+                                    <span>or</span>
+                                </div>
+
+                                <button id="btn-import-prompt" class="btn btn-secondary btn-full">
+                                    <span class="material-symbols-outlined">upload</span> Import from File
+                                </button>
+                                <input type="file" id="import-prompt-file" accept=".json,.txt,.xml,.md" hidden>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Persona Detail Page (Child of Browse or My Personas) -->
+                    <div id="persona-page-detail" class="persona-page hidden" data-page="detail">
+                        <div class="page-header">
+                            <button class="back-nav-btn" data-back="browse">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <h3 id="detail-persona-name">Persona Details</h3>
+                        </div>
+
+                        <div id="persona-detail-content" class="persona-detail-content">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                    <!-- Version History Page (Author-Only, Child of Extracted) -->
+                    <div id="persona-page-version-history" class="persona-page hidden" data-page="version-history">
+                        <div class="page-header">
+                            <button class="back-nav-btn" data-back="extracted">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <h3>Version History</h3>
+                            <button id="btn-export-persona" class="btn-icon" title="Export JSON">
+                                <span class="material-symbols-outlined">download</span>
+                            </button>
+                        </div>
+
+                        <div class="version-history-content">
+                            <!-- Persona Name -->
+                            <div class="version-persona-name" id="version-persona-name"></div>
+
+                            <!-- Version List -->
+                            <div id="version-list" class="version-list" role="list">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extracted Persona Page (Child of Create) -->
+                    <div id="persona-page-extracted" class="persona-page hidden" data-page="extracted">
+                        <div class="page-header">
+                            <button class="back-nav-btn" data-back="create">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <h3>Edit Persona</h3>
+                            <button id="btn-version-history" class="btn-icon" title="Version History"
+                                aria-label="View version history">
+                                <span class="material-symbols-outlined">history</span>
+                            </button>
+                        </div>
+
+                        <!-- Source Prompt FAB -->
+                        <button id="source-prompt-fab" class="fab fab-source-prompt" title="View Source Prompt">
+                            <span class="material-symbols-outlined">person</span>
+                        </button>
+
+                        <div class="extracted-page-content">
+                            <!-- Persona Name Input -->
+                            <div class="form-group persona-name-group">
+                                <label class="form-label">Persona Name <span class="required">*</span></label>
+                                <input type="text" id="ext-name" class="form-input" placeholder="Enter persona name...">
+                            </div>
+
+                            <!-- Memory Layer Section (Static Header) -->
+                            <div class="section-header">
+                                <span class="material-symbols-outlined section-type-icon">psychology</span>
+                                <span>Memory Layer</span>
+                            </div>
+                            <div id="ext-memory-sections" class="memory-sections">
+
+                                <!-- Persona Section (7-Dimension) -->
+                                <section class="accordion expanded" data-section="persona">
+                                    <div class="accordion-header-wrapper">
+                                        <button class="accordion-header" aria-expanded="true">
+                                            <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                                            <span class="accordion-title">Persona</span>
+                                            <div class="header-controls">
+                                                <span class="badge badge-auto">EXTRACTED</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                    <div class="accordion-content">
+                                        <div class="textarea-container">
+                                            <textarea id="ext-synthesized-persona" class="persona-textarea"
+                                                placeholder="Role and purpose description..." rows="4"></textarea>
+                                            <button class="expand-btn" data-target="ext-synthesized-persona"
+                                                title="Expand">
+                                                <span class="material-symbols-outlined">expand_content</span>
+                                            </button>
+                                        </div>
+                                        <!-- Persona metadata (7-dimension format) -->
+                                        <div id="ext-synthesis-metadata" class="synthesis-metadata">
+                                            <span class="meta-label">Role:</span>
+                                            <span class="meta-value" id="ext-persona-role">-</span>
+                                            <span class="meta-label">Purpose:</span>
+                                            <span class="meta-value" id="ext-persona-purpose">-</span>
+                                            <span class="meta-label">Credentials:</span>
+                                            <span class="meta-value" id="ext-credentials">-</span>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Context Section (7-Dimension) -->
+                                <section class="accordion expanded" data-section="context">
+                                    <button class="accordion-header" aria-expanded="true">
+                                        <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                                        <span class="accordion-title">Domain Context</span>
+                                        <span id="badge-context" class="badge hidden"></span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" data-component="ext_context" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div id="ext-context-content" class="component-content">
+                                            <p class="empty-state">No domain context extracted.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Tone Section (7-Dimension) -->
+                                <section class="accordion expanded" data-section="tone">
+                                    <button class="accordion-header" aria-expanded="true">
+                                        <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                                        <span class="accordion-title">Tone &amp; Style</span>
+                                        <span id="badge-tone" class="badge hidden"></span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" data-component="ext_tone" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div id="ext-tone-content" class="component-content">
+                                            <p class="empty-state">No tone profile extracted.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Framework Section (7-Dimension) -->
+                                <section class="accordion expanded" data-section="framework">
+                                    <button class="accordion-header" aria-expanded="true">
+                                        <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                                        <span class="accordion-title">Framework</span>
+                                        <span id="badge-framework" class="badge hidden"></span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" data-component="ext_framework" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div id="ext-framework-content" class="component-content">
+                                            <p class="empty-state">No methodology extracted.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Constraints Section (7-Dimension) -->
+                                <section class="accordion expanded" data-section="constraints">
+                                    <button class="accordion-header" aria-expanded="true">
+                                        <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                                        <span class="accordion-title">Constraints</span>
+                                        <span id="badge-constraints" class="badge hidden"></span>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div id="ext-constraints-content" class="component-content">
+                                            <p class="empty-state">No constraints extracted.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Format Section (7-Dimension) -->
+                                <section class="accordion expanded" data-section="format">
+                                    <button class="accordion-header" aria-expanded="true">
+                                        <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                                        <span class="accordion-title">Output Format</span>
+                                        <span id="badge-format" class="badge hidden"></span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" data-component="ext_format" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div id="ext-format-content" class="component-content">
+                                            <p class="empty-state">No format preferences extracted.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Exemplar Section (7-Dimension) -->
+                                <section class="accordion expanded" data-section="exemplar">
+                                    <button class="accordion-header" aria-expanded="true">
+                                        <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                                        <span class="accordion-title">Examples</span>
+                                        <span id="badge-exemplar" class="badge hidden"></span>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div id="ext-exemplar-content" class="component-content">
+                                            <p class="empty-state">No examples extracted.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Extensions -->
+                                <section class="accordion expanded" data-section="injected_context">
+                                    <button class="accordion-header" aria-expanded="true">
+                                        <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                                        <span class="accordion-title">Extensions</span>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <p class="help-text">Add custom context or constraints:</p>
+                                        <div class="textarea-container">
+                                            <textarea id="ext-injected-context" class="context-textarea"
+                                                placeholder="e.g. 'Always use Python 3.11'" rows="3"></textarea>
+                                            <button class="expand-btn" data-target="ext-injected-context"
+                                                title="Expand">
+                                                <span class="material-symbols-outlined">expand_content</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </section>
+
+                            </div>
+
+                            <!-- Metadata Details Section (Static Header) -->
+                            <div class="section-header">
+                                <span class="material-symbols-outlined section-type-icon">info</span>
+                                <span>Metadata Details</span>
+                            </div>
+                            <div id="ext-metadata-details" class="metadata-details-section">
+                                <!-- Provider & Model (Read-only with editable styling) -->
+                                <div class="field-row">
+                                    <div class="field-item">
+                                        <span class="field-label">Provider</span>
+                                        <span class="editable-text ext-field readonly" id="ext-provider">-</span>
+                                    </div>
+                                    <div class="field-item">
+                                        <span class="field-label">Model</span>
+                                        <span class="editable-text ext-field readonly" id="ext-model">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- Domain (Filter Chips - single select) -->
+                                <div class="field-group">
+                                    <span class="field-label">Domain <span class="required">*</span></span>
+                                    <div class="filter-chip-group ext-chip-group" data-field="domain"
+                                        data-single="true">
+                                        <button class="filter-chip" data-value="tech">Tech</button>
+                                        <button class="filter-chip" data-value="creative">Creative</button>
+                                        <button class="filter-chip" data-value="business">Business</button>
+                                        <button class="filter-chip" data-value="education">Education</button>
+                                        <button class="filter-chip" data-value="health">Health</button>
+                                        <button class="filter-chip" data-value="lifestyle">Lifestyle</button>
+                                        <button class="filter-chip" data-value="other">Other</button>
+                                    </div>
+                                </div>
+
+                                <!-- Sub-domains (Tag List - editable) -->
+                                <div class="field-group">
+                                    <span class="field-label">Sub-domains <span class="optional">(max 5)</span></span>
+                                    <div id="ext-subdomains" class="tag-list" data-component="metadata"
+                                        data-field="subdomains" data-max="5">
+                                        <button class="tag-add" title="Add sub-domain">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Tone (Filter Chips - horizontal) -->
+                                <div class="field-group">
+                                    <span class="field-label">Tone <span class="required">*</span></span>
+                                    <div class="filter-chip-group ext-chip-group compact" data-field="tone"
+                                        data-single="true">
+                                        <button class="filter-chip" data-value="formal">Formal</button>
+                                        <button class="filter-chip" data-value="casual">Casual</button>
+                                        <button class="filter-chip" data-value="friendly">Friendly</button>
+                                        <button class="filter-chip" data-value="professional">Professional</button>
+                                        <button class="filter-chip" data-value="academic">Academic</button>
+                                    </div>
+                                </div>
+
+                                <!-- Complexity (Filter Chips - horizontal) -->
+                                <div class="field-group">
+                                    <span class="field-label">Complexity <span class="required">*</span></span>
+                                    <div class="filter-chip-group ext-chip-group compact" data-field="complexity"
+                                        data-single="true">
+                                        <button class="filter-chip" data-value="beginner">Beginner</button>
+                                        <button class="filter-chip" data-value="intermediate">Intermediate</button>
+                                        <button class="filter-chip" data-value="advanced">Advanced</button>
+                                    </div>
+                                </div>
+
+                                <!-- Keywords (Tag List - editable, required) -->
+                                <div class="field-group">
+                                    <span class="field-label">Keywords <span class="required">*</span></span>
+                                    <div id="ext-keywords" class="tag-list" data-component="metadata"
+                                        data-field="keywords">
+                                        <button class="tag-add" title="Add keyword">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Target Audience (Editable text) -->
+                                <div class="fact-item">
+                                    <strong>Target Audience:</strong>
+                                    <span class="editable-text ext-field" id="ext-audience" data-component="metadata"
+                                        data-field="audience">-</span>
+                                </div>
+
+                                <!-- Visibility Toggle (unchanged) -->
+                                <div class="field-group visibility-section">
+                                    <span class="field-label">Visibility</span>
+                                    <div class="filter-chip-group ext-chip-group compact visibility-chips"
+                                        data-field="visibility" data-single="true">
+                                        <button id="ext-visibility-private" class="filter-chip visibility-chip"
+                                            data-value="private">
+                                            <span class="material-symbols-outlined">lock</span>
+                                            <span>Private</span>
+                                        </button>
+                                        <button id="ext-visibility-public" class="filter-chip visibility-chip selected"
+                                            data-value="public">
+                                            <span class="material-symbols-outlined">public</span>
+                                            <span>Public</span>
+                                        </button>
+                                    </div>
+                                    <p class="help-text">Private personas are saved as drafts. Public personas are
+                                        published to the community.</p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <!-- FAB (Create) - Bottom Right -->
+                    <button id="persona-fab" class="fab" title="Create new persona">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+
+                    <!-- Persona Footer -->
+                    <footer id="persona-footer" class="panel-footer">
+                        <!-- Browse/Search page: My Personas button -->
+                        <button id="my-personas-btn"
+                            class="btn btn-primary btn-large btn-with-spinner footer-btn-browse">
+                            <span class="btn-content">
+                                <span class="material-symbols-outlined">emoji_people</span> My Personas
+                            </span>
+                            <span class="btn-spinner">
+                                <svg class="spinner-svg" viewBox="0 0 50 50">
+                                    <circle class="spinner-track" cx="25" cy="25" r="20" fill="none" stroke-width="4">
+                                    </circle>
+                                    <circle class="spinner-progress" cx="25" cy="25" r="20" fill="none"
+                                        stroke-width="4"></circle>
+                                </svg>
+                            </span>
+                        </button>
+                        <!-- Create page: Extract Persona button -->
+                        <button id="extract-btn"
+                            class="btn btn-primary btn-large btn-full btn-with-spinner footer-btn-create hidden">
+                            <span class="btn-content">
+                                <span class="material-symbols-outlined">chip_extraction</span> Extract Persona
+                            </span>
+                            <span class="btn-spinner">
+                                <svg class="spinner-svg" viewBox="0 0 50 50">
+                                    <circle class="spinner-track" cx="25" cy="25" r="20" fill="none" stroke-width="4">
+                                    </circle>
+                                    <circle class="spinner-progress" cx="25" cy="25" r="20" fill="none"
+                                        stroke-width="4"></circle>
+                                </svg>
+                            </span>
+                        </button>
+                        <!-- Extracted page: Publish button -->
+                        <button id="ext-publish-btn"
+                            class="btn btn-primary btn-large btn-full btn-with-spinner footer-btn-extracted hidden">
+                            <span class="btn-content">
+                                <span class="material-symbols-outlined">publish</span> Publish
+                            </span>
+                            <span class="btn-spinner">
+                                <svg class="spinner-svg" viewBox="0 0 50 50">
+                                    <circle class="spinner-track" cx="25" cy="25" r="20" fill="none" stroke-width="4">
+                                    </circle>
+                                    <circle class="spinner-progress" cx="25" cy="25" r="20" fill="none"
+                                        stroke-width="4"></circle>
+                                </svg>
+                            </span>
+                        </button>
+                        <!-- My Personas page: Prompts button -->
+                        <button id="prompts-btn"
+                            class="btn btn-primary btn-large btn-full footer-btn-my-personas hidden">
+                            <span class="material-symbols-outlined">description</span> Prompts
+                        </button>
+                        <!-- Add Prompt page: Save Prompt button -->
+                        <button id="save-prompt-btn"
+                            class="btn btn-primary btn-large btn-full btn-with-spinner footer-btn-add-prompt hidden">
+                            <span class="btn-content">
+                                <span class="material-symbols-outlined">save</span> Save Prompt
+                            </span>
+                            <span class="btn-spinner">
+                                <svg class="spinner-svg" viewBox="0 0 50 50">
+                                    <circle class="spinner-track" cx="25" cy="25" r="20" fill="none" stroke-width="4">
+                                    </circle>
+                                    <circle class="spinner-progress" cx="25" cy="25" r="20" fill="none"
+                                        stroke-width="4"></circle>
+                                </svg>
+                            </span>
+                        </button>
+                    </footer>
+                </div>
+
+        </main>
+    </div>
+
+    <!-- M3 Alert Dialog -->
+    <div id="alert-dialog" class="dialog-overlay hidden" role="alertdialog" aria-modal="true">
+        <div class="dialog-scrim"></div>
+        <div class="dialog-container">
+            <div class="dialog-icon">
+                <span class="material-symbols-outlined dialog-icon-error">error</span>
+                <span class="material-symbols-outlined dialog-icon-warning">warning</span>
+                <span class="material-symbols-outlined dialog-icon-info">info</span>
+                <span class="material-symbols-outlined dialog-icon-success">check_circle</span>
+            </div>
+            <h2 class="dialog-title">Error</h2>
+            <p class="dialog-message">An error occurred.</p>
+            <div class="dialog-details hidden">
+                <pre class="dialog-details-content"></pre>
+            </div>
+            <div class="dialog-actions">
+                <button class="btn btn-secondary dialog-dismiss">Dismiss</button>
+                <button class="btn btn-primary dialog-retry hidden">
+                    <span class="material-symbols-outlined">refresh</span> Retry
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- M3 Confirm Dialog -->
+    <div id="confirm-dialog" class="dialog-overlay hidden" role="dialog" aria-modal="true">
+        <div class="dialog-scrim"></div>
+        <div class="dialog-container">
+            <div class="dialog-icon">
+                <span class="material-symbols-outlined dialog-icon-info">info</span>
+            </div>
+            <h2 class="dialog-title">Confirm</h2>
+            <p class="dialog-message">Are you sure?</p>
+            <div class="dialog-actions">
+                <button class="btn btn-primary dialog-confirm">Confirm</button>
+                <button class="btn btn-secondary dialog-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- M3 Prompt Dialog (for text input) -->
+    <div id="prompt-dialog" class="dialog-overlay hidden" role="dialog" aria-modal="true">
+        <div class="dialog-scrim"></div>
+        <div class="dialog-container">
+            <div class="dialog-icon">
+                <span class="material-symbols-outlined dialog-icon-info">edit_note</span>
+            </div>
+            <h2 class="dialog-title">Change Notes</h2>
+            <p class="dialog-message">What changed in this version?</p>
+            <textarea id="prompt-input" class="dialog-input" placeholder="Optional: describe your changes"
+                rows="2"></textarea>
+            <div class="dialog-actions">
+                <button class="btn btn-primary dialog-confirm">Publish</button>
+                <button class="btn btn-secondary dialog-cancel">Skip</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Source Prompt Fullscreen Viewer -->
+    <div id="source-prompt-viewer" class="textarea-overlay hidden">
+        <div class="textarea-container is-fullscreen">
+            <div class="fullscreen-header">
+                <h3>Source Prompt</h3>
+                <button class="btn-icon close-fullscreen" title="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <textarea id="source-prompt-textarea" class="persona-textarea" readonly
+                placeholder="No source prompt available"></textarea>
+            <div class="fullscreen-footer">
+                <button id="btn-rebuild-persona" class="btn btn-primary btn-with-spinner">
+                    <span class="btn-content">
+                        <span class="material-symbols-outlined">sync</span> Rebuild Persona
+                    </span>
+                    <span class="btn-spinner">
+                        <svg class="spinner-svg" viewBox="0 0 50 50">
+                            <circle class="spinner-track" cx="25" cy="25" r="20" fill="none" stroke-width="4">
+                            </circle>
+                            <circle class="spinner-progress" cx="25" cy="25" r="20" fill="none" stroke-width="4">
+                            </circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../supabase/supabase.min.js"></script>
+    <script src="../supabase/supabase-client.js"></script>
+    <script src="../theme/theme-controller.js"></script>
+    <script src="../memory/component-schemas.js"></script>
+    <script src="sidepanel.js"></script>
+</body>
+
+</html>

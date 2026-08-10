@@ -1,0 +1,169 @@
+/**
+ * ============================================================================
+ * RATING UI STYLES - 5-Star Rating Component CSS (Material 3 Design)
+ * ============================================================================
+ * 
+ * Theme-aware styles matching Gemini's UI. Uses the same color variables
+ * as the main extension for consistency.
+ * 
+ * ============================================================================
+ */
+
+/* Dark theme (default) */
+.pa-rating-container {
+    --rating-star-empty: #5f6368;
+    --rating-star-filled: #fbbc04;
+    --rating-star-hover: #fdd663;
+    --rating-text: #9aa0a6;
+    --rating-text-active: #e8eaed;
+}
+
+/* Light theme - unified detection via :root[data-theme] + legacy selectors */
+:root[data-theme="light"] .pa-rating-container,
+body[data-gemini-theme="light"] .pa-rating-container,
+html[style*="color-scheme: light"] .pa-rating-container,
+body[style*="background-color: rgb(255"] .pa-rating-container,
+.light-theme .pa-rating-container {
+    --rating-star-empty: #c4c7c5;
+    --rating-star-filled: #ea8600;
+    --rating-star-hover: #f9ab00;
+    --rating-text: #5f6368;
+    --rating-text-active: #1f1f1f;
+}
+
+/* Additional light theme detection for system preference */
+@media (prefers-color-scheme: light) {
+    .pa-rating-container {
+        --rating-star-empty: #c4c7c5;
+        --rating-star-filled: #ea8600;
+        --rating-star-hover: #f9ab00;
+        --rating-text: #5f6368;
+        --rating-text-active: #1f1f1f;
+    }
+}
+
+/* Rating Container - Clean inline style */
+.pa-rating-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    margin-top: 4px;
+    font-family: 'Google Sans', 'Google Sans Text', Roboto, sans-serif;
+}
+
+/* Rating Label - Subtle text */
+.pa-rating-label {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--rating-text);
+    white-space: nowrap;
+    letter-spacing: 0.1px;
+    transition: color 0.2s ease;
+}
+
+/* Stars Container - Proper spacing */
+.pa-stars-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Individual Star Button - Better touch targets */
+.pa-star {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: var(--rating-star-empty);
+    border-radius: 50%;
+    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+        color 0.15s ease;
+    line-height: 1;
+}
+
+.pa-star:hover {
+    transform: scale(1.15);
+    color: var(--rating-star-hover);
+}
+
+.pa-star:focus {
+    outline: none;
+}
+
+.pa-star:focus-visible {
+    outline: 2px solid #8ab4f8;
+    outline-offset: 2px;
+}
+
+/* Filled Star (rated) */
+.pa-star-filled {
+    color: var(--rating-star-filled);
+}
+
+/* Hover State */
+.pa-star-hover {
+    color: var(--rating-star-hover);
+}
+
+/* Container when rated */
+.pa-rating-container[data-rated="true"] .pa-rating-label {
+    color: var(--rating-text-active);
+    font-weight: 500;
+}
+
+/* Star pop animation */
+@keyframes pa-star-pop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pa-star-filled {
+    animation: pa-star-pop 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .pa-rating-container {
+        gap: 10px;
+    }
+
+    .pa-rating-label {
+        font-size: 12px;
+    }
+
+    .pa-star {
+        font-size: 22px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .pa-stars-container {
+        gap: 4px;
+    }
+}
+
+/* Integration with Gemini's existing response-actions */
+.response-actions+.pa-rating-container {
+    margin-left: 0;
+}
+
+/* For model response containers */
+.model-response-container .pa-rating-container {
+    margin-top: 8px;
+}

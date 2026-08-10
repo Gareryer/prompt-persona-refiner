@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Workspace Settings</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Toast notification container -->
+    <div id="toast-container"></div>
+
+    <div class="container">
+        <header>
+            <div class="header-row">
+                <div class="logo">
+                    <svg class="icon" viewBox="0 0 256 256" fill="currentColor">
+                        <path
+                            d="M208,144a15.78,15.78,0,0,1-10.42,14.94L146,178l-19.06,51.62a15.92,15.92,0,0,1-29.88,0L78,178l-51.62-19a15.92,15.92,0,0,1,0-29.88L78,110l19-51.62a15.92,15.92,0,0,1,29.88,0L146,110l51.62,19A15.78,15.78,0,0,1,208,144Z" />
+                    </svg>
+                    <h1>Gemini Workspace Settings</h1>
+                </div>
+                <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme">
+                    <span class="theme-toggle-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Model Manager Section -->
+            <section class="card" id="model-manager-container">
+                <!-- Model Manager UI will be rendered here by JavaScript -->
+                <div class="loading-placeholder">
+                    <div class="spinner"></div>
+                    <span>Loading Model Manager...</span>
+                </div>
+            </section>
+        </main>
+
+        <!-- Status message for notifications -->
+        <footer>
+            <span id="status-msg"></span>
+        </footer>
+    </div>
+    <script src="../llm/llm-client.js"></script>
+    <script src="../model/model-registry.js"></script>
+    <script src="../model/model-manager.js"></script>
+    <script src="../theme/theme-controller.js"></script>
+    <script src="model-manager-ui.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>

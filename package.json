@@ -1,0 +1,16 @@
+{
+    "name": "gemini-context-aware-extension",
+    "version": "1.0.0",
+    "description": "Chrome extension for Gemini with intelligent prompt refinement",
+    "scripts": {
+        "build": "node build.js",
+        "build:dev": "node build.js --dev",
+        "watch": "node build.js --watch",
+        "clean": "rimraf dist"
+    },
+    "devDependencies": {
+        "esbuild": "^0.20.0",
+        "javascript-obfuscator": "^4.1.1",
+        "rimraf": "^5.0.5"
+    }
+}

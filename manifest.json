@@ -1,0 +1,121 @@
+{
+  "manifest_version": 3,
+  "name": "Prompt Assistant - AI Context-Aware Engineer",
+  "version": "1.0.0",
+  "description": "Persist personas and refine prompts in gemini.google.com",
+  "icons": {
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "scripting",
+    "tabs",
+    "clipboardWrite",
+    "sidePanel",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://gemini.google.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "https://openrouter.ai/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "options/index.html",
+    "open_in_tab": true
+  },
+  "action": {
+    "default_title": "Open Memory Control Panel",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "sidepanel/index.html"
+  },
+  "commands": {
+    "trigger-refine": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+R",
+        "mac": "Command+Shift+R"
+      },
+      "description": "Refine current prompt"
+    },
+    "open-sidepanel": {
+      "suggested_key": {
+        "default": "Alt+M"
+      },
+      "description": "Open Memory Control Panel"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://gemini.google.com/*"
+      ],
+      "js": [
+        "security/runtime-security.js",
+        "bridge/extension-bridge.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://gemini.google.com/*"
+      ],
+      "js": [
+        "logging/logger.js",
+        "model/model-registry.js",
+        "model/model-manager.js",
+        "rating/rating-manager.js",
+        "rating/rating-ui.js",
+        "rating/rating-injector.js",
+        "content/scraper.js",
+        "llm/llm-client.js",
+        "llm/llm-config.js",
+        "memory/component-schemas.js",
+        "memory/memory-controller.js",
+        "memory/analyzer-registry.js",
+        "memory/analyzers/recent-focus.js",
+        "memory/analyzers/unified-analyzer.js",
+        "memory/context-assembler.js",
+        "memory/index.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://gemini.google.com/*"
+      ],
+      "css": [
+        "content/styles.css",
+        "rating/rating.css"
+      ],
+      "js": [
+        "content/diff.js",
+        "content/templates.js",
+        "content/observer.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "sidepanel/index.html",
+        "sidepanel/sidepanel.js",
+        "sidepanel/sidepanel.css",
+        "icons/icon128.png"
+      ],
+      "matches": [
+        "https://gemini.google.com/*"
+      ]
+    }
+  ]
+}

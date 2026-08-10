@@ -1,0 +1,1228 @@
+/* ============================================================================
+ * Gemini Extension - Content Script Styles (Dark/Light Mode)
+ * ============================================================================
+ * 
+ * Injected UI elements: Settings icon, Refine toggle, Review modal
+ * Supports both dark and light mode via CSS custom properties.
+ * 
+ * ============================================================================ */
+
+/* ============================================================================
+ * CSS CUSTOM PROPERTIES - Theme Tokens
+ * ============================================================================ */
+
+:root {
+    /* === DARK MODE (Default) === */
+
+    /* Surfaces */
+    --ext-color-bg: #000000;
+    --ext-color-surface: #1e1f20;
+    --ext-color-surface-container: #0e0e0e;
+
+    /* Text */
+    --ext-color-text-primary: #e3e3e3;
+    --ext-color-text-secondary: #c4c7c5;
+    --ext-color-text-tertiary: #8e918f;
+    --ext-color-accent: #a8c7fa;
+    --ext-color-accent-container: rgba(168, 199, 250, 0.15);
+    --ext-color-on-accent: #041e49;
+    --ext-color-toggle-knob: #041e49;
+
+    /* Interactive States */
+    --ext-color-hover: rgba(227, 227, 227, 0.08);
+    --ext-color-active: rgba(227, 227, 227, 0.12);
+
+    /* Borders */
+    --ext-color-outline: #444746;
+    --ext-color-divider: #3c4043;
+
+    /* Status */
+    --ext-color-success: #34a853;
+    --ext-color-error: #ea4335;
+}
+
+/* === LIGHT MODE === */
+/* Applied via media query OR when Gemini theme is detected as light */
+@media (prefers-color-scheme: light) {
+    :root {
+        /* Surfaces */
+        --ext-color-bg: #f0f4f8;
+        --ext-color-surface: #ffffff;
+        --ext-color-surface-container: #e9eef6;
+
+        /* Text */
+        --ext-color-text-primary: #1f1f1f;
+        --ext-color-text-secondary: #444746;
+        --ext-color-text-tertiary: #747775;
+        --ext-color-accent: #0b57d0;
+        --ext-color-accent-container: rgba(11, 87, 208, 0.12);
+        --ext-color-on-accent: #ffffff;
+        --ext-color-toggle-knob: #ffffff;
+
+        /* Interactive States */
+        --ext-color-hover: rgba(31, 31, 31, 0.08);
+        --ext-color-active: rgba(31, 31, 31, 0.12);
+
+        /* Borders */
+        --ext-color-outline: #747775;
+        --ext-color-divider: #c4c7c5;
+
+        /* Status */
+        --ext-color-success: #1e8e3e;
+        --ext-color-error: #d93025;
+    }
+}
+
+/* Light mode via JavaScript detection (data-theme attribute on :root) */
+:root[data-theme="light"],
+body[data-gemini-theme="light"] {
+    --ext-color-bg: #f0f4f8;
+    --ext-color-surface: #ffffff;
+    --ext-color-surface-container: #e9eef6;
+    --ext-color-text-primary: #1f1f1f;
+    --ext-color-text-secondary: #444746;
+    --ext-color-text-tertiary: #747775;
+    --ext-color-accent: #0b57d0;
+    --ext-color-accent-container: rgba(11, 87, 208, 0.12);
+    --ext-color-on-accent: #ffffff;
+    --ext-color-toggle-knob: #ffffff;
+    --ext-color-hover: rgba(31, 31, 31, 0.08);
+    --ext-color-active: rgba(31, 31, 31, 0.12);
+    --ext-color-outline: #747775;
+    --ext-color-divider: #c4c7c5;
+    --ext-color-success: #1e8e3e;
+    --ext-color-error: #d93025;
+}
+
+/* Font Family - Exact Gemini stack */
+.gemini-ext-font-sans {
+    font-family: "Google Sans Flex", "Google Sans", "Helvetica Neue", sans-serif;
+}
+
+/* --- Settings Icon Wrapper (positioned next to input) --- */
+.gemini-ext-settings-wrapper {
+    position: fixed;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.gemini-ext-settings-wrapper.visible {
+    display: flex;
+}
+
+.gemini-ext-settings-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--ext-color-text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.gemini-ext-settings-btn.enabled {
+    color: var(--ext-color-text-secondary);
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.gemini-ext-settings-btn.enabled:hover {
+    background: var(--ext-color-hover);
+    color: var(--ext-color-text-primary);
+}
+
+/* --- Model Indicator Dot (Badge overlay on settings icon) --- */
+.gemini-ext-model-dot {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.gemini-ext-model-dot.inactive {
+    background: var(--ext-color-error);
+    box-shadow: 0 0 4px rgba(234, 67, 53, 0.6);
+    animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+.gemini-ext-model-dot.active {
+    background: var(--ext-color-success);
+    box-shadow: 0 0 6px rgba(52, 168, 83, 0.8);
+    animation: pulse-green 2s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+
+    0%,
+    100% {
+        transform: translateX(-50%) scale(1);
+        box-shadow: 0 0 4px rgba(52, 168, 83, 0.4);
+    }
+
+    50% {
+        transform: translateX(-50%) scale(1.3);
+        box-shadow: 0 0 12px rgba(52, 168, 83, 1);
+    }
+}
+
+@keyframes pulse-red {
+
+    0%,
+    100% {
+        transform: translateX(-50%) scale(1);
+        box-shadow: 0 0 4px rgba(234, 67, 53, 0.4);
+    }
+
+    50% {
+        transform: translateX(-50%) scale(1.3);
+        box-shadow: 0 0 12px rgba(234, 67, 53, 1);
+    }
+}
+
+/* --- Refine Toggle - Native Gemini Button Style --- */
+.gemini-ext-toggle-wrapper {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    margin-left: 4px;
+    margin-right: 8px;
+    border-radius: 9999px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+    font-family: "Google Sans Flex", "Google Sans Text", "Google Sans", sans-serif;
+    position: relative;
+}
+
+.gemini-ext-toggle-wrapper.visible {
+    display: flex !important;
+}
+
+.gemini-ext-toggle-wrapper:hover {
+    background: var(--ext-color-hover);
+}
+
+/* Active/Checked state */
+.gemini-ext-toggle-wrapper.active {
+    background: var(--ext-color-accent-container);
+}
+
+.gemini-ext-toggle-wrapper.active:hover {
+    background: var(--ext-color-active);
+}
+
+.gemini-ext-toggle-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ext-color-text-primary);
+    letter-spacing: 0.2px;
+}
+
+.gemini-ext-toggle-wrapper.active .gemini-ext-toggle-label {
+    color: var(--ext-color-text-primary);
+}
+
+/* Toggle Switch - Material 3 Style (Compact) */
+.gemini-ext-toggle {
+    position: relative;
+    width: 28px;
+    height: 18px;
+    background: var(--ext-color-outline);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.gemini-ext-toggle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: var(--ext-color-text-primary);
+    border-radius: 50%;
+    transition: left 0.2s ease, background-color 0.2s;
+}
+
+/* Active State */
+.gemini-ext-toggle.checked {
+    background: var(--ext-color-accent);
+}
+
+.gemini-ext-toggle.checked::after {
+    left: calc(100% - 15px);
+    background: var(--ext-color-toggle-knob);
+}
+
+/* --- Review Modal - Native Material 3 Dialog --- */
+.gemini-ext-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    /* Dimmer overlay */
+    backdrop-filter: blur(2px);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.gemini-ext-modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Modal Variables - Use root-level variables for theme support */
+.gemini-ext-modal-overlay {
+    --modal-bg: var(--ext-color-surface);
+    --modal-surface: var(--ext-color-surface-container);
+    --modal-border: var(--ext-color-divider);
+    --modal-text: var(--ext-color-text-primary);
+    --modal-text-secondary: var(--ext-color-text-secondary);
+    --modal-primary: var(--ext-color-accent);
+    --modal-on-primary: var(--ext-color-on-accent);
+    --modal-outline: var(--ext-color-outline);
+}
+
+.gemini-ext-modal {
+    background: var(--modal-bg);
+    border-radius: 32px;
+    /* Verified: prompt container uses 32px */
+    width: 700px;
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.2, 0.0, 0, 1.0);
+    font-family: "Google Sans Flex", "Google Sans", sans-serif;
+    overflow: hidden;
+    border: none;
+}
+
+.gemini-ext-modal-overlay.open .gemini-ext-modal {
+    transform: scale(1) translateY(0);
+}
+
+/* Header */
+.gemini-ext-modal-header {
+    padding: 24px 24px 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gemini-ext-modal-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gemini-ext-modal-icon {
+    font-size: 24px;
+}
+
+.gemini-ext-modal-title {
+    color: var(--modal-text);
+    font-size: 22px;
+    /* Headline Small */
+    font-weight: 400;
+    /* Regular weight typical in Material 3 */
+    margin: 0;
+}
+
+.gemini-ext-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--modal-text-secondary);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.gemini-ext-modal-close:hover {
+    background: var(--ext-color-hover);
+    color: var(--modal-text);
+}
+
+/* Tabs - Pill Style (matches sidepanel tab-nav) */
+.gemini-ext-modal-tabs {
+    display: flex;
+    padding: 12px 16px;
+    gap: 8px;
+    background: var(--modal-surface);
+    border-bottom: none;
+}
+
+.gemini-ext-tab {
+    flex: 1;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 9999px;
+    color: var(--modal-text-secondary);
+    font-family: "Google Sans Flex", "Google Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.gemini-ext-tab:hover {
+    background: var(--ext-color-hover);
+    color: var(--modal-text);
+}
+
+.gemini-ext-tab[aria-selected="true"] {
+    background: var(--ext-color-accent);
+    color: var(--ext-color-on-accent);
+}
+
+.gemini-ext-tab[aria-selected="true"]:hover {
+    background: var(--ext-color-accent);
+    filter: brightness(0.95);
+}
+
+/* Body - 80% of 350px combined section = 280px */
+.gemini-ext-modal-body {
+    padding: 16px 16px;
+    height: 300px;
+    min-height: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+    position: relative;
+    background: var(--modal-bg);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Content panels */
+.gemini-ext-content-panel {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.gemini-ext-content-panel.hidden {
+    display: none;
+}
+
+.gemini-ext-input-area {
+    background: var(--modal-surface);
+    border: none;
+    border-radius: 0 0 24px 24px !important;
+    padding: 16px;
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
+    color: var(--modal-text);
+    font-size: 16px;
+    line-height: 1.5;
+    width: 100%;
+    resize: none;
+    outline: none;
+    font-family: 'Roboto', sans-serif;
+    transition: border-color 0.2s, background 0.2s;
+    box-sizing: border-box;
+}
+
+.gemini-ext-input-area:focus {
+    background: var(--ext-color-hover);
+}
+
+/* Textarea Container for expand button positioning */
+.gemini-ext-textarea-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* Fullscreen state - expands to cover entire modal content area (body + status + footer) */
+.gemini-ext-textarea-container.is-fullscreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    /* Modal-body (300px) + status-bar (40px) + footer (~70px) + buffer */
+    height: calc(332px + 36px + 72px);
+    z-index: 200;
+    background: var(--modal-bg);
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+    border-radius: 0 0 20px 20px !important;
+}
+
+/* Allow fullscreen to overflow modal-body boundaries */
+.gemini-ext-modal-body:has(.is-fullscreen) {
+    overflow: visible;
+    padding: 16px !important;
+}
+
+.gemini-ext-textarea-container.is-fullscreen .gemini-ext-input-area {
+    flex: 1;
+    max-height: none !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    border-radius: 0 0 24px 24px !important;
+    padding: 16px !important;
+    box-sizing: border-box;
+}
+
+/* Controls positioning in fullscreen - inside the container padding */
+.gemini-ext-textarea-container.is-fullscreen .gemini-ext-textarea-controls {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    z-index: 101;
+}
+
+/* Keep expand button visible in fullscreen (for cases without controls container) */
+.gemini-ext-textarea-container.is-fullscreen .gemini-ext-expand-btn {
+    z-index: 101;
+}
+
+
+/* Expand button - match sidepanel styling exactly */
+.gemini-ext-expand-btn {
+    position: absolute;
+    bottom: 24px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: var(--modal-surface);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+    transition: all 0.15s ease;
+    z-index: 2;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.gemini-ext-expand-btn:hover,
+.gemini-ext-expand-btn:active {
+    opacity: 1;
+    background: var(--ext-color-hover);
+}
+
+.gemini-ext-expand-btn svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--modal-text-secondary);
+}
+
+.gemini-ext-expand-btn:hover svg,
+.gemini-ext-expand-btn:active svg {
+    stroke: var(--modal-text);
+}
+
+.gemini-ext-expand-btn .material-symbols-outlined {
+    font-size: 22px;
+    color: var(--modal-text-secondary);
+}
+
+.gemini-ext-expand-btn:hover .material-symbols-outlined,
+.gemini-ext-expand-btn:active .material-symbols-outlined {
+    color: var(--modal-text);
+}
+
+/* Textarea controls container - holds nav buttons and expand button */
+.gemini-ext-textarea-controls {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 2;
+}
+
+/* Navigation buttons - exact same aesthetic as expand button */
+.gemini-ext-nav-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: var(--modal-surface);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+    transition: all 0.15s ease;
+    z-index: 2;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.gemini-ext-nav-btn:hover:not(:disabled),
+.gemini-ext-nav-btn:active:not(:disabled) {
+    opacity: 1;
+    background: var(--ext-color-hover);
+}
+
+.gemini-ext-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.gemini-ext-nav-btn svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--modal-text-secondary);
+}
+
+.gemini-ext-nav-btn:hover:not(:disabled) svg,
+.gemini-ext-nav-btn:active:not(:disabled) svg {
+    stroke: var(--modal-text);
+}
+
+/* Pair navigation button - accent color to distinguish from history chevrons */
+.gemini-ext-pair-btn {
+    background: var(--ext-color-accent-container);
+}
+
+.gemini-ext-pair-btn svg {
+    stroke: var(--modal-primary);
+}
+
+.gemini-ext-pair-btn:hover:not(:disabled) {
+    background: var(--modal-primary);
+}
+
+.gemini-ext-pair-btn:hover:not(:disabled) svg {
+    stroke: var(--ext-color-on-accent);
+}
+
+.gemini-ext-pair-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: var(--modal-surface);
+}
+
+.gemini-ext-pair-btn:disabled svg {
+    stroke: var(--modal-text-secondary);
+}
+
+/* Adjust expand button when inside controls container */
+.gemini-ext-textarea-controls .gemini-ext-expand-btn {
+    position: relative;
+    bottom: auto;
+    right: auto;
+}
+
+/* Textarea Scrollbar - Positioned inward from edge */
+.gemini-ext-input-area::-webkit-scrollbar {
+    width: 12px;
+}
+
+.gemini-ext-input-area::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 12px 0;
+}
+
+.gemini-ext-input-area::-webkit-scrollbar-thumb {
+    background: var(--modal-border);
+    border-radius: 6px;
+    border: 4px solid transparent;
+    background-clip: padding-box;
+}
+
+.gemini-ext-input-area::-webkit-scrollbar-thumb:hover {
+    background: var(--modal-text-secondary);
+    border: 4px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Status bar - 20% of 350px combined section = 70px */
+.gemini-ext-status-bar {
+    padding: 16px;
+    height: 50px;
+    min-height: 50px;
+    max-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    overflow: hidden;
+}
+
+/* Stop button area - static space, use visibility to show/hide */
+.gemini-ext-stop-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    visibility: hidden;
+}
+
+.gemini-ext-stop-area.visible {
+    visibility: visible;
+}
+
+/* Feedback text with typing effect */
+.gemini-ext-feedback {
+    font-size: 14px;
+    color: var(--modal-text-secondary);
+    font-family: 'Google Sans', sans-serif;
+    text-align: center;
+}
+
+.gemini-ext-feedback.typing::after {
+    content: '|';
+    animation: blink-cursor 0.7s infinite;
+    margin-left: 2px;
+}
+
+@keyframes blink-cursor {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Progress/Loading indicator - acts as footer border-top line */
+/* MUI-style Linear Indeterminate with dual-bar fluid animation */
+.gemini-ext-progress-container {
+    height: 2px;
+    background: var(--modal-border);
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+/* When loading: show the animation
+.gemini-ext-progress-container.visible {
+    opacity: 1;
+}
+*/
+
+/* Hide the static bar element - we use pseudo-elements */
+.gemini-ext-progress-bar {
+    display: none;
+}
+
+/* Track container for pseudo-elements */
+.gemini-ext-progress-track {
+    display: none;
+}
+
+/* Primary bar - longer, moves faster initially then slows */
+.gemini-ext-progress-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg,
+            #4285F4 0%,
+            #4285F4 25%,
+            #EA4335 25%,
+            #EA4335 50%,
+            #FBBC05 50%,
+            #FBBC05 75%,
+            #34A853 75%,
+            #34A853 100%);
+    background-size: 400% 100%;
+    animation: none;
+    transform-origin: left center;
+}
+
+/* Secondary bar - shorter, catches up with different timing */
+.gemini-ext-progress-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg,
+            #4285F4 0%,
+            #4285F4 25%,
+            #EA4335 25%,
+            #EA4335 50%,
+            #FBBC05 50%,
+            #FBBC05 75%,
+            #34A853 75%,
+            #34A853 100%);
+    background-size: 400% 100%;
+    animation: none;
+    transform-origin: left center;
+}
+
+/* Animate only when container is visible */
+.gemini-ext-progress-container.visible::before {
+    animation:
+        progress-primary-scale 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite,
+        progress-primary-translate 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite,
+        progress-gradient-shift 2.1s linear infinite;
+}
+
+.gemini-ext-progress-container.visible::after {
+    animation:
+        progress-secondary-scale 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite,
+        progress-secondary-translate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite,
+        progress-gradient-shift 2.1s linear infinite;
+    animation-delay: 1.15s;
+}
+
+/* Primary bar: starts narrow, grows wide, shrinks as it exits */
+@keyframes progress-primary-scale {
+    0% {
+        width: 0%;
+    }
+
+    25% {
+        width: 50%;
+    }
+
+    50% {
+        width: 75%;
+    }
+
+    75% {
+        width: 35%;
+    }
+
+    100% {
+        width: 0%;
+    }
+}
+
+/* Primary bar horizontal movement */
+@keyframes progress-primary-translate {
+    0% {
+        left: -35%;
+    }
+
+    60% {
+        left: 60%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* Secondary bar: different timing for the catch-up effect */
+@keyframes progress-secondary-scale {
+    0% {
+        width: 0%;
+    }
+
+    25% {
+        width: 30%;
+    }
+
+    50% {
+        width: 60%;
+    }
+
+    75% {
+        width: 40%;
+    }
+
+    100% {
+        width: 0%;
+    }
+}
+
+/* Secondary bar movement - starts later, moves differently */
+@keyframes progress-secondary-translate {
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 30%;
+    }
+
+    100% {
+        left: 110%;
+    }
+}
+
+/* Gradient color shift for visual interest */
+@keyframes progress-gradient-shift {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    50% {
+        background-position: 100% 0%;
+    }
+
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+
+.gemini-ext-diff-view {
+    background: var(--modal-surface);
+    border-radius: 12px;
+    padding: 16px;
+    min-height: 150px;
+    max-height: 300px;
+    overflow-y: auto;
+    color: var(--modal-text);
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'Roboto', sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+}
+
+/* Diff view in fullscreen - no max height */
+.gemini-ext-textarea-container.is-fullscreen .gemini-ext-diff-view {
+    max-height: unset;
+}
+
+/* Diff Highlighting */
+.diff-added {
+    background-color: rgba(52, 168, 83, 0.15);
+    color: var(--ext-color-success);
+    text-decoration: underline;
+    text-decoration-style: solid;
+    text-decoration-color: var(--ext-color-success);
+}
+
+.diff-removed {
+    background-color: rgba(234, 67, 53, 0.15);
+    color: var(--ext-color-error);
+    text-decoration: line-through;
+    text-decoration-color: var(--ext-color-error);
+}
+
+/* Footer */
+.gemini-ext-modal-footer {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    border-top: 1px solid var(--modal-border);
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.gemini-ext-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 24px;
+    height: 40px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-family: 'Google Sans', sans-serif;
+}
+
+.gemini-ext-btn-ghost {
+    background: transparent;
+    color: var(--modal-primary);
+}
+
+.gemini-ext-btn-ghost:hover {
+    background: var(--ext-color-accent-container);
+}
+
+.gemini-ext-btn-primary {
+    background: var(--ext-color-accent);
+    color: var(--ext-color-on-accent);
+}
+
+.gemini-ext-btn-primary:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.gemini-ext-btn-primary:disabled {
+    color: var(--modal-text);
+    background: var(--ext-color-surface);
+    border: 1px solid var(--modal-outline);
+}
+
+.gemini-ext-btn-disabled,
+.gemini-ext-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+    color: var(--ext-color-text-secondary);
+}
+
+.gemini-ext-btn-ghost:disabled {
+    background: transparent;
+}
+
+/* View Toggle inside Modal */
+.modal-view-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+/* Stop Button Area - Between content and footer */
+.gemini-ext-stop-area {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    width: 100%;
+}
+
+.gemini-ext-stop-area.visible {
+    display: flex;
+}
+
+/* Stop Button */
+.gemini-ext-btn-stop {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    height: 36px;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--ext-color-error);
+    background: transparent;
+    color: var(--ext-color-error);
+    transition: all 0.2s;
+    font-family: 'Google Sans', sans-serif;
+}
+
+.gemini-ext-btn-stop:hover {
+    background: rgba(234, 67, 53, 0.1);
+}
+
+/* Stop Area Container */
+.gemini-ext-stop-area {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px 0;
+    width: 100%;
+}
+
+.gemini-ext-stop-area.visible {
+    display: flex;
+}
+
+/* Feedback Message Element */
+.gemini-ext-feedback {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ext-color-text-secondary);
+    font-family: 'Google Sans', sans-serif;
+    flex: 1;
+    text-align: center;
+}
+
+.gemini-ext-feedback:empty {
+    display: none;
+}
+
+/* When stop button is hidden, center the feedback */
+.gemini-ext-stop-area .gemini-ext-btn-stop[style*="display: none"]~.gemini-ext-feedback,
+.gemini-ext-stop-area:only-child .gemini-ext-feedback {
+    text-align: center;
+}
+
+
+.gemini-ext-loading-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--modal-text-secondary);
+}
+
+/* Character Count */
+.gemini-ext-char-count {
+    position: absolute;
+    right: 24px;
+    bottom: 16px;
+    text-align: right;
+    font-size: 12px;
+    color: var(--modal-text-secondary);
+    font-family: 'Roboto', sans-serif;
+    pointer-events: none;
+    padding-right: 0px;
+    padding-bottom: 0px;
+}
+
+/* Status Bar Container */
+.gemini-ext-status-bar {
+    position: relative;
+    min-height: 50px;
+    padding-top: 0px !important;
+}
+
+/* ============================================================================
+ * Missing Utility Classes
+ * ============================================================================ */
+
+/* Hidden utility class for tab panel toggling */
+.hidden {
+    display: none !important;
+}
+
+/* Content Panel - Container for each tab's content */
+.gemini-ext-content-panel {
+    display: block;
+    width: 100%;
+}
+
+/* Footer Layout - Main footer container */
+/* NOTE: border-top is provided by .gemini-ext-progress-container above */
+.gemini-ext-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: none;
+    /* Progress container above serves as the border */
+}
+
+/* Footer Layout - Left/Right sections for button groups */
+.gemini-ext-footer-left,
+.gemini-ext-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Secondary Button Style (Copy button with outline) */
+.gemini-ext-btn-secondary {
+    background: var(--ext-color-surface);
+    color: var(--modal-text);
+    border: 1px solid var(--modal-outline);
+}
+
+.gemini-ext-btn-secondary:hover {
+    background: var(--ext-color-hover);
+    border-color: var(--modal-text-secondary);
+}
+
+/* Empty State - Shown when modal opens without content */
+.gemini-ext-empty-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+    padding: 24px;
+    pointer-events: none;
+}
+
+.gemini-ext-empty-state.hidden {
+    display: none;
+}
+
+.gemini-ext-empty-state .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.gemini-ext-empty-state .empty-state-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--modal-text);
+    margin: 0 0 8px 0;
+}
+
+.gemini-ext-empty-state .empty-state-hint {
+    font-size: 13px;
+    color: var(--modal-text-secondary);
+    margin: 0;
+}
+
+.gemini-ext-empty-state kbd {
+    background: var(--modal-surface);
+    border: 1px solid var(--modal-border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11px;
+}
+
+.gemini-ext-empty-state button {
+    pointer-events: auto;
+    margin-top: 16px;
+}
+
+/* API Key Missing State */
+.gemini-ext-empty-state.api-key-missing .empty-state-title {
+    color: var(--ext-color-warning);
+}
+
+.gemini-ext-empty-state.api-key-missing .empty-state-hint {
+    margin-bottom: 12px;
+}

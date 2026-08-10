@@ -1,0 +1,565 @@
+{
+  "meta": {
+    "project": "Prompt Assistant - AI Context-Aware Engineer",
+    "packageName": "gemini-context-aware-extension",
+    "version": "1.0.0",
+    "type": "Chrome Extension (Manifest V3)",
+    "description": "Persists 7-dimension persona memory and refines prompts inside gemini.google.com",
+    "host": "https://gemini.google.com/*",
+    "generatedAt": "2026-08-06",
+    "sourceFiles": 38,
+    "excluded": [".claude", ".agent", ".agents", "graphify-out", "*.md", "supabase/supabase.min.js (vendored)"],
+    "categories": {
+      "actor": { "label": "Actors", "color": "#f472b6" },
+      "client-surface": { "label": "Client Surfaces", "color": "#38bdf8" },
+      "content-script": { "label": "Content Scripts (Gemini page)", "color": "#a78bfa" },
+      "core-service": { "label": "Core Services", "color": "#f5c518" },
+      "background": { "label": "Background / MV3 Worker", "color": "#fb923c" },
+      "storage": { "label": "Storage & Data", "color": "#34d399" },
+      "backend": { "label": "Backend (Supabase)", "color": "#22d3ee" },
+      "external": { "label": "External Services", "color": "#94a3b8" }
+    },
+    "worldModel": {
+      "note": "Manifest declares three content-script groups. Group 2 runs in the MAIN world (page JS context) and therefore has NO chrome.* access; it proxies all extension API calls through the ISOLATED-world bridge using CustomEvents.",
+      "evidence": "manifest.json:content_scripts; bridge/extension-bridge.js:1-40"
+    }
+  },
+
+  "nodes": [
+    { "id": "end-user", "label": "End User", "sublabel": "Writes prompts in Gemini", "category": "actor", "file": null, "evidence": "manifest.json:matches" },
+    { "id": "extension-author", "label": "Developer", "sublabel": "Builds / obfuscates the extension", "category": "actor", "file": "build.js", "evidence": "build.js:1" },
+
+    { "id": "gemini-page", "label": "gemini.google.com", "sublabel": "Host page the extension augments", "category": "client-surface", "file": null, "evidence": "manifest.json:host_permissions" },
+    { "id": "sidepanel", "label": "Side Panel", "sublabel": "3-tab memory & persona control panel", "category": "client-surface", "file": "sidepanel/index.html", "evidence": "manifest.json:side_panel" },
+    { "id": "sidepanel-js", "label": "sidepanel.js", "sublabel": "Panel controller, 299KB", "category": "client-surface", "file": "sidepanel/sidepanel.js", "evidence": "sidepanel/sidepanel.js:1" },
+    { "id": "options-page", "label": "Options Page", "sublabel": "Model + API key configuration", "category": "client-surface", "file": "options/index.html", "evidence": "manifest.json:options_ui" },
+    { "id": "model-manager-ui", "label": "Model Manager UI", "sublabel": "Add/edit/test provider models", "category": "client-surface", "file": "options/model-manager-ui.js", "evidence": "options/model-manager-ui.js:1" },
+    { "id": "theme-controller", "label": "Theme Controller", "sublabel": "light/dark/system, key themeMode", "category": "client-surface", "file": "theme/theme-controller.js", "evidence": "theme/theme-controller.js:36" },
+
+    { "id": "runtime-security", "label": "Runtime Security", "sublabel": "Domain allowlist + anti-debug guard", "category": "content-script", "file": "security/runtime-security.js", "evidence": "security/runtime-security.js:32" },
+    { "id": "extension-bridge", "label": "Extension Bridge", "sublabel": "ISOLATED world chrome.* proxy", "category": "content-script", "file": "bridge/extension-bridge.js", "evidence": "bridge/extension-bridge.js:1" },
+    { "id": "observer", "label": "Observer", "sublabel": "Injects UI, drives refinement, 80KB", "category": "content-script", "file": "content/observer.js", "evidence": "content/observer.js:1615" },
+    { "id": "scraper", "label": "Conversation Scraper", "sublabel": "Reads Gemini turns from the DOM", "category": "content-script", "file": "content/scraper.js", "evidence": "content/scraper.js:1" },
+    { "id": "diff-engine", "label": "Diff Engine", "sublabel": "Word diff for the review modal", "category": "content-script", "file": "content/diff.js", "evidence": "content/diff.js:1" },
+    { "id": "templates", "label": "UI Templates", "sublabel": "Markup for injected components", "category": "content-script", "file": "content/templates.js", "evidence": "content/templates.js:1" },
+    { "id": "rating-injector", "label": "Rating Injector", "sublabel": "Mounts star widget on each turn", "category": "content-script", "file": "rating/rating-injector.js", "evidence": "rating/rating-injector.js:1" },
+    { "id": "rating-ui", "label": "Rating UI", "sublabel": "1-5 star control", "category": "content-script", "file": "rating/rating-ui.js", "evidence": "rating/rating-ui.js:1" },
+
+    { "id": "memory-index", "label": "Memory Orchestrator", "sublabel": "analyzeSession() entry point", "category": "core-service", "file": "memory/index.js", "evidence": "memory/index.js:83" },
+    { "id": "memory-controller", "label": "MemoryController", "sublabel": "CRUD + pinning for 7 dimensions", "category": "core-service", "file": "memory/memory-controller.js", "evidence": "memory/memory-controller.js:84" },
+    { "id": "component-schemas", "label": "Component Schemas", "sublabel": "V4 verbatim-first JSON schemas", "category": "core-service", "file": "memory/component-schemas.js", "evidence": "memory/component-schemas.js:98" },
+    { "id": "analyzer-registry", "label": "Analyzer Registry", "sublabel": "Pluggable analyzer dispatch", "category": "core-service", "file": "memory/analyzer-registry.js", "evidence": "memory/analyzer-registry.js:134" },
+    { "id": "unified-analyzer", "label": "Unified Analyzer", "sublabel": "One LLM call, all 7 dimensions", "category": "core-service", "file": "memory/analyzers/unified-analyzer.js", "evidence": "memory/index.js:219" },
+    { "id": "recent-focus", "label": "Recent Focus Analyzer", "sublabel": "Only registry-registered analyzer", "category": "core-service", "file": "memory/analyzers/recent-focus.js", "evidence": "memory/index.js:62" },
+    { "id": "context-assembler", "label": "Context Assembler", "sublabel": "Builds final injected context", "category": "core-service", "file": "memory/context-assembler.js", "evidence": "memory/context-assembler.js:7" },
+    { "id": "llm-client", "label": "LLM Client", "sublabel": "Provider-agnostic request builder", "category": "core-service", "file": "llm/llm-client.js", "evidence": "llm/llm-client.js:29" },
+    { "id": "llm-config", "label": "LLM Config", "sublabel": "Prompt templates + parameters", "category": "core-service", "file": "llm/llm-config.js", "evidence": "llm/llm-config.js:1" },
+    { "id": "model-registry", "label": "Model Registry", "sublabel": "4 providers, models, parameters", "category": "core-service", "file": "model/model-registry.js", "evidence": "model/model-registry.js:15" },
+    { "id": "model-manager", "label": "Model Manager", "sublabel": "Active model + key persistence", "category": "core-service", "file": "model/model-manager.js", "evidence": "model/model-manager.js:61" },
+    { "id": "rating-manager", "label": "Rating Manager", "sublabel": "Per-turn 1-5 star store", "category": "core-service", "file": "rating/rating-manager.js", "evidence": "rating/rating-manager.js:429" },
+    { "id": "extractor", "label": "Persona Extractor", "sublabel": "Prompt to structured persona", "category": "core-service", "file": "extractor/extractor.js", "evidence": "extractor/extractor.js:258" },
+    { "id": "logger", "label": "Logger", "sublabel": "Levelled logs, bridge-aware", "category": "core-service", "file": "logging/logger.js", "evidence": "logging/logger.js:1" },
+
+    { "id": "service-worker", "label": "Background Worker", "sublabel": "MV3 RPC hub, 29 message types", "category": "background", "file": "background.js", "evidence": "manifest.json:background" },
+    { "id": "crypto-layer", "label": "API Key Encryption", "sublabel": "AES-GCM wrap of stored keys", "category": "background", "file": "background.js", "evidence": "background.js:126" },
+    { "id": "commands", "label": "Keyboard Commands", "sublabel": "Ctrl+Shift+R refine, Alt+M panel", "category": "background", "file": "background.js", "evidence": "manifest.json:commands" },
+
+    { "id": "storage-local", "label": "chrome.storage.local", "sublabel": "Models, drafts, prompts, memory", "category": "storage", "file": null, "evidence": "background.js:2014" },
+    { "id": "storage-sync", "label": "chrome.storage.sync", "sublabel": "globalPersona, template, log level", "category": "storage", "file": null, "evidence": "background.js:2011" },
+    { "id": "storage-session", "label": "chrome.storage.session", "sublabel": "Ephemeral per-session state", "category": "storage", "file": null, "evidence": "background.js" },
+    { "id": "session-storage", "label": "window.sessionStorage", "sublabel": "Live rating cache per tab", "category": "storage", "file": "rating/rating-manager.js", "evidence": "rating/rating-manager.js:207" },
+
+    { "id": "supabase-client", "label": "Supabase Client", "sublabel": "Auth + cloud persona library", "category": "backend", "file": "supabase/supabase-client.js", "evidence": "supabase/supabase-client.js:82" },
+    { "id": "tbl-profiles", "label": "profiles", "sublabel": "User profile rows (RLS)", "category": "backend", "file": "supabase/schema.sql", "evidence": "supabase/schema.sql:12" },
+    { "id": "tbl-personas", "label": "personas", "sublabel": "Published persona library (RLS)", "category": "backend", "file": "supabase/schema.sql", "evidence": "supabase/schema.sql:54" },
+    { "id": "tbl-ratings", "label": "ratings", "sublabel": "Community persona ratings (RLS)", "category": "backend", "file": "supabase/schema.sql", "evidence": "supabase/schema.sql:116" },
+    { "id": "tbl-saved-prompts", "label": "saved_prompts", "sublabel": "User prompt library (RLS)", "category": "backend", "file": "supabase/schema/saved_prompts.sql", "evidence": "supabase/schema/saved_prompts.sql:6" },
+
+    { "id": "api-gemini", "label": "Google Gemini API", "sublabel": "generativelanguage.googleapis.com", "category": "external", "file": null, "evidence": "model/model-registry.js:20" },
+    { "id": "api-openai", "label": "OpenAI API", "sublabel": "api.openai.com/v1", "category": "external", "file": null, "evidence": "model/model-registry.js:58" },
+    { "id": "api-anthropic", "label": "Anthropic API", "sublabel": "api.anthropic.com/v1", "category": "external", "file": null, "evidence": "model/model-registry.js:96" },
+    { "id": "api-openrouter", "label": "OpenRouter API", "sublabel": "openrouter.ai/api/v1", "category": "external", "file": null, "evidence": "model/model-registry.js:122" }
+  ],
+
+  "edges": [
+    { "from": "end-user", "to": "gemini-page", "label": "types a prompt", "kind": "event", "evidence": "content/observer.js:358" },
+    { "from": "end-user", "to": "sidepanel", "label": "opens panel (Alt+M)", "kind": "event", "evidence": "manifest.json:commands" },
+    { "from": "end-user", "to": "options-page", "label": "configures models", "kind": "event", "evidence": "manifest.json:options_ui" },
+    { "from": "extension-author", "to": "service-worker", "label": "esbuild + obfuscator", "kind": "call", "evidence": "build.js:1" },
+
+    { "from": "runtime-security", "to": "gemini-page", "label": "domain allowlist gate", "kind": "inject", "evidence": "security/runtime-security.js:32" },
+    { "from": "observer", "to": "gemini-page", "label": "injectInterface() mounts UI", "kind": "inject", "evidence": "content/observer.js:1615" },
+    { "from": "observer", "to": "gemini-page", "label": "MutationObserver on composer", "kind": "dom", "evidence": "content/observer.js:358" },
+    { "from": "observer", "to": "diff-engine", "label": "computes word diff", "kind": "call", "evidence": "content/diff.js:1" },
+    { "from": "observer", "to": "templates", "label": "renders modal markup", "kind": "call", "evidence": "content/observer.js:525" },
+    { "from": "observer", "to": "service-worker", "label": "MSG: REFINE_PROMPT", "kind": "message", "evidence": "background.js:1997" },
+    { "from": "observer", "to": "service-worker", "label": "MSG: THEME_CHANGED", "kind": "message", "evidence": "content/observer.js:233" },
+    { "from": "service-worker", "to": "observer", "label": "MSG: TRIGGER_REFINE_SHORTCUT", "kind": "message", "evidence": "content/observer.js:2010" },
+    { "from": "service-worker", "to": "observer", "label": "MSG: TOGGLE_SPLIT_VIEW", "kind": "message", "evidence": "content/observer.js:2021" },
+    { "from": "service-worker", "to": "memory-index", "label": "MSG: REBUILD_MEMORY_REQUEST", "kind": "message", "evidence": "memory/index.js:360" },
+
+    { "from": "memory-index", "to": "scraper", "label": "reads conversation turns", "kind": "call", "evidence": "memory/index.js:131" },
+    { "from": "memory-index", "to": "unified-analyzer", "label": "analyze() all 7 dimensions", "kind": "call", "evidence": "memory/index.js:219" },
+    { "from": "memory-index", "to": "analyzer-registry", "label": "registers RecentFocus", "kind": "call", "evidence": "memory/index.js:62" },
+    { "from": "analyzer-registry", "to": "recent-focus", "label": "dispatches analyzer", "kind": "call", "evidence": "memory/analyzer-registry.js:134" },
+    { "from": "unified-analyzer", "to": "llm-client", "label": "single LLM call", "kind": "call", "evidence": "memory/index.js:219" },
+    { "from": "unified-analyzer", "to": "component-schemas", "label": "validates against schema", "kind": "call", "evidence": "memory/component-schemas.js:98" },
+    { "from": "memory-index", "to": "memory-controller", "label": "setComponent() per dimension", "kind": "call", "evidence": "memory/memory-controller.js:271" },
+    { "from": "memory-controller", "to": "extension-bridge", "label": "_makeBridgeRequest storage", "kind": "message", "evidence": "bridge/extension-bridge.js:19" },
+    { "from": "extension-bridge", "to": "storage-local", "label": "pa-storage-request CRUD", "kind": "storage", "evidence": "bridge/extension-bridge.js:19" },
+    { "from": "extension-bridge", "to": "service-worker", "label": "pa-api-proxy-request", "kind": "message", "evidence": "bridge/extension-bridge.js:20" },
+    { "from": "context-assembler", "to": "memory-controller", "label": "reads effective components", "kind": "call", "evidence": "memory/memory-controller.js:634" },
+
+    { "from": "service-worker", "to": "llm-client", "label": "callLLMForExtraction()", "kind": "call", "evidence": "background.js:1863" },
+    { "from": "service-worker", "to": "crypto-layer", "label": "decryptApiKey()", "kind": "call", "evidence": "background.js:151" },
+    { "from": "llm-client", "to": "model-registry", "label": "resolves provider config", "kind": "call", "evidence": "model/model-registry.js:15" },
+    { "from": "llm-client", "to": "llm-config", "label": "builds prompt template", "kind": "call", "evidence": "llm/llm-config.js:1" },
+    { "from": "service-worker", "to": "api-gemini", "label": "POST generateContent", "kind": "network", "evidence": "background.js:1877" },
+    { "from": "service-worker", "to": "api-openai", "label": "POST /chat/completions", "kind": "network", "evidence": "background.js:1901" },
+    { "from": "service-worker", "to": "api-openrouter", "label": "POST /chat/completions", "kind": "network", "evidence": "background.js:1927" },
+    { "from": "service-worker", "to": "api-anthropic", "label": "POST /messages (x-api-key)", "kind": "network", "evidence": "background.js:1961" },
+
+    { "from": "model-manager-ui", "to": "model-manager", "label": "save model + key", "kind": "call", "evidence": "options/model-manager-ui.js:1" },
+    { "from": "model-manager", "to": "storage-local", "label": "writes pa_models", "kind": "storage", "evidence": "model/model-manager.js:61" },
+    { "from": "model-manager-ui", "to": "service-worker", "label": "MSG: LLM_CONFIG_SAVED", "kind": "message", "evidence": "content/observer.js:2025" },
+    { "from": "options-page", "to": "model-manager-ui", "label": "renders manager", "kind": "call", "evidence": "options/index.js:1" },
+
+    { "from": "rating-injector", "to": "rating-ui", "label": "mounts star control", "kind": "inject", "evidence": "rating/rating-injector.js:1" },
+    { "from": "rating-ui", "to": "rating-manager", "label": "setRating(turn, 1-5)", "kind": "call", "evidence": "rating/rating-manager.js:429" },
+    { "from": "rating-manager", "to": "session-storage", "label": "live cache", "kind": "storage", "evidence": "rating/rating-manager.js:207" },
+    { "from": "rating-manager", "to": "storage-local", "label": "backupToStorage()", "kind": "storage", "evidence": "rating/rating-manager.js:266" },
+    { "from": "scraper", "to": "rating-manager", "label": "attaches ratings to turns", "kind": "call", "evidence": "content/scraper.js:1" },
+
+    { "from": "sidepanel", "to": "sidepanel-js", "label": "loads controller", "kind": "call", "evidence": "sidepanel/index.html:1082" },
+    { "from": "sidepanel-js", "to": "service-worker", "label": "MSG: GET_MEMORY / UPDATE_COMPONENT", "kind": "message", "evidence": "background.js:1318" },
+    { "from": "sidepanel-js", "to": "service-worker", "label": "MSG: PIN_PERSONA / PIN_COMPONENT", "kind": "message", "evidence": "background.js:1345" },
+    { "from": "sidepanel-js", "to": "service-worker", "label": "MSG: EXTRACT_PERSONA", "kind": "message", "evidence": "extractor/extractor.js:258" },
+    { "from": "sidepanel-js", "to": "supabase-client", "label": "auth + persona CRUD", "kind": "call", "evidence": "supabase/supabase-client.js:254" },
+    { "from": "sidepanel-js", "to": "theme-controller", "label": "toggles theme", "kind": "call", "evidence": "theme/theme-controller.js:36" },
+    { "from": "service-worker", "to": "memory-controller", "label": "getSessionMemory()", "kind": "call", "evidence": "background.js:1307" },
+    { "from": "service-worker", "to": "extractor", "label": "runs extraction", "kind": "call", "evidence": "extractor/extractor.js:258" },
+    { "from": "extractor", "to": "storage-local", "label": "persona_drafts", "kind": "storage", "evidence": "extractor/extractor.js:234" },
+
+    { "from": "supabase-client", "to": "tbl-profiles", "label": "profile row", "kind": "network", "evidence": "supabase/schema.sql:12" },
+    { "from": "supabase-client", "to": "tbl-personas", "label": "publish / browse personas", "kind": "network", "evidence": "supabase/schema.sql:54" },
+    { "from": "supabase-client", "to": "tbl-ratings", "label": "persona ratings", "kind": "network", "evidence": "supabase/schema.sql:116" },
+    { "from": "supabase-client", "to": "tbl-saved-prompts", "label": "saved prompt library", "kind": "network", "evidence": "supabase/schema/saved_prompts.sql:6" },
+
+    { "from": "commands", "to": "service-worker", "label": "Ctrl+Shift+R / Alt+M", "kind": "event", "evidence": "manifest.json:commands" },
+    { "from": "logger", "to": "storage-sync", "label": "_logLevel", "kind": "storage", "evidence": "logging/logger.js:1" },
+    { "from": "sidepanel-js", "to": "logger", "label": "renders Logs tab", "kind": "call", "evidence": "sidepanel/index.html:322" }
+  ],
+
+  "memoryDimensions": [
+    { "order": 1, "key": "persona", "title": "Persona", "purpose": "Identity, role, credentials, background", "metadata": null, "evidence": "memory/component-schemas.js:100" },
+    { "order": 2, "key": "context", "title": "Domain Context", "purpose": "Domain knowledge, scope, terminology", "metadata": ["domain (single-select)", "scope_tags (multi)"], "evidence": "memory/component-schemas.js:115" },
+    { "order": 3, "key": "exemplar", "title": "Examples", "purpose": "Few-shot examples", "metadata": null, "evidence": "memory/component-schemas.js:265" },
+    { "order": 4, "key": "format", "title": "Output Format", "purpose": "Output type and structure preferences", "metadata": ["outputType (single-select)"], "evidence": "memory/component-schemas.js:239" },
+    { "order": 5, "key": "tone", "title": "Tone & Style", "purpose": "Voice, style, banned phrases", "metadata": ["style_tags (multi)", "banned_phrases (multi)"], "evidence": "memory/component-schemas.js:146" },
+    { "order": 6, "key": "framework", "title": "Framework", "purpose": "Methodology, reasoning mode, workflow", "metadata": ["reasoning (single-select)"], "evidence": "memory/component-schemas.js:177" },
+    { "order": 7, "key": "constraints", "title": "Constraints", "purpose": "Rules, prohibitions, requirements", "metadata": null, "evidence": "memory/component-schemas.js:203" }
+  ],
+
+  "enums": {
+    "domain": ["Tech", "Creative", "Business", "Education", "Health", "Lifestyle", "Other"],
+    "style": ["Professional", "Casual", "Technical", "Friendly", "Direct", "Empathetic", "Authoritative", "Formal", "Informal", "Academic", "Conversational", "Objective", "Supportive", "Educational", "Instructive", "Expert"],
+    "reasoning": ["Deductive", "Inductive", "Chain-of-Thought", "Tree-of-Thought", "Step-by-Step", "Analytical", "Creative", "Socratic"],
+    "outputType": ["Markdown", "Plaintext", "JSON", "Code", "HTML", "Structured", "Custom"],
+    "evidence": "memory/component-schemas.js:63-85"
+  },
+
+  "messageTypes": [
+    { "type": "REFINE_PROMPT", "from": "observer", "to": "service-worker", "handler": "handleRefinement()", "evidence": "background.js:1997" },
+    { "type": "STOP_REFINEMENT", "from": "observer", "to": "service-worker", "handler": "AbortController.abort()", "evidence": "background.js:2003" },
+    { "type": "TRIGGER_REFINE_SHORTCUT", "from": "service-worker", "to": "observer", "handler": "triggerRefinement()", "evidence": "content/observer.js:2010" },
+    { "type": "TOGGLE_SPLIT_VIEW", "from": "service-worker", "to": "observer", "handler": "toggleSplitView()", "evidence": "content/observer.js:2021" },
+    { "type": "TOGGLE_SIDEPANEL", "from": "observer", "to": "service-worker", "handler": "chrome.sidePanel.open()", "evidence": "background.js:1" },
+    { "type": "GET_MEMORY", "from": "sidepanel-js", "to": "service-worker", "handler": "getSessionMemory()", "evidence": "background.js:1307" },
+    { "type": "UPDATE_COMPONENT", "from": "sidepanel-js", "to": "service-worker", "handler": "updateMemoryComponent()", "evidence": "background.js:1318" },
+    { "type": "PIN_PERSONA", "from": "sidepanel-js", "to": "service-worker", "handler": "pinPersona()", "evidence": "background.js:1345" },
+    { "type": "UNPIN_PERSONA", "from": "sidepanel-js", "to": "service-worker", "handler": "unpinPersona()", "evidence": "background.js:1370" },
+    { "type": "PIN_COMPONENT", "from": "sidepanel-js", "to": "service-worker", "handler": "pinComponent()", "evidence": "background.js:1403" },
+    { "type": "UNPIN_COMPONENT", "from": "sidepanel-js", "to": "service-worker", "handler": "unpinComponent()", "evidence": "background.js:1432" },
+    { "type": "TOGGLE_FACT", "from": "sidepanel-js", "to": "service-worker", "handler": "toggleFact()", "evidence": "background.js:1454" },
+    { "type": "REBUILD_MEMORY", "from": "sidepanel-js", "to": "service-worker", "handler": "rebuildSessionMemory()", "evidence": "background.js:1669" },
+    { "type": "REBUILD_MEMORY_REQUEST", "from": "service-worker", "to": "memory-index", "handler": "analyzeSession()", "evidence": "memory/index.js:360" },
+    { "type": "REFRESH_RECENT_FOCUS", "from": "service-worker", "to": "memory-index", "handler": "RecentFocus analyzer", "evidence": "content/observer.js:2025" },
+    { "type": "EXTRACT_PERSONA", "from": "sidepanel-js", "to": "service-worker", "handler": "extractFromPrompt()", "evidence": "extractor/extractor.js:258" },
+    { "type": "STOP_EXTRACTION", "from": "sidepanel-js", "to": "service-worker", "handler": "abort extraction", "evidence": "background.js:1" },
+    { "type": "IMPORT_PERSONA_MEMORY", "from": "sidepanel-js", "to": "service-worker", "handler": "import persona into memory", "evidence": "background.js:1" },
+    { "type": "REPORT_PERSONA", "from": "sidepanel-js", "to": "service-worker", "handler": "report published persona", "evidence": "background.js:1" },
+    { "type": "SUBMIT_RATING", "from": "rating-ui", "to": "service-worker", "handler": "persist rating", "evidence": "background.js:1" },
+    { "type": "CHECK_RATING_ELIGIBILITY", "from": "rating-injector", "to": "service-worker", "handler": "eligibility gate", "evidence": "background.js:1" },
+    { "type": "GET_MODEL_CONFIG", "from": "extractor", "to": "service-worker", "handler": "getModelConfig()", "evidence": "extractor/extractor.js:316" },
+    { "type": "LLM_CONFIG_SAVED", "from": "model-manager-ui", "to": "service-worker", "handler": "broadcast config change", "evidence": "content/observer.js:2025" },
+    { "type": "CHECK_API_KEY", "from": "sidepanel-js", "to": "service-worker", "handler": "key presence check", "evidence": "background.js:1" },
+    { "type": "API_PROXY_REQUEST", "from": "extension-bridge", "to": "service-worker", "handler": "cross-origin proxy", "evidence": "bridge/extension-bridge.js:20" },
+    { "type": "SCAN_CONTENT", "from": "sidepanel-js", "to": "observer", "handler": "scrape page", "evidence": "background.js:1" },
+    { "type": "GET_SESSION_ID", "from": "sidepanel-js", "to": "service-worker", "handler": "getCurrentTabSessionId()", "evidence": "background.js:1286" },
+    { "type": "GET_TAB_ID", "from": "observer", "to": "service-worker", "handler": "getTabId()", "evidence": "content/observer.js:1813" },
+    { "type": "GET_THEME", "from": "observer", "to": "service-worker", "handler": "theme read", "evidence": "theme/theme-controller.js:36" },
+    { "type": "THEME_CHANGED", "from": "observer", "to": "service-worker", "handler": "theme broadcast", "evidence": "content/observer.js:233" },
+    { "type": "OPEN_OPTIONS_PAGE", "from": "sidepanel-js", "to": "service-worker", "handler": "chrome.runtime.openOptionsPage()", "evidence": "background.js:1" },
+    { "type": "DOWNLOAD_FILE", "from": "sidepanel-js", "to": "service-worker", "handler": "chrome.downloads.download()", "evidence": "background.js:1" }
+  ],
+
+  "bridgeProtocol": [
+    { "event": "pa-storage-request", "direction": "MAIN -> ISOLATED", "purpose": "chrome.storage CRUD proxy", "evidence": "bridge/extension-bridge.js:19" },
+    { "event": "pa-storage-response", "direction": "ISOLATED -> MAIN", "purpose": "storage result by requestId", "evidence": "bridge/extension-bridge.js:19" },
+    { "event": "pa-api-proxy-request", "direction": "MAIN -> ISOLATED", "purpose": "cross-origin API call proxy", "evidence": "bridge/extension-bridge.js:20" },
+    { "event": "pa-api-proxy-response", "direction": "ISOLATED -> MAIN", "purpose": "API result", "evidence": "bridge/extension-bridge.js:20" },
+    { "event": "pa-storage-changed", "direction": "ISOLATED -> MAIN", "purpose": "broadcasts chrome.storage.onChanged", "evidence": "bridge/extension-bridge.js:21" },
+    { "event": "window.postMessage (source: ext-bridge)", "direction": "ISOLATED -> MAIN", "purpose": "forwards background messages", "evidence": "bridge/extension-bridge.js:298" }
+  ],
+
+  "providers": [
+    { "id": "gemini", "name": "Google Gemini", "baseURL": "https://generativelanguage.googleapis.com/v1beta/models", "auth": "key query param", "dynamicModels": true, "models": ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"], "params": ["temperature (0.7)", "maxOutputTokens (8192)"], "evidence": "model/model-registry.js:16" },
+    { "id": "openai", "name": "OpenAI", "baseURL": "https://api.openai.com/v1", "auth": "Authorization: Bearer", "dynamicModels": true, "models": ["gpt-4o-mini", "gpt-4o", "gpt-4o-2024-08-06"], "params": ["temperature (1)", "max_tokens (4096)"], "evidence": "model/model-registry.js:54" },
+    { "id": "anthropic", "name": "Anthropic", "baseURL": "https://api.anthropic.com/v1", "auth": "x-api-key", "dynamicModels": false, "models": ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"], "params": ["max_tokens (4096)"], "evidence": "model/model-registry.js:92" },
+    { "id": "openrouter", "name": "OpenRouter", "baseURL": "https://openrouter.ai/api/v1", "auth": "Authorization: Bearer", "dynamicModels": true, "models": ["google/gemini-2.0-flash-exp:free", "google/gemini-flash-1.5-8b:free", "meta-llama/llama-3.3-70b-instruct:free", "meta-llama/llama-3.2-11b-vision-instruct:free", "meta-llama/llama-3.1-8b-instruct:free", "qwen/qwen-2.5-72b-instruct:free", "qwen/qwen-2-7b-instruct:free", "microsoft/phi-3-mini-128k-instruct:free", "mistralai/mistral-7b-instruct:free", "openai/gpt-oss-120b:free", "allenai/olmo-3.1-32b-think:free", "nvidia/nemotron-3-nano-30b-a3b:free"], "params": ["temperature", "max_tokens"], "evidence": "model/model-registry.js:118" }
+  ],
+
+  "storageKeys": [
+    { "key": "pa_models", "area": "local", "purpose": "Configured models incl. encrypted API keys", "evidence": "background.js:2014" },
+    { "key": "pa_active_model", "area": "local", "purpose": "Currently selected model id", "evidence": "background.js:2016" },
+    { "key": "persona_drafts", "area": "local", "purpose": "Unpublished extracted personas", "evidence": "extractor/extractor.js:234" },
+    { "key": "persona_reports", "area": "local", "purpose": "Reported persona records", "evidence": "background.js:1" },
+    { "key": "saved_prompts", "area": "local", "purpose": "Local prompt library cache", "evidence": "sidepanel/sidepanel.js:1" },
+    { "key": "geminiApiKey", "area": "local", "purpose": "Legacy Gemini key", "evidence": "model/model-manager.js:61" },
+    { "key": "openaiApiKey", "area": "local", "purpose": "Legacy OpenAI key", "evidence": "model/model-manager.js:62" },
+    { "key": "globalPersona", "area": "sync", "purpose": "Fallback persona when no session memory", "evidence": "background.js:2011" },
+    { "key": "selectedTemplate", "area": "sync", "purpose": "Active refinement template", "evidence": "background.js:2011" },
+    { "key": "contextVariables", "area": "sync", "purpose": "User context variables", "evidence": "background.js:2012" },
+    { "key": "themeMode", "area": "sync", "purpose": "light / dark / system", "evidence": "theme/theme-controller.js:36" },
+    { "key": "_logLevel", "area": "sync", "purpose": "Global log verbosity", "evidence": "logging/logger.js:1" }
+  ],
+
+  "backendTables": [
+    { "name": "profiles", "purpose": "User profile rows linked to auth.users", "rls": true, "evidence": "supabase/schema.sql:12" },
+    { "name": "personas", "purpose": "Published/community persona library with versioning", "rls": true, "evidence": "supabase/schema.sql:54" },
+    { "name": "ratings", "purpose": "Community ratings on published personas", "rls": true, "evidence": "supabase/schema.sql:116" },
+    { "name": "saved_prompts", "purpose": "User's saved raw prompts", "rls": true, "evidence": "supabase/schema/saved_prompts.sql:6" }
+  ],
+
+  "screens": {
+    "note": "Side panel is a 3-tab shell; the Persona tab is a page stack where exactly one page is .active at a time.",
+    "tabs": [
+      { "id": "tab-content-context", "name": "Context", "purpose": "Live 7-dimension memory for the active Gemini session", "evidence": "sidepanel/index.html:76" },
+      { "id": "tab-content-persona", "name": "Persona", "purpose": "Browse, create, edit and publish personas", "evidence": "sidepanel/index.html:371" },
+      { "id": "tab-content-logs", "name": "Logs", "purpose": "Level-filtered log viewer with export", "evidence": "sidepanel/index.html:322" }
+    ],
+    "personaPages": [
+      { "id": "persona-page-browse", "name": "Browse / Search", "evidence": "sidepanel/index.html:377" },
+      { "id": "persona-page-create", "name": "Create Persona", "evidence": "sidepanel/index.html:469" },
+      { "id": "persona-page-my-personas", "name": "My Personas", "evidence": "sidepanel/index.html:502" },
+      { "id": "persona-page-prompts", "name": "Saved Prompts", "evidence": "sidepanel/index.html:520" },
+      { "id": "persona-page-add-prompt", "name": "Add Prompt", "evidence": "sidepanel/index.html:542" },
+      { "id": "persona-page-detail", "name": "Persona Detail (dead UI)", "evidence": "sidepanel/index.html:582" },
+      { "id": "persona-page-version-history", "name": "Version History", "evidence": "sidepanel/index.html:596" },
+      { "id": "persona-page-extracted", "name": "Edit Persona", "evidence": "sidepanel/index.html:619" }
+    ],
+    "modals": [
+      { "id": "alert-dialog", "name": "Alert", "evidence": "sidepanel/index.html:989" },
+      { "id": "confirm-dialog", "name": "Confirm", "evidence": "sidepanel/index.html:1014" },
+      { "id": "prompt-dialog", "name": "Change Notes", "evidence": "sidepanel/index.html:1030" },
+      { "id": "source-prompt-viewer", "name": "Source Prompt Viewer", "evidence": "sidepanel/index.html:1048" }
+    ]
+  },
+
+  "features": [
+    { "name": "Prompt Refinement", "description": "Rewrites the user's draft prompt using persona memory before sending to Gemini", "entry": "Refine toggle in composer or Ctrl+Shift+R", "evidence": "content/observer.js:1901" },
+    { "name": "7-Dimension Persona Memory", "description": "Persists persona, context, exemplar, format, tone, framework, constraints per session", "entry": "Automatic on conversation activity; Rebuild Memory button", "evidence": "memory/memory-controller.js:48" },
+    { "name": "Component & Persona Pinning", "description": "Freezes a dimension or the whole persona so re-analysis cannot overwrite it", "entry": "Pin icon in Context tab", "evidence": "memory/memory-controller.js:429" },
+    { "name": "Persona Extraction", "description": "Turns an arbitrary pasted prompt into a structured 7-dimension persona", "entry": "Persona > Create > Extract Persona", "evidence": "extractor/extractor.js:258" },
+    { "name": "Persona Publishing & Versioning", "description": "Publish personas publicly with version history and change notes", "entry": "Edit Persona > Publish", "evidence": "supabase/schema.sql:54" },
+    { "name": "Community Persona Library", "description": "Search, filter and import personas published by others", "entry": "Persona > Browse", "evidence": "sidepanel/index.html:377" },
+    { "name": "Saved Prompt Library", "description": "Save raw prompts and later extract personas from them", "entry": "Persona > My Personas > Prompts", "evidence": "supabase/schema/saved_prompts.sql:6" },
+    { "name": "Response Rating", "description": "Rate each Gemini turn 1-5 stars to inform analysis", "entry": "Star widget under a response", "evidence": "rating/rating-manager.js:429" },
+    { "name": "Multi-Provider LLM Support", "description": "Gemini, OpenAI, Anthropic and OpenRouter with per-model parameters", "entry": "Options > Model Manager", "evidence": "model/model-registry.js:15" },
+    { "name": "Encrypted API Key Storage", "description": "API keys are encrypted at rest and decrypted only in the worker", "entry": "Automatic on save", "evidence": "background.js:126" },
+    { "name": "Split View", "description": "Side-by-side panel and Gemini layout", "entry": "Split view button / TOGGLE_SPLIT_VIEW", "evidence": "content/observer.js:2035" },
+    { "name": "Theming", "description": "Light/dark/system theme synced between panel and injected UI", "entry": "Theme toggle in panel header", "evidence": "theme/theme-controller.js:36" },
+    { "name": "Diagnostic Logging", "description": "Level-filtered logs viewable and exportable from the panel", "entry": "Logs tab", "evidence": "logging/logger.js:1" },
+    { "name": "Runtime Security Hardening", "description": "Domain allowlist, anti-debug timing guard, per-session key fingerprint", "entry": "Automatic at document_start", "evidence": "security/runtime-security.js:32" },
+    { "name": "Cloud Account & Sync", "description": "Email or anonymous auth; personas and prompts persist in Supabase under RLS", "entry": "Panel auth controls", "evidence": "supabase/supabase-client.js:149" }
+  ],
+
+  "flows": [
+    {
+      "id": "refine-prompt",
+      "name": "Refine a prompt in Gemini",
+      "category": "Core",
+      "description": "User drafts a prompt, the extension rewrites it with persona memory, user reviews the diff and sends.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "gemini-page", "fn": "findChatInput()", "desc": "User types a draft prompt into the Gemini composer; observer has already located the input element.", "evidence": "content/observer.js:358" },
+        { "n": 2, "from": "observer", "to": "gemini-page", "fn": "injectInterface()", "desc": "Refine toggle and settings icon are mounted into the composer container.", "evidence": "content/observer.js:1615" },
+        { "n": 3, "from": "end-user", "to": "observer", "fn": "createRefineToggle()", "desc": "User clicks the Refine toggle (or presses Ctrl+Shift+R, which arrives as TRIGGER_REFINE_SHORTCUT).", "evidence": "content/observer.js:474" },
+        { "n": 4, "from": "observer", "to": "service-worker", "fn": "triggerRefinement()", "desc": "Sends REFINE_PROMPT with the draft text, persona, prior prompts, template and model id.", "evidence": "content/observer.js:1901" },
+        { "n": 5, "from": "service-worker", "to": "storage-local", "fn": "handleRefinement()", "desc": "Registers an AbortController for the tab, cancelling any in-flight refinement, then reads pa_models and pa_active_model.", "evidence": "background.js:1997" },
+        { "n": 6, "from": "service-worker", "to": "crypto-layer", "fn": "decryptApiKey()", "desc": "Decrypts the stored API key if it is in encrypted form.", "evidence": "background.js:151" },
+        { "n": 7, "from": "service-worker", "to": "memory-controller", "fn": "getSessionMemory()", "desc": "Loads the session's memory; a pinned persona takes precedence over the synthesized one, with globalPersona as final fallback.", "evidence": "background.js:1307" },
+        { "n": 8, "from": "service-worker", "to": "context-assembler", "fn": "buildV4RefinementContext()", "desc": "Assembles the 7 dimensions into the refinement context block.", "evidence": "background.js:1477" },
+        { "n": 9, "from": "service-worker", "to": "api-gemini", "fn": "fetch()", "desc": "POSTs the refinement request to the active provider endpoint with the abort signal attached.", "evidence": "background.js:1877" },
+        { "n": 10, "from": "service-worker", "to": "observer", "fn": "getUserFriendlyError()", "desc": "Returns the refined text, or a user-friendly message on failure.", "evidence": "background.js:1740" },
+        { "n": 11, "from": "observer", "to": "diff-engine", "fn": "createReviewModal()", "desc": "Computes the word-level diff between original and refined text and renders the review modal.", "evidence": "content/observer.js:525" },
+        { "n": 12, "from": "end-user", "to": "observer", "fn": "pasteToInput()", "desc": "User accepts; refined text replaces the composer contents.", "evidence": "content/observer.js:1603" },
+        { "n": 13, "from": "observer", "to": "gemini-page", "fn": "triggerNativeSend()", "desc": "Fires Gemini's native send so the refined prompt is submitted.", "evidence": "content/observer.js:1587" }
+      ]
+    },
+    {
+      "id": "build-memory",
+      "name": "Build persona memory from a conversation",
+      "category": "Core",
+      "description": "The extension scrapes the conversation and derives all 7 persona dimensions in a single LLM call.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#rebuild-memory", "desc": "User presses Rebuild Memory in the Context tab footer (or analysis auto-triggers on activity).", "evidence": "sidepanel/index.html:303" },
+        { "n": 2, "from": "sidepanel-js", "to": "service-worker", "fn": "sendMessage(REBUILD_MEMORY)", "desc": "Panel asks the worker to rebuild memory for the current session.", "evidence": "background.js:1669" },
+        { "n": 3, "from": "service-worker", "to": "memory-index", "fn": "rebuildSessionMemory()", "desc": "Worker relays REBUILD_MEMORY_REQUEST into the MAIN-world memory orchestrator.", "evidence": "memory/index.js:360" },
+        { "n": 4, "from": "memory-index", "to": "memory-index", "fn": "analyzeSession()", "desc": "Guards against concurrent runs by reusing the in-flight analysis promise.", "evidence": "memory/index.js:83" },
+        { "n": 5, "from": "memory-index", "to": "scraper", "fn": "scrape()", "desc": "Reads the conversation turns; aborts early if there is no history.", "evidence": "memory/index.js:131" },
+        { "n": 6, "from": "memory-index", "to": "memory-controller", "fn": "isComponentPinned()", "desc": "Collects pinned dimensions so they are excluded from re-analysis and preserved verbatim.", "evidence": "memory/index.js:188" },
+        { "n": 7, "from": "memory-index", "to": "unified-analyzer", "fn": "UnifiedAnalyzer.analyze()", "desc": "One LLM call produces all 7 dimensions plus suggested_name/suggested_title metadata.", "evidence": "memory/index.js:219" },
+        { "n": 8, "from": "unified-analyzer", "to": "llm-client", "fn": "LLMClient", "desc": "Request goes out through the configured provider; MAIN world proxies it via the bridge.", "evidence": "llm/llm-client.js:29" },
+        { "n": 9, "from": "memory-index", "to": "memory-controller", "fn": "setComponent()", "desc": "Each returned dimension is validated against its V4 schema, sanitized and stored.", "evidence": "memory/memory-controller.js:271" },
+        { "n": 10, "from": "memory-controller", "to": "extension-bridge", "fn": "_makeBridgeRequest()", "desc": "MAIN world has no chrome.* access, so persistence is proxied by CustomEvent pa-storage-request.", "evidence": "bridge/extension-bridge.js:19" },
+        { "n": 11, "from": "extension-bridge", "to": "storage-local", "fn": "chrome.storage.local.set()", "desc": "The ISOLATED-world bridge performs the actual write and replies on pa-storage-response.", "evidence": "bridge/extension-bridge.js:19" },
+        { "n": 12, "from": "sidepanel-js", "to": "sidepanel", "fn": "renderAllComponents()", "desc": "Context tab re-renders the 7 accordions with fresh counts and the updated timestamp.", "evidence": "sidepanel/index.html:95" }
+      ]
+    },
+    {
+      "id": "extract-persona",
+      "name": "Extract a persona from a pasted prompt",
+      "category": "Persona",
+      "description": "User pastes any prompt and the extension converts it into a structured, editable persona.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "navigateToPersonaPage('create')", "desc": "User opens Persona tab and taps the + FAB to reach the Create page.", "evidence": "sidepanel/index.html:469" },
+        { "n": 2, "from": "end-user", "to": "sidepanel", "fn": "#extract-prompt-input", "desc": "User pastes a prompt, or imports a .json/.txt/.xml/.md file via #import-persona-file.", "evidence": "sidepanel/index.html:482" },
+        { "n": 3, "from": "end-user", "to": "sidepanel-js", "fn": "handleExtractPersona()", "desc": "User presses Extract Persona in the footer.", "evidence": "sidepanel/index.html:933" },
+        { "n": 4, "from": "sidepanel-js", "to": "extractor", "fn": "extractFromPrompt()", "desc": "Rejects prompts under 10 characters, then proceeds.", "evidence": "extractor/extractor.js:258" },
+        { "n": 5, "from": "extractor", "to": "service-worker", "fn": "getModelConfig()", "desc": "Requests the active provider/model config via GET_MODEL_CONFIG.", "evidence": "extractor/extractor.js:316" },
+        { "n": 6, "from": "service-worker", "to": "api-gemini", "fn": "callLLMForExtraction()", "desc": "Sends the extraction prompt to the provider with an abort signal.", "evidence": "background.js:1863" },
+        { "n": 7, "from": "extractor", "to": "extractor", "fn": "parseExtractionResponse()", "desc": "Strips ```json fences and validates that memory_layer and metadata are both present.", "evidence": "extractor/extractor.js:354" },
+        { "n": 8, "from": "extractor", "to": "storage-local", "fn": "saveDrafts()", "desc": "Result is persisted to persona_drafts so the edit survives a panel reload.", "evidence": "extractor/extractor.js:247" },
+        { "n": 9, "from": "sidepanel-js", "to": "sidepanel", "fn": "populateExtractionResults()", "desc": "Edit Persona page opens pre-filled with the 7 dimensions and metadata.", "evidence": "sidepanel/index.html:619" }
+      ]
+    },
+    {
+      "id": "publish-persona",
+      "name": "Publish a persona to the community library",
+      "category": "Persona",
+      "description": "User finalises an extracted persona and publishes it with a version note.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#ext-name", "desc": "User names the persona (required) and edits any of the 7 dimension accordions.", "evidence": "sidepanel/index.html:640" },
+        { "n": 2, "from": "end-user", "to": "sidepanel", "fn": "#ext-keywords", "desc": "User adds required keywords plus optional sub-domains, tone, complexity and audience metadata.", "evidence": "sidepanel/index.html:872" },
+        { "n": 3, "from": "end-user", "to": "sidepanel", "fn": "#ext-visibility-public", "desc": "User selects Public (default) or Private, which saves as a draft instead.", "evidence": "sidepanel/index.html:895" },
+        { "n": 4, "from": "end-user", "to": "sidepanel-js", "fn": "handlePublishPersona()", "desc": "User presses Publish in the persona footer.", "evidence": "sidepanel/index.html:948" },
+        { "n": 5, "from": "sidepanel-js", "to": "sidepanel", "fn": "#prompt-dialog", "desc": "Change-notes dialog asks what changed in this version; user may skip.", "evidence": "sidepanel/index.html:1030" },
+        { "n": 6, "from": "sidepanel-js", "to": "supabase-client", "fn": "createPersona()", "desc": "Persona row is written to the personas table under the owner's RLS policy.", "evidence": "supabase/supabase-client.js:254" },
+        { "n": 7, "from": "supabase-client", "to": "tbl-personas", "fn": "insert", "desc": "Row is stored with version metadata for later history browsing.", "evidence": "supabase/schema.sql:54" },
+        { "n": 8, "from": "sidepanel-js", "to": "sidepanel", "fn": "navigateToPersonaPage('my-personas')", "desc": "On success the panel returns to My Personas showing the published entry.", "evidence": "sidepanel/index.html:502" }
+      ]
+    },
+    {
+      "id": "browse-import-persona",
+      "name": "Discover and import a community persona",
+      "category": "Persona",
+      "description": "User searches the shared library and loads someone else's persona into their session memory.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#persona-search", "desc": "User searches personas by keyword or intent from the Browse page.", "evidence": "sidepanel/index.html:381" },
+        { "n": 2, "from": "end-user", "to": "sidepanel", "fn": "#search-filters-btn", "desc": "User refines with chip filters: domain, tone, complexity, provider and sort order.", "evidence": "sidepanel/index.html:390" },
+        { "n": 3, "from": "sidepanel-js", "to": "supabase-client", "fn": "searchPersonas()", "desc": "Query hits the personas table; public rows are readable under RLS.", "evidence": "supabase/schema.sql:54" },
+        { "n": 4, "from": "supabase-client", "to": "sidepanel", "fn": "#persona-results", "desc": "Matching personas render as result cards.", "evidence": "sidepanel/index.html:460" },
+        { "n": 5, "from": "end-user", "to": "sidepanel-js", "fn": "loadPersonaToEdit()", "desc": "User opens a persona to inspect its dimensions.", "evidence": "sidepanel/index.html:619" },
+        { "n": 6, "from": "sidepanel-js", "to": "service-worker", "fn": "sendMessage(IMPORT_PERSONA_MEMORY)", "desc": "Chosen persona is imported into the active session's memory.", "evidence": "background.js:1" },
+        { "n": 7, "from": "service-worker", "to": "memory-controller", "fn": "setComponent()", "desc": "Imported dimensions overwrite current memory and become active for refinement.", "evidence": "memory/memory-controller.js:271" }
+      ]
+    },
+    {
+      "id": "pin-persona",
+      "name": "Pin a persona so analysis cannot overwrite it",
+      "category": "Memory",
+      "description": "User locks the persona (or a single dimension) against re-analysis.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#pin-persona-btn", "desc": "User taps the pin icon; the AUTO badge indicates current mode.", "evidence": "sidepanel/index.html:115" },
+        { "n": 2, "from": "sidepanel-js", "to": "service-worker", "fn": "sendMessage(PIN_PERSONA)", "desc": "Pin request carries the session id.", "evidence": "background.js:1345" },
+        { "n": 3, "from": "service-worker", "to": "memory-controller", "fn": "pinPersona()", "desc": "Marks the persona pinned and snapshots its current value.", "evidence": "memory/memory-controller.js:429" },
+        { "n": 4, "from": "memory-controller", "to": "storage-local", "fn": "save()", "desc": "Pinned state persists with the memory record.", "evidence": "memory/memory-controller.js:229" },
+        { "n": 5, "from": "memory-index", "to": "unified-analyzer", "fn": "analyzeSession()", "desc": "Subsequent rebuilds skip pinned dimensions entirely, preserving them verbatim.", "evidence": "memory/index.js:188" },
+        { "n": 6, "from": "service-worker", "to": "memory-controller", "fn": "getEffectivePersona()", "desc": "Refinement then reads the pinned persona in preference to the synthesized one.", "evidence": "memory/memory-controller.js:494" }
+      ]
+    },
+    {
+      "id": "edit-memory-component",
+      "name": "Hand-edit a memory dimension",
+      "category": "Memory",
+      "description": "User directly rewrites one of the 7 dimensions in the Context tab.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "accordion toggle", "desc": "User expands a dimension accordion, e.g. Tone & Style.", "evidence": "sidepanel/index.html:178" },
+        { "n": 2, "from": "end-user", "to": "sidepanel", "fn": "#synthesized-persona-input", "desc": "User edits the verbatim instruction text or adjusts metadata chips.", "evidence": "sidepanel/index.html:128" },
+        { "n": 3, "from": "end-user", "to": "sidepanel-js", "fn": "#save-synthesized-persona", "desc": "User presses Save.", "evidence": "sidepanel/index.html:136" },
+        { "n": 4, "from": "sidepanel-js", "to": "service-worker", "fn": "sendMessage(UPDATE_COMPONENT)", "desc": "Sends dimension id and new data.", "evidence": "background.js:1318" },
+        { "n": 5, "from": "service-worker", "to": "memory-controller", "fn": "updateMemoryComponent()", "desc": "Validates against the V4 schema and sanitizes the payload.", "evidence": "background.js:1318" },
+        { "n": 6, "from": "memory-controller", "to": "storage-local", "fn": "setComponent()", "desc": "Change is persisted and the generation counter advances.", "evidence": "memory/memory-controller.js:271" }
+      ]
+    },
+    {
+      "id": "add-custom-context",
+      "name": "Inject custom standing instructions",
+      "category": "Memory",
+      "description": "User adds free-form rules that always accompany the persona.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#injected-context-input", "desc": "User types a standing instruction such as 'Always use Python 3.11'.", "evidence": "sidepanel/index.html:287" },
+        { "n": 2, "from": "end-user", "to": "sidepanel-js", "fn": "#save-injected-context", "desc": "User presses Save Extensions.", "evidence": "sidepanel/index.html:293" },
+        { "n": 3, "from": "sidepanel-js", "to": "memory-controller", "fn": "setComponent()", "desc": "Stored alongside the 7 analyzed dimensions as injected_context.", "evidence": "memory/memory-controller.js:271" },
+        { "n": 4, "from": "context-assembler", "to": "service-worker", "fn": "buildV4RefinementContext()", "desc": "Custom context is appended to every subsequent refinement.", "evidence": "background.js:1477" }
+      ]
+    },
+    {
+      "id": "rate-response",
+      "name": "Rate a Gemini response",
+      "category": "Feedback",
+      "description": "User scores a conversation turn 1-5 stars to signal quality.",
+      "steps": [
+        { "n": 1, "from": "rating-injector", "to": "service-worker", "fn": "sendMessage(CHECK_RATING_ELIGIBILITY)", "desc": "Checks whether the turn is eligible for rating before mounting UI.", "evidence": "rating/rating-injector.js:1" },
+        { "n": 2, "from": "rating-injector", "to": "gemini-page", "fn": "RatingUI", "desc": "Star control is injected beneath the response turn.", "evidence": "rating/rating-ui.js:1" },
+        { "n": 3, "from": "end-user", "to": "rating-ui", "fn": "click star", "desc": "User picks a score from 1 to 5; values outside that range are rejected.", "evidence": "rating/rating-manager.js:431" },
+        { "n": 4, "from": "rating-ui", "to": "rating-manager", "fn": "setRating()", "desc": "Rating is recorded against the turn index with a timestamp.", "evidence": "rating/rating-manager.js:429" },
+        { "n": 5, "from": "rating-manager", "to": "session-storage", "fn": "save()", "desc": "Written to sessionStorage for fast in-tab reads.", "evidence": "rating/rating-manager.js:236" },
+        { "n": 6, "from": "rating-manager", "to": "storage-local", "fn": "backupToStorage()", "desc": "Mirrored into chrome.storage so ratings survive a page reload.", "evidence": "rating/rating-manager.js:266" },
+        { "n": 7, "from": "scraper", "to": "memory-index", "fn": "scrape()", "desc": "Ratings are attached to scraped turns and feed the next analysis pass.", "evidence": "content/scraper.js:1" }
+      ]
+    },
+    {
+      "id": "configure-model",
+      "name": "Configure an LLM provider and API key",
+      "category": "Setup",
+      "description": "User connects a model so refinement and analysis can run.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#open-settings-btn-context", "desc": "From the 'No Model Connected' state the user taps Connect Model.", "evidence": "sidepanel/index.html:89" },
+        { "n": 2, "from": "sidepanel-js", "to": "service-worker", "fn": "sendMessage(OPEN_OPTIONS_PAGE)", "desc": "Worker calls chrome.runtime.openOptionsPage().", "evidence": "background.js:1" },
+        { "n": 3, "from": "end-user", "to": "model-manager-ui", "fn": "render()", "desc": "User picks one of Gemini, OpenAI, Anthropic or OpenRouter.", "evidence": "model/model-registry.js:15" },
+        { "n": 4, "from": "end-user", "to": "model-manager-ui", "fn": "handleSave()", "desc": "User pastes an API key and adjusts temperature / max tokens.", "evidence": "options/model-manager-ui.js:1" },
+        { "n": 5, "from": "model-manager-ui", "to": "crypto-layer", "fn": "getEncryptionKey()", "desc": "Key is encrypted before it is written to disk.", "evidence": "background.js:126" },
+        { "n": 6, "from": "model-manager", "to": "storage-local", "fn": "_saveToStorage()", "desc": "Model config lands in pa_models and the active id in pa_active_model.", "evidence": "model/model-manager.js:61" },
+        { "n": 7, "from": "model-manager-ui", "to": "service-worker", "fn": "sendMessage(LLM_CONFIG_SAVED)", "desc": "Broadcast so open Gemini tabs pick up the new configuration immediately.", "evidence": "content/observer.js:2025" }
+      ]
+    },
+    {
+      "id": "auth-signin",
+      "name": "Create an account and sync to the cloud",
+      "category": "Setup",
+      "description": "User authenticates so personas and prompts persist beyond the browser.",
+      "steps": [
+        { "n": 1, "from": "sidepanel-js", "to": "supabase-client", "fn": "loadSupabaseLib()", "desc": "Vendored supabase.min.js is loaded, working within MV3 CSP limits.", "evidence": "supabase/supabase-client.js:120" },
+        { "n": 2, "from": "supabase-client", "to": "supabase-client", "fn": "init()", "desc": "Client initialises with persistSession true and detectSessionInUrl false.", "evidence": "supabase/supabase-client.js:82" },
+        { "n": 3, "from": "end-user", "to": "supabase-client", "fn": "signUp()", "desc": "User registers with email and password, or uses signInAnonymously() for a throwaway session.", "evidence": "supabase/supabase-client.js:149" },
+        { "n": 4, "from": "supabase-client", "to": "tbl-profiles", "fn": "insert", "desc": "A profile row is created for the new user.", "evidence": "supabase/schema.sql:12" },
+        { "n": 5, "from": "supabase-client", "to": "sidepanel-js", "fn": "getSession()", "desc": "Session is restored automatically on subsequent panel loads.", "evidence": "supabase/supabase-client.js:101" },
+        { "n": 6, "from": "sidepanel-js", "to": "tbl-personas", "fn": "loadMyPersonas()", "desc": "The user's personas and saved prompts become available under RLS.", "evidence": "sidepanel/index.html:502" }
+      ]
+    },
+    {
+      "id": "save-prompt",
+      "name": "Save a prompt to the library",
+      "category": "Persona",
+      "description": "User stores a raw prompt for later reuse or extraction.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#add-prompt-fab", "desc": "From Saved Prompts the user taps + to open the Add Prompt form.", "evidence": "sidepanel/index.html:536" },
+        { "n": 2, "from": "end-user", "to": "sidepanel", "fn": "#add-prompt-title", "desc": "User enters a title and pastes the prompt body, or imports a file.", "evidence": "sidepanel/index.html:554" },
+        { "n": 3, "from": "end-user", "to": "sidepanel-js", "fn": "handleSavePrompt()", "desc": "User presses Save Prompt in the footer.", "evidence": "sidepanel/index.html:968" },
+        { "n": 4, "from": "sidepanel-js", "to": "tbl-saved-prompts", "fn": "insert", "desc": "Prompt is written to saved_prompts under the owner's RLS policy.", "evidence": "supabase/schema/saved_prompts.sql:6" },
+        { "n": 5, "from": "sidepanel-js", "to": "sidepanel", "fn": "loadSavedPrompts()", "desc": "Panel returns to the Saved Prompts list showing the new entry.", "evidence": "sidepanel/index.html:520" },
+        { "n": 6, "from": "end-user", "to": "extractor", "fn": "extractFromPrompt()", "desc": "A saved prompt can later be sent straight into persona extraction.", "evidence": "extractor/extractor.js:258" }
+      ]
+    },
+    {
+      "id": "version-history",
+      "name": "Review and restore a persona version",
+      "category": "Persona",
+      "description": "Author inspects earlier versions of their persona and rolls one back.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#btn-version-history", "desc": "Author opens Version History from the Edit Persona page.", "evidence": "sidepanel/index.html:625" },
+        { "n": 2, "from": "sidepanel-js", "to": "tbl-personas", "fn": "openVersionHistory()", "desc": "Version rows for the persona are fetched; the view is author-only.", "evidence": "sidepanel/index.html:596" },
+        { "n": 3, "from": "sidepanel-js", "to": "sidepanel", "fn": "#version-list", "desc": "Versions render with their change notes.", "evidence": "sidepanel/index.html:612" },
+        { "n": 4, "from": "end-user", "to": "service-worker", "fn": "#btn-export-persona", "desc": "Author may export the persona as JSON via chrome.downloads.", "evidence": "sidepanel/index.html:602" },
+        { "n": 5, "from": "end-user", "to": "sidepanel", "fn": "restore version", "desc": "Restoring a version returns to Edit Persona with those values loaded.", "evidence": "sidepanel/index.html:598" }
+      ]
+    },
+    {
+      "id": "rebuild-from-source",
+      "name": "Rebuild a persona from its source prompt",
+      "category": "Persona",
+      "description": "User re-runs extraction against the original prompt after editing drifts.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#source-prompt-fab", "desc": "User opens the fullscreen source prompt viewer from Edit Persona.", "evidence": "sidepanel/index.html:632" },
+        { "n": 2, "from": "sidepanel", "to": "end-user", "fn": "#source-prompt-textarea", "desc": "Original prompt is shown read-only for reference.", "evidence": "sidepanel/index.html:1056" },
+        { "n": 3, "from": "end-user", "to": "sidepanel-js", "fn": "handleRebuildFromSource()", "desc": "User presses Rebuild Persona.", "evidence": "sidepanel/index.html:1059" },
+        { "n": 4, "from": "sidepanel-js", "to": "extractor", "fn": "extractFromPrompt()", "desc": "Extraction re-runs against the stored source prompt.", "evidence": "extractor/extractor.js:258" },
+        { "n": 5, "from": "extractor", "to": "sidepanel", "fn": "populateExtractionResults()", "desc": "Edit Persona is repopulated with freshly derived dimensions.", "evidence": "sidepanel/index.html:619" }
+      ]
+    },
+    {
+      "id": "split-view",
+      "name": "Toggle split view",
+      "category": "UI",
+      "description": "User arranges the panel alongside Gemini.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#split-view-btn", "desc": "User taps the split view control in the panel header.", "evidence": "sidepanel/index.html:39" },
+        { "n": 2, "from": "sidepanel-js", "to": "service-worker", "fn": "sendMessage(TOGGLE_SPLIT_VIEW)", "desc": "Request is relayed to the active Gemini tab.", "evidence": "content/observer.js:2021" },
+        { "n": 3, "from": "service-worker", "to": "observer", "fn": "toggleSplitView()", "desc": "Observer switches the page into or out of iframe split layout.", "evidence": "content/observer.js:2035" }
+      ]
+    },
+    {
+      "id": "theme-sync",
+      "name": "Switch theme across panel and page",
+      "category": "UI",
+      "description": "Theme choice propagates to the injected Gemini UI.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#theme-toggle-btn", "desc": "User toggles light or dark in the panel header.", "evidence": "sidepanel/index.html:36" },
+        { "n": 2, "from": "sidepanel-js", "to": "theme-controller", "fn": "ThemeController", "desc": "Choice is stored under the themeMode key.", "evidence": "theme/theme-controller.js:36" },
+        { "n": 3, "from": "observer", "to": "observer", "fn": "detectPageTheme()", "desc": "Observer also watches Gemini's own theme via initThemeObservation().", "evidence": "content/observer.js:54" },
+        { "n": 4, "from": "observer", "to": "service-worker", "fn": "sendMessage(THEME_CHANGED)", "desc": "Theme changes are broadcast so surfaces stay in sync.", "evidence": "content/observer.js:233" },
+        { "n": 5, "from": "observer", "to": "gemini-page", "fn": "applyThemeToDocument()", "desc": "Injected UI restyles to match.", "evidence": "content/observer.js:203" }
+      ]
+    },
+    {
+      "id": "view-logs",
+      "name": "Inspect and export diagnostic logs",
+      "category": "Diagnostics",
+      "description": "User troubleshoots by filtering and exporting logs.",
+      "steps": [
+        { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "tab-btn[data-tab=logs]", "desc": "User opens the Logs tab; a badge shows the current log count.", "evidence": "sidepanel/index.html:322" },
+        { "n": 2, "from": "end-user", "to": "sidepanel", "fn": "#log-level-dropdown", "desc": "User filters to TRACE, DEBUG, INFO, WARN or ERROR.", "evidence": "sidepanel/index.html:343" },
+        { "n": 3, "from": "logger", "to": "sidepanel", "fn": "#log-viewer-page", "desc": "Matching entries render with their component prefix.", "evidence": "sidepanel/index.html:364" },
+        { "n": 4, "from": "end-user", "to": "service-worker", "fn": "#export-logs-page", "desc": "Export sends DOWNLOAD_FILE so the worker saves the log via chrome.downloads.", "evidence": "sidepanel/index.html:361" },
+        { "n": 5, "from": "end-user", "to": "logger", "fn": "#clear-logs-page", "desc": "Clear empties the buffer.", "evidence": "sidepanel/index.html:360" }
+      ]
+    },
+    {
+      "id": "security-boot",
+      "name": "Harden the page at load",
+      "category": "Diagnostics",
+      "description": "Security and bridge scripts initialise before any page script runs.",
+      "steps": [
+        { "n": 1, "from": "gemini-page", "to": "runtime-security", "fn": "document_start", "desc": "runtime-security.js and extension-bridge.js load first, in the ISOLATED world.", "evidence": "security/runtime-security.js:1" },
+        { "n": 2, "from": "runtime-security", "to": "runtime-security", "fn": "ALLOWED_DOMAINS", "desc": "Execution is confined to gemini.google.com.", "evidence": "security/runtime-security.js:32" },
+        { "n": 3, "from": "runtime-security", "to": "runtime-security", "fn": "performance.now()", "desc": "Anti-debugging timing probe detects a paused debugger.", "evidence": "security/runtime-security.js:21" },
+        { "n": 4, "from": "runtime-security", "to": "runtime-security", "fn": "generateFingerprint()", "desc": "Per-session and per-instance keys plus an environment fingerprint are generated.", "evidence": "security/runtime-security.js:44" },
+        { "n": 5, "from": "extension-bridge", "to": "gemini-page", "fn": "addEventListener('pa-storage-request')", "desc": "Bridge starts listening so MAIN-world modules can reach chrome.* APIs.", "evidence": "bridge/extension-bridge.js:19" },
+        { "n": 6, "from": "observer", "to": "gemini-page", "fn": "isExtensionContextValid()", "desc": "On extension reload the observer detects an invalid context and shows a reload notice.", "evidence": "content/observer.js:87" }
+      ]
+    }
+  ],
+
+  "verificationNotes": [
+    "All 7 memory dimensions confirmed in memory/component-schemas.js (DIMENSION 1-7 headers) and the canonical order array at memory/memory-controller.js:48.",
+    "Message type strings were confirmed by matching both send sites (type: '...') and receive sites (.type === '...').",
+    "The bridge uses CustomEvents (pa-storage-request / pa-api-proxy-request), not window.postMessage, for MAIN->ISOLATED calls; postMessage with source 'ext-bridge' is used only for forwarding background messages back to MAIN.",
+    "Only RecentFocus is registered through AnalyzerRegistry (memory/index.js:62); UnifiedAnalyzer is invoked directly and produces all 7 dimensions in one call.",
+    "All 4 providers in model/model-registry.js are implemented in background.js request switches, matching the manifest host_permissions exactly.",
+    "KNOWN DEFECT: six badge ids are duplicated between the Context tab and the Edit Persona page (badge-context, badge-tone, badge-framework, badge-constraints, badge-format, badge-exemplar), so getElementById always resolves to the Context-tab copy.",
+    "KNOWN DEAD UI: #persona-page-detail is declared in sidepanel/index.html:582 but no navigateToPersonaPage('detail') call exists.",
+    "SECURITY NOTE: the Supabase anon key is committed at supabase/supabase-client.js:24. This is normal for anon keys protected by RLS; 14 CREATE POLICY statements were found across the two schema files.",
+    "supabase/supabase.min.js (162KB) is the vendored @supabase/supabase-js bundle and was intentionally excluded from symbol-level analysis."
+  ]
+}
