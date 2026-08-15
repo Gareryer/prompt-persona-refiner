@@ -60,7 +60,7 @@
     { "id": "extractor", "label": "Persona Extractor", "sublabel": "Prompt to structured persona", "category": "core-service", "file": "extractor/extractor.js", "evidence": "extractor/extractor.js:258" },
     { "id": "logger", "label": "Logger", "sublabel": "Levelled logs, bridge-aware", "category": "core-service", "file": "logging/logger.js", "evidence": "logging/logger.js:1" },
 
-    { "id": "service-worker", "label": "Background Worker", "sublabel": "MV3 RPC hub, 29 message types", "category": "background", "file": "background.js", "evidence": "manifest.json:background" },
+    { "id": "service-worker", "label": "Background Worker", "sublabel": "MV3 RPC hub, 27 inbound message types", "category": "background", "file": "background.js", "evidence": "manifest.json:background" },
     { "id": "crypto-layer", "label": "API Key Encryption", "sublabel": "AES-GCM wrap of stored keys", "category": "background", "file": "background.js", "evidence": "background.js:126" },
     { "id": "commands", "label": "Keyboard Commands", "sublabel": "Ctrl+Shift+R refine, Alt+M panel", "category": "background", "file": "background.js", "evidence": "manifest.json:commands" },
 
@@ -93,7 +93,7 @@
     { "from": "observer", "to": "diff-engine", "label": "computes word diff", "kind": "call", "evidence": "content/diff.js:1" },
     { "from": "observer", "to": "templates", "label": "renders modal markup", "kind": "call", "evidence": "content/observer.js:525" },
     { "from": "observer", "to": "service-worker", "label": "MSG: REFINE_PROMPT", "kind": "message", "evidence": "background.js:1997" },
-    { "from": "observer", "to": "service-worker", "label": "MSG: THEME_CHANGED", "kind": "message", "evidence": "content/observer.js:233" },
+    { "from": "observer", "to": "sidepanel-js", "label": "MSG: THEME_CHANGED (no live listener)", "kind": "message", "evidence": "content/observer.js:233" },
     { "from": "service-worker", "to": "observer", "label": "MSG: TRIGGER_REFINE_SHORTCUT", "kind": "message", "evidence": "content/observer.js:2010" },
     { "from": "service-worker", "to": "observer", "label": "MSG: TOGGLE_SPLIT_VIEW", "kind": "message", "evidence": "content/observer.js:2021" },
     { "from": "service-worker", "to": "memory-index", "label": "MSG: REBUILD_MEMORY_REQUEST", "kind": "message", "evidence": "memory/index.js:360" },
@@ -197,8 +197,8 @@
     { "type": "SCAN_CONTENT", "from": "sidepanel-js", "to": "observer", "handler": "scrape page", "evidence": "background.js:1" },
     { "type": "GET_SESSION_ID", "from": "sidepanel-js", "to": "service-worker", "handler": "getCurrentTabSessionId()", "evidence": "background.js:1286" },
     { "type": "GET_TAB_ID", "from": "observer", "to": "service-worker", "handler": "getTabId()", "evidence": "content/observer.js:1813" },
-    { "type": "GET_THEME", "from": "observer", "to": "service-worker", "handler": "theme read", "evidence": "theme/theme-controller.js:36" },
-    { "type": "THEME_CHANGED", "from": "observer", "to": "service-worker", "handler": "theme broadcast", "evidence": "content/observer.js:233" },
+    { "type": "GET_THEME", "from": "sidepanel-js", "to": "observer", "handler": "detectPageTheme() (no live sender)", "evidence": "content/observer.js:75" },
+    { "type": "THEME_CHANGED", "from": "observer", "to": "sidepanel-js", "handler": "theme broadcast (no live listener)", "evidence": "content/observer.js:233" },
     { "type": "OPEN_OPTIONS_PAGE", "from": "sidepanel-js", "to": "service-worker", "handler": "chrome.runtime.openOptionsPage()", "evidence": "background.js:1" },
     { "type": "DOWNLOAD_FILE", "from": "sidepanel-js", "to": "service-worker", "handler": "chrome.downloads.download()", "evidence": "background.js:1" }
   ],
@@ -518,7 +518,7 @@
         { "n": 1, "from": "end-user", "to": "sidepanel", "fn": "#theme-toggle-btn", "desc": "User toggles light or dark in the panel header.", "evidence": "sidepanel/index.html:36" },
         { "n": 2, "from": "sidepanel-js", "to": "theme-controller", "fn": "ThemeController", "desc": "Choice is stored under the themeMode key.", "evidence": "theme/theme-controller.js:36" },
         { "n": 3, "from": "observer", "to": "observer", "fn": "detectPageTheme()", "desc": "Observer also watches Gemini's own theme via initThemeObservation().", "evidence": "content/observer.js:54" },
-        { "n": 4, "from": "observer", "to": "service-worker", "fn": "sendMessage(THEME_CHANGED)", "desc": "Theme changes are broadcast so surfaces stay in sync.", "evidence": "content/observer.js:233" },
+        { "n": 4, "from": "observer", "to": "sidepanel-js", "fn": "sendMessage(THEME_CHANGED)", "desc": "Theme changes are broadcast toward the side panel; the legacy listener was removed, so nothing consumes it today.", "evidence": "content/observer.js:233" },
         { "n": 5, "from": "observer", "to": "gemini-page", "fn": "applyThemeToDocument()", "desc": "Injected UI restyles to match.", "evidence": "content/observer.js:203" }
       ]
     },
