@@ -484,7 +484,7 @@ class MemoryController {
         if (!this._cache) {
             await this.load();
         }
-        return (this._cache.components.persona?.pinned?.pinned) === true;
+        return Boolean(this._cache.components?.persona?.pinned);
     }
 
     /**

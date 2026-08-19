@@ -272,7 +272,8 @@ class GeminiConversationScraper {
                         exported: formatDate(now)
                     }
                 },
-                messages: []
+                messages: [],
+                turns: []
             };
         }
 
@@ -292,7 +293,7 @@ class GeminiConversationScraper {
         }
 
         // Step 4: Get conversation title
-        scrapeLog('debug', '[scrape] 📰 Getting title');
+        scrapeLog('debug', '[scrape] Getting title');
         console.log('[Scraper] scrape: Getting title...');
         const titleEl = document.querySelector('h1, [class*="title"], title');
         const title = titleEl?.textContent?.trim() || document.title || "Gemini conversation";
@@ -358,7 +359,8 @@ class GeminiConversationScraper {
                     wasTruncated: wasTruncated
                 }
             },
-            messages: messages
+            messages: messages,
+            turns: turns
         };
     }
 

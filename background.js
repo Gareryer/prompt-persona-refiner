@@ -68,47 +68,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 });
 
-// Handle API key validation requests from content script
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === 'CHECK_API_KEY') {
-    (async () => {
-      try {
-        // Check both legacy and new Model Manager storage formats
-        const result = await chrome.storage.local.get(['geminiApiKey', 'pa_models', 'pa_active_model']);
 
-        // Legacy format check
-        if (result.geminiApiKey && result.geminiApiKey.length > 10) {
-          sendResponse({ hasKey: true, canOpenOptions: true });
-          return;
-        }
-
-        // New Model Manager format - check for any enabled model with API key
-        if (result.pa_models) {
-          const models = result.pa_models;
-          const hasEnabledModelWithKey = Object.values(models).some(
-            model => model.enabled && model.apiKey && model.apiKey.length > 10
-          );
-
-          if (hasEnabledModelWithKey) {
-            sendResponse({ hasKey: true, canOpenOptions: true });
-            return;
-          }
-        }
-
-        sendResponse({ hasKey: false, canOpenOptions: true });
-      } catch (error) {
-        sendResponse({ hasKey: false, error: error.message });
-      }
-    })();
-    return true; // Keep channel open for async response
-  }
-
-  // Open options page from content script
-  if (msg.type === 'OPEN_OPTIONS_PAGE') {
-    chrome.runtime.openOptionsPage();
-    return false;
-  }
-});
 
 // ============================================================================
 // Recent Focus Auto-Refresh Configuration
@@ -177,171 +137,60 @@ function isEncrypted(value) {
 // API Proxy - Handle cross-origin requests from content scripts
 // ============================================================================
 
-/**
- * Handle API proxy requests from extension-bridge (content script)
- * Background script has cross-origin permissions via host_permissions in manifest
- */
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === 'API_PROXY_REQUEST') {
-    bgLog('info', 'API Proxy: Received request', { url: msg.url?.substring(0, 50) });
 
-    (async () => {
-      try {
-        const response = await fetch(msg.url, msg.options);
-
-        // Read response body
-        const contentType = response.headers.get('content-type') || '';
-        let data;
-
-        if (contentType.includes('application/json')) {
-          data = await response.json();
-        } else {
-          data = await response.text();
-        }
-
-        bgLog('info', 'API Proxy: Success', {
-          status: response.status,
-          ok: response.ok
-        });
-
-        sendResponse({
-          ok: response.ok,
-          status: response.status,
-          statusText: response.statusText,
-          data: data
-        });
-      } catch (error) {
-        bgLog('error', 'API Proxy: Failed', { error: error.message });
-        sendResponse({
-          ok: false,
-          error: error.message
-        });
-      }
-    })();
-
-    return true; // Keep channel open for async response
-  }
-
-  /**
-   * DOWNLOAD_FILE - Download a file with proper filename
-   * Uses onDeterminingFilename to force the correct filename
-   */
-  if (msg.type === 'DOWNLOAD_FILE') {
-    console.log('[Background] Received DOWNLOAD_FILE', msg.payload);
-
-    try {
-      const { jsonData, filename } = msg.payload;
-
-      if (!jsonData || !filename) {
-        console.error('[Background] Missing jsonData or filename');
-        sendResponse({ success: false, error: 'Missing jsonData or filename' });
-        return true;
-      }
-
-      console.log('[Background] Setting up onDeterminingFilename for', { filename });
-
-      // Set up one-time listener to force filename
-      const filenameListener = (downloadItem, suggest) => {
-        console.log('[Background] onDeterminingFilename triggered', { id: downloadItem.id, filename });
-        chrome.downloads.onDeterminingFilename.removeListener(filenameListener);
-        suggest({ filename: filename });
-        return true; // Signal that we will call suggest
-      };
-      chrome.downloads.onDeterminingFilename.addListener(filenameListener);
-
-      // Create data URL (Service Workers don't have URL.createObjectURL)
-      const base64Data = btoa(unescape(encodeURIComponent(jsonData)));
-      const dataUrl = `data:application/json;base64,${base64Data}`;
-
-      chrome.downloads.download({
-        url: dataUrl,
-        filename: filename,
-        saveAs: true,
-        conflictAction: 'uniquify'
-      }, (downloadId) => {
-
-        if (chrome.runtime.lastError) {
-          chrome.downloads.onDeterminingFilename.removeListener(filenameListener);
-          console.error('[Background] Download failed', chrome.runtime.lastError);
-          bgLog('error', 'Download failed', { error: chrome.runtime.lastError.message });
-          sendResponse({ success: false, error: chrome.runtime.lastError.message });
-        } else {
-          console.log('[Background] Download started', { downloadId, filename });
-          bgLog('info', 'Download started', { downloadId, filename });
-          sendResponse({ success: true, downloadId });
-        }
-      });
-    } catch (error) {
-      console.error('[Background] DOWNLOAD_FILE exception', error);
-      bgLog('error', 'DOWNLOAD_FILE exception', { error: error.message });
-      sendResponse({ success: false, error: error.message });
-    }
-    return true; // Keep channel open for async response
-  }
-
-
-});
 
 // Open sidepanel when extension icon is clicked
 chrome.action.onClicked.addListener(async (tab) => {
   if (tab.url?.includes('gemini.google.com')) {
-    await chrome.sidePanel.open({ tabId: tab.id });
+    const openOptions = tab.windowId ? { windowId: tab.windowId } : { tabId: tab.id };
+    try {
+      await chrome.sidePanel.open(openOptions);
+    } catch (err) {
+      await chrome.sidePanel.open({ tabId: tab.id });
+    }
   } else {
     chrome.runtime.openOptionsPage();
   }
 });
 
 // ===========================================================================
-// Tab-specific Sidepanel Behavior
+// Sidepanel Connection & Lifecycle Tracking
 // ===========================================================================
 
-/**
- * Check if URL is a Gemini page
- */
-function isGeminiUrl(url) {
-  return url?.includes('gemini.google.com');
-}
+// Track active sidepanel connections via long-lived runtime ports
+const openSidepanelPorts = new Set();
+const sidepanelWindowPorts = new Map(); // windowId -> port
 
-/**
- * Update sidepanel availability for a tab based on its URL
- */
-async function updateSidepanelForTab(tabId, url) {
-  try {
-    if (isGeminiUrl(url)) {
-      // Enable sidepanel on Gemini tabs
-      await chrome.sidePanel.setOptions({
-        tabId,
-        path: 'sidepanel/index.html',
-        enabled: true
-      });
-    } else {
-      // Disable sidepanel on non-Gemini tabs
-      await chrome.sidePanel.setOptions({
-        tabId,
-        enabled: false
-      });
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === 'sidepanel') {
+    openSidepanelPorts.add(port);
+    const windowId = port.sender?.tab?.windowId;
+    if (windowId) {
+      sidepanelWindowPorts.set(windowId, port);
     }
-  } catch (error) {
-    console.error('[Sidepanel] Failed to update options for tab:', tabId, error);
+    bgLog('info', 'Sidepanel port connected', { windowId });
+
+    port.onDisconnect.addListener(() => {
+      openSidepanelPorts.delete(port);
+      if (windowId && sidepanelWindowPorts.get(windowId) === port) {
+        sidepanelWindowPorts.delete(windowId);
+      }
+      bgLog('info', 'Sidepanel port disconnected', { windowId });
+    });
   }
+});
+
+/**
+ * Check if the sidepanel is currently open
+ * @param {number} [windowId]
+ * @returns {boolean}
+ */
+function isSidepanelOpen(windowId) {
+  if (windowId && sidepanelWindowPorts.has(windowId)) {
+    return true;
+  }
+  return openSidepanelPorts.size > 0;
 }
-
-// When user switches tabs, update sidepanel availability
-chrome.tabs.onActivated.addListener(async (activeInfo) => {
-  try {
-    const tab = await chrome.tabs.get(activeInfo.tabId);
-    await updateSidepanelForTab(activeInfo.tabId, tab.url);
-  } catch (error) {
-    console.error('[Sidepanel] onActivated error:', error);
-  }
-});
-
-// When tab URL changes, update sidepanel availability  
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.url) {
-    await updateSidepanelForTab(tabId, changeInfo.url);
-  }
-});
 
 // Clean up session storage when tab is closed
 chrome.tabs.onRemoved.addListener((tabId) => {
@@ -357,39 +206,110 @@ chrome.commands.onCommand.addListener(async (command) => {
 
   if (command === 'trigger-refine') {
     if (tab?.id && tab.url?.includes('gemini.google.com')) {
-      chrome.tabs.sendMessage(tab.id, { type: 'TRIGGER_REFINE_SHORTCUT' });
+      chrome.tabs.sendMessage(tab.id, { type: 'TRIGGER_REFINE_SHORTCUT' }).catch((err) => {
+        console.warn('[Background] Failed to send trigger-refine shortcut:', err.message);
+      });
     }
   }
 
   if (command === 'open-sidepanel') {
     if (tab?.id && tab.url?.includes('gemini.google.com')) {
-      await chrome.sidePanel.open({ tabId: tab.id });
+      const openOptions = tab.windowId ? { windowId: tab.windowId } : { tabId: tab.id };
+      try {
+        await chrome.sidePanel.open(openOptions);
+      } catch (err) {
+        await chrome.sidePanel.open({ tabId: tab.id });
+      }
     }
   }
 });
 
-// Track sidepanel state per tab (Chrome API doesn't provide this)
-const sidepanelState = new Map();
-
 // Handle messages from content scripts and sidepanel
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Check API key presence
+  if (message.type === 'CHECK_API_KEY') {
+    (async () => {
+      try {
+        const result = await chrome.storage.local.get(['geminiApiKey', 'pa_models', 'pa_active_model']);
+        if (result.geminiApiKey && result.geminiApiKey.length > 10) {
+          sendResponse({ hasKey: true, canOpenOptions: true });
+          return;
+        }
+        if (result.pa_models) {
+          const hasEnabledModelWithKey = Object.values(result.pa_models).some(
+            model => model.enabled && model.apiKey && model.apiKey.length > 10
+          );
+          if (hasEnabledModelWithKey) {
+            sendResponse({ hasKey: true, canOpenOptions: true });
+            return;
+          }
+        }
+        sendResponse({ hasKey: false, canOpenOptions: true });
+      } catch (error) {
+        sendResponse({ hasKey: false, error: error.message });
+      }
+    })();
+    return true;
+  }
+
+  // Open options page
+  if (message.type === 'OPEN_OPTIONS_PAGE') {
+    chrome.runtime.openOptionsPage();
+    return false;
+  }
+
+  // Download file
+  if (message.type === 'DOWNLOAD_FILE') {
+    try {
+      const { jsonData, filename } = message.payload || {};
+      if (!jsonData || !filename) {
+        sendResponse({ success: false, error: 'Missing jsonData or filename' });
+        return true;
+      }
+      const filenameListener = (downloadItem, suggest) => {
+        chrome.downloads.onDeterminingFilename.removeListener(filenameListener);
+        suggest({ filename: filename });
+        return true;
+      };
+      chrome.downloads.onDeterminingFilename.addListener(filenameListener);
+      const base64Data = btoa(unescape(encodeURIComponent(jsonData)));
+      const dataUrl = `data:application/json;base64,${base64Data}`;
+      chrome.downloads.download({
+        url: dataUrl,
+        filename: filename,
+        saveAs: true,
+        conflictAction: 'uniquify'
+      }, (downloadId) => {
+        if (chrome.runtime.lastError) {
+          chrome.downloads.onDeterminingFilename.removeListener(filenameListener);
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+        } else {
+          sendResponse({ success: true, downloadId });
+        }
+      });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+    return true;
+  }
+
   if (message.type === 'GET_TAB_ID') {
     sendResponse({ tabId: sender.tab?.id });
     return true;
   }
 
   // Toggle sidepanel open/close from settings icon
-  // B1 FIX: Now sends acknowledgment response
   if (message.type === 'TOGGLE_SIDEPANEL') {
     (async () => {
       const tabId = sender.tab?.id;
+      const windowId = sender.tab?.windowId;
       if (!tabId) {
         sendResponse({ success: false, error: 'No tab ID' });
         return;
       }
 
       try {
-        const isOpen = sidepanelState.get(tabId) || false;
+        const isOpen = isSidepanelOpen(windowId);
 
         if (isOpen) {
           // Close: disable sidepanel to force close
@@ -400,14 +320,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             path: 'sidepanel/index.html',
             enabled: true
           });
-          sidepanelState.set(tabId, false);
-          console.log('[Background] Sidepanel closed for tab:', tabId);
+          console.log('[Background] Sidepanel closed for tab:', tabId, 'window:', windowId);
           sendResponse({ success: true, isOpen: false });
         } else {
           // Open sidepanel
-          await chrome.sidePanel.open({ tabId });
-          sidepanelState.set(tabId, true);
-          console.log('[Background] Sidepanel opened for tab:', tabId);
+          const openOptions = windowId ? { windowId } : { tabId };
+          try {
+            await chrome.sidePanel.open(openOptions);
+          } catch (err) {
+            await chrome.sidePanel.open({ tabId });
+          }
+          console.log('[Background] Sidepanel opened for tab:', tabId, 'window:', windowId);
           sendResponse({ success: true, isOpen: true });
         }
       } catch (err) {
@@ -415,7 +338,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: false, error: err.message });
       }
     })();
-    return true; // B1 FIX: Keep channel open for async response
+    return true;
   }
 
   // Toggle Split View Mode
@@ -444,7 +367,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             console.log('[Background] Closing split view...');
 
             // 1. Tell content script to remove iframe
-            chrome.tabs.sendMessage(tabId, { type: 'TOGGLE_SPLIT_VIEW' });
+            chrome.tabs.sendMessage(tabId, { type: 'TOGGLE_SPLIT_VIEW' }).catch((err) => {
+              console.warn('[Background] Failed to notify tab of split view close:', err.message);
+            });
 
             // 2. Re-enable sidepanel for future use
             await chrome.sidePanel.setOptions({
@@ -456,7 +381,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             // NOTE: Chrome's sidePanel.open() can ONLY be called from user gesture context
             // (e.g., chrome.action.onClicked). Message handlers don't preserve gesture context.
             // User must click the settings icon to reopen the sidepanel.
-            sidepanelState.set(tabId, false);
             console.log('[Background] Split view closed. Click settings icon to open sidepanel.');
             sendResponse({ success: true, splitViewActive: false });
           } else {
@@ -466,7 +390,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             // Sidepanel closes itself with window.close() after sending this message
             // Just wait a bit for it to fully close, then inject iframe
             setTimeout(() => {
-              chrome.tabs.sendMessage(tabId, { type: 'TOGGLE_SPLIT_VIEW' });
+              chrome.tabs.sendMessage(tabId, { type: 'TOGGLE_SPLIT_VIEW' }).catch((err) => {
+                console.warn('[Background] Failed to notify tab of split view open:', err.message);
+              });
             }, 300);
             sendResponse({ success: true, splitViewActive: true });
           }
@@ -564,6 +490,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'GET_DISABLED_FACTS') {
+    const disabledKey = `session_${message.sessionId}_disabled`;
+    chrome.storage.local.get(disabledKey).then(result => {
+      sendResponse({ success: true, disabledFacts: result[disabledKey] || {} });
+    }).catch(err => {
+      sendResponse({ success: false, error: err.message, disabledFacts: {} });
+    });
+    return true;
+  }
+
   // Relay LLM_CONFIG_SAVED to Gemini tabs for SmartAutoRun detection
   // Only broadcast to tabs that don't already have memory (aggressive guard)
   if (message.type === 'LLM_CONFIG_SAVED') {
@@ -624,11 +560,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // MAIN world cannot make cross-origin requests, so we proxy through background
   if (message.type === 'API_PROXY_REQUEST') {
     (async () => {
+      let keepAliveInterval = null;
       try {
         bgLog('debug', 'API Proxy: Processing request', {
           url: message.url?.substring(0, 50) + '...',
           method: message.options?.method || 'GET'
         });
+
+        // Keep service worker active during long LLM API calls in MV3
+        keepAliveInterval = setInterval(() => {
+          chrome.runtime.getPlatformInfo(() => {});
+        }, 5000);
 
         const response = await fetch(message.url, message.options);
         const contentType = response.headers.get('content-type') || '';
@@ -653,6 +595,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           status: 0,
           error: error.message
         });
+      } finally {
+        if (keepAliveInterval) {
+          clearInterval(keepAliveInterval);
+        }
       }
     })();
     return true; // Keep channel open for async response
@@ -1078,7 +1024,7 @@ JSON OUTPUT:`;
           return;
         }
 
-        const storageKey = `session_${sessionId} `;
+        const storageKey = `session_${sessionId}`;
         const result = await chrome.storage.local.get(storageKey);
         const memory = result[storageKey];
 
@@ -1089,7 +1035,7 @@ JSON OUTPUT:`;
         }
 
         // Check if already rated
-        const ratingKey = `rating_${memory.importedPersona} `;
+        const ratingKey = `rating_${memory.importedPersona}`;
         const ratingResult = await chrome.storage.local.get(ratingKey);
         if (ratingResult[ratingKey]?.submitted) {
           sendResponse({ eligible: false, alreadyRated: true });
@@ -1138,7 +1084,7 @@ JSON OUTPUT:`;
         }
 
         // Store rating locally
-        const ratingKey = `rating_${personaId} `;
+        const ratingKey = `rating_${personaId}`;
         await chrome.storage.local.set({
           [ratingKey]: {
             personaId,
@@ -1241,7 +1187,7 @@ JSON OUTPUT:`;
 
       try {
         // Store report locally
-        const reportKey = `report_${personaId}_${Date.now()} `;
+        const reportKey = `report_${personaId}_${Date.now()}`;
         await chrome.storage.local.set({
           [reportKey]: {
             personaId,
@@ -1281,10 +1227,26 @@ JSON OUTPUT:`;
 // ============================================================================
 
 /**
- * Get session ID from current active tab
+/**
+ * Get session ID from current active tab or specified tabId
+ * @param {number} [targetTabId] - Optional specific tab ID to query
+ * @returns {Promise<string|null>}
  */
-async function getCurrentTabSessionId() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+async function getCurrentTabSessionId(targetTabId = null) {
+  let tab = null;
+  if (targetTabId) {
+    try {
+      tab = await chrome.tabs.get(targetTabId);
+    } catch {
+      // tab query fallback if get fails
+    }
+  }
+
+  if (!tab) {
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    tab = activeTab;
+  }
+
   if (!tab?.url?.includes('gemini.google.com')) return null;
 
   try {
@@ -1307,7 +1269,7 @@ async function getCurrentTabSessionId() {
 async function getSessionMemory(sessionId) {
   if (!sessionId) return null;
 
-  const storageKey = `session_${sessionId} `;
+  const storageKey = `session_${sessionId}`;
   const result = await chrome.storage.local.get(storageKey);
   return result[storageKey] || null;
 }
@@ -1318,7 +1280,7 @@ async function getSessionMemory(sessionId) {
 async function updateMemoryComponent(sessionId, componentId, data) {
   if (!sessionId || !componentId) return { success: false };
 
-  const storageKey = `session_${sessionId} `;
+  const storageKey = `session_${sessionId}`;
   const result = await chrome.storage.local.get(storageKey);
   const memory = result[storageKey] || { sessionId, components: {} };
 
@@ -1347,12 +1309,22 @@ async function pinPersona(sessionId) {
 
   const storageKey = `session_${sessionId}`;
   const result = await chrome.storage.local.get(storageKey);
-  const memory = result[storageKey];
+  let memory = result[storageKey];
+
+  if (!memory) {
+    memory = { sessionId, components: {}, currentGeneration: 0 };
+  }
+  if (!memory.components) {
+    memory.components = {};
+  }
+  if (!memory.components.persona && !memory.components.persona_synthesizer) {
+    memory.components.persona = { current: { instruction: '' } };
+  }
 
   // Support both V4 'persona' and legacy 'persona_synthesizer' component names
-  const personaComponent = memory?.components?.persona || memory?.components?.persona_synthesizer;
-  if (!personaComponent?.current) {
-    return { success: false, error: 'No persona to pin' };
+  const personaComponent = memory.components.persona || memory.components.persona_synthesizer;
+  if (!personaComponent.current) {
+    personaComponent.current = { instruction: '' };
   }
 
   personaComponent.pinned = true;
@@ -1406,11 +1378,21 @@ async function pinComponent(sessionId, componentId) {
 
   const storageKey = `session_${sessionId}`;
   const result = await chrome.storage.local.get(storageKey);
-  const memory = result[storageKey];
+  let memory = result[storageKey];
 
-  const component = memory?.components?.[componentId];
-  if (!component?.current) {
-    return { success: false, error: `No ${componentId} component data` };
+  if (!memory) {
+    memory = { sessionId, components: {}, currentGeneration: 0 };
+  }
+  if (!memory.components) {
+    memory.components = {};
+  }
+  if (!memory.components[componentId]) {
+    memory.components[componentId] = { current: { instruction: '' } };
+  }
+
+  const component = memory.components[componentId];
+  if (!component.current) {
+    component.current = { instruction: '' };
   }
 
   component.pinned = true;
@@ -1454,7 +1436,7 @@ async function unpinComponent(sessionId, componentId) {
 async function toggleFact(sessionId, factPath, enabled) {
   if (!sessionId || !factPath) return { success: false };
 
-  const storageKey = `session_${sessionId} _disabled`;
+  const storageKey = `session_${sessionId}_disabled`;
   const result = await chrome.storage.local.get(storageKey);
   const disabled = result[storageKey] || {};
 
@@ -1470,187 +1452,216 @@ async function toggleFact(sessionId, factPath, enabled) {
 
 /**
  * Build formatted refinement context from V4 memory components
- * Supports 7-dimension V4 schema with legacy fallback
+ * Supports 7-dimension V4 schema with legacy fallback and disabled-fact filtering
  * @param {Object} memoryData - Session memory data
+ * @param {Object} [disabledFacts={}] - Map of disabled facts/components
  * @returns {Object} Structured context with all dimensions
  */
-function buildV4RefinementContext(memoryData) {
+function buildV4RefinementContext(memoryData, disabledFacts = {}) {
   if (!memoryData?.components) return { formatted: '', dimensions: {} };
 
   const components = memoryData.components;
   const dimensions = {};
   const sections = [];
 
+  const isFactDisabled = (dim) => {
+    return disabledFacts[`component.${dim}`] === true || disabledFacts[dim] === true;
+  };
+
+  // Helper to extract active data, prioritizing pinned data over current data
+  const getActiveData = (comp) => {
+    if (!comp) return null;
+    if (comp.pinned && comp.pinnedData) {
+      return comp.pinnedData;
+    }
+    return comp.current || null;
+  };
+
   // =========================================================================
   // PERSONA - The expert identity the LLM must BECOME (not just act as)
   // =========================================================================
-  const personaV4 = components.persona;
-  const personaLegacy = components.persona_synthesizer;
+  if (!isFactDisabled('persona')) {
+    const personaV4 = components.persona;
+    const personaLegacy = components.persona_synthesizer;
 
-  let personaText = null;
-  if (personaV4?.pinned && personaV4?.pinnedData?.instruction) {
-    personaText = personaV4.pinnedData.instruction;
-  } else if (personaV4?.current?.instruction) {
-    personaText = personaV4.current.instruction;
-  } else if (personaLegacy?.pinned && personaLegacy?.pinnedData?.synthesizedPersona) {
-    personaText = personaLegacy.pinnedData.synthesizedPersona;
-  } else if (personaLegacy?.current?.synthesizedPersona) {
-    personaText = personaLegacy.current.synthesizedPersona;
-  }
+    const personaData = getActiveData(personaV4) || getActiveData(personaLegacy);
+    let personaText = null;
+    if (personaData?.instruction) {
+      personaText = personaData.instruction;
+    } else if (personaData?.synthesizedPersona) {
+      personaText = personaData.synthesizedPersona;
+    }
 
-  if (personaText) {
-    dimensions.persona = personaText;
-    sections.push(`## 🎭 PERSONA (EMBODY THIS EXPERT)
+    if (personaText) {
+      dimensions.persona = personaText;
+      sections.push(`## 🎭 PERSONA (EMBODY THIS EXPERT)
 ${personaText}`);
+    }
   }
 
   // =========================================================================
   // CONTEXT - Domain expertise and scope boundaries
   // =========================================================================
-  const contextV4 = components.context;
-  const contextLegacy = components.topic_summarizer;
+  if (!isFactDisabled('context')) {
+    const contextV4 = components.context;
+    const contextLegacy = components.topic_summarizer;
 
-  if (contextV4?.current) {
-    const ctx = contextV4.current;
-    const domain = ctx.metadata?.domain || 'General';
-    const scopeTags = ctx.metadata?.scope_tags || [];
-    const instruction = ctx.instruction || '';
+    const contextData = getActiveData(contextV4);
+    const contextLegacyData = getActiveData(contextLegacy);
 
-    dimensions.context = { domain, scopeTags, instruction };
-    sections.push(`## 🌐 DOMAIN & SCOPE
+    if (contextData) {
+      const domain = contextData.metadata?.domain || 'General';
+      const scopeTags = contextData.metadata?.scope_tags || [];
+      const instruction = contextData.instruction || '';
+
+      dimensions.context = { domain, scopeTags, instruction };
+      sections.push(`## 🌐 DOMAIN & SCOPE
 - **Domain**: ${domain}
 - **Scope**: ${scopeTags.join(', ') || 'General'}
 - **Expertise**: ${instruction || 'Apply domain knowledge as appropriate'}`);
-  } else if (contextLegacy?.current) {
-    const ctx = contextLegacy.current;
-    dimensions.context = {
-      domain: ctx.primaryTopic || 'General',
-      scopeTags: ctx.keywords || [],
-      instruction: ctx.summary || ''
-    };
-    sections.push(`## 🌐 DOMAIN & SCOPE
-- **Domain**: ${ctx.primaryTopic || 'General'}
-- **Scope**: ${ctx.keywords?.join(', ') || 'General'}
-- **Summary**: ${ctx.summary || 'No summary available'}`);
+    } else if (contextLegacyData) {
+      dimensions.context = {
+        domain: contextLegacyData.primaryTopic || 'General',
+        scopeTags: contextLegacyData.keywords || [],
+        instruction: contextLegacyData.summary || ''
+      };
+      sections.push(`## 🌐 DOMAIN & SCOPE
+- **Domain**: ${contextLegacyData.primaryTopic || 'General'}
+- **Scope**: ${contextLegacyData.keywords?.join(', ') || 'General'}
+- **Summary**: ${contextLegacyData.summary || 'No summary available'}`);
+    }
   }
 
   // =========================================================================
   // TONE - Communication style and voice
   // =========================================================================
-  const toneV4 = components.tone;
-  const toneLegacy = components.style_profiler;
+  if (!isFactDisabled('tone')) {
+    const toneV4 = components.tone;
+    const toneLegacy = components.style_profiler;
 
-  if (toneV4?.current) {
-    const tone = toneV4.current;
-    const styleTags = tone.metadata?.style_tags || [];
-    const bannedPhrases = tone.metadata?.banned_phrases || [];
+    const toneData = getActiveData(toneV4);
+    const toneLegacyData = getActiveData(toneLegacy);
 
-    dimensions.tone = { instruction: tone.instruction, styleTags, bannedPhrases };
-    let toneSection = `## 🎨 TONE & STYLE
-- **Voice**: ${tone.instruction || 'Professional and clear'}
+    if (toneData) {
+      const styleTags = toneData.metadata?.style_tags || [];
+      const bannedPhrases = toneData.metadata?.banned_phrases || [];
+
+      dimensions.tone = { instruction: toneData.instruction, styleTags, bannedPhrases };
+      let toneSection = `## 🎨 TONE & STYLE
+- **Voice**: ${toneData.instruction || 'Professional and clear'}
 - **Style Tags**: ${styleTags.join(', ') || 'Professional'}`;
-    if (bannedPhrases.length > 0) {
-      toneSection += `\n- **AVOID**: "${bannedPhrases.join('", "')}"`;
+      if (bannedPhrases.length > 0) {
+        toneSection += `\n- **AVOID**: "${bannedPhrases.join('", "')}"`;
+      }
+      sections.push(toneSection);
+    } else if (toneLegacyData) {
+      dimensions.tone = {
+        instruction: toneLegacyData.tone || 'Professional',
+        styleTags: toneLegacyData.traits || [],
+        bannedPhrases: []
+      };
+      sections.push(`## 🎨 TONE & STYLE
+- **Tone**: ${toneLegacyData.tone || 'Professional'}
+- **Verbosity**: ${toneLegacyData.verbosity || 'Moderate'}
+- **Technical Level**: ${toneLegacyData.technicalLevel || 'Intermediate'}
+- **Directness**: ${toneLegacyData.directness || 'Direct'}`);
     }
-    sections.push(toneSection);
-  } else if (toneLegacy?.current) {
-    const style = toneLegacy.current;
-    dimensions.tone = {
-      instruction: style.tone || 'Professional',
-      styleTags: style.traits || [],
-      bannedPhrases: []
-    };
-    sections.push(`## 🎨 TONE & STYLE
-- **Tone**: ${style.tone || 'Professional'}
-- **Verbosity**: ${style.verbosity || 'Moderate'}
-- **Technical Level**: ${style.technicalLevel || 'Intermediate'}
-- **Directness**: ${style.directness || 'Direct'}`);
   }
 
   // =========================================================================
   // FRAMEWORK - Reasoning methodology
   // =========================================================================
-  const frameworkV4 = components.framework;
+  if (!isFactDisabled('framework')) {
+    const frameworkV4 = components.framework;
+    const fw = getActiveData(frameworkV4);
 
-  if (frameworkV4?.current) {
-    const fw = frameworkV4.current;
-    const reasoningType = fw.metadata?.reasoning_type || 'Step-by-Step';
+    if (fw) {
+      const reasoningType = fw.metadata?.reasoning_type || 'Step-by-Step';
 
-    dimensions.framework = { instruction: fw.instruction, reasoningType };
-    sections.push(`## 🔧 METHODOLOGY
+      dimensions.framework = { instruction: fw.instruction, reasoningType };
+      sections.push(`## 🔧 METHODOLOGY
 - **Reasoning Approach**: ${reasoningType}
 - **Methodology**: ${fw.instruction || 'Apply structured thinking'}`);
+    }
   }
 
   // =========================================================================
   // CONSTRAINTS - Rules, prohibitions, requirements
   // =========================================================================
-  const constraintsV4 = components.constraints;
+  if (!isFactDisabled('constraints')) {
+    const constraintsV4 = components.constraints;
+    const c = getActiveData(constraintsV4);
 
-  if (constraintsV4?.current) {
-    const c = constraintsV4.current;
-    const prohibitions = c.metadata?.prohibitions || [];
-    const requirements = c.metadata?.requirements || [];
-    const responseLength = c.metadata?.response_length || 'appropriate';
+    if (c) {
+      const prohibitions = c.metadata?.prohibitions || [];
+      const requirements = c.metadata?.requirements || [];
+      const responseLength = c.metadata?.response_length || 'appropriate';
 
-    dimensions.constraints = { prohibitions, requirements, responseLength, instruction: c.instruction };
-    let constraintSection = `## ⚠️ CONSTRAINTS`;
-    if (requirements.length > 0) {
-      constraintSection += `\n- **MUST**: ${requirements.join('; ')}`;
+      dimensions.constraints = { prohibitions, requirements, responseLength, instruction: c.instruction };
+      let constraintSection = `## ⚠️ CONSTRAINTS`;
+      if (requirements.length > 0) {
+        constraintSection += `\n- **MUST**: ${requirements.join('; ')}`;
+      }
+      if (prohibitions.length > 0) {
+        constraintSection += `\n- **NEVER**: ${prohibitions.join('; ')}`;
+      }
+      constraintSection += `\n- **Response Length**: ${responseLength}`;
+      if (c.instruction) {
+        constraintSection += `\n- **Notes**: ${c.instruction}`;
+      }
+      sections.push(constraintSection);
     }
-    if (prohibitions.length > 0) {
-      constraintSection += `\n- **NEVER**: ${prohibitions.join('; ')}`;
-    }
-    constraintSection += `\n- **Response Length**: ${responseLength}`;
-    if (c.instruction) {
-      constraintSection += `\n- **Notes**: ${c.instruction}`;
-    }
-    sections.push(constraintSection);
   }
 
   // =========================================================================
   // FORMAT - Output structure preferences
   // =========================================================================
-  const formatV4 = components.format;
+  if (!isFactDisabled('format')) {
+    const formatV4 = components.format;
+    const fmt = getActiveData(formatV4);
 
-  if (formatV4?.current) {
-    const fmt = formatV4.current;
-    const outputType = fmt.metadata?.output_type || 'Markdown';
+    if (fmt) {
+      const outputType = fmt.metadata?.output_type || 'Markdown';
 
-    dimensions.format = { outputType, instruction: fmt.instruction };
-    sections.push(`## 📋 OUTPUT FORMAT
+      dimensions.format = { outputType, instruction: fmt.instruction };
+      sections.push(`## 📋 OUTPUT FORMAT
 - **Type**: ${outputType}
 - **Structure**: ${fmt.instruction || 'Format appropriately for the task'}`);
+    }
   }
 
   // =========================================================================
   // EXEMPLAR - Example patterns to learn from
   // =========================================================================
-  const exemplarV4 = components.exemplar;
+  if (!isFactDisabled('exemplar')) {
+    const exemplarV4 = components.exemplar;
+    const ex = getActiveData(exemplarV4);
 
-  if (exemplarV4?.current) {
-    const ex = exemplarV4.current;
-    dimensions.exemplar = { instruction: ex.instruction };
-    if (ex.instruction) {
-      sections.push(`## 📚 EXEMPLAR PATTERNS
+    if (ex) {
+      dimensions.exemplar = { instruction: ex.instruction };
+      if (ex.instruction) {
+        sections.push(`## 📚 EXEMPLAR PATTERNS
 ${ex.instruction}`);
+      }
     }
   }
 
   // =========================================================================
   // RECENT FOCUS - Current conversation momentum (legacy support)
   // =========================================================================
-  const recentFocus = components.recent_focus?.current;
-  if (recentFocus) {
-    dimensions.recentFocus = recentFocus;
-    let recentSection = `## 🎯 CURRENT FOCUS
+  if (!isFactDisabled('recent_focus')) {
+    const recentFocus = getActiveData(components.recent_focus);
+    if (recentFocus) {
+      dimensions.recentFocus = recentFocus;
+      let recentSection = `## 🎯 CURRENT FOCUS
 - **Working On**: ${recentFocus.currentTopic || recentFocus.currentFocus || 'General task'}
 - **Active Task**: ${recentFocus.activeTask || 'None specified'}
 - **Momentum**: ${typeof recentFocus.momentum === 'object' ? recentFocus.momentum.direction : recentFocus.momentum || 'Steady'}`;
-    if (recentFocus.openItems?.length) {
-      recentSection += `\n- **Open Items**: ${recentFocus.openItems.join(', ')}`;
+      if (recentFocus.openItems?.length) {
+        recentSection += `\n- **Open Items**: ${recentFocus.openItems.join(', ')}`;
+      }
+      sections.push(recentSection);
     }
-    sections.push(recentSection);
   }
 
   return {
@@ -1677,23 +1688,32 @@ async function rebuildSessionMemory(sessionId, options = {}) {
   }
 
   try {
-    // Step 1: Get current tab
-    bgLog('debug', '[rebuildSessionMemory] Querying active tab');
-    console.log('[Background] rebuildSessionMemory: Querying active tab...');
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id) {
-      bgLog('warn', '[rebuildSessionMemory] No active tab');
-      console.warn('[Background] rebuildSessionMemory: No active tab');
-      return { success: false, error: 'No active tab' };
+    // Step 1: Get current tab for session
+    bgLog('debug', '[rebuildSessionMemory] Querying tab for session');
+    console.log('[Background] rebuildSessionMemory: Querying tab for session...');
+    
+    let targetTab = null;
+    const matchingTabs = await chrome.tabs.query({ url: `https://gemini.google.com/app/${sessionId}*` });
+    if (matchingTabs && matchingTabs.length > 0) {
+      targetTab = matchingTabs[0];
+    } else {
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      targetTab = activeTab;
     }
-    bgLog('debug', '[rebuildSessionMemory] Tab found', { tabId: tab.id });
-    console.log('[Background] rebuildSessionMemory: Tab found:', tab.id);
+
+    if (!targetTab?.id) {
+      bgLog('warn', '[rebuildSessionMemory] No active tab found');
+      console.warn('[Background] rebuildSessionMemory: No active tab found');
+      return { success: false, error: 'No active Gemini tab found' };
+    }
+    bgLog('debug', '[rebuildSessionMemory] Tab found', { tabId: targetTab.id });
+    console.log('[Background] rebuildSessionMemory: Tab found:', targetTab.id);
 
     // Step 2: Clear decision
     if (!options.enabledAnalyzers) {
       bgLog('debug', '[rebuildSessionMemory] Full rebuild - clearing storage');
       console.log('[Background] rebuildSessionMemory: Full rebuild, clearing existing memory...');
-      const storageKey = `session_${sessionId} `;
+      const storageKey = `session_${sessionId}`;
       await chrome.storage.local.remove(storageKey);
       bgLog('debug', '[rebuildSessionMemory] Storage cleared');
       console.log('[Background] rebuildSessionMemory: Storage cleared');
@@ -1708,7 +1728,7 @@ async function rebuildSessionMemory(sessionId, options = {}) {
     // Step 3: Send message to content script
     bgLog('debug', '[rebuildSessionMemory] Sending REBUILD_MEMORY_REQUEST to content script');
     console.log('[Background] rebuildSessionMemory: Sending message to content script...');
-    const result = await chrome.tabs.sendMessage(tab.id, {
+    const result = await chrome.tabs.sendMessage(targetTab.id, {
       type: 'REBUILD_MEMORY_REQUEST',
       sessionId,
       enabledAnalyzers: options.enabledAnalyzers
@@ -1749,27 +1769,27 @@ function getUserFriendlyError(status, rawError, provider) {
   // Handle specific HTTP status codes
   switch (status) {
     case 429:
-      return `Rate limit exceeded.${providerName} API is temporarily overloaded.Please wait a moment and try again.`;
+      return `Rate limit exceeded. ${providerName} API is temporarily overloaded. Please wait a moment and try again.`;
     case 401:
-      return `Invalid API key.Please check your ${providerName} API key in Extension Options.`;
+      return `Invalid API key. Please check your ${providerName} API key in Extension Options.`;
     case 403:
-      return `Access denied.Your ${providerName} API key may not have permission for this model.Check your API access.`;
+      return `Access denied. Your ${providerName} API key may not have permission for this model. Check your API access.`;
     case 400:
-      return `Invalid request.The prompt may be too long or contain unsupported content.`;
+      return `Invalid request. The prompt may be too long or contain unsupported content.`;
     case 500:
     case 502:
     case 503:
     case 504:
-      return `${providerName} server error(${status}).The service is temporarily unavailable.Please try again later.`;
+      return `${providerName} server error (${status}). The service is temporarily unavailable. Please try again later.`;
     case 0:
       // Network error - no response received
-      return `Network error.Check your internet connection and try again.`;
+      return `Network error. Check your internet connection and try again.`;
     default:
       // Fall back to raw error with provider context
       if (rawError) {
-        return `${providerName}: ${rawError} `;
+        return `${providerName}: ${rawError}`;
       }
-      return `${providerName} API error(${status}).Please try again.`;
+      return `${providerName} API error (${status}). Please try again.`;
   }
 }
 
@@ -1851,8 +1871,208 @@ const MODEL_CONFIGS = {
 };
 
 // ============================================================================
-// Persona Extraction LLM Call
+// Multi-Provider LLM Transport Adapters & Unified Runner
 // ============================================================================
+
+const LLM_TRANSPORTS = {
+  gemini: {
+    buildUrl: (model, apiKey, endpoint) => endpoint ? `${endpoint}?key=${apiKey}` : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    buildHeaders: () => ({ 'Content-Type': 'application/json' }),
+    buildBody: (prompt, params = {}) => JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: params.temperature ?? 0.7,
+        maxOutputTokens: params.maxOutputTokens ?? params.max_tokens ?? 8192
+      }
+    }),
+    extractText: (data) => data?.candidates?.[0]?.content?.parts?.[0]?.text
+  },
+  openai: {
+    buildUrl: (model, apiKey, endpoint) => endpoint || 'https://api.openai.com/v1/chat/completions',
+    buildHeaders: (apiKey) => ({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    }),
+    buildBody: (prompt, params = {}, model) => JSON.stringify({
+      model: model || 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: params.temperature ?? 0.7,
+      max_tokens: params.max_tokens ?? params.maxOutputTokens ?? 4096
+    }),
+    extractText: (data) => data?.choices?.[0]?.message?.content
+  },
+  openrouter: {
+    buildUrl: (model, apiKey, endpoint) => endpoint || 'https://openrouter.ai/api/v1/chat/completions',
+    buildHeaders: (apiKey) => ({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://gemini.google.com',
+      'X-Title': 'Prompt Assistant'
+    }),
+    buildBody: (prompt, params = {}, model) => JSON.stringify({
+      model: model || 'openai/gpt-oss-120b:free',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: params.temperature ?? 0.7,
+      max_tokens: params.max_tokens ?? params.maxOutputTokens ?? 4096
+    }),
+    extractText: (data) => data?.choices?.[0]?.message?.content
+  },
+  anthropic: {
+    buildUrl: (model, apiKey, endpoint) => endpoint || 'https://api.anthropic.com/v1/messages',
+    buildHeaders: (apiKey) => ({
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    }),
+    buildBody: (prompt, params = {}, model) => JSON.stringify({
+      model: model || 'claude-3-5-sonnet-latest',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: params.max_tokens ?? params.maxOutputTokens ?? 4096
+    }),
+    extractText: (data) => data?.content?.[0]?.text
+  }
+};
+
+// ============================================================================
+// Retry Configuration for Transient API Errors
+// ============================================================================
+const RETRY_CONFIG_BG = {
+  maxRetries: 3,
+  baseDelayMs: 1000,
+  maxDelayMs: 8000,
+  retryableStatuses: [429, 500, 502, 503, 504]
+};
+
+/**
+ * Calculate exponential backoff delay with jitter
+ * @param {number} attempt - Current attempt number (0-based)
+ * @returns {number} Delay in milliseconds
+ */
+function calculateRetryDelay(attempt) {
+  const exponentialDelay = RETRY_CONFIG_BG.baseDelayMs * Math.pow(2, attempt);
+  const cappedDelay = Math.min(exponentialDelay, RETRY_CONFIG_BG.maxDelayMs);
+  // Add ±25% jitter to prevent thundering herd
+  const jitter = cappedDelay * (0.75 + Math.random() * 0.5);
+  return Math.round(jitter);
+}
+
+/**
+ * Unified execution runner for LLM requests across all supported providers
+ */
+async function executeLlmRequest(prompt, modelConfig, signal = null) {
+  if (!modelConfig?.apiKey) {
+    return {
+      success: false,
+      error: `No API key configured for ${modelConfig?.name || 'selected model'}. Set it in Extension Options.`
+    };
+  }
+
+  let provider = (modelConfig.provider || 'gemini').toLowerCase();
+  if (provider === 'google') provider = 'gemini';
+
+  const adapter = LLM_TRANSPORTS[provider];
+  if (!adapter) {
+    return { success: false, error: `Unsupported provider: ${provider}` };
+  }
+
+  let apiKey = modelConfig.apiKey;
+  if (isEncrypted(apiKey)) {
+    apiKey = await decryptApiKey(apiKey);
+  }
+
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= RETRY_CONFIG_BG.maxRetries; attempt++) {
+    // Check abort signal before each attempt
+    if (signal?.aborted) {
+      bgLog('info', 'LLM request aborted by user before attempt', { attempt });
+      return { success: false, aborted: true, error: 'Request aborted by user' };
+    }
+
+    try {
+      // Wait before retry (skip on first attempt)
+      if (attempt > 0) {
+        const delay = calculateRetryDelay(attempt - 1);
+        bgLog('info', `LLM retry ${attempt}/${RETRY_CONFIG_BG.maxRetries}`, {
+          provider, delayMs: delay
+        });
+        // Interruptible delay — abort signal can cancel the wait
+        await new Promise((resolve, reject) => {
+          const timer = setTimeout(resolve, delay);
+          if (signal) {
+            signal.addEventListener('abort', () => {
+              clearTimeout(timer);
+              reject(new DOMException('Aborted', 'AbortError'));
+            }, { once: true });
+          }
+        });
+      }
+
+      const model = modelConfig.modelId || modelConfig.model;
+      const url = adapter.buildUrl(model, apiKey, modelConfig.endpoint);
+      const headers = adapter.buildHeaders(apiKey);
+      const body = adapter.buildBody(prompt, modelConfig.parameters || {}, model);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body,
+        signal
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || data?.error) {
+        const rawError = data?.error?.message || data?.error;
+        const errMsg = getUserFriendlyError(response.status, rawError, provider);
+
+        // Retry on transient errors
+        if (RETRY_CONFIG_BG.retryableStatuses.includes(response.status) &&
+            attempt < RETRY_CONFIG_BG.maxRetries) {
+          bgLog('warn', `Transient ${provider} API error (${response.status}), will retry`, {
+            attempt, status: response.status
+          });
+          lastError = { success: false, error: errMsg, status: response.status };
+          continue; // Retry
+        }
+
+        bgLog('error', `${provider} API error`, { status: response.status, error: errMsg, attempt });
+        return { success: false, error: errMsg, status: response.status };
+      }
+
+      const text = adapter.extractText(data);
+      if (!text) {
+        return { success: false, error: `${modelConfig.name || provider} returned empty response. Try again.` };
+      }
+
+      if (attempt > 0) {
+        bgLog('info', `LLM request succeeded after ${attempt} retries`, { provider });
+      }
+      return { success: true, text: text.trim() };
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        bgLog('info', 'LLM request aborted by user');
+        return { success: false, aborted: true, error: 'Request aborted by user' };
+      }
+
+      // Retry on network errors (TypeError from fetch)
+      if (e instanceof TypeError && attempt < RETRY_CONFIG_BG.maxRetries) {
+        bgLog('warn', `Network error on ${provider} API call, will retry`, {
+          attempt, message: e.message
+        });
+        lastError = { success: false, error: e.message };
+        continue;
+      }
+
+      console.error('LLM API call failed', e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  // All retries exhausted
+  bgLog('error', 'All LLM retries exhausted', { provider, maxRetries: RETRY_CONFIG_BG.maxRetries });
+  return lastError || { success: false, error: 'Request failed after multiple retries. Please try again later.' };
+}
 
 /**
  * Call LLM for persona extraction
@@ -1861,136 +2081,11 @@ const MODEL_CONFIGS = {
  * @returns {Promise<{success: boolean, text?: string, error?: string}>}
  */
 async function callLLMForExtraction(prompt, modelConfig, signal = null) {
-  if (!modelConfig?.apiKey) {
-    return { success: false, error: 'No API key configured' };
-  }
-
-  const { provider, model, apiKey } = modelConfig;
-  bgLog('info', 'callLLMForExtraction: Calling LLM', { provider, model });
-
-  try {
-    let response, data;
-
-    // === Provider-specific API calls ===
-    switch (provider) {
-      case 'google':
-      case 'gemini': {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 8192
-            }
-          }),
-          signal
-        });
-        data = await response.json();
-
-        if (!response.ok) {
-          return { success: false, error: data.error?.message || `HTTP ${response.status}` };
-        }
-
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        return { success: true, text };
-      }
-
-      case 'openai': {
-        const endpoint = 'https://api.openai.com/v1/chat/completions';
-        response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-            max_tokens: 8192
-          }),
-          signal
-        });
-        data = await response.json();
-
-        if (!response.ok) {
-          return { success: false, error: data.error?.message || `HTTP ${response.status}` };
-        }
-
-        const text = data.choices?.[0]?.message?.content;
-        return { success: true, text };
-      }
-
-      case 'openrouter': {
-        const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
-        response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': chrome.runtime.getURL(''),
-            'X-Title': 'Gemini Context Extension'
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-            max_tokens: 8192
-          }),
-          signal
-        });
-        data = await response.json();
-
-        if (!response.ok) {
-          const errorMsg = data.error?.message || data.error?.code || `HTTP ${response.status}`;
-          bgLog('error', 'OpenRouter API error', { status: response.status, error: data.error, model });
-          return { success: false, error: `OpenRouter: ${errorMsg}` };
-        }
-
-        const text = data.choices?.[0]?.message?.content;
-        if (!text) {
-          bgLog('warn', 'OpenRouter returned empty response', { data });
-          return { success: false, error: 'OpenRouter returned empty response' };
-        }
-        return { success: true, text };
-      }
-
-      case 'anthropic': {
-        const endpoint = 'https://api.anthropic.com/v1/messages';
-        response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01'
-          },
-          body: JSON.stringify({
-            model: model,
-            max_tokens: 8192,
-            messages: [{ role: 'user', content: prompt }]
-          }),
-          signal
-        });
-        data = await response.json();
-
-        if (!response.ok) {
-          return { success: false, error: data.error?.message || `HTTP ${response.status}` };
-        }
-
-        const text = data.content?.[0]?.text;
-        return { success: true, text };
-      }
-
-      default:
-        return { success: false, error: `Unknown provider: ${provider}` };
-    }
-  } catch (error) {
-    bgLog('error', 'callLLMForExtraction failed', { error: error.message });
-    return { success: false, error: error.message };
-  }
+  bgLog('info', 'callLLMForExtraction: Calling LLM', {
+    provider: modelConfig?.provider,
+    model: modelConfig?.model || modelConfig?.modelId
+  });
+  return await executeLlmRequest(prompt, modelConfig, signal);
 }
 
 // AI Refinement Logic
@@ -2006,154 +2101,169 @@ async function handleRefinement({ text, persona, context, previousPrompts, templ
   }
   const signal = abortController.signal;
 
-  const syncStorage = await chrome.storage.sync.get([
-    'globalPersona', 'selectedTemplate', 'contextVariables'
-  ]);
-
-  // Get model config from model-manager storage pattern
-  // Priority: explicit modelId > pa_active_model > default
-  const localStorage = await chrome.storage.local.get(['pa_models', 'pa_active_model']);
-  const paModels = localStorage.pa_models || {};
-  const activeModelId = localStorage.pa_active_model?.activeModelId;
-
-  const effectiveModelId = modelId || activeModelId || 'gemini-2.0-flash';
-  let modelConfig = paModels[effectiveModelId];
-
-  // Fallback to legacy MODEL_CONFIGS if not in pa_models
-  if (!modelConfig) {
-    modelConfig = MODEL_CONFIGS[effectiveModelId] || MODEL_CONFIGS['gemini-2.0-flash'];
-  }
-
-  bgLog('info', 'Refinement: Using model', {
-    effectiveModelId,
-    hasModelConfig: !!modelConfig,
-    hasApiKey: !!modelConfig?.apiKey,
-    provider: modelConfig?.provider
-  });
-
-  // Get API key from model config
-  let apiKey = modelConfig?.apiKey;
-  if (apiKey && isEncrypted(apiKey)) {
-    apiKey = await decryptApiKey(apiKey);
-  }
-
-  // Get persona: Synthesized Persona is primary, globalPersona is fallback
-  let effectivePersona = 'Helpful Assistant'; // Default fallback
-  let sessionId = null;
-  let memoryData = null;
-
   try {
-    sessionId = await getCurrentTabSessionId();
-    if (sessionId) {
-      memoryData = await getSessionMemory(sessionId);
+    const syncStorage = await chrome.storage.sync.get([
+      'globalPersona', 'selectedTemplate', 'contextVariables'
+    ]);
 
-      // Use pinned persona if available, otherwise use current/synthesized persona
-      const personaComponent = memoryData?.components?.persona_synthesizer;
-      let synthesizedPersona = null;
+    // Get model config from model-manager storage pattern
+    // Priority: explicit modelId > pa_active_model > default
+    const localStorage = await chrome.storage.local.get(['pa_models', 'pa_active_model']);
+    const paModels = localStorage.pa_models || {};
+    const activeModelId = localStorage.pa_active_model?.activeModelId;
 
-      if (personaComponent?.pinned && personaComponent?.pinnedData?.synthesizedPersona) {
-        // Pinned persona takes priority
-        synthesizedPersona = personaComponent.pinnedData.synthesizedPersona;
-        bgLog('debug', 'Refinement: Using pinned persona');
-      } else if (personaComponent?.current?.synthesizedPersona) {
-        // Use current synthesized persona
-        synthesizedPersona = personaComponent.current.synthesizedPersona;
-      }
+    const effectiveModelId = modelId || activeModelId || 'gemini-2.0-flash';
+    let modelConfig = paModels[effectiveModelId];
 
-      if (synthesizedPersona) {
-        effectivePersona = synthesizedPersona;
+    // Fallback to legacy MODEL_CONFIGS if not in pa_models
+    if (!modelConfig) {
+      modelConfig = MODEL_CONFIGS[effectiveModelId] || MODEL_CONFIGS['gemini-2.0-flash'];
+    }
+
+    bgLog('info', 'Refinement: Using model', {
+      effectiveModelId,
+      hasModelConfig: !!modelConfig,
+      hasApiKey: !!modelConfig?.apiKey,
+      provider: modelConfig?.provider
+    });
+
+    // Get persona: Synthesized Persona is primary, globalPersona is fallback
+    let effectivePersona = 'Helpful Assistant'; // Default fallback
+    let sessionId = null;
+    let memoryData = null;
+
+    try {
+      sessionId = await getCurrentTabSessionId(tabId);
+      if (sessionId) {
+        memoryData = await getSessionMemory(sessionId);
+
+        // Use pinned persona if available, otherwise use current/synthesized persona
+        const personaComponent = memoryData?.components?.persona || memoryData?.components?.persona_synthesizer;
+        let synthesizedPersona = null;
+
+        if (personaComponent?.pinned && personaComponent?.pinnedData) {
+          synthesizedPersona = personaComponent.pinnedData.instruction || personaComponent.pinnedData.synthesizedPersona;
+          bgLog('debug', 'Refinement: Using pinned persona');
+        } else if (personaComponent?.current) {
+          synthesizedPersona = personaComponent.current.instruction || personaComponent.current.synthesizedPersona;
+        }
+
+        if (synthesizedPersona) {
+          effectivePersona = synthesizedPersona;
+        } else if (syncStorage.globalPersona) {
+          // Fallback to globalPersona only if no synthesized persona exists
+          effectivePersona = syncStorage.globalPersona;
+        }
       } else if (syncStorage.globalPersona) {
-        // Fallback to globalPersona only if no synthesized persona exists
+        // No session, use globalPersona
         effectivePersona = syncStorage.globalPersona;
       }
-    } else if (syncStorage.globalPersona) {
-      // No session, use globalPersona
-      effectivePersona = syncStorage.globalPersona;
-    }
-  } catch (e) {
-    console.warn('[Refinement] Could not get persona:', e);
-    if (syncStorage.globalPersona) {
-      effectivePersona = syncStorage.globalPersona;
-    }
-  }
-
-  // ========================================================================
-  // Recent Focus Auto-Refresh: Run every N refinements to keep context fresh
-  // ========================================================================
-  refinementCounter++;
-  if (refinementCounter >= RECENT_FOCUS_REFRESH_INTERVAL && sessionId) {
-    bgLog('info', 'Auto-refreshing Recent Focus', { refinementCounter });
-    try {
-      // Request content script to refresh Recent Focus
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id) {
-        await chrome.tabs.sendMessage(tab.id, {
-          type: 'REFRESH_RECENT_FOCUS',
-          sessionId
-        });
-        refinementCounter = 0; // Reset counter
-        bgLog('info', 'Recent Focus refresh requested');
-      }
     } catch (e) {
-      console.warn('[Refinement] Recent Focus auto-refresh failed:', e);
-    }
-  }
-
-  // Replace context variables in the input text
-  let processedText = text;
-  if (syncStorage.contextVariables) {
-    try {
-      const variables = JSON.parse(syncStorage.contextVariables);
-      for (const [key, value] of Object.entries(variables)) {
-        const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-        processedText = processedText.replace(regex, value);
+      console.warn('[Refinement] Could not get persona:', e);
+      if (syncStorage.globalPersona) {
+        effectivePersona = syncStorage.globalPersona;
       }
-    } catch (e) {
-      // Invalid JSON - skip variable replacement
-      console.warn('Invalid context variables JSON:', e);
     }
-  }
 
-  // Build context string from chat history
-  let contextStr = '';
-  if (context && context.length > 0) {
-    contextStr = `\nRECENT CHAT HISTORY:\n${context.map(m => `[${m.role.toUpperCase()}]: ${m.text}`).join('\n')}\n`;
-  }
+    // ========================================================================
+    // Recent Focus Auto-Refresh: Run every N refinements to keep context fresh
+    // ========================================================================
+    refinementCounter++;
+    if (refinementCounter >= RECENT_FOCUS_REFRESH_INTERVAL && sessionId) {
+      bgLog('info', 'Auto-refreshing Recent Focus', { refinementCounter });
+      try {
+        // Request content script to refresh Recent Focus
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab?.id) {
+          await chrome.tabs.sendMessage(tab.id, {
+            type: 'REFRESH_RECENT_FOCUS',
+            sessionId
+          });
+          refinementCounter = 0; // Reset counter
+          bgLog('info', 'Recent Focus refresh requested');
+        }
+      } catch (e) {
+        console.warn('[Refinement] Recent Focus auto-refresh failed:', e);
+      }
+    }
 
-  // Build previous prompts section with ratings
-  let previousPromptsStr = '';
-  if (previousPrompts && previousPrompts.length > 0) {
-    previousPromptsStr = `
+    // Replace context variables in the input text (with regex escaping for safety)
+    let processedText = text;
+    if (syncStorage.contextVariables) {
+      try {
+        const variables = JSON.parse(syncStorage.contextVariables);
+        for (const [key, value] of Object.entries(variables)) {
+          const escapedKey = String(key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`\\{\\{${escapedKey}\\}\\}`, 'g');
+          processedText = processedText.replace(regex, value);
+        }
+      } catch (e) {
+        // Invalid JSON - skip variable replacement
+        console.warn('Invalid context variables JSON:', e);
+      }
+    }
+
+    // Build context string from chat history
+    let contextStr = '';
+    if (context && context.length > 0) {
+      contextStr = `\nRECENT CHAT HISTORY:\n${context.map(m => `[${m.role.toUpperCase()}]: ${m.text}`).join('\n')}\n`;
+    }
+
+    // Build previous prompts section with ratings
+    let previousPromptsStr = '';
+    if (previousPrompts && previousPrompts.length > 0) {
+      previousPromptsStr = `
 PROMPT HISTORY WITH USER SATISFACTION:
 (The rating shows how satisfied the user was with the AI's response to each prompt. High ratings = the response style/approach worked well for this user)
 ${previousPrompts.map((p, i) => {
-      const ratingLabel = p.rating
-        ? `User rated AI response: ★${p.rating}/5`
-        : 'Response not yet rated';
-      return `${i + 1}. "${p.prompt}"
+        const ratingLabel = p.rating
+          ? `User rated AI response: ★${p.rating}/5`
+          : 'Response not yet rated';
+        return `${i + 1}. "${p.prompt}"
    → ${ratingLabel}`;
-    }).join('\n')}
-`
-  }
+      }).join('\n')}
+`;
+    }
 
-  // =========================================================================
-  // BUILD V4 REFINEMENT CONTEXT - All 7 dimensions
-  // =========================================================================
-  const v4Context = memoryData ? buildV4RefinementContext(memoryData) : { formatted: '', dimensions: {} };
+    // Fetch disabled facts for this session
+    let disabledFacts = {};
+    if (sessionId) {
+      const disabledKey = `session_${sessionId}_disabled`;
+      const disabledResult = await chrome.storage.local.get(disabledKey);
+      disabledFacts = disabledResult[disabledKey] || {};
+    }
 
-  // Use persona from V4 context if available, otherwise use the earlier resolved effectivePersona
-  const personaToUse = v4Context.dimensions.persona || effectivePersona;
+    // =========================================================================
+    // BUILD V4 REFINEMENT CONTEXT - All 7 dimensions (respecting disabled state)
+    // =========================================================================
+    const v4Context = memoryData ? buildV4RefinementContext(memoryData, disabledFacts) : { formatted: '', dimensions: {} };
 
-  bgLog('info', 'Refinement: Context assembled', {
-    hasDimensions: v4Context.hasDimensions,
-    dimensionCount: Object.keys(v4Context.dimensions).length,
-    dimensionKeys: Object.keys(v4Context.dimensions)
-  });
+    // Check if persona is explicitly disabled
+    const isPersonaDisabled = disabledFacts['component.persona'] === true || disabledFacts['persona'] === true;
 
-  // =========================================================================
-  // CONSTRUCT THE INDUSTRY-LEVEL REFINEMENT PROMPT
-  // =========================================================================
-  const promptText = `${REFINEMENT_SYSTEM_PROMPT}
+    // Use persona from V4 context if available, otherwise use effectivePersona ONLY if persona is not disabled
+    const personaToUse = isPersonaDisabled ? null : (v4Context.dimensions.persona || effectivePersona);
+
+    // Fallback: If persona is not disabled and V4 context didn't format a persona section, inject effectivePersona if available
+    if (!isPersonaDisabled && !v4Context.dimensions.persona && personaToUse && personaToUse !== 'Helpful Assistant') {
+      v4Context.dimensions.persona = personaToUse;
+      const personaSection = `## 🎭 PERSONA (EMBODY THIS EXPERT)\n${personaToUse}`;
+      v4Context.formatted = v4Context.formatted
+        ? `${personaSection}\n\n${v4Context.formatted}`
+        : personaSection;
+      v4Context.hasDimensions = true;
+    }
+
+    bgLog('info', 'Refinement: Context assembled', {
+      hasDimensions: v4Context.hasDimensions,
+      dimensionCount: Object.keys(v4Context.dimensions).length,
+      dimensionKeys: Object.keys(v4Context.dimensions)
+    });
+
+    // =========================================================================
+    // CONSTRUCT THE INDUSTRY-LEVEL REFINEMENT PROMPT
+    // =========================================================================
+    const promptText = `${REFINEMENT_SYSTEM_PROMPT}
 
 ## EXPERT CONTEXT (Your accumulated knowledge for this session)
 
@@ -2179,136 +2289,20 @@ ${previousPromptsStr || '(No previous prompts with ratings)'}
 
 ## YOUR REFINED PROMPT:`;
 
+    const llmResponse = await executeLlmRequest(promptText, modelConfig, signal);
 
-  let result = "";
-  let errorMessage = null;
-
-  if (apiKey) {
-    try {
-      if (modelConfig.provider === 'google' || modelConfig.provider === 'gemini') {
-        // Gemini API
-        const endpoint = modelConfig.endpoint || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-        const url = `${endpoint}?key=${apiKey}`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }]
-          }),
-          signal
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          errorMessage = getUserFriendlyError(response.status, data.error?.message, modelConfig.provider);
-          bgLog('error', 'Gemini API error', { status: response.status, error: errorMessage });
-        } else {
-          result = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        }
-      } else if (modelConfig.provider === 'openai') {
-        // OpenAI API
-        const endpoint = modelConfig.endpoint || 'https://api.openai.com/v1/chat/completions';
-        const model = modelConfig.modelId || effectiveModelId;
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [{ role: 'user', content: promptText }],
-            temperature: 0.7
-          }),
-          signal
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          errorMessage = getUserFriendlyError(response.status, data.error?.message, modelConfig.provider);
-          bgLog('error', 'OpenAI API error', { status: response.status, error: errorMessage });
-        } else {
-          result = data.choices?.[0]?.message?.content;
-        }
-      } else if (modelConfig.provider === 'openrouter') {
-        // OpenRouter API (OpenAI-compatible)
-        const endpoint = modelConfig.endpoint || 'https://openrouter.ai/api/v1/chat/completions';
-        const model = modelConfig.modelId || 'openai/gpt-oss-120b:free';
-        bgLog('info', 'Refinement: OpenRouter call', { endpoint, model });
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': 'chrome-extension://prompt-assistant',
-            'X-Title': 'Prompt Assistant'
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [{ role: 'user', content: promptText }],
-            temperature: 0.7
-          }),
-          signal
-        });
-        const data = await response.json();
-        bgLog('info', 'Refinement: OpenRouter response', { ok: response.ok, hasChoices: !!data.choices, hasError: !!data.error });
-
-        if (!response.ok || data.error) {
-          // OpenRouter returns error in data.error.message or data.error
-          const rawError = data.error?.message || data.error;
-          errorMessage = getUserFriendlyError(response.status, rawError, modelConfig.provider);
-          bgLog('error', 'OpenRouter API error', { status: response.status, error: errorMessage });
-        } else {
-          result = data.choices?.[0]?.message?.content;
-        }
-      } else if (modelConfig.provider === 'anthropic') {
-        // Anthropic API
-        const endpoint = modelConfig.endpoint || 'https://api.anthropic.com/v1/messages';
-        const model = modelConfig.modelId || 'claude-3-5-sonnet-latest';
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01'
-          },
-          body: JSON.stringify({
-            model: model,
-            max_tokens: 4096,
-            messages: [{ role: 'user', content: promptText }]
-          }),
-          signal
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          errorMessage = getUserFriendlyError(response.status, data.error?.message, modelConfig.provider);
-          bgLog('error', 'Anthropic API error', { status: response.status, error: errorMessage });
-        } else {
-          result = data.content?.[0]?.text;
-        }
-      }
-    } catch (e) {
-      // Check if this was an intentional abort (user clicked Stop)
-      if (e.name === 'AbortError') {
-        bgLog('info', 'Refinement aborted by user');
-        return { refined: null, aborted: true };
-      }
-      console.error("API call failed", e);
-      errorMessage = e.message;
+    if (llmResponse.aborted) {
+      return { refined: null, aborted: true };
     }
-  } else {
-    // No API key configured
-    errorMessage = `No API key configured for ${modelConfig?.name || 'selected model'}. Set it in Extension Options.`;
-  }
 
-  // Return error if present
-  if (errorMessage) {
-    return { refined: null, error: errorMessage };
-  }
+    if (!llmResponse.success) {
+      return { refined: null, error: llmResponse.error };
+    }
 
-  // Fallback if result is empty (shouldn't happen if no error)
-  if (!result) {
-    return { refined: null, error: `${modelConfig?.name || 'API'} returned empty response. Try again.` };
+    return { refined: llmResponse.text.replace(/^"|"$/g, '') };
+  } finally {
+    if (tabId && activeRefinements.get(tabId) === abortController) {
+      activeRefinements.delete(tabId);
+    }
   }
-
-  return { refined: result.trim().replace(/^"|"$/g, '') };
 }

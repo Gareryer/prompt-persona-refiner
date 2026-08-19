@@ -244,6 +244,27 @@ class Logger {
     }
 
     /**
+     * Storage access helpers
+     */
+    async _storageGet(key, area = 'session') {
+        if (this._hasDirectStorage()) {
+            const storageArea = chrome.storage[area] || chrome.storage.local;
+            const res = await storageArea.get(key);
+            return res ? res[key] : null;
+        }
+        return await this._makeBridgeRequest('get', key, null, area);
+    }
+
+    async _storageSet(key, value, area = 'session') {
+        if (this._hasDirectStorage()) {
+            const storageArea = chrome.storage[area] || chrome.storage.local;
+            await storageArea.set({ [key]: value });
+            return;
+        }
+        await this._makeBridgeRequest('set', key, value, area);
+    }
+
+    /**
      * Set minimum log level (persists to storage)
      * @param {string} level - Log level name
      * @param {boolean} persist - Whether to save preference
@@ -253,15 +274,9 @@ class Logger {
             this.level = LOG_LEVELS[level];
             this.info(`Log level set to ${level}`, { component: 'Logger' });
 
-            // Persist preference
-            // Persist preference
             if (persist) {
                 try {
-                    if (this._hasDirectStorage()) {
-                        await chrome.storage.sync.set({ _logLevel: level });
-                    } else {
-                        await this._makeBridgeRequest('set', '_logLevel', level, 'sync');
-                    }
+                    await this._storageSet('_logLevel', level, 'sync');
                 } catch (e) {
                     console.error('Failed to persist log level:', e);
                 }
@@ -274,17 +289,10 @@ class Logger {
      */
     async _restoreLevel() {
         try {
-            let result;
-            if (this._hasDirectStorage()) {
-                result = await chrome.storage.sync.get('_logLevel');
-            } else {
-                const val = await this._makeBridgeRequest('get', '_logLevel', null, 'sync');
-                result = val ? { _logLevel: val } : {};
-            }
-
-            if (result._logLevel && LOG_LEVELS[result._logLevel] !== undefined) {
-                this.level = LOG_LEVELS[result._logLevel];
-                console.log(`[Logger] Restored log level: ${result._logLevel}`);
+            const savedLevel = await this._storageGet('_logLevel', 'sync');
+            if (savedLevel && LOG_LEVELS[savedLevel] !== undefined) {
+                this.level = LOG_LEVELS[savedLevel];
+                console.log(`[Logger] Restored log level: ${savedLevel}`);
             }
         } catch (e) {
             console.error('Failed to restore log level:', e);
@@ -305,17 +313,12 @@ class Logger {
     _log(level, message, data = {}) {
         if (LOG_LEVELS[level] < this.level) return;
 
-        // Extract component, tags, and correlationId from data
-        const component = data.component || 'App';
-        const tags = data.tags || [];
-        const correlationId = data.correlationId || null;
-        delete data.component;
-        delete data.tags;
-        delete data.correlationId;
+        // Extract component, tags, and correlationId without mutating caller object
+        const { component = 'App', tags = [], correlationId = null, ...restData } = data || {};
 
         // Sanitize PII
         const sanitizedMessage = this._sanitize(message);
-        const sanitizedData = this._sanitizeObject(data);
+        const sanitizedData = this._sanitizeObject(restData);
 
         // Create entry with all fields
         const entry = new LogEntry(level, sanitizedMessage, sanitizedData, component, tags, correlationId);
@@ -451,231 +454,7 @@ class Logger {
         });
     }
 
-    // ========================================================================
-    // Structured Action Logging (Enhancement 4)
-    // ========================================================================
 
-    /**
-     * Log a structured action
-     * @param {string} actionType - e.g., 'api_call', 'user_click', 'storage_write'
-     * @param {string} target - Target of the action
-     * @param {'success'|'failure'|'pending'} result - Outcome
-     * @param {Object} data - Additional data
-     */
-    action(actionType, target, result, data = {}) {
-        const level = result === 'failure' ? 'error' : result === 'pending' ? 'debug' : 'info';
-        return this._log(level, `[${actionType}] ${target}: ${result}`, {
-            action: actionType,
-            target,
-            result,
-            ...data
-        });
-    }
-
-    // ========================================================================
-    // Analyzer & Schema Logging (Unified Analyzer Support)
-    // ========================================================================
-
-    /**
-     * Log analyzer component result
-     * @param {string} componentId - e.g., 'topic_summarizer', 'intent_classifier'
-     * @param {'start'|'success'|'failure'|'skipped'} status - Analysis status
-     * @param {Object} data - Additional data (duration, errors, etc.)
-     */
-    analyzer(componentId, status, data = {}) {
-        const statusPrefix = {
-            start: '[->]',
-            success: '[OK]',
-            failure: '[ERR]',
-            skipped: '[SKIP]'
-        }[status] || '[~]';
-
-        const level = status === 'failure' ? 'error' : status === 'skipped' ? 'debug' : 'info';
-        return this._log(level, `${statusPrefix} [Analyzer] ${componentId}: ${status}`, {
-            component: 'UnifiedAnalyzer',
-            analyzerId: componentId,
-            status,
-            ...data
-        });
-    }
-
-    /**
-     * Log schema validation result
-     * @param {string} componentId - Component being validated
-     * @param {boolean} valid - Whether validation passed
-     * @param {string[]} errors - Validation errors if any
-     */
-    schema(componentId, valid, errors = []) {
-        const level = valid ? 'debug' : 'warn';
-        const status = valid ? 'valid' : 'invalid';
-        return this._log(level, `[Schema] ${componentId}: ${status}`, {
-            component: 'ComponentSchemas',
-            analyzerId: componentId,
-            valid,
-            errors: errors.length > 0 ? errors : undefined,
-            errorCount: errors.length
-        });
-    }
-
-    /**
-     * Log LLM API call with schema enforcement status
-     * @param {string} provider - LLM provider (gemini, openai, anthropic, openrouter)
-     * @param {'start'|'success'|'failure'} status - Call status
-     * @param {Object} data - Additional data (duration, schemaEnforced, tokens, etc.)
-     */
-    llmCall(provider, status, data = {}) {
-        const statusPrefix = status === 'success' ? '[OK]' : status === 'failure' ? '[ERR]' : '[->]';
-        const level = status === 'failure' ? 'error' : 'info';
-
-        const schemaStatus = data.schemaEnforced ? '(schema-enforced)' : '(no schema)';
-        return this._log(level, `${statusPrefix} [LLM] ${provider} ${status} ${schemaStatus}`, {
-            component: 'LLMClient',
-            provider,
-            status,
-            schemaEnforced: data.schemaEnforced || false,
-            ...data
-        });
-    }
-
-    // ========================================================================
-    // Comprehensive Activity Logging (Macro-Level Tracking)
-    // ========================================================================
-
-    /**
-     * Log user click/interaction event
-     * @param {string} target - Element or button clicked
-     * @param {string} component - Component where click occurred
-     * @param {Object} data - Additional context (value, state, etc.)
-     */
-    click(target, component, data = {}) {
-        return this._log('DEBUG', `[Click] ${component} -> ${target}`, {
-            component,
-            eventType: 'click',
-            target,
-            ...data
-        });
-    }
-
-    /**
-     * Log storage operation (read/write/delete)
-     * @param {'read'|'write'|'delete'|'clear'} operation - Storage operation type
-     * @param {string} key - Storage key
-     * @param {Object} data - Additional context (size, success, etc.)
-     */
-    storage(operation, key, data = {}) {
-        const opPrefix = {
-            read: '[R]',
-            write: '[W]',
-            delete: '[D]',
-            clear: '[C]'
-        }[operation] || '[~]';
-
-        return this._log('DEBUG', `${opPrefix} [Storage] ${operation}: ${key}`, {
-            component: 'Storage',
-            operation,
-            key,
-            ...data
-        });
-    }
-
-    /**
-     * Log bridge/messaging event
-     * @param {'send'|'receive'|'relay'} direction - Message direction
-     * @param {string} messageType - Message type/action
-     * @param {Object} data - Additional context (source, target, etc.)
-     */
-    bridge(direction, messageType, data = {}) {
-        const dirPrefix = {
-            send: '[OUT]',
-            receive: '[IN]',
-            relay: '[REL]'
-        }[direction] || '[~]';
-
-        return this._log('DEBUG', `${dirPrefix} [Bridge] ${direction}: ${messageType}`, {
-            component: 'Bridge',
-            direction,
-            messageType,
-            ...data
-        });
-    }
-
-    /**
-     * Log lifecycle event (init, destroy, load, unload)
-     * @param {string} component - Component name
-     * @param {'init'|'ready'|'load'|'unload'|'destroy'|'error'} event - Lifecycle event
-    lifecycle(component, event, data = {}) {
-        const evPrefix = {
-            init: '[INIT]',
-            ready: '[RDY]',
-            load: '[LOAD]',
-            unload: '[UNLD]',
-            destroy: '[DSTROY]',
-            error: '[ERR]'
-        }[event] || '[~]';
-
-        const level = event === 'error' ? 'error' : 'info';
-        return this._log(level, `${evPrefix} [Lifecycle] ${component}: ${event}`, {
-            component,
-            lifecycle: event,
-            ...data
-        });
-    }
-
-    /**
-     * Log state change
-     * @param {string} component - Component name
-     * @param {string} stateName - State variable name
-     * @param {*} oldValue - Previous value
-     * @param {*} newValue - New value
-     */
-    state(component, stateName, oldValue, newValue) {
-        return this._log('DEBUG', `[State] ${component}.${stateName} changed`, {
-            component,
-            stateName,
-            oldValue: typeof oldValue === 'object' ? JSON.stringify(oldValue).slice(0, 100) : oldValue,
-            newValue: typeof newValue === 'object' ? JSON.stringify(newValue).slice(0, 100) : newValue
-        });
-    }
-
-    /**
-     * Log DOM mutation/injection
-     * @param {'inject'|'remove'|'update'|'observe'} operation - DOM operation
-     * @param {string} target - Target element/selector
-     * @param {Object} data - Additional context
-     */
-    dom(operation, target, data = {}) {
-        const emoji = {
-            inject: '[INJ]',
-            remove: '[DEL]',
-            update: '[UPD]',
-            observe: '[OBS]'
-        }[operation] || '[~]';
-
-        return this._log('DEBUG', `${emoji} [DOM] ${operation}: ${target}`, {
-            component: 'DOM',
-            operation,
-            target,
-            ...data
-        });
-    }
-
-    /**
-     * Log external API call (non-LLM)
-     * @param {string} endpoint - API endpoint or service name
-     * @param {'start'|'success'|'failure'} status - Call status
-     * @param {Object} data - Additional context (method, statusCode, etc.)
-     */
-    api(endpoint, status, data = {}) {
-        const statusPrefix = status === 'success' ? '[OK]' : status === 'failure' ? '[ERR]' : '[NET]';
-        const level = status === 'failure' ? 'error' : 'debug';
-
-        return this._log(level, `${emoji} [API] ${endpoint}: ${status}`, {
-            component: 'API',
-            endpoint,
-            status,
-            ...data
-        });
-    }
 
     /**
      * Sanitize string for PII
@@ -858,20 +637,14 @@ class Logger {
     async _persist() {
         if (!LOGGER_CONFIG.enablePersistence) return;
 
-        // Check if extension context is still valid
-        if (!chrome.runtime?.id) return;
-
         try {
             const logs = this.buffer.getAll().map(l => l.toJSON());
-            if (this._hasDirectStorage()) {
-                await chrome.storage.session.set({ _logs: logs });
-            } else {
-                await this._makeBridgeRequest('set', '_logs', logs, 'session');
-            }
+            await this._storageSet('_logs', logs, 'session');
         } catch (e) {
             // Silently ignore context invalidation errors
             if (!e.message?.includes('Extension context invalidated') &&
-                !e.message?.includes('not allowed from this context')) {
+                !e.message?.includes('not allowed from this context') &&
+                !e.message?.includes('Extension reloaded')) {
                 console.error('Logger persist failed:', e);
             }
         }
@@ -881,29 +654,20 @@ class Logger {
      * Restore from storage
      */
     async _restore() {
-        // Check if extension context is still valid (prevents errors after reload)
-        if (!chrome.runtime?.id) return;
-
         try {
-            let result;
-            if (this._hasDirectStorage()) {
-                result = await chrome.storage.session.get('_logs');
-            } else {
-                const val = await this._makeBridgeRequest('get', '_logs', null, 'session');
-                result = val ? { _logs: val } : {};
-            }
-
-            if (result._logs && Array.isArray(result._logs)) {
-                for (const logData of result._logs) {
+            const logs = await this._storageGet('_logs', 'session');
+            if (logs && Array.isArray(logs)) {
+                for (const logData of logs) {
                     const entry = Object.assign(new LogEntry('INFO', ''), logData);
                     this.buffer.push(entry);
                 }
-                console.log(`[Logger] Restored ${result._logs.length} logs from session`);
+                console.log(`[Logger] Restored ${logs.length} logs from session`);
             }
         } catch (e) {
             // Silently ignore context invalidation errors (expected after extension reload)
             if (!e.message?.includes('Extension context invalidated') &&
-                !e.message?.includes('not allowed from this context')) {
+                !e.message?.includes('not allowed from this context') &&
+                !e.message?.includes('Extension reloaded')) {
                 console.error('Logger restore failed:', e);
             }
         }

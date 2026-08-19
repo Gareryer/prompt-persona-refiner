@@ -182,8 +182,65 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Trigger wrapper: extracts persona_id from the inserted/updated row
+CREATE OR REPLACE FUNCTION trigger_update_persona_rating()
+RETURNS TRIGGER AS $$
+BEGIN
+    PERFORM update_persona_rating(NEW.persona_id);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Automatically recalculate rating aggregates after any rating change
+DROP TRIGGER IF EXISTS update_persona_rating_trigger ON ratings;
+CREATE TRIGGER update_persona_rating_trigger
+    AFTER INSERT OR UPDATE ON ratings
+    FOR EACH ROW
+    EXECUTE FUNCTION trigger_update_persona_rating();
+
 -- =============================================================================
--- SECTION 5: Enable Anonymous Auth (run in Supabase Dashboard)
+-- SECTION 5: Version History Table
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS version_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    persona_id UUID REFERENCES personas(id) ON DELETE CASCADE,
+    version_number INTEGER NOT NULL,
+    memory_layer JSONB NOT NULL,
+    metadata JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    change_summary TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_version_history_persona_id ON version_history(persona_id);
+CREATE INDEX IF NOT EXISTS idx_version_history_version_number ON version_history(persona_id, version_number);
+
+ALTER TABLE version_history ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public version history is viewable by everyone"
+    ON version_history FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM personas
+            WHERE personas.id = version_history.persona_id
+            AND personas.is_public = true
+        )
+        OR auth.uid() = created_by
+    );
+
+CREATE POLICY "Users can insert version history for their personas"
+    ON version_history FOR INSERT
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM personas
+            WHERE personas.id = version_history.persona_id
+            AND personas.user_id = auth.uid()
+        )
+    );
+
+-- =============================================================================
+-- SECTION 6: Enable Anonymous Auth (run in Supabase Dashboard)
 -- =============================================================================
 -- Go to Authentication > Providers > Anonymous and enable it
 -- This allows users to start using the app without signing up

@@ -949,6 +949,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     await restoreFormStateFromSplitView();
 
 
+    // Connect long-lived port to background service worker for accurate open/close tracking
+    let sidepanelPort = null;
+    try {
+        sidepanelPort = chrome.runtime.connect({ name: 'sidepanel' });
+    } catch (e) {
+        console.warn('[Sidepanel] Failed to connect port to background:', e);
+    }
+
     // Listen for storage changes
     chrome.storage.onChanged.addListener(handleStorageChange);
 
@@ -960,6 +968,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Cleanup on page unload to prevent listener accumulation
     window.addEventListener('beforeunload', () => {
+        // Disconnect port cleanly
+        if (sidepanelPort) {
+            try {
+                sidepanelPort.disconnect();
+            } catch (_) {}
+            sidepanelPort = null;
+        }
+
         // Clear the log refresh interval
         if (logRefreshInterval) {
             clearInterval(logRefreshInterval);
@@ -983,23 +999,63 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function handleTabActivated(activeInfo) {
     const previousSessionId = currentSessionId;
     console.log('[Sidepanel] Tab activated:', activeInfo.tabId, { previousSession: previousSessionId });
-    await loadCurrentSession();
-    console.log('[Sidepanel] Session after tab switch:', {
-        previousSession: previousSessionId,
-        newSession: currentSessionId,
-        sessionChanged: previousSessionId !== currentSessionId
-    });
+    try {
+        const tab = await chrome.tabs.get(activeInfo.tabId);
+        await loadSessionFromTab(tab);
+    } catch (e) {
+        console.warn('[Sidepanel] handleTabActivated get tab fallback:', e);
+        await loadCurrentSession();
+    }
 }
 
 // Tab URL update handler
 async function handleTabUpdated(tabId, changeInfo, tab) {
-    // Only reload if URL changed and it's the active tab
     if (changeInfo.url) {
-        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (activeTab && activeTab.id === tabId) {
-            console.log('[Sidepanel] Active tab URL changed:', changeInfo.url);
-            await loadCurrentSession();
+        try {
+            const currentTab = tab || await chrome.tabs.get(tabId);
+            if (currentTab?.active) {
+                console.log('[Sidepanel] Active tab URL changed:', changeInfo.url);
+                await loadSessionFromTab(currentTab);
+            }
+        } catch (e) {
+            console.warn('[Sidepanel] handleTabUpdated error:', e);
         }
+    }
+}
+
+/**
+ * Load session data directly from a tab object
+ * @param {chrome.tabs.Tab} tab
+ */
+async function loadSessionFromTab(tab) {
+    try {
+        const hasModel = await checkLLMStatus();
+        if (!hasModel) {
+            showNoModelOverlay();
+            return;
+        }
+        hideNoModelOverlay();
+
+        if (!tab?.url?.includes('gemini.google.com')) {
+            currentSessionId = null;
+            document.getElementById('session-id').textContent = 'N/A';
+            showNoSession();
+            return;
+        }
+
+        currentSessionId = extractSessionId(tab.url);
+        if (!currentSessionId) {
+            document.getElementById('session-id').textContent = 'N/A';
+            showNoSession();
+            return;
+        }
+
+        showSession();
+        document.getElementById('session-id').textContent = currentSessionId;
+        await loadMemoryData();
+    } catch (error) {
+        console.error('[Sidepanel] Failed to load session from tab:', error);
+        showNoSession();
     }
 }
 
@@ -1180,20 +1236,22 @@ async function loadMemoryData() {
     });
 
     // Update last updated time
-    if (memoryData?.lastUpdated) {
-        const date = new Date(memoryData.lastUpdated);
-        document.getElementById('last-updated').textContent = `Last updated: ${date.toLocaleString()}`;
+    const lastUpdatedEl = document.getElementById('last-updated');
+    if (lastUpdatedEl) {
+        if (memoryData?.lastUpdated) {
+            const date = new Date(memoryData.lastUpdated);
+            lastUpdatedEl.textContent = `Last updated: ${date.toLocaleString()}`;
+        } else {
+            lastUpdatedEl.textContent = 'No memory data yet';
+        }
     }
 
     // Render components
     console.log('[Sidepanel] loadMemoryData: Rendering components...');
     renderAllComponents();
 
-    // Initialize section badges with generation tracking
-    // This detects STALE sections (component.generation < currentGeneration)
-    if (memoryData) {
-        initializeSectionBadges(memoryData);
-    }
+    // Initialize section badges with generation tracking (or clear them to default)
+    initializeSectionBadges(memoryData);
 
     console.log('[Sidepanel] loadMemoryData: Complete');
 }
@@ -1292,6 +1350,42 @@ async function restoreFormStateFromSplitView() {
 // ============================================================================
 
 /**
+ * Update pin button state for a dimension
+ * @param {string} dimensionId - Dimension ID (context, tone, persona, etc.)
+ * @param {boolean} isPinned - Whether the dimension is pinned
+ */
+function updateDimensionPinButton(dimensionId, isPinned) {
+    const pinBtn = document.getElementById(dimensionId === 'persona' ? 'pin-persona-btn' : `pin-${dimensionId}-btn`);
+    if (pinBtn) {
+        const iconEl = pinBtn.querySelector('.material-symbols-outlined');
+        const label = dimensionId.charAt(0).toUpperCase() + dimensionId.slice(1);
+        if (isPinned) {
+            pinBtn.classList.add('pinned');
+            if (iconEl) iconEl.textContent = 'keep'; // Filled pin icon
+            pinBtn.title = `Unpin ${label} to allow automatic updates`;
+        } else {
+            pinBtn.classList.remove('pinned');
+            if (iconEl) iconEl.textContent = 'push_pin'; // Outline pin icon
+            pinBtn.title = `Pin ${label} to prevent automatic updates`;
+        }
+    }
+
+    // Sync in-section verbatim toggle & badge
+    const verbatimToggle = document.getElementById(dimensionId === 'persona' ? 'verbatim-toggle-persona' : `verbatim-toggle-${dimensionId}`);
+    const verbatimBadge = document.getElementById(dimensionId === 'persona' ? 'verbatim-badge-persona' : `verbatim-badge-${dimensionId}`);
+    if (verbatimToggle) {
+        verbatimToggle.checked = !!isPinned;
+    }
+    if (verbatimBadge) {
+        if (isPinned) {
+            verbatimBadge.classList.remove('hidden');
+        } else {
+            verbatimBadge.classList.add('hidden');
+        }
+    }
+}
+
+/**
  * Render all memory components
  * Always renders editable textareas even when no data exists
  * so users can manually input context on fresh pages
@@ -1304,29 +1398,42 @@ function renderAllComponents() {
     // Always render sections (with empty defaults if no data)
     // ========================================================================
 
-    // Persona dimension - core identity
-    if (components.persona) {
-        renderSynthesizedPersona(components.persona);
-    }
+    // Helper to get active data for a component (respecting pinned state)
+    const getActiveCompData = (comp) => {
+        if (!comp) return { instruction: '' };
+        if (comp.pinned && comp.pinnedData) return comp.pinnedData;
+        return comp.current || { instruction: '' };
+    };
+
+    // Persona dimension - core identity (always call to reset if empty)
+    const personaComp = components.persona || {};
+    updateDimensionPinButton('persona', personaComp.pinned === true);
+    renderSynthesizedPersona(personaComp);
+
+    // Update pin buttons and render the other 6 dimensions
+    const dimensions = ['context', 'tone', 'framework', 'constraints', 'format', 'exemplar'];
+    dimensions.forEach(dim => {
+        const comp = components[dim] || {};
+        updateDimensionPinButton(dim, comp.pinned === true);
+    });
 
     // Context dimension - domain, terminology
-    // Always render with empty object if no data
-    renderContext(components.context?.current || { instruction: '' });
+    renderContext(getActiveCompData(components.context));
 
     // Tone dimension - voice, style, verbosity
-    renderTone(components.tone?.current || { instruction: '' });
+    renderTone(getActiveCompData(components.tone));
 
     // Framework dimension - methodology, workflow
-    renderFramework(components.framework?.current || { instruction: '' });
+    renderFramework(getActiveCompData(components.framework));
 
     // Constraints dimension - rules, prohibitions
-    renderConstraints(components.constraints?.current || { instruction: '' });
+    renderConstraints(getActiveCompData(components.constraints));
 
     // Format dimension - output structure 
-    renderFormat(components.format?.current || { instruction: '' });
+    renderFormat(getActiveCompData(components.format));
 
     // Exemplar dimension - examples, edge cases
-    renderExemplar(components.exemplar?.current || { instruction: '' });
+    renderExemplar(getActiveCompData(components.exemplar));
 
     // Injected Context - prefer custom_context from extraction, fallback to user_injected_context
     const injectedContextInput = document.getElementById('injected-context-input');
@@ -1399,6 +1506,8 @@ function renderAllComponents() {
             injectedContextInput.value = lines.join('\n').trim();
         } else if (components.user_injected_context?.current) {
             injectedContextInput.value = components.user_injected_context.current.text || '';
+        } else {
+            injectedContextInput.value = '';
         }
     }
 
@@ -1817,17 +1926,138 @@ function renderV4Section(config) {
         }
     });
 
-    // Data update on input (no height manipulation - CSS handles sizing)
-    textarea.addEventListener('input', () => {
+    // === VERBATIM CONTROLS (Bottom-Right of Textarea) ===
+    const compState = memoryData?.components?.[dimensionId];
+    const isPinned = compState?.pinned === true;
+
+    const verbatimWrapper = document.createElement('div');
+    verbatimWrapper.className = 'verbatim-controls';
+
+    const verbatimBadge = document.createElement('span');
+    verbatimBadge.className = 'badge verbatim';
+    verbatimBadge.id = `verbatim-badge-${dimensionId}`;
+    verbatimBadge.textContent = 'VERBATIM';
+    if (!isPinned) verbatimBadge.classList.add('hidden');
+
+    const toggleLabel = document.createElement('label');
+    toggleLabel.className = 'toggle-switch verbatim-switch';
+
+    const toggleInput = document.createElement('input');
+    toggleInput.type = 'checkbox';
+    toggleInput.id = `verbatim-toggle-${dimensionId}`;
+    toggleInput.dataset.verbatim = dimensionId;
+    toggleInput.checked = !!isPinned;
+
+    const toggleSlider = document.createElement('span');
+    toggleSlider.className = 'toggle-slider';
+
+    toggleLabel.appendChild(toggleInput);
+    toggleLabel.appendChild(toggleSlider);
+
+    verbatimWrapper.appendChild(verbatimBadge);
+    verbatimWrapper.appendChild(toggleLabel);
+
+    // Event: manual toggle of in-section verbatim switch
+    toggleInput.addEventListener('change', async (e) => {
+        const shouldPin = e.target.checked;
+        const label = dimensionId.charAt(0).toUpperCase() + dimensionId.slice(1);
+        if (shouldPin) {
+            verbatimBadge.classList.remove('hidden');
+            updateDimensionPinButton(dimensionId, true);
+            if (currentSessionId) {
+                try {
+                    await chrome.runtime.sendMessage({
+                        type: 'PIN_COMPONENT',
+                        sessionId: currentSessionId,
+                        componentId: dimensionId
+                    });
+                    if (memoryData?.components?.[dimensionId]) {
+                        memoryData.components[dimensionId].pinned = true;
+                        memoryData.components[dimensionId].pinnedData = { ...(memoryData.components[dimensionId].current || data) };
+                        const storageKey = `session_${currentSessionId}`;
+                        await chrome.storage.local.set({ [storageKey]: memoryData });
+                    }
+                    showNotification(`${label} locked as verbatim`);
+                } catch (err) {
+                    console.error('[Sidepanel] Failed to pin component:', err);
+                }
+            }
+        } else {
+            verbatimBadge.classList.add('hidden');
+            updateDimensionPinButton(dimensionId, false);
+            if (currentSessionId) {
+                try {
+                    await chrome.runtime.sendMessage({
+                        type: 'UNPIN_COMPONENT',
+                        sessionId: currentSessionId,
+                        componentId: dimensionId
+                    });
+                    if (memoryData?.components?.[dimensionId]) {
+                        memoryData.components[dimensionId].pinned = false;
+                        delete memoryData.components[dimensionId].pinnedData;
+                        const storageKey = `session_${currentSessionId}`;
+                        await chrome.storage.local.set({ [storageKey]: memoryData });
+                    }
+                    showNotification(`${label} unlocked from verbatim`);
+                } catch (err) {
+                    console.error('[Sidepanel] Failed to unpin component:', err);
+                }
+            }
+        }
+    });
+
+    // Data update on input (debounced storage save + immediate in-memory update)
+    let autoSaveTimeout = null;
+    const triggerUpdate = () => {
         if (onUpdate) {
             const newData = { ...data, instruction: textarea.value };
             onUpdate(newData);
         }
+    };
+
+    textarea.addEventListener('input', () => {
+        // Auto-activate verbatim on edit
+        if (!toggleInput.checked) {
+            toggleInput.checked = true;
+            verbatimBadge.classList.remove('hidden');
+            updateDimensionPinButton(dimensionId, true);
+            if (currentSessionId) {
+                chrome.runtime.sendMessage({
+                    type: 'PIN_COMPONENT',
+                    sessionId: currentSessionId,
+                    componentId: dimensionId
+                }).catch(err => console.error('[Sidepanel] Auto-pin failed:', err));
+            }
+        }
+
+        // Update in-memory data immediately
+        if (memoryData?.components?.[dimensionId]) {
+            const comp = memoryData.components[dimensionId];
+            if (comp.pinned) {
+                if (!comp.pinnedData) comp.pinnedData = {};
+                comp.pinnedData.instruction = textarea.value;
+            }
+            if (!comp.current) comp.current = {};
+            comp.current.instruction = textarea.value;
+        }
+
+        // Debounce storage persistence by 500ms
+        if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            triggerUpdate();
+        }, 500);
+    });
+
+    // Immediate flush on blur
+    textarea.addEventListener('blur', () => {
+        if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+        triggerUpdate();
     });
 
     textareaWrapper.appendChild(textarea);
     textareaWrapper.appendChild(expandBtn);
     container.appendChild(textareaWrapper);
+    container.appendChild(verbatimWrapper);
 
     // === METADATA: Chips based on dimension type ===
     const metadata = data?.metadata || {};
@@ -2178,10 +2408,8 @@ function createTextInput(config) {
  */
 function renderSynthesizedPersona(component) {
     const textarea = document.getElementById('synthesized-persona-input');
-    const metadataContainer = document.getElementById('synthesis-metadata');
     const insightsContainer = document.getElementById('key-insights');
     const pinBtn = document.getElementById('pin-persona-btn');
-    const modeBadge = document.getElementById('persona-mode-badge');
     const personaNameEl = document.getElementById('active-persona-name');
 
     // Use pinned data if pinned, otherwise use current
@@ -2261,26 +2489,9 @@ function renderSynthesizedPersona(component) {
             personaText = parts.join('\n');
         }
 
-        textarea.value = personaText;
-        // Remove readonly if there's content (allow editing)
-        if (personaText) {
-            textarea.removeAttribute('readonly');
+        if (textarea) {
+            textarea.value = personaText;
         }
-    }
-
-    const hasPersonaData = data.synthesizedPersona || data.role || data.purpose;
-    if (metadataContainer && hasPersonaData) {
-        // Show metadata
-        metadataContainer.classList.remove('hidden');
-
-        // Update metadata values - support both v3 and legacy fields
-        const roleEl = document.getElementById('persona-role');
-        const purposeEl = document.getElementById('persona-purpose');
-        const expertiseEl = document.getElementById('expertise-level');
-
-        if (roleEl) roleEl.textContent = data.role || data.primaryDomain || '-';
-        if (purposeEl) purposeEl.textContent = data.purpose || '-';
-        if (expertiseEl) expertiseEl.textContent = data.credentials?.years_experience || data.expertiseLevel || '-';
     }
 
     // Render key insights if available (used in refinement)
@@ -2317,6 +2528,9 @@ function renderContext(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.context) {
+                    if (memoryData.components.context.pinned) {
+                        memoryData.components.context.pinnedData = newData;
+                    }
                     memoryData.components.context.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2337,6 +2551,9 @@ function renderContext(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.context) {
+                    if (memoryData.components.context.pinned) {
+                        memoryData.components.context.pinnedData = newData;
+                    }
                     memoryData.components.context.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2377,6 +2594,9 @@ function renderTone(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.tone) {
+                    if (memoryData.components.tone.pinned) {
+                        memoryData.components.tone.pinnedData = newData;
+                    }
                     memoryData.components.tone.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2397,6 +2617,9 @@ function renderTone(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.tone) {
+                    if (memoryData.components.tone.pinned) {
+                        memoryData.components.tone.pinnedData = newData;
+                    }
                     memoryData.components.tone.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2432,6 +2655,9 @@ function renderFramework(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.framework) {
+                    if (memoryData.components.framework.pinned) {
+                        memoryData.components.framework.pinnedData = newData;
+                    }
                     memoryData.components.framework.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2452,6 +2678,9 @@ function renderFramework(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.framework) {
+                    if (memoryData.components.framework.pinned) {
+                        memoryData.components.framework.pinnedData = newData;
+                    }
                     memoryData.components.framework.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2482,6 +2711,9 @@ function renderConstraints(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.constraints) {
+                    if (memoryData.components.constraints.pinned) {
+                        memoryData.components.constraints.pinnedData = newData;
+                    }
                     memoryData.components.constraints.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2502,6 +2734,9 @@ function renderConstraints(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.constraints) {
+                    if (memoryData.components.constraints.pinned) {
+                        memoryData.components.constraints.pinnedData = newData;
+                    }
                     memoryData.components.constraints.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2532,6 +2767,9 @@ function renderFormat(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.format) {
+                    if (memoryData.components.format.pinned) {
+                        memoryData.components.format.pinnedData = newData;
+                    }
                     memoryData.components.format.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2552,6 +2790,9 @@ function renderFormat(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.format) {
+                    if (memoryData.components.format.pinned) {
+                        memoryData.components.format.pinnedData = newData;
+                    }
                     memoryData.components.format.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2582,6 +2823,9 @@ function renderExemplar(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.exemplar) {
+                    if (memoryData.components.exemplar.pinned) {
+                        memoryData.components.exemplar.pinnedData = newData;
+                    }
                     memoryData.components.exemplar.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2602,6 +2846,9 @@ function renderExemplar(data) {
             isEditable: true,
             onUpdate: async (newData) => {
                 if (currentSessionId && memoryData?.components?.exemplar) {
+                    if (memoryData.components.exemplar.pinned) {
+                        memoryData.components.exemplar.pinnedData = newData;
+                    }
                     memoryData.components.exemplar.current = newData;
                     const storageKey = `session_${currentSessionId}`;
                     await chrome.storage.local.set({ [storageKey]: memoryData });
@@ -2647,7 +2894,7 @@ async function handleFactToggle(event) {
     }
 
     // Save to storage
-    const storageKey = `session_${currentSessionId} _disabled`;
+    const storageKey = `session_${currentSessionId}_disabled`;
     await chrome.storage.local.set({ [storageKey]: disabledFacts });
 
     console.log(`[Sidepanel] Toggled ${path}: ${input.checked ? 'enabled' : 'disabled'} `);
@@ -2669,7 +2916,7 @@ function updateToggleStates() {
     document.querySelectorAll('.toggle-switch input').forEach(input => {
         const component = input.dataset.component;
         if (component) {
-            input.checked = !isFactDisabled(`component.${component} `);
+            input.checked = !isFactDisabled(`component.${component}`);
         }
     });
 }
@@ -2697,8 +2944,13 @@ function setupAccordions() {
     // Set up click handlers for accordion toggle
     document.querySelectorAll('.accordion-header').forEach(header => {
         header.addEventListener('click', (e) => {
-            // Don't toggle if clicking on the switch
-            if (e.target.closest('.toggle-switch')) return;
+            // Don't toggle if clicking on the switch, pin toggle, or badge
+            if (e.target.closest('.toggle-switch') || e.target.closest('.pin-toggle') || e.target.closest('.badge')) return;
+
+            // Before toggling or collapsing, trigger blur on any focused textarea/input to guarantee immediate save
+            if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) {
+                document.activeElement.blur();
+            }
 
             const accordion = header.closest('.accordion');
             const content = accordion.querySelector('.accordion-content');
@@ -2722,7 +2974,7 @@ function setupAccordions() {
         input.addEventListener('change', async (e) => {
             e.stopPropagation();
             const component = input.dataset.component;
-            await handleFactToggle({ target: input, closest: () => ({ dataset: { path: `component.${component} ` } }) });
+            await handleFactToggle({ target: input, closest: () => ({ dataset: { path: `component.${component}` } }) });
         });
     });
 }
@@ -2849,41 +3101,50 @@ function setupButtonHandlers() {
         await rebuildMemory();
     });
 
-    // PIN Persona Toggle
-    document.getElementById('pin-persona-btn')?.addEventListener('click', async (event) => {
-        event.stopPropagation(); // Prevent accordion toggle
+    // PIN Toggle for all 7 dimensions (Persona + 6 dimensions)
+    document.querySelectorAll('.pin-toggle').forEach(pinBtn => {
+        pinBtn.addEventListener('click', async (event) => {
+            event.stopPropagation(); // Prevent accordion toggle
 
-        if (!currentSessionId) {
-            showNotification('No session active', 'error');
-            return;
-        }
-
-        const pinBtn = event.currentTarget;
-        const isPinned = pinBtn.classList.contains('pinned');
-
-        try {
-            if (isPinned) {
-                // Unpin
-                await chrome.runtime.sendMessage({
-                    type: 'UNPIN_PERSONA',
-                    sessionId: currentSessionId
-                });
-                showNotification('Persona unpinned - will update automatically');
-            } else {
-                // Pin current persona
-                await chrome.runtime.sendMessage({
-                    type: 'PIN_PERSONA',
-                    sessionId: currentSessionId
-                });
-                showNotification('Persona pinned - protected from updates');
+            if (!currentSessionId) {
+                showNotification('No session active', 'error');
+                return;
             }
 
-            // Reload to show updated state
-            await loadMemoryData();
-        } catch (e) {
-            console.error('[Sidepanel] Failed to toggle pin:', e);
-            showNotification('Failed to toggle pin state', 'error');
-        }
+            const componentId = pinBtn.dataset.component || (pinBtn.id === 'pin-persona-btn' ? 'persona' : null);
+            if (!componentId) return;
+
+            const isPinned = pinBtn.classList.contains('pinned');
+            const label = componentId.charAt(0).toUpperCase() + componentId.slice(1);
+
+            try {
+                if (isPinned) {
+                    // Unpin
+                    const msgType = componentId === 'persona' ? 'UNPIN_PERSONA' : 'UNPIN_COMPONENT';
+                    await chrome.runtime.sendMessage({
+                        type: msgType,
+                        sessionId: currentSessionId,
+                        componentId
+                    });
+                    showNotification(`${label} unpinned - will update automatically`);
+                } else {
+                    // Pin current component
+                    const msgType = componentId === 'persona' ? 'PIN_PERSONA' : 'PIN_COMPONENT';
+                    await chrome.runtime.sendMessage({
+                        type: msgType,
+                        sessionId: currentSessionId,
+                        componentId
+                    });
+                    showNotification(`${label} pinned - protected from updates`);
+                }
+
+                // Reload to show updated state
+                await loadMemoryData();
+            } catch (e) {
+                console.error(`[Sidepanel] Failed to toggle pin for ${componentId}:`, e);
+                showNotification('Failed to toggle pin state', 'error');
+            }
+        });
     });
 }
 
@@ -2940,11 +3201,6 @@ async function rebuildMemory() {
                 }
             }
         });
-
-        // Always include persona dimension (core requirement)
-        if (!enabledAnalyzers.includes('persona')) {
-            enabledAnalyzers.push('persona');
-        }
 
         spLog('info', '[rebuildMemory] START', {
             enabledAnalyzers,
@@ -3046,7 +3302,13 @@ function handleStorageChange(changes, areaName) {
     const sessionKey = `session_${currentSessionId}`;
     if (changes[sessionKey]) {
         memoryData = changes[sessionKey].newValue;
-        renderAllComponents();
+
+        // CRITICAL GUARD: Do not destructively re-render if user is currently typing/focused on a textarea or input
+        const activeEl = document.activeElement;
+        const isUserEditing = activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT');
+        if (!isUserEditing) {
+            renderAllComponents();
+        }
     }
 
     // Check for model config changes and update LLM status
@@ -3830,52 +4092,21 @@ function updateSectionBadge(sectionId, options = {}) {
         state.isPinned = options.isPinned;
     }
 
-    // Get textarea for readonly state
-    const textarea = document.getElementById(`v4-${sectionId}-textarea`);
+    // Determine badge state for the ACCORDION HEADER
+    badge.classList.remove('stale', 'hidden');
 
-    // Determine badge state - PRIORITY ORDER
-    badge.classList.remove('verbatim', 'stale', 'hidden');
-
-    if (state.isPinned) {
-        // === PINNED = VERBATIM (protected from rebuild) ===
-        // Show pin icon + text, clickable to unpin
-        badge.innerHTML = `<span class="material-symbols-outlined badge-pin-icon">keep</span>VERBATIM`;
-        badge.classList.add('verbatim');
-        badge.title = 'Click to unpin and allow Rebuild Memory to update this section';
-        badge.style.cursor = 'pointer';
-        badge.dataset.sectionId = sectionId;
-
-        // Make textarea readonly when pinned
-        if (textarea) {
-            textarea.readOnly = true;
-            textarea.classList.add('pinned-readonly');
-        }
-    } else if (state.isStale) {
+    if (!state.isPinned && state.isStale) {
         // === STALE = Not updated in last rebuild ===
         badge.innerHTML = 'STALE';
         badge.classList.add('stale');
         badge.title = 'This section was not included in the last Rebuild Memory';
         badge.style.cursor = 'default';
-        delete badge.dataset.sectionId;
-
-        // Remove readonly when unpinned
-        if (textarea) {
-            textarea.readOnly = false;
-            textarea.classList.remove('pinned-readonly');
-        }
     } else {
-        // === Current, not pinned = hide badge ===
+        // === Current or Pinned = hide header badge (Verbatim status is shown inside the section) ===
         badge.classList.add('hidden');
         badge.innerHTML = '';
         badge.title = '';
         badge.style.cursor = 'default';
-        delete badge.dataset.sectionId;
-
-        // Remove readonly when unpinned
-        if (textarea) {
-            textarea.readOnly = false;
-            textarea.classList.remove('pinned-readonly');
-        }
     }
 }
 
@@ -3952,52 +4183,11 @@ function setupBadgeListeners() {
             });
         }
 
-        // Listen for toggle changes
+        // Listen for toggle changes on Edit Persona page
         const toggle = document.querySelector(`input[data-component="ext_${sectionId}"]`);
         if (toggle) {
             toggle.addEventListener('change', (e) => {
                 updateSectionBadge(sectionId, { isEnabled: e.target.checked });
-            });
-        }
-
-        // === VERBATIM BADGE CLICK HANDLER ===
-        // Clicking VERBATIM badge unpins the section
-        const badge = document.getElementById(`badge-${sectionId}`);
-        if (badge) {
-            badge.addEventListener('click', async (e) => {
-                const clickedSectionId = badge.dataset.sectionId;
-                if (!clickedSectionId) return; // Not a clickable badge
-
-                const state = _sectionBadgeState[clickedSectionId];
-                if (!state?.isPinned) return; // Not pinned
-
-                spLog('info', `Unpinning section: ${clickedSectionId}`);
-
-                // Send unpin request to background
-                try {
-                    await chrome.runtime.sendMessage({
-                        type: 'UNPIN_COMPONENT',
-                        sessionId: currentSessionId,
-                        componentId: clickedSectionId
-                    });
-
-                    // Update local state
-                    state.isPinned = false;
-
-                    // Refresh badge (will now show STALE if generation is lower)
-                    const currentGen = memoryData?.currentGeneration || 0;
-                    const componentGen = state.generation || 0;
-                    state.isStale = componentGen < currentGen;
-
-                    updateSectionBadge(clickedSectionId, {
-                        isPinned: false,
-                        isStale: state.isStale
-                    });
-
-                    spLog('info', `Section ${clickedSectionId} unpinned successfully`);
-                } catch (error) {
-                    spLog('error', `Failed to unpin section: ${clickedSectionId}`, { error: error.message });
-                }
             });
         }
     });
@@ -5214,7 +5404,8 @@ async function handlePublishPersona() {
         }
 
         // Check visibility setting
-        const isPublic = document.getElementById('ext-visibility-public')?.classList.contains('selected') || false;
+        const publicBtn = document.getElementById('ext-visibility-public');
+        const isPublic = Boolean(publicBtn?.classList.contains('active') || publicBtn?.classList.contains('selected'));
 
         // Read synthesized persona from textarea
         const synthesizedPersona = document.getElementById('ext-synthesized-persona')?.value?.trim() ||
@@ -7533,60 +7724,75 @@ async function renderLogsPage() {
 }
 
 function setupSynthesizedPersonaSave() {
-    const saveBtn = document.getElementById('save-synthesized-persona');
     const textarea = document.getElementById('synthesized-persona-input');
+    const verbatimToggle = document.getElementById('verbatim-toggle-persona');
+    const verbatimBadge = document.getElementById('verbatim-badge-persona');
 
-    if (!saveBtn || !textarea) return;
+    if (!textarea) return;
 
-    // Auto-save on input (debounced) - same pattern as other sections
+    // In-section Verbatim toggle for Persona
+    if (verbatimToggle) {
+        verbatimToggle.addEventListener('change', async (e) => {
+            const shouldPin = e.target.checked;
+            if (shouldPin) {
+                if (verbatimBadge) verbatimBadge.classList.remove('hidden');
+                updateDimensionPinButton('persona', true);
+                if (currentSessionId) {
+                    try {
+                        await chrome.runtime.sendMessage({
+                            type: 'PIN_PERSONA',
+                            sessionId: currentSessionId
+                        });
+                        showNotification('Persona locked as verbatim');
+                    } catch (err) {
+                        console.error('[Sidepanel] Failed to pin persona:', err);
+                    }
+                }
+            } else {
+                if (verbatimBadge) verbatimBadge.classList.add('hidden');
+                updateDimensionPinButton('persona', false);
+                if (currentSessionId) {
+                    try {
+                        await chrome.runtime.sendMessage({
+                            type: 'UNPIN_PERSONA',
+                            sessionId: currentSessionId
+                        });
+                        showNotification('Persona unlocked from verbatim');
+                    } catch (err) {
+                        console.error('[Sidepanel] Failed to unpin persona:', err);
+                    }
+                }
+            }
+        });
+    }
+
+    // Auto-save on input (debounced) and immediate save on blur
     let autoSaveTimeout = null;
     textarea.addEventListener('input', () => {
-        // Debounce auto-save by 1 second
+        // Auto-activate verbatim on edit
+        if (verbatimToggle && !verbatimToggle.checked) {
+            verbatimToggle.checked = true;
+            if (verbatimBadge) verbatimBadge.classList.remove('hidden');
+            updateDimensionPinButton('persona', true);
+            if (currentSessionId) {
+                chrome.runtime.sendMessage({
+                    type: 'PIN_PERSONA',
+                    sessionId: currentSessionId
+                }).catch(err => console.error('[Sidepanel] Auto-pin persona failed:', err));
+            }
+        }
+
+        // Debounce auto-save by 500ms
         if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
         autoSaveTimeout = setTimeout(async () => {
             await savePersonaToStorage(textarea.value, false); // Silent save
-        }, 1000);
+        }, 500);
     });
 
-    // Manual Save button with visual feedback
-    saveBtn.addEventListener('click', async () => {
-        if (!currentSessionId) return;
-
-        // Clear any pending auto-save
+    // Immediate save on blur (when user clicks away / closes)
+    textarea.addEventListener('blur', async () => {
         if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
-
-        // Add loading state
-        saveBtn.disabled = true;
-        saveBtn.classList.add('loading');
-        const originalText = saveBtn.textContent;
-        saveBtn.textContent = 'Saving...';
-
-        try {
-            await savePersonaToStorage(textarea.value, true); // Show notification
-
-            // Success feedback
-            saveBtn.textContent = 'Saved!';
-            saveBtn.classList.remove('loading');
-            saveBtn.classList.add('success');
-
-            // Reset after 2 seconds
-            setTimeout(() => {
-                saveBtn.textContent = originalText;
-                saveBtn.classList.remove('success');
-                saveBtn.disabled = false;
-            }, 2000);
-        } catch (e) {
-            saveBtn.textContent = 'Error';
-            saveBtn.classList.remove('loading');
-            saveBtn.classList.add('error');
-            showNotification('Failed to save persona', 'error');
-
-            setTimeout(() => {
-                saveBtn.textContent = originalText;
-                saveBtn.classList.remove('error');
-                saveBtn.disabled = false;
-            }, 2000);
-        }
+        await savePersonaToStorage(textarea.value, false);
     });
 }
 

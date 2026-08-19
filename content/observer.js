@@ -597,6 +597,11 @@ function createReviewModal() {
   const emptyStateEl = overlay.querySelector('#empty-state-guidance');
   const btnConfigureApi = overlay.querySelector('#btn-configure-api');
 
+  // Error banner elements
+  const errorBanner = overlay.querySelector('#refinement-error-banner');
+  const errorBannerMessage = overlay.querySelector('#error-banner-message');
+  const btnErrorRetry = overlay.querySelector('#btn-error-retry');
+
   // Feedback element for typing effect messages
   const feedbackEl = overlay.querySelector('#refinement-feedback');
 
@@ -1086,6 +1091,11 @@ function createReviewModal() {
       state.lastRefinementPayload = null;
       state.isAborted = false;
 
+      // Dismiss error banner on successful result
+      if (errorBanner) {
+        errorBanner.style.display = 'none';
+      }
+
       // UPDATE the current pair with the refined result (don't push a new one)
       // The pair was already created by openWithLoading with refined: null
       if (state.pairs[state.pairIndex]) {
@@ -1124,6 +1134,11 @@ function createReviewModal() {
     openWithLoading: async (originalText) => {
       // Reset abort state for new refinement
       state.isAborted = false;
+
+      // Dismiss any previous error banner
+      if (errorBanner) {
+        errorBanner.style.display = 'none';
+      }
 
       // Clear feedback element
       if (feedbackEl) {
@@ -1175,18 +1190,24 @@ function createReviewModal() {
       // Clean up abort controller
       state.currentAbortController = null;
 
-      const roughText = state.pairs[state.pairIndex]?.rough || '';
-
-      // Show error with retry option
-      if (canRetry && state.lastRefinementPayload) {
-        refinedTextarea.value = `Error: ${errorMessage}\n\nTip: Click "Refine" to try again, or edit your prompt and retry.`;
-      } else {
-        refinedTextarea.value = `Error: ${errorMessage}\n\nOriginal prompt:\n${roughText}`;
+      // Show error in dedicated banner (never corrupt textarea)
+      if (errorBanner && errorBannerMessage) {
+        errorBannerMessage.textContent = errorMessage;
+        errorBanner.style.display = 'flex';
       }
 
-      btnSendFinal.disabled = false;
+      // Keep textarea content intact — don't overwrite with error text
+      // Restore the original prompt text if the refined textarea is empty
+      const roughText = state.pairs[state.pairIndex]?.rough || '';
+      if (!refinedTextarea.value.trim()) {
+        refinedTextarea.value = '';
+        refinedTextarea.placeholder = 'Refinement failed — click Retry or Refine to try again.';
+      }
+
+      // Disable Send (no valid refined prompt to send), enable Refine for retry
+      btnSendFinal.disabled = true;
       btnReRefine.disabled = false;
-      switchTab('refined'); // Show refined tab with error message
+      switchTab('refined'); // Show refined tab
     },
 
     close: () => overlay.classList.remove('open'),
@@ -1207,6 +1228,23 @@ function createReviewModal() {
 
     onSend: null,
   };
+
+  // Helper: Dismiss error banner
+  const dismissErrorBanner = () => {
+    if (errorBanner) {
+      errorBanner.style.display = 'none';
+    }
+  };
+
+  // Error banner retry button handler
+  if (btnErrorRetry) {
+    btnErrorRetry.onclick = () => {
+      obsLog('info', 'Error banner retry clicked');
+      dismissErrorBanner();
+      // Trigger re-refinement using the original prompt text
+      btnReRefine.click();
+    };
+  }
 
   // Event Handlers
   btnClose.onclick = () => {
@@ -1330,6 +1368,9 @@ function createReviewModal() {
   // Re-Refine: Refine the current text again (tab-aware)
   // This creates a NEW pair in history, preserving navigation
   btnReRefine.onclick = async () => {
+    // Dismiss error banner when starting new refinement
+    dismissErrorBanner();
+
     // Get text from current tab: Raw Prompt or Refined Prompt (not Differences)
     let currentContent;
     const wasOnRefinedTab = state.activeTab === 'refined';
@@ -1337,8 +1378,11 @@ function createReviewModal() {
     if (state.activeTab === 'original') {
       currentContent = originalTextarea.value;
     } else {
-      // Both 'refined' and 'diff' tabs use refinedTextarea
-      currentContent = refinedTextarea.value;
+      // Use refined textarea content, but fall back to the original prompt
+      // if the refined textarea is empty (e.g., after an error)
+      currentContent = refinedTextarea.value.trim()
+        ? refinedTextarea.value
+        : (state.pairs[state.pairIndex]?.rough || originalTextarea.value);
     }
 
     if (!currentContent.trim()) return;

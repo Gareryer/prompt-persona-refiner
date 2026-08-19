@@ -616,23 +616,22 @@ let _currentRatingManager = null;
  * }
  */
 function getCurrentRatingManager() {
-    // Return cached instance if available
-    if (_currentRatingManager) {
-        return _currentRatingManager;
-    }
-
     // Extract session ID from current URL
     const sessionId = RatingManager.extractSessionId(window.location.href);
 
-    if (sessionId) {
-        _currentRatingManager = new RatingManager(sessionId);
-        ratingLog('info', `Created RatingManager for current session: ${sessionId}`);
+    if (!sessionId) {
+        ratingLog('warn', 'Cannot create RatingManager - no session ID in URL');
+        return null;
+    }
+
+    // Return cached instance if it matches current session
+    if (_currentRatingManager && _currentRatingManager.sessionId === sessionId) {
         return _currentRatingManager;
     }
 
-    // Not on a valid session page
-    ratingLog('warn', 'Cannot create RatingManager - no session ID in URL');
-    return null;
+    _currentRatingManager = new RatingManager(sessionId);
+    ratingLog('info', `Created RatingManager for session: ${sessionId}`);
+    return _currentRatingManager;
 }
 
 // ============================================================================

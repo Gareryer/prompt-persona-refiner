@@ -352,13 +352,14 @@ class PersonaExtractor {
      * @returns {ExtractionResult|null}
      */
     parseExtractionResponse(text) {
+        if (!text || typeof text !== 'string') return null;
+
         try {
             // Clean up response - remove markdown code blocks if present
             let cleaned = text.trim();
             if (cleaned.startsWith('```json')) {
                 cleaned = cleaned.slice(7);
-            }
-            if (cleaned.startsWith('```')) {
+            } else if (cleaned.startsWith('```')) {
                 cleaned = cleaned.slice(3);
             }
             if (cleaned.endsWith('```')) {
@@ -366,7 +367,17 @@ class PersonaExtractor {
             }
             cleaned = cleaned.trim();
 
-            const parsed = JSON.parse(cleaned);
+            let parsed;
+            try {
+                parsed = JSON.parse(cleaned);
+            } catch (e) {
+                const match = cleaned.match(/\{[\s\S]*\}/);
+                if (match) {
+                    parsed = JSON.parse(match[0]);
+                } else {
+                    throw e;
+                }
+            }
 
             // Validate structure
             if (!parsed.memory_layer || !parsed.metadata) {

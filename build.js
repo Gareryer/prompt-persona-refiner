@@ -4,7 +4,7 @@ const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 
 const isWatch = process.argv.includes('--watch');
-const isDev = process.argv.includes('--dev');
+const isDev = process.argv.includes('--dev') || isWatch;
 const outdir = 'dist';
 
 // Obfuscation settings (balanced: security + performance)
@@ -14,12 +14,12 @@ const obfuscatorConfig = {
     controlFlowFlatteningThreshold: 0.5,
     deadCodeInjection: true,
     deadCodeInjectionThreshold: 0.2,
-    debugProtection: false, // Can break devtools, only enable if needed
-    disableConsoleOutput: false, // Keep console for debugging
+    debugProtection: false,
+    disableConsoleOutput: false,
     identifierNamesGenerator: 'hexadecimal',
-    renameGlobals: false, // Don't rename globals (breaks Chrome extension APIs)
+    renameGlobals: false,
     rotateStringArray: true,
-    selfDefending: false, // Can cause issues in strict environments
+    selfDefending: false,
     shuffleStringArray: true,
     splitStrings: true,
     splitStringsChunkLength: 10,
@@ -38,17 +38,13 @@ const obfuscatorConfig = {
     unicodeEscapeSequence: false,
 };
 
-// Clean and create output directory
-if (fs.existsSync(outdir)) {
-    fs.rmSync(outdir, { recursive: true });
-}
-fs.mkdirSync(outdir, { recursive: true });
-
-// Files to minify (JS)
+// Files to minify/bundle (JS)
 const jsEntryPoints = [
     'security/runtime-security.js',
     'background.js',
     'bridge/extension-bridge.js',
+    'theme/theme-controller.js',
+    'content/templates.js',
     'content/observer.js',
     'content/scraper.js',
     'content/diff.js',
@@ -67,9 +63,11 @@ const jsEntryPoints = [
     'memory/analyzers/unified-analyzer.js',
     'memory/context-assembler.js',
     'memory/index.js',
+    'extractor/extractor.js',
     'sidepanel/sidepanel.js',
     'options/index.js',
     'options/model-manager-ui.js',
+    'supabase/supabase-client.js'
 ];
 
 // CSS files to minify
@@ -86,7 +84,7 @@ const staticFiles = [
     'icons/icon128.png',
     'sidepanel/index.html',
     'options/index.html',
-    'README.md',
+    'supabase/supabase.min.js',
 ];
 
 // Helper to ensure directory exists
@@ -97,49 +95,69 @@ function ensureDir(filePath) {
     }
 }
 
+// Clean and create output directory
+function cleanOutdir() {
+    if (fs.existsSync(outdir)) {
+        fs.rmSync(outdir, { recursive: true });
+    }
+    fs.mkdirSync(outdir, { recursive: true });
+}
+
 // Copy static files
-console.log('Copying static files...');
-for (const file of staticFiles) {
-    const src = path.join(__dirname, file);
-    const dest = path.join(__dirname, outdir, file);
-    if (fs.existsSync(src)) {
-        ensureDir(dest);
-        fs.copyFileSync(src, dest);
-        console.log(`  + ${file}`);
-    } else {
-        console.log(`  ! ${file} not found, skipping`);
+function copyStaticFiles() {
+    console.log('Copying static files...');
+    for (const file of staticFiles) {
+        const src = path.join(__dirname, file);
+        const dest = path.join(__dirname, outdir, file);
+        if (fs.existsSync(src)) {
+            ensureDir(dest);
+            fs.copyFileSync(src, dest);
+            console.log(`  + ${file}`);
+        } else {
+            console.warn(`  ! ${file} not found, skipping`);
+        }
+    }
+}
+
+// Validate all source files exist
+function validateSources() {
+    const missing = [];
+    for (const file of [...jsEntryPoints, ...cssFiles]) {
+        const src = path.join(__dirname, file);
+        if (!fs.existsSync(src)) {
+            missing.push(file);
+        }
+    }
+    if (missing.length > 0) {
+        console.error('\n[ERR] Missing declared source files:');
+        missing.forEach(f => console.error(`  - ${f}`));
+        process.exit(1);
     }
 }
 
 // Build and obfuscate JS files
 async function buildJS() {
-    console.log('\nMinifying JavaScript...');
-
-    const existingEntryPoints = jsEntryPoints.filter(f => {
-        const exists = fs.existsSync(path.join(__dirname, f));
-        if (!exists) console.log(`  ! ${f} not found, skipping`);
-        return exists;
-    });
+    console.log('\nProcessing JavaScript...');
 
     // First pass: esbuild minification
     await esbuild.build({
-        entryPoints: existingEntryPoints,
+        entryPoints: jsEntryPoints,
         outdir: outdir,
         bundle: false,
-        minify: true,
-        sourcemap: false,
+        minify: !isDev,
+        sourcemap: isDev ? 'inline' : false,
         target: ['chrome100'],
         format: 'iife',
         logLevel: 'info',
     });
 
-    console.log('  + JavaScript minified');
+    console.log('  + JavaScript processed');
 
-    // Second pass: obfuscation (skip in dev mode)
+    // Second pass: obfuscation (skip in dev/watch mode)
     if (!isDev) {
         console.log('\nObfuscating JavaScript...');
 
-        for (const file of existingEntryPoints) {
+        for (const file of jsEntryPoints) {
             const outFile = path.join(__dirname, outdir, file);
             if (!fs.existsSync(outFile)) continue;
 
@@ -163,17 +181,12 @@ async function buildCSS() {
         const src = path.join(__dirname, file);
         const dest = path.join(__dirname, outdir, file);
 
-        if (!fs.existsSync(src)) {
-            console.log(`  ! ${file} not found, skipping`);
-            continue;
-        }
-
         ensureDir(dest);
 
         await esbuild.build({
             entryPoints: [src],
             outfile: dest,
-            minify: true,
+            minify: !isDev,
             sourcemap: false,
             logLevel: 'silent',
         });
@@ -183,11 +196,32 @@ async function buildCSS() {
 
 // Main build
 async function build() {
-    const mode = isDev ? 'development' : 'production (obfuscated)';
+    const mode = isWatch ? 'watch' : isDev ? 'development' : 'production (obfuscated)';
     console.log(`Building extension for ${mode}...\n`);
     const startTime = Date.now();
 
     try {
+        validateSources();
+        cleanOutdir();
+        copyStaticFiles();
+
+        if (isWatch) {
+            await buildCSS();
+            const ctx = await esbuild.context({
+                entryPoints: jsEntryPoints,
+                outdir: outdir,
+                bundle: false,
+                minify: false,
+                sourcemap: 'inline',
+                target: ['chrome100'],
+                format: 'iife',
+                logLevel: 'info',
+            });
+            await ctx.watch();
+            console.log('\n[WATCH] Watching for source file changes...');
+            return;
+        }
+
         await buildJS();
         await buildCSS();
 

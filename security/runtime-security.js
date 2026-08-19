@@ -14,27 +14,12 @@
 (function () {
     'use strict';
 
-    // === ANTI-DEBUG PROTECTION ===
-    const _0x = (function () {
-        let _detected = false;
-        const _check = function () {
-            const start = performance.now();
-            debugger;
-            const end = performance.now();
-            if (end - start > 100) _detected = true;
-        };
-        // Check periodically (disabled by default, enable if needed)
-        // setInterval(_check, 5000);
-        return { isDebuggerAttached: () => _detected };
-    })();
-
     // === DOMAIN LOCK ===
     const ALLOWED_DOMAINS = ['gemini.google.com'];
     const currentDomain = window.location.hostname;
 
     if (!ALLOWED_DOMAINS.some(d => currentDomain.endsWith(d))) {
         console.error('[Security] Unauthorized domain');
-        // Silently disable functionality on unauthorized domains
         window.__GEMINI_EXT_DISABLED__ = true;
         return;
     }
@@ -97,28 +82,19 @@
 
     // === INTEGRITY CHECK ===
     const _integrityCheck = (function () {
-        const originalFunctions = new Map();
-
-        // Store original references to critical functions
-        const protect = (obj, prop) => {
-            if (obj && typeof obj[prop] === 'function') {
-                originalFunctions.set(`${obj.constructor?.name || 'global'}.${prop}`, obj[prop]);
-            }
-        };
-
-        // Protect critical APIs
-        protect(window, 'fetch');
-        protect(window, 'XMLHttpRequest');
-        protect(console, 'log');
+        const protectedTargets = [
+            { name: 'window.fetch', target: window, prop: 'fetch', original: window.fetch },
+            { name: 'window.XMLHttpRequest', target: window, prop: 'XMLHttpRequest', original: window.XMLHttpRequest },
+            { name: 'console.log', target: console, prop: 'log', original: console.log },
+            { name: 'console.warn', target: console, prop: 'warn', original: console.warn },
+            { name: 'console.error', target: console, prop: 'error', original: console.error }
+        ].filter(item => item.target && typeof item.target[item.prop] === 'function');
 
         return {
             verify: () => {
-                for (const [key, original] of originalFunctions) {
-                    const [objName, prop] = key.split('.');
-                    const obj = objName === 'global' ? window :
-                        objName === 'Console' ? console : window[objName];
-                    if (obj && obj[prop] !== original) {
-                        console.warn('[Security] Integrity check failed:', key);
+                for (const item of protectedTargets) {
+                    if (item.target[item.prop] !== item.original) {
+                        console.warn('[Security] Integrity check failed:', item.name);
                         return false;
                     }
                 }

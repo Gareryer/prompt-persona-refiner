@@ -106,19 +106,21 @@
 
                     <!-- Persona Section (7-Dimension: persona) -->
                     <section class="accordion" data-section="persona">
-                        <div class="accordion-header-wrapper">
-                            <button class="accordion-header" aria-expanded="true">
-                                <span class="accordion-icon material-symbols-outlined">chevron_right</span>
-                                <span class="accordion-title">Persona</span>
-                                <div class="header-controls">
-                                    <span class="badge badge-auto" id="persona-mode-badge">AUTO</span>
-                                    <span id="pin-persona-btn" class="pin-toggle" role="button" tabindex="0"
-                                        title="Pin Persona">
-                                        <span class="material-symbols-outlined">push_pin</span>
-                                    </span>
-                                </div>
-                            </button>
-                        </div>
+                        <button class="accordion-header" aria-expanded="true">
+                            <span class="accordion-icon material-symbols-outlined">chevron_right</span>
+                            <span class="accordion-title">Persona</span>
+                            <div class="header-controls">
+                                <span class="badge hidden" id="badge-persona"></span>
+                                <span id="pin-persona-btn" class="pin-toggle" role="button" tabindex="0" data-component="persona"
+                                    title="Pin Persona">
+                                    <span class="material-symbols-outlined">push_pin</span>
+                                </span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" data-component="persona" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </button>
                         <div class="accordion-content">
                             <div class="persona-name-display">
                                 <span class="meta-label">Active:</span>
@@ -132,19 +134,12 @@
                                 </button>
                             </div>
 
-                            <div class="persona-actions">
-                                <button id="save-synthesized-persona" class="btn btn-secondary">
-                                    Save
-                                </button>
-                            </div>
-
-                            <div id="synthesis-metadata" class="synthesis-metadata hidden">
-                                <span class="meta-label">Role:</span>
-                                <span class="meta-value" id="persona-role">-</span>
-                                <span class="meta-label">Purpose:</span>
-                                <span class="meta-value" id="persona-purpose">-</span>
-                                <span class="meta-label">Expertise:</span>
-                                <span class="meta-value" id="expertise-level">-</span>
+                            <div class="verbatim-controls">
+                                <span class="badge verbatim hidden" id="verbatim-badge-persona">VERBATIM</span>
+                                <label class="toggle-switch verbatim-switch">
+                                    <input type="checkbox" id="verbatim-toggle-persona" data-verbatim="persona">
+                                    <span class="toggle-slider"></span>
+                                </label>
                             </div>
                         </div>
                     </section>
@@ -156,6 +151,10 @@
                             <span class="accordion-title">Domain Context</span>
                             <div class="header-controls">
                                 <span class="badge hidden" id="badge-context"></span>
+                                <span id="pin-context-btn" class="pin-toggle" role="button" tabindex="0" data-component="context"
+                                    title="Pin Domain Context">
+                                    <span class="material-symbols-outlined">push_pin</span>
+                                </span>
                             </div>
                             <label class="toggle-switch">
                                 <input type="checkbox" data-component="context" checked>
@@ -176,6 +175,10 @@
                             <span class="accordion-title">Tone & Style</span>
                             <div class="header-controls">
                                 <span class="badge hidden" id="badge-tone"></span>
+                                <span id="pin-tone-btn" class="pin-toggle" role="button" tabindex="0" data-component="tone"
+                                    title="Pin Tone & Style">
+                                    <span class="material-symbols-outlined">push_pin</span>
+                                </span>
                             </div>
                             <label class="toggle-switch">
                                 <input type="checkbox" data-component="tone" checked>
@@ -196,6 +199,10 @@
                             <span class="accordion-title">Framework</span>
                             <div class="header-controls">
                                 <span class="badge hidden" id="badge-framework"></span>
+                                <span id="pin-framework-btn" class="pin-toggle" role="button" tabindex="0" data-component="framework"
+                                    title="Pin Framework">
+                                    <span class="material-symbols-outlined">push_pin</span>
+                                </span>
                             </div>
                             <label class="toggle-switch">
                                 <input type="checkbox" data-component="framework" checked>
@@ -216,6 +223,10 @@
                             <span class="accordion-title">Constraints</span>
                             <div class="header-controls">
                                 <span class="badge hidden" id="badge-constraints"></span>
+                                <span id="pin-constraints-btn" class="pin-toggle" role="button" tabindex="0" data-component="constraints"
+                                    title="Pin Constraints">
+                                    <span class="material-symbols-outlined">push_pin</span>
+                                </span>
                             </div>
                             <label class="toggle-switch">
                                 <input type="checkbox" data-component="constraints" checked>
@@ -236,6 +247,10 @@
                             <span class="accordion-title">Output Format</span>
                             <div class="header-controls">
                                 <span class="badge hidden" id="badge-format"></span>
+                                <span id="pin-format-btn" class="pin-toggle" role="button" tabindex="0" data-component="format"
+                                    title="Pin Output Format">
+                                    <span class="material-symbols-outlined">push_pin</span>
+                                </span>
                             </div>
                             <label class="toggle-switch">
                                 <input type="checkbox" data-component="format" checked>
@@ -256,6 +271,10 @@
                             <span class="accordion-title">Examples</span>
                             <div class="header-controls">
                                 <span class="badge hidden" id="badge-exemplar"></span>
+                                <span id="pin-exemplar-btn" class="pin-toggle" role="button" tabindex="0" data-component="exemplar"
+                                    title="Pin Examples">
+                                    <span class="material-symbols-outlined">push_pin</span>
+                                </span>
                             </div>
                             <label class="toggle-switch">
                                 <input type="checkbox" data-component="exemplar" checked>

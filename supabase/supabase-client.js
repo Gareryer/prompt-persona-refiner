@@ -57,6 +57,7 @@ function sbLog(level, msg, data = {}) {
  */
 class SupabaseClient {
     static instance = null;
+    static #initPromise = null;
 
     /**
      * Get the singleton instance
@@ -65,8 +66,14 @@ class SupabaseClient {
     static async getInstance() {
         if (!SupabaseClient.instance) {
             SupabaseClient.instance = new SupabaseClient();
-            await SupabaseClient.instance.init();
         }
+        if (!SupabaseClient.#initPromise) {
+            SupabaseClient.#initPromise = SupabaseClient.instance.init().catch(err => {
+                SupabaseClient.#initPromise = null;
+                throw err;
+            });
+        }
+        await SupabaseClient.#initPromise;
         return SupabaseClient.instance;
     }
 

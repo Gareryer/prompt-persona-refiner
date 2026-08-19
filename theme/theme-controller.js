@@ -63,7 +63,7 @@ class ThemeController {
         this.#applyMode(mode);
 
         // Listen for storage changes (cross-context sync)
-        if (typeof chrome !== 'undefined' && chrome.storage) {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
             chrome.storage.onChanged.addListener((changes, namespace) => {
                 if (namespace === 'local' && changes[this.STORAGE_KEY]) {
                     const newMode = changes[this.STORAGE_KEY].newValue || this.DEFAULT_MODE;
@@ -73,20 +73,26 @@ class ThemeController {
             });
         }
 
-        // Listen for system preference changes
-        if (window.matchMedia) {
+        // Listen for system preference changes (cleaning up old listener if present)
+        if (typeof window !== 'undefined' && window.matchMedia) {
+            if (this.#systemMediaQuery && this.#mediaQueryListener) {
+                this.#systemMediaQuery.removeEventListener('change', this.#mediaQueryListener);
+            }
             this.#systemMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            this.#systemMediaQuery.addEventListener('change', async () => {
+            this.#mediaQueryListener = async () => {
                 const currentMode = await this.getMode();
                 if (currentMode === 'system') {
                     this.#applyMode('system');
                     this.#notifySubscribers();
                 }
-            });
+            };
+            this.#systemMediaQuery.addEventListener('change', this.#mediaQueryListener);
         }
 
         console.log('[ThemeController] Initialized with mode:', mode);
     }
+
+    static #mediaQueryListener = null;
 
     /**
      * Get current theme mode from storage
@@ -94,12 +100,15 @@ class ThemeController {
      * @returns {Promise<'system'|'light'|'dark'>} Current mode
      */
     static async getMode() {
-        if (typeof chrome !== 'undefined' && chrome.storage) {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
             return new Promise((resolve) => {
                 chrome.storage.local.get([this.STORAGE_KEY], (result) => {
-                    resolve(result[this.STORAGE_KEY] || this.DEFAULT_MODE);
+                    resolve(result?.[this.STORAGE_KEY] || this.DEFAULT_MODE);
                 });
             });
+        }
+        if (typeof localStorage !== 'undefined') {
+            return localStorage.getItem(this.STORAGE_KEY) || this.DEFAULT_MODE;
         }
         return this.DEFAULT_MODE;
     }
@@ -116,8 +125,10 @@ class ThemeController {
             return;
         }
 
-        if (typeof chrome !== 'undefined' && chrome.storage) {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
             await chrome.storage.local.set({ [this.STORAGE_KEY]: mode });
+        } else if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(this.STORAGE_KEY, mode);
         }
 
         this.#applyMode(mode);

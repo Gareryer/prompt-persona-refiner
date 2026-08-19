@@ -222,6 +222,14 @@ window.addEventListener('pa-api-proxy-request', async (event) => {
             options
         });
 
+        if (!result) {
+            console.error('[ExtBridge] API proxy received null/empty response from background');
+            window.dispatchEvent(new CustomEvent('pa-api-proxy-response', {
+                detail: { success: false, requestId, error: 'API proxy received null response from background' }
+            }));
+            return;
+        }
+
         // Check if background script returned an error
         if (result.error) {
             console.error('[ExtBridge] API proxy error from background:', result.error);
@@ -273,60 +281,69 @@ if (chrome.runtime?.id) {
      * 
      * @listens chrome.runtime.onMessage
      */
+    // Pending request registry for MAIN-world request/response correlation
+    const pendingBridgeRequests = new Map();
+
+    // Single static response listener for all MAIN-world bridge responses
+    window.addEventListener('message', (event) => {
+        if (event.data?.source === 'ext-bridge-response' && event.data?.requestId) {
+            const pending = pendingBridgeRequests.get(event.data.requestId);
+            if (pending) {
+                clearTimeout(pending.timeoutId);
+                pendingBridgeRequests.delete(event.data.requestId);
+                try {
+                    pending.sendResponse(event.data.result);
+                } catch (e) {
+                    console.warn('[ExtBridge] Failed to send response back to background:', e);
+                }
+            }
+        }
+    });
+
+    /**
+     * Chrome Runtime Message Listener (ISOLATED -> MAIN Tunnel)
+     * Forwards background messages to MAIN world scripts.
+     */
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-        // Double-check context validity (may have changed since listener setup)
         if (!chrome.runtime?.id) {
             console.warn('[ExtBridge] Context invalidated during message handling');
             return;
         }
 
-        // Define which message types should be forwarded to MAIN world
-        const forwardableTypes = [
-            'REBUILD_MEMORY_REQUEST',   // Trigger full memory analysis
-            'REFRESH_RECENT_FOCUS',     // Update recent focus only
-            'LLM_CONFIG_SAVED'          // Model configuration changed
-        ];
+        const REQUEST_RESPONSE_TYPES = ['REBUILD_MEMORY_REQUEST'];
+        const FIRE_AND_FORGET_TYPES = ['REFRESH_RECENT_FOCUS', 'LLM_CONFIG_SAVED'];
 
-        // Only process forwardable messages
-        if (forwardableTypes.includes(msg.type)) {
-            // Generate unique request ID for request/response correlation
+        // Fire-and-forget broadcasts
+        if (FIRE_AND_FORGET_TYPES.includes(msg.type)) {
+            window.postMessage({
+                source: 'ext-bridge',
+                type: msg.type,
+                payload: msg
+            }, '*');
+            return false; // Close port immediately
+        }
+
+        // Request/Response operations
+        if (REQUEST_RESPONSE_TYPES.includes(msg.type)) {
             const requestId = `bridge_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-            console.log(`[ExtBridge] Forwarding ${msg.type} to MAIN world (id: ${requestId})`);
+            const timeoutId = setTimeout(() => {
+                if (pendingBridgeRequests.has(requestId)) {
+                    pendingBridgeRequests.delete(requestId);
+                    console.log(`[ExtBridge] ⏰ Response timeout for ${msg.type} (id: ${requestId})`);
+                }
+            }, 60000);
 
-            // Post message to MAIN world using window.postMessage
-            // MAIN world scripts listen for messages with source: 'ext-bridge'
+            pendingBridgeRequests.set(requestId, { sendResponse, timeoutId });
+
             window.postMessage({
                 source: 'ext-bridge',
                 type: msg.type,
                 payload: msg,
-                requestId: requestId
+                requestId
             }, '*');
 
-            // === ASYNC RESPONSE HANDLING ===
-            // Set up listener for response from MAIN world
-            const responseHandler = (event) => {
-                // Verify response is from our bridge and matches our request
-                if (event.data?.source === 'ext-bridge-response' &&
-                    event.data?.requestId === requestId) {
-                    // Clean up listener after receiving response
-                    window.removeEventListener('message', responseHandler);
-                    // Forward response back to background script
-                    sendResponse(event.data.result);
-                }
-            };
-            window.addEventListener('message', responseHandler);
-
-            // === TIMEOUT CLEANUP ===
-            // Remove listener after 60 seconds to prevent memory leaks
-            // (LLM analysis operations can take significant time)
-            setTimeout(() => {
-                window.removeEventListener('message', responseHandler);
-                console.log(`[ExtBridge] ⏰ Response timeout for ${msg.type} (id: ${requestId})`);
-            }, 60000);
-
-            // Return true to indicate async response will be sent
-            return true;
+            return true; // Keep channel open for async response
         }
     });
 

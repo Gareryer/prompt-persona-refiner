@@ -86,6 +86,24 @@ class ModelManager {
     async init() {
         if (this._initialized) return;
 
+        // Serialize concurrent init() calls — second caller awaits the same promise
+        if (this._initPromise) return this._initPromise;
+
+        this._initPromise = this._doInit();
+        try {
+            await this._initPromise;
+        } catch (err) {
+            // Allow retry on failure
+            this._initPromise = null;
+            throw err;
+        }
+    }
+
+    /**
+     * Internal initialization logic (called once via memoized promise)
+     * @private
+     */
+    async _doInit() {
         console.log('[ModelManager] Initializing...');
 
         try {
@@ -709,13 +727,18 @@ class ModelManager {
             }
         });
 
-        // B6 FIX: Listen for storage changes to invalidate cache
+        // Listen for storage changes to invalidate cache
         window.addEventListener('pa-storage-changed', (event) => {
-            const { changes } = event.detail;
+            const { changes } = event.detail || {};
             if (changes && (changes[MODEL_STORAGE_KEYS.MODELS] || changes[MODEL_STORAGE_KEYS.ACTIVE_MODEL])) {
-                console.log('[ModelManager] B6 FIX: Storage changed externally, invalidating cache');
-                // Invalidate cache so next operation fetches fresh data
-                if (window._modelManagerInstance) {
+                console.log('[ModelManager] Storage changed externally, invalidating cache');
+                this._cache = null;
+                this._initialized = false;
+                if (_modelManagerInstance) {
+                    _modelManagerInstance._cache = null;
+                    _modelManagerInstance._initialized = false;
+                }
+                if (typeof window !== 'undefined' && window._modelManagerInstance) {
                     window._modelManagerInstance._cache = null;
                     window._modelManagerInstance._initialized = false;
                 }

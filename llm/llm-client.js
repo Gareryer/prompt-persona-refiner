@@ -390,8 +390,17 @@ class LLMClient {
             return LLM_ERROR_TYPES.TOKEN_LIMIT;
         }
 
-        // Network errors
-        if (message.includes('network') || message.includes('fetch') || message.includes('timeout') || message.includes('econnrefused')) {
+        // Network and connection errors
+        if (
+            message.includes('network') ||
+            message.includes('fetch') ||
+            message.includes('timeout') ||
+            message.includes('econnrefused') ||
+            message.includes('message channel closed') ||
+            message.includes('could not establish connection') ||
+            message.includes('receiving end does not exist') ||
+            message.includes('api proxy')
+        ) {
             return LLM_ERROR_TYPES.NETWORK;
         }
 
@@ -445,7 +454,7 @@ class LLMClient {
             }],
             generationConfig: {
                 temperature: options.temperature || 0.7,
-                maxOutputTokens: options.maxTokens || 4096
+                maxOutputTokens: options.maxTokens || 8192
             }
         };
         console.log('[LLMClient] _callGemini: Body constructed', { promptLength: prompt.length });
@@ -480,8 +489,10 @@ class LLMClient {
         // Step 5: Handle errors
         if (!proxyResponse.ok) {
             console.error('[LLMClient] _callGemini: API error');
-            const error = proxyResponse.data;
-            throw new Error(`Gemini API error: ${error?.error?.message || proxyResponse.statusText || 'Unknown error'}`);
+            const errorData = proxyResponse.data;
+            const error = new Error(`Gemini API error: ${errorData?.error?.message || proxyResponse.statusText || 'Unknown error'}`);
+            error.status = proxyResponse.status;
+            throw error;
         }
 
         // Step 6: Parse response (data is already parsed by proxy)
@@ -513,7 +524,7 @@ class LLMClient {
             model: this.model,
             messages,
             temperature: options.temperature || 0.7,
-            max_tokens: options.maxTokens || 4096
+            max_tokens: options.maxTokens || 8192
         };
 
         // JSON mode with optional schema enforcement
@@ -542,11 +553,13 @@ class LLMClient {
                 'Authorization': `Bearer ${this.apiKey}`
             },
             body: JSON.stringify(body)
-        });
+        }, options.abortSignal);
 
         if (!proxyResponse.ok) {
             const error = proxyResponse.data;
-            throw new Error(`OpenAI API error: ${error?.error?.message || proxyResponse.statusText || 'Unknown error'}`);
+            const err = new Error(`OpenAI API error: ${error?.error?.message || proxyResponse.statusText || 'Unknown error'}`);
+            err.status = proxyResponse.status;
+            throw err;
         }
 
         const data = proxyResponse.data;
@@ -572,7 +585,7 @@ class LLMClient {
 
         const body = {
             model: this.model,
-            max_tokens: options.maxTokens || 4096,
+            max_tokens: options.maxTokens || 8192,
             messages: [{ role: 'user', content: enhancedPrompt }]
         };
 
@@ -588,11 +601,13 @@ class LLMClient {
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify(body)
-        });
+        }, options.abortSignal);
 
         if (!proxyResponse.ok) {
             const error = proxyResponse.data;
-            throw new Error(`Anthropic API error: ${error?.error?.message || proxyResponse.statusText || 'Unknown error'}`);
+            const err = new Error(`Anthropic API error: ${error?.error?.message || proxyResponse.statusText || 'Unknown error'}`);
+            err.status = proxyResponse.status;
+            throw err;
         }
 
         const data = proxyResponse.data;
@@ -626,7 +641,7 @@ class LLMClient {
             model: this.model,
             messages,
             temperature: options.temperature || 0.7,
-            max_tokens: options.maxTokens || 4096
+            max_tokens: options.maxTokens || 8192
         };
 
         const proxyResponse = await this._proxyFetch(url, {
@@ -638,11 +653,13 @@ class LLMClient {
                 'X-Title': 'Prompt Assistant Extension'
             },
             body: JSON.stringify(body)
-        });
+        }, options.abortSignal);
 
         if (!proxyResponse.ok) {
             const error = proxyResponse.data;
-            throw new Error(`OpenRouter API error: ${error?.error?.message || proxyResponse.statusText || 'Unknown error'}`);
+            const err = new Error(`OpenRouter API error: ${error?.error?.message || proxyResponse.statusText || 'Unknown error'}`);
+            err.status = proxyResponse.status;
+            throw err;
         }
 
         const data = proxyResponse.data;
@@ -652,11 +669,80 @@ class LLMClient {
     }
 
     /**
-     * Parse JSON from text, handling markdown code blocks
+     * Helper to repair truncated JSON strings by balancing brackets/quotes
+     * @param {string} str
+     * @returns {string}
+     */
+    _fixTruncatedJSON(str) {
+        let inString = false;
+        let escape = false;
+        const stack = [];
+
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+
+            if (escape) {
+                escape = false;
+                continue;
+            }
+
+            if (char === '\\') {
+                escape = true;
+                continue;
+            }
+
+            if (char === '"') {
+                inString = !inString;
+                continue;
+            }
+
+            if (!inString) {
+                if (char === '{' || char === '[') {
+                    stack.push(char);
+                } else if (char === '}') {
+                    if (stack[stack.length - 1] === '{') stack.pop();
+                } else if (char === ']') {
+                    if (stack[stack.length - 1] === '[') stack.pop();
+                }
+            }
+        }
+
+        let result = str;
+
+        // If truncated inside a string, close the quote
+        if (inString) {
+            if (result.endsWith('\\')) {
+                result = result.slice(0, -1);
+            }
+            result += '"';
+        }
+
+        // Clean up trailing incomplete structures (e.g. key without value or dangling commas)
+        result = result.replace(/,\s*"[^"]*"\s*:\s*"?$/, '');
+        result = result.replace(/:\s*"?$/, ': null');
+        result = result.replace(/,\s*$/, '');
+        result = result.replace(/,\s*([\}\]])/g, '$1');
+
+        // Close remaining open structures
+        while (stack.length > 0) {
+            const open = stack.pop();
+            if (open === '{') result += '}';
+            else if (open === '[') result += ']';
+        }
+
+        result = result.replace(/,\s*([\}\]])/g, '$1');
+        return result;
+    }
+
+    /**
+     * Parse JSON from text, handling markdown code blocks, reasoning tags, and truncated streams
      */
     _parseJSON(text) {
-        // Remove markdown code blocks if present
+        if (!text || typeof text !== 'string') return {};
+
         let cleaned = text.trim();
+
+        // Strip markdown code fences
         if (cleaned.startsWith('```json')) {
             cleaned = cleaned.slice(7);
         } else if (cleaned.startsWith('```')) {
@@ -667,12 +753,42 @@ class LLMClient {
         }
         cleaned = cleaned.trim();
 
+        // Strip <think>...</think> reasoning tags if present
+        cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+        // 1. Direct JSON parse
         try {
             return JSON.parse(cleaned);
-        } catch (e) {
-            console.warn('[LLMClient] Failed to parse JSON response:', e);
-            return { raw: text, parseError: true };
+        } catch (e) {}
+
+        // 2. Regex fallback to extract outermost JSON object or array
+        const jsonMatch = cleaned.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+        if (jsonMatch) {
+            try {
+                return JSON.parse(jsonMatch[0]);
+            } catch (e2) {}
         }
+
+        // 3. Repair trailing commas and control characters
+        let repaired = cleaned.replace(/,\s*([\}\]])/g, '$1');
+        try {
+            return JSON.parse(repaired);
+        } catch (e3) {}
+
+        // 4. Truncated JSON repair (auto-close quotes/braces)
+        repaired = this._fixTruncatedJSON(cleaned);
+        if (repaired) {
+            try {
+                return JSON.parse(repaired);
+            } catch (e4) {
+                try {
+                    return JSON.parse(repaired.replace(/,\s*([\}\]])/g, '$1'));
+                } catch (e5) {}
+            }
+        }
+
+        console.warn('[LLMClient] Failed to parse JSON response:', text.substring(0, 200));
+        return { raw: text, parseError: true };
     }
 
     /**

@@ -2,9 +2,25 @@
 .agent/
 .agents/
 .claude/
+.continue/
+.cursor/
+.gemini/
+.kiro/
+.opencode/
+.pi/
+.vscode/
+.ignore
+.rules
+.windsurfrules
+opencode.json
+
+# Graph artifacts
+graph.graphml
+graph.mmd
 
 # Generated knowledge-graph artifacts
 graphify-out/
+wiki/
 
 # Media
 *.mp4
@@ -24,3 +40,6 @@ dist/
 .DS_Store
 Thumbs.db
 *.log
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+graft/

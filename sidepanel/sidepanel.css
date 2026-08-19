@@ -829,6 +829,31 @@ body {
     line-height: 1;
 }
 
+/* Verbatim Controls Container */
+.verbatim-controls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    margin-bottom: 8px;
+}
+
+.verbatim-controls .badge.verbatim {
+    margin: 0;
+}
+
+/* Verbatim Switch */
+.verbatim-switch {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 28px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
 /* Hidden badge */
 .badge.hidden {
     display: none !important;
@@ -1128,8 +1153,14 @@ body {
 .header-controls {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     margin-left: auto;
+    flex-shrink: 0;
+}
+
+.accordion-header > .toggle-switch {
+    margin-left: 8px;
+    flex-shrink: 0;
 }
 
 .pin-toggle {

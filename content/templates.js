@@ -139,6 +139,28 @@ const getReviewModalTemplate = () => `
         </button>
       </div>
       
+      <!-- Error banner - shown on API errors instead of corrupting textarea -->
+      <div id="refinement-error-banner" class="gemini-ext-error-banner" style="display: none;">
+        <div class="gemini-ext-error-banner-content">
+          <svg class="gemini-ext-error-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <div class="gemini-ext-error-text">
+            <span class="gemini-ext-error-title">Refinement failed</span>
+            <span class="gemini-ext-error-message" id="error-banner-message"></span>
+          </div>
+        </div>
+        <button class="gemini-ext-btn gemini-ext-btn-ghost gemini-ext-error-retry" id="btn-error-retry">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+          </svg>
+          Retry
+        </button>
+      </div>
+      
       <!-- ============================================================== -->
       <!-- ORIGINAL TAB: Raw prompt editing                                -->
       <!-- ============================================================== -->

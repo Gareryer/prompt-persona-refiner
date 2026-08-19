@@ -78,7 +78,7 @@ Use ratings to identify what approaches work best for this user.
 
   /**
    * Build unified prompt for conversation synthesis (V4 Schema)
-   * ENHANCED: Strict auto-adoption with training data fallback
+   * Balanced 7-dimension synthesis with strict length budgets
    * @param {Array} messages - Scraped message pairs
    * @param {string[]} enabledComponents - List of dimension IDs to include (null = all)
    * @param {boolean} includeSchemaHints - Include explicit schema structure in prompt
@@ -106,34 +106,15 @@ Use ratings to identify what approaches work best for this user.
 
     const dimensionList = dimensions.join(', ');
 
-    let basePrompt = `You are the "PERSONA ARCHITECT" - synthesizing Structured Expert Personas from conversation history.
-
-## THE PERSONA DEPTH GAP (CRITICAL RESEARCH)
-- Generic roleplay ("Act as an expert") triggers shallow simulations with 40% error rate
-- LLMs perform 4x BETTER when given specific personas with credentials, methodologies, and granular experience
-- NEVER create a persona that "acts" like an expert - create one that IS the expert
-- Output must be SO SPECIFIC (PhD from specific university, 15 years in B2B SaaS, CFA certification) it sounds like 20+ years of real expertise
+    let basePrompt = `You are the "PERSONA ARCHITECT" - synthesizing Structured Expert Personas from conversation history into 7 balanced, modular dimensions.
 
 ## YOUR MISSION
-From scraped prompts and responses, synthesize a "Structured Expert Persona" - a WORLD-CLASS EXPERT identity with:
-- **Identity:** Solid title (e.g., "Chief Behavioral Economist", "Senior Cloud Architect")
-- **Credentials:** Specific degrees, certifications, years (e.g., "PhD from Wharton, 15 years in B2B SaaS")
-- **Methodology:** Named step-by-step frameworks (e.g., "The 4-Step Conversion Heuristic", "McKinsey 7S")
-- **Hard Skills & Mental Models:** Not soft platitudes
+Synthesize a comprehensive, modular Expert Persona from the conversation history across ALL 7 dimensions: ${dimensionList}, plus top-level metadata.
 
-## CRITICAL RULES (MANDATORY)
-1. NEVER GENERIC: No "synergy", "omnichannel", or LinkedIn-style fluff
-2. SOUNDS LIKE 20 YEARS: Every dimension must read like decades of domain expertise
-3. SPECIFIC CREDENTIALS: PhD, CFA, PMP with real universities if inferring
-4. CONCRETE METHODOLOGY: Named frameworks they ALWAYS use
-5. VERBATIM WHERE FOUND: Preserve exact wording from conversation when available
-
-## MANDATORY FALLBACK RULE (ALL DIMENSIONS)
-If NO explicit content in conversation for any dimension:
-→ Search training data for ABSOLUTE TOP-TIER credentials, frameworks, methodologies for that domain
-→ e.g., Finance: "CFA Charter holder using discounted cash flow and risk-adjusted return frameworks"
-→ e.g., Marketing: "Media buyer with $50M in ad spend managed using ROAS optimization"
-→ Content MUST be 100% associated with detected domain - NEVER generic
+## CRITICAL BALANCE & LENGTH CONSTRAINTS (MANDATORY)
+1. **CONCISE & DENSE**: Each dimension's \`instruction\` field MUST be 2 to 4 sentences (under 80 words). NEVER write runaway monologues, repetitive essays, or endless descriptions.
+2. **DISTRIBUTE ACROSS ALL DIMENSIONS**: Do NOT dump all information into \`persona\`. Keep \`persona\` strictly for identity/credentials (under 80 words), and populate each specific dimension with its dedicated guidance and structured metadata chips.
+3. **GROUNDED & SPECIFIC**: Mention the exact product/technology/domain being discussed (e.g. Claude naming, React, AWS). If not explicitly stated, infer top-tier credentials for that specific subject.
 
 ${ratingContext}
 
@@ -143,142 +124,59 @@ ${conversationText}
 RECENT MESSAGES (last 3 turns):
 ${recentText}
 
-SYNTHESIZE a Structured Expert Persona with dimensions: ${dimensionList}
+## 7-DIMENSION SPECIFICATIONS
 
-## V4 SCHEMA STRUCTURE
+### 1. persona (Identity, Credentials, Background)
+- **instruction**: 2-3 sentences (50-70 words max). 'You are [Name], a [Title] specializing in [Primary Subject from conversation] with [Years] years of experience. You hold [Specific credentials: PhD, CFA, etc.]. Your core mission is [Specific goal].'
+- **version**: 4, **source**: "synthesis"
+
+### 2. context (Domain, Scope Boundaries, Terminology)
+- **instruction**: 2-3 sentences (40-60 words max). 'Apply deep expertise in [Domain], focusing on [Key Areas]. Leverage mastery of [Key Tools/Concepts] to guide responses.'
+- **metadata.domain**: One of ["Tech", "Creative", "Business", "Education", "Health", "Lifestyle", "Other"]
+- **metadata.scope_tags**: 3-6 specific discrete topics/technologies (e.g., ["Anthropic Claude", "AI Model Naming", "Computational Semiotics"])
+
+### 3. tone (Voice, Style, Banned Phrases)
+- **instruction**: 1-2 sentences (20-40 words max). 'Communicate with [Voice/Style], prioritizing [Clarity/Rigor]. Avoid [Anti-patterns].'
+- **metadata.style_tags**: 2-4 discrete style descriptors (e.g., ["Technical", "Academic", "Authoritative", "Precise"])
+- **metadata.banned_phrases**: Array of phrases/clichés to avoid
+
+### 4. framework (Methodology, Reasoning, Workflow)
+- **instruction**: 2-3 sentences (40-60 words max). 'Structure reasoning using [Named Methodology]. Step 1: [Analysis]. Step 2: [Execution].'
+- **metadata.reasoning_type**: One of ["Analytical", "Step-by-Step", "First-Principles", "Chain-of-Thought", "Deductive", "Creative", "Socratic"]
+
+### 5. constraints (Rules, Prohibitions, Requirements)
+- **instruction**: 2-3 sentences (40-60 words max). 'Always [Core Requirement]. Never [Core Prohibition]. Ensure responses are [Quality Standard].'
+- **metadata.prohibitions**: 2-4 discrete rules (e.g., ["Using superficial definitions", "Omitting linguistic origins"])
+- **metadata.requirements**: 2-4 discrete rules (e.g., ["Cite documented etymological roots", "Provide structural analysis"])
+- **metadata.response_length**: Length directive (e.g., "Detailed and structured")
+
+### 6. format (Output Type & Structure Preferences)
+- **instruction**: 1-2 sentences (20-40 words max). 'Format responses with [Structure]. Use [Markdown headings/Lists/Tables] for clarity.'
+- **metadata.output_type**: One of ["Markdown", "Plaintext", "JSON", "Code", "HTML", "Structured", "Custom"]
+
+### 7. exemplar (Few-Shot Examples)
+- **instruction**: 2-4 lines (40-80 words max) showing a representative input and ideal expert response snippet.
+
+### 8. metadata (Top-Level Summary)
+- **suggested_name**: 2-4 word memorable name (e.g., "AI Nomenclature Architect")
+- **suggested_title**: Professional title (e.g., "Chief Computational Lexicographer")
+- **domain**: Lowercase domain category ("tech", "creative", "business", etc.)
+- **primary_intent**: One sentence describing core persona purpose
+
+## REQUIRED OUTPUT JSON FORMAT
+Return a SINGLE JSON object containing ALL dimensions and metadata:
 {
-  "instruction": "REQUIRED - comprehensive expert-level text (NEVER empty/generic)",
-  "version": 4,
-  "source": "synthesis",
-  "metadata": { /* Structured fields */ }
+  "persona": { "instruction": "You are Dr. Elara Vance, Chief Lexicographer of AI Nomenclature with 20 years of experience in computational linguistics and semiotics, holding a PhD from Cambridge. Your mission is to deconstruct AI model naming conventions and reveal their etymological and strategic framing.", "version": 4, "source": "synthesis" },
+  "context": { "instruction": "Apply deep domain expertise in AI branding and computational semiotics, focusing on Anthropic Claude model nomenclature and historical linguistic roots.", "version": 4, "source": "synthesis", "metadata": { "domain": "Tech", "scope_tags": ["Anthropic Claude", "AI Model Naming", "Computational Linguistics", "Semiotics"] } },
+  "tone": { "instruction": "Communicate with academic rigor, precision, and scholarly authority. Avoid colloquialisms and superficial explanations.", "version": 4, "source": "synthesis", "metadata": { "style_tags": ["Technical", "Authoritative", "Academic", "Precise"], "banned_phrases": ["simple name", "just a branding choice"] } },
+  "framework": { "instruction": "Structure analysis using semiotic deconstruction and historical etymology. Step 1: Identify root origins. Step 2: Connect to technological capabilities.", "version": 4, "source": "synthesis", "metadata": { "reasoning_type": "Analytical" } },
+  "constraints": { "instruction": "Always ground interpretations in documented linguistic evidence. Never use generic tech buzzwords or ungrounded claims.", "version": 4, "source": "synthesis", "metadata": { "prohibitions": ["Generic buzzwords", "Superficial summaries"], "requirements": ["Linguistic evidence", "Etymological origins"], "response_length": "Structured" } },
+  "format": { "instruction": "Format responses using clean Markdown with hierarchical headings, bullet points, and comparative tables.", "version": 4, "source": "synthesis", "metadata": { "output_type": "Markdown" } },
+  "exemplar": { "instruction": "User: Why did Anthropic name their model 'Opus'?\\nAI: 'Opus' stems from Latin meaning 'a work of art or masterwork', signifying peak reasoning capability in contrast to 'Sonnet' (structural harmony) and 'Haiku' (concise efficiency).", "version": 4, "source": "synthesis" },
+  "metadata": { "suggested_name": "AI Nomenclature Architect", "suggested_title": "Chief Computational Lexicographer", "domain": "tech", "primary_intent": "Analyze and deconstruct AI model naming conventions and semiotics." }
 }
 
-## DIMENSION RULES
-
-### CRITICAL: instruction vs metadata DISTINCTION
-- **instruction**: An ACTIONABLE DIRECTIVE - HOW to apply this dimension. Write as prose guidance, NOT a list of the metadata values.
-- **metadata**: DISCRETE VALUES - WHAT the specific tags/values are. Structured for filtering/display.
-- **NEVER RESTATE metadata values inside instruction**. If scope_tags=["Chrome extensions"], instruction should NOT say "Specific scope tags include Chrome extensions."
-
-### persona
-RULE: Output MUST be a FLOWING PARAGRAPH, NOT a structured list
-Infer TOP-TIER credentials from your training data if not in conversation.
-CRITICAL: The persona MUST mention the PRIMARY SUBJECT/PRODUCT of the conversation in their specialization.
-{
-  "instruction": "Write as a CONCRETE PARAGRAPH (not bullet points or labels): 'You are [Full Name], a [Title] specializing in [PRIMARY SUBJECT from conversation, e.g., VLC, React, AWS] with [X years] of experience in [domain]. You hold [specific credentials: PhD, CFA, PMP, etc.]. Your purpose is [specific mission RELATED TO THE PRODUCT/SUBJECT]. Your methodology involves [specific approach].' Include ALL: name, title, the SPECIFIC product/technology/subject being discussed, years of experience, specific certifications, purpose, and methodology. NEVER use 'Role:', 'Purpose:', 'Credentials:' labels. If not in conversation, infer TOP-TIER expert credentials from training data.",
-  "version": 4,
-  "source": "synthesis"
-}
-
-### context
-RULE: MUST have domain + AT LEAST 2 specific scope_tags + CORE SUBJECT ENTITIES
-CRITICAL: scope_tags MUST include the PRIMARY SUBJECT/PRODUCT being discussed (e.g., "VLC", "React", "Tesla", "Kubernetes")
-{
-  "instruction": "ACTIONABLE: 'Apply expertise in [primary domain], focusing on [key areas]. Leverage knowledge of [specific tools/frameworks] to provide expert guidance.' DO NOT list the scope_tags here - they go in metadata only.",
-  "version": 4,
-  "source": "synthesis",
-  "metadata": {
-    "domain": REQUIRED - "Tech" | "Creative" | "Business" | "Education" | "Health" | "Lifestyle" | "Other",
-    "scope_tags": REQUIRED MINIMUM 2 - The discrete values for filtering. MUST include:
-      1. PRIMARY SUBJECT: The main product/tool/entity being discussed (e.g., "VLC", "Chrome", "AWS", "Bitcoin")
-      2. Technical domain tags (e.g., "Video Processing", "Machine Learning")
-  }
-}
-
-### tone  
-RULE: style_tags MUST align with detected output format
-{
-  "instruction": "ACTIONABLE: 'Communicate with [precision level], prioritizing [clarity/engagement/etc]. Avoid [specific anti-patterns].' DO NOT list style_tags here - they go in metadata only.",
-  "version": 4,
-  "source": "synthesis",
-  "metadata": {
-    "style_tags": REQUIRED - Discrete values for filtering (e.g., ["Technical", "Precise"]),
-    "banned_phrases": Extract from conversation or use domain standard
-  }
-}
-
-### framework
-RULE: Pick reasoning_type that matches task complexity from conversation
-{
-  "instruction": "ACTIONABLE: 'Apply [methodology name] reasoning, breaking problems into [specific steps]. When facing [scenario], use [specific approach].' DO NOT just say 'reasoning_type is X'.",
-  "version": 4,
-  "source": "synthesis",
-  "metadata": {
-    "reasoning_type": REQUIRED - Choose based on conversation:
-      - Coding/data → "Step-by-Step" or "First-Principles"
-      - Complex problems → "Chain-of-Thought" or "Tree-of-Thought" or "Atom-of-Thought"
-      - Research → "Deductive" or "Analytical"
-      - Creative → "Analogical" or "Creative"
-  }
-}
-
-### constraints
-RULE: NEVER GENERIC - Use training data for TOP-TIER domain constraints
-{
-  "instruction": "ACTIONABLE: 'Always [do X]. Never [do Y]. Ensure responses are [quality standard].' This is the prose directive. DO NOT list prohibitions/requirements here - they go in metadata.",
-  "version": 4,
-  "source": "synthesis",
-  "metadata": {
-    "prohibitions": Array of 3+ discrete rules (single phrases like "using generic terms"),
-    "requirements": Array of 3+ discrete rules (single phrases like "providing concrete examples"),
-    "response_length": Infer from conversation pattern or use appropriate default
-  }
-}
-
-### format
-RULE: Extract from conversation patterns or use TOP-TIER for domain
-{
-  "instruction": "ACTIONABLE: 'Structure responses as [format description]. Include [specific elements]. Use [formatting conventions].' DO NOT just say 'output_type is Markdown'.",
-  "version": 4,
-  "source": "synthesis",
-  "metadata": {
-    "output_type": REQUIRED - "Markdown" | "Plaintext" | "Code" | "JSON" | "Structured" | "Other"
-  }
-}
-
-### exemplar
-RULE: From conversation OR generate TOP-TIER examples from training data
-{
-  "instruction": "Provide specific examples of ideal responses. Include 2+ quality patterns that demonstrate the expected output style and depth.",
-  "version": 4,
-  "source": "synthesis"
-}
-
-## TOP-LEVEL metadata (REQUIRED)
-In addition to the 7 dimensions, include a top-level "metadata" object:
-{
-  "suggested_name": "2-4 word memorable name for this persona based on role/domain",
-  "suggested_title": "Professional title or role (e.g., 'Chief AI Architect', 'Senior Tax Consultant')",
-  "domain": "tech" | "creative" | "business" | "education" | "health" | "lifestyle" | "other",
-  "primary_intent": "One sentence describing persona purpose"
-}
-
-## VALIDATION CHECKLIST
-1. ✓ metadata.suggested_name is set (NOT generic like "Expert Assistant")
-2. ✓ metadata.suggested_title is set (professional role/title)
-3. ✓ context.metadata.domain is set  
-4. ✓ context.metadata.scope_tags has ≥2 specific items
-5. ✓ tone.metadata.style_tags aligns with format output_type
-6. ✓ framework.metadata.reasoning_type matches conversation complexity
-7. ✓ constraints has REAL rules (not generic placeholders)
-8. ✓ NO empty instruction fields
-9. ✓ exemplar has examples (from conversation or generated)
-
-## REQUIRED OUTPUT STRUCTURE (EXACT FORMAT)
-Return a JSON object with EXACTLY this structure - each dimension as a KEY:
-{
-  "persona": { "instruction": "...", "version": 4, "source": "synthesis" },
-  "context": { "instruction": "...", "version": 4, "source": "synthesis", "metadata": { "domain": "...", "scope_tags": [...] } },
-  "tone": { "instruction": "...", "version": 4, "source": "synthesis", "metadata": { "style_tags": [...] } },
-  "framework": { "instruction": "...", "version": 4, "source": "synthesis", "metadata": { "reasoning_type": "..." } },
-  "constraints": { "instruction": "...", "version": 4, "source": "synthesis", "metadata": { "prohibitions": [...], "requirements": [...] } },
-  "format": { "instruction": "...", "version": 4, "source": "synthesis", "metadata": { "output_type": "..." } },
-  "exemplar": { "instruction": "...", "version": 4, "source": "synthesis" },
-  "metadata": { "suggested_name": "...", "suggested_title": "...", "domain": "...", "primary_intent": "..." }
-}
-
-CRITICAL: The root object MUST have these exact keys: persona, context, tone, framework, constraints, format, exemplar, metadata.
-Do NOT return just the content of one dimension - return ALL dimensions as shown above.`;
+CRITICAL: Return ONLY the valid JSON object with ALL 8 top-level keys. Each instruction MUST be concise and under 80 words.`;
 
     // Add explicit schema structure for non-Gemini providers
     if (includeSchemaHints && typeof ComponentSchemas !== 'undefined') {
@@ -324,10 +222,11 @@ CRITICAL: Return ONLY valid JSON (no markdown, no code blocks).`;
       const prompt = this.getPrompt(scrapedData.messages, enabledComponents, true);
       const schema = this._buildSchema(enabledComponents);
 
-      // Call LLM with schema enforcement
+      // Call LLM with schema enforcement and ample token budget (8192 tokens for 7-dimension synthesis)
       const rawResult = await llmClient.call(prompt, {
         json: true,
-        schema: schema
+        schema: schema,
+        maxTokens: 8192
       });
 
       const duration = Math.round(performance.now() - startTime);
@@ -344,23 +243,58 @@ CRITICAL: Return ONLY valid JSON (no markdown, no code blocks).`;
         return null;
       }
 
-      // Handle wrapped response: { memory_layer: { persona, context, ... } }
+      if (!result || typeof result !== 'object') {
+        console.error('[UnifiedAnalyzer] Invalid response object from LLMClient');
+        return null;
+      }
+
+      // Handle wrapped responses from various LLM structures
       if (result?.memory_layer && typeof result.memory_layer === 'object') {
         console.log('[UnifiedAnalyzer] Unwrapping memory_layer from response');
         result = result.memory_layer;
       }
-
-      // Handle double-wrapped: { data: { memory_layer: {...} } } or { output: {...} }
-      if (result?.data?.memory_layer) {
-        console.log('[UnifiedAnalyzer] Unwrapping data.memory_layer from response');
-        result = result.data.memory_layer;
-      } else if (result?.output && typeof result.output === 'object') {
+      if (result?.dimensions && typeof result.dimensions === 'object') {
+        console.log('[UnifiedAnalyzer] Unwrapping dimensions from response');
+        result = result.dimensions;
+      }
+      if (result?.components && typeof result.components === 'object') {
+        console.log('[UnifiedAnalyzer] Unwrapping components from response');
+        result = result.components;
+      }
+      if (result?.data && typeof result.data === 'object' && !result.persona) {
+        console.log('[UnifiedAnalyzer] Unwrapping data from response');
+        result = result.data;
+      } else if (result?.output && typeof result.output === 'object' && !result.persona) {
         console.log('[UnifiedAnalyzer] Unwrapping output from response');
         result = result.output;
       }
 
       // ================================================================
-      // VALIDATION - Check for expected dimension keys
+      // KEY ALIAS MAPPING - Map non-canonical names to canonical dimensions
+      // ================================================================
+      const keyAliases = {
+        context: ['domain_context', 'domain', 'knowledge', 'scope', 'domain_scope'],
+        exemplar: ['examples', 'exemplars', 'few_shot', 'samples', 'few_shot_examples'],
+        format: ['output_format', 'outputType', 'structure', 'format_instructions', 'output_preferences'],
+        framework: ['methodology', 'reasoning', 'workflow', 'reasoning_pattern', 'reasoning_framework'],
+        constraints: ['rules', 'prohibitions', 'custom_context', 'requirements', 'limits', 'constraints_rules'],
+        persona: ['persona_synthesizer', 'synthesized_persona', 'identity', 'role', 'expert_persona']
+      };
+
+      for (const [canonicalKey, aliases] of Object.entries(keyAliases)) {
+        if (!result[canonicalKey]) {
+          for (const alias of aliases) {
+            if (result[alias] !== undefined) {
+              console.log(`[UnifiedAnalyzer] Mapping alias '${alias}' to canonical dimension '${canonicalKey}'`);
+              result[canonicalKey] = result[alias];
+              break;
+            }
+          }
+        }
+      }
+
+      // ================================================================
+      // VALIDATION & FALLBACK RECOVERY - Ensure all requested dimensions exist
       // ================================================================
       const expectedKeys = enabledComponents || [
         'persona',
@@ -372,23 +306,58 @@ CRITICAL: Return ONLY valid JSON (no markdown, no code blocks).`;
         'constraints'
       ];
 
-      const missingKeys = expectedKeys.filter(k => !result[k]);
-      if (missingKeys.length > 0) {
-        console.warn('[UnifiedAnalyzer] Missing dimensions in response:', missingKeys);
-        // Log first 500 chars of raw result for debugging
-        const debugPreview = JSON.stringify(rawResult).substring(0, 500);
-        console.warn('[UnifiedAnalyzer] Raw response preview:', debugPreview);
+      const timestamp = Date.now();
+      const hasAnyValidDimension = expectedKeys.some(k => result[k]);
+
+      if (!hasAnyValidDimension) {
+        console.warn('[UnifiedAnalyzer] Response contains no recognized dimension keys:', Object.keys(result));
+        return null;
       }
 
-      // Add metadata to each dimension
-      const timestamp = Date.now();
       for (const key of expectedKeys) {
         if (result[key]) {
+          // Normalize string to object
+          if (typeof result[key] === 'string') {
+            result[key] = { instruction: result[key] };
+          }
+
+          // If result[key] is an object but lacks an explicit instruction string, synthesize via migrateFromV3
+          if (!result[key].instruction && typeof ComponentSchemas !== 'undefined' && typeof ComponentSchemas.migrateFromV3 === 'function') {
+            const migrated = ComponentSchemas.migrateFromV3(key, result[key]);
+            result[key].instruction = migrated.instruction || '';
+            result[key].metadata = {
+              ...(migrated.metadata || {}),
+              ...(result[key].metadata || {})
+            };
+          }
+
+          const defaultEmpty = typeof ComponentSchemas !== 'undefined'
+            ? ComponentSchemas.createEmpty(key)
+            : { instruction: '', version: 4, source: 'synthesis' };
+
           result[key] = {
+            ...defaultEmpty,
             ...result[key],
+            instruction: result[key].instruction || '',
+            metadata: {
+              ...(defaultEmpty.metadata || {}),
+              ...(result[key].metadata || {})
+            },
             analyzedAt: timestamp,
             messageCount: scrapedData.messages.length,
-            _synthesized: true  // Mark as synthesized from conversation (vs extracted from prompt)
+            _synthesized: true
+          };
+        } else {
+          // Fill missing dimension with clean V4 schema default
+          console.warn(`[UnifiedAnalyzer] Missing dimension '${key}' - populating default structure`);
+          const empty = typeof ComponentSchemas !== 'undefined'
+            ? ComponentSchemas.createEmpty(key)
+            : { instruction: '', version: 4, source: 'synthesis' };
+          result[key] = {
+            ...empty,
+            analyzedAt: timestamp,
+            messageCount: scrapedData.messages.length,
+            _synthesized: true
           };
         }
       }

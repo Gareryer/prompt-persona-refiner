@@ -261,7 +261,7 @@ async function analyzeSession(url, options = {}) {
                     for (const dimensionId of dimensionIds) {
                         const data = unifiedResults[dimensionId];
                         if (data) {
-                            await memory.setComponent(dimensionId, data, 0.9, generation);
+                            await memory.setComponent(dimensionId, data, { generation });
                             memLog('debug', `  ${dimensionId} stored`, {
                                 fields: Object.keys(data).length
                             });
@@ -403,6 +403,9 @@ const SmartAutoRun = {
     _observer: null,
     _pendingAnalysis: false,
     _hasRunInitial: false,
+    _currentSessionId: null,
+    _currentUrl: null,
+    _urlCheckInterval: null,
     MIN_TURNS: 2, // Minimum complete turns before auto-run
 
     /**
@@ -438,7 +441,8 @@ const SmartAutoRun = {
         if (completeTurns < this.MIN_TURNS) {
             return {
                 canRun: false,
-                reason: `Need ${this.MIN_TURNS} complete turns, have ${completeTurns}`
+                reason: `Need ${this.MIN_TURNS} complete turns, have ${completeTurns}`,
+                completeTurns
             };
         }
 
@@ -450,7 +454,7 @@ const SmartAutoRun = {
             const hasExistingMemory = await memory.hasContext();
 
             if (hasExistingMemory) {
-                return { canRun: false, reason: 'Memory already exists', hasMemory: true };
+                return { canRun: false, reason: 'Memory already exists', hasMemory: true, completeTurns };
             }
         }
 
@@ -458,7 +462,7 @@ const SmartAutoRun = {
     },
 
     /**
-     * Set up observer to detect new responses
+     * Set up observer to detect new completed responses
      */
     setupResponseObserver() {
         if (this._observer) return;
@@ -480,20 +484,25 @@ const SmartAutoRun = {
         });
 
         this._observer.observe(chatContainer, { childList: true, subtree: true });
-        memLog('debug', 'SmartAutoRun: Response observer active');
+        memLog('debug', 'SmartAutoRun: Response observer active for current session');
     },
 
     /**
      * Check if a new node indicates a completed response
      */
     async _checkForCompletedResponse(node) {
-        // Already ran initial analysis
+        // Already ran initial analysis for this session
         if (this._hasRunInitial) return;
 
         // Look for model response completion indicators
         const isModelResponse = node.matches?.('[class*="model-response"]') ||
             node.matches?.('[class*="response-container"]') ||
-            node.querySelector?.('[class*="model-response"]');
+            node.matches?.('message-content') ||
+            node.matches?.('.model-turn') ||
+            node.querySelector?.('[class*="model-response"]') ||
+            node.querySelector?.('[class*="response-container"]') ||
+            node.querySelector?.('message-content') ||
+            node.querySelector?.('.model-turn');
 
         if (!isModelResponse) return;
 
@@ -501,23 +510,23 @@ const SmartAutoRun = {
         if (this._pendingAnalysis) return;
         this._pendingAnalysis = true;
 
-        // Wait 2 seconds for streaming to complete
+        // Wait 2.5 seconds for streaming to finish
         setTimeout(async () => {
             this._pendingAnalysis = false;
 
             const { canRun, completeTurns, reason } = await this.canRun();
 
             if (canRun) {
-                memLog('info', 'SmartAutoRun: Threshold reached, running initial analysis', {
+                memLog('info', 'SmartAutoRun: Turn threshold reached after response, running analysis', {
                     completeTurns
                 });
                 this._hasRunInitial = true;
                 await this.runAnalysis();
                 this.cleanup();
             } else {
-                memLog('debug', 'SmartAutoRun: Not ready yet', { reason });
+                memLog('debug', 'SmartAutoRun: Not ready yet', { reason, completeTurns });
             }
-        }, 2000);
+        }, 2500);
     },
 
     /**
@@ -526,15 +535,33 @@ const SmartAutoRun = {
     async runAnalysis() {
         try {
             const url = window.location.href;
-            await analyzeSession(url);
-            memLog('info', 'SmartAutoRun: Initial analysis complete');
+            const sessionId = MemoryController.extractSessionId(url);
+            let enabledAnalyzers = ['persona', 'context', 'tone', 'framework', 'constraints', 'format', 'exemplar'];
+
+            if (sessionId && typeof MemoryController !== 'undefined') {
+                try {
+                    const disabledKey = `session_${sessionId}_disabled`;
+                    const disabledFacts = await MemoryController._makeBridgeRequest('get', disabledKey);
+                    if (disabledFacts && typeof disabledFacts === 'object') {
+                        enabledAnalyzers = enabledAnalyzers.filter(dim => {
+                            return disabledFacts[`component.${dim}`] !== true && disabledFacts[dim] !== true;
+                        });
+                    }
+                } catch (bridgeErr) {
+                    memLog('warn', 'SmartAutoRun: Could not fetch disabled facts via bridge', { error: bridgeErr.message });
+                }
+            }
+
+            memLog('info', 'SmartAutoRun: Running analysis with enabled analyzers', { enabledAnalyzers });
+            await analyzeSession(url, { enabledAnalyzers });
+            memLog('info', 'SmartAutoRun: Analysis complete for session', { url });
         } catch (error) {
             memLog('error', 'SmartAutoRun: Analysis failed', { error: error.message });
         }
     },
 
     /**
-     * Cleanup observer after initial run
+     * Cleanup observer after run or on session switch
      */
     cleanup() {
         if (this._observer) {
@@ -544,29 +571,101 @@ const SmartAutoRun = {
     },
 
     /**
-     * Initialize smart auto-run
+     * Evaluate session state and trigger auto-run or response listener
+     */
+    async checkAndRun() {
+        const { canRun, reason, hasMemory, completeTurns } = await this.canRun();
+
+        if (canRun) {
+            memLog('info', 'SmartAutoRun: Prerequisites met, running auto-analysis', { completeTurns });
+            this._hasRunInitial = true;
+            await this.runAnalysis();
+        } else if (hasMemory) {
+            memLog('debug', 'SmartAutoRun: Memory already exists for this session, skipping auto-run');
+        } else {
+            memLog('debug', 'SmartAutoRun: Waiting for prerequisites (listening for responses)', { reason, completeTurns });
+            this.setupResponseObserver();
+        }
+    },
+
+    /**
+     * Handle SPA route or session change
+     */
+    async handleLocationChange() {
+        const currentUrl = window.location.href;
+        const newSessionId = MemoryController.extractSessionId(currentUrl);
+
+        if (currentUrl === this._currentUrl && newSessionId === this._currentSessionId) {
+            return;
+        }
+
+        memLog('info', `SmartAutoRun: Route/Session changed`, {
+            fromSession: this._currentSessionId,
+            toSession: newSessionId
+        });
+
+        this._currentUrl = currentUrl;
+        this._currentSessionId = newSessionId;
+        this._hasRunInitial = false;
+        this._pendingAnalysis = false;
+        this.cleanup();
+
+        // Allow DOM to settle for SPA transitions before checking turns
+        setTimeout(() => {
+            this.checkAndRun();
+        }, 1000);
+    },
+
+    /**
+     * Initialize smart auto-run with SPA navigation listeners
      */
     async initialize() {
         if (this._initialized) return;
         this._initialized = true;
 
-        memLog('debug', 'SmartAutoRun: Initializing...');
+        this._currentUrl = window.location.href;
+        this._currentSessionId = MemoryController.extractSessionId(this._currentUrl);
 
-        const { canRun, reason, hasMemory } = await this.canRun();
+        memLog('debug', 'SmartAutoRun: Initializing with session', { sessionId: this._currentSessionId });
 
-        if (canRun) {
-            // Already has sufficient data - run immediately (e.g., page navigation to existing chat)
-            memLog('info', 'SmartAutoRun: Prerequisites met, running analysis');
-            this._hasRunInitial = true;
-            await this.runAnalysis();
-        } else if (hasMemory) {
-            // Memory already exists - no need to do anything
-            memLog('debug', 'SmartAutoRun: Memory already exists, skipping');
-        } else {
-            memLog('debug', 'SmartAutoRun: Waiting for prerequisites', { reason });
-            // Set up observer to wait for data
-            this.setupResponseObserver();
+        // Hook history API to intercept SPA navigation
+        try {
+            const originalPushState = history.pushState;
+            history.pushState = function (...args) {
+                const result = originalPushState.apply(this, args);
+                window.dispatchEvent(new Event('pa-locationchange'));
+                return result;
+            };
+
+            const originalReplaceState = history.replaceState;
+            history.replaceState = function (...args) {
+                const result = originalReplaceState.apply(this, args);
+                window.dispatchEvent(new Event('pa-locationchange'));
+                return result;
+            };
+
+            window.addEventListener('popstate', () => {
+                window.dispatchEvent(new Event('pa-locationchange'));
+            });
+
+            window.addEventListener('pa-locationchange', () => {
+                this.handleLocationChange();
+            });
+        } catch (e) {
+            memLog('warn', 'SmartAutoRun: Could not hook history API', { error: e.message });
         }
+
+        // Periodic URL watcher fallback for robust SPA detection
+        if (!this._urlCheckInterval) {
+            this._urlCheckInterval = setInterval(() => {
+                if (window.location.href !== this._currentUrl) {
+                    this.handleLocationChange();
+                }
+            }, 1500);
+        }
+
+        // Initial evaluation
+        await this.checkAndRun();
     }
 };
 

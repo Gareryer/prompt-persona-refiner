@@ -124,22 +124,21 @@ const ComponentSchemas = {
                 },
                 metadata: {
                     type: "object",
-                    nullable: true,
                     properties: {
                         domain: {
                             type: "string",
-                            nullable: true,
-                            description: "Primary domain category (single-select chip)"
+                            description: "Primary domain category: Tech, Creative, Business, Education, Health, Lifestyle, Other"
                         },
                         scope_tags: {
                             type: "array",
                             items: { type: "string" },
                             description: "Topics in scope (multi-select + custom tags)"
                         }
-                    }
+                    },
+                    required: ["domain", "scope_tags"]
                 }
             },
-            required: ["instruction"]
+            required: ["instruction", "metadata"]
         },
 
         // ====================================================================
@@ -155,7 +154,6 @@ const ComponentSchemas = {
                 },
                 metadata: {
                     type: "object",
-                    nullable: true,
                     properties: {
                         style_tags: {
                             type: "array",
@@ -167,10 +165,11 @@ const ComponentSchemas = {
                             items: { type: "string" },
                             description: "Phrases to avoid (multi-select + custom)"
                         }
-                    }
+                    },
+                    required: ["style_tags", "banned_phrases"]
                 }
             },
-            required: ["instruction"]
+            required: ["instruction", "metadata"]
         },
 
         // ====================================================================
@@ -186,17 +185,16 @@ const ComponentSchemas = {
                 },
                 metadata: {
                     type: "object",
-                    nullable: true,
                     properties: {
                         reasoning_type: {
                             type: "string",
-                            nullable: true,
                             description: "Reasoning approach (single-select chip)"
                         }
-                    }
+                    },
+                    required: ["reasoning_type"]
                 }
             },
-            required: ["instruction"]
+            required: ["instruction", "metadata"]
         },
 
         // ====================================================================
@@ -212,7 +210,6 @@ const ComponentSchemas = {
                 },
                 metadata: {
                     type: "object",
-                    nullable: true,
                     properties: {
                         prohibitions: {
                             type: "array",
@@ -226,13 +223,13 @@ const ComponentSchemas = {
                         },
                         response_length: {
                             type: "string",
-                            nullable: true,
                             description: "Length limit e.g., '500 words' (auto-generated if empty)"
                         }
-                    }
+                    },
+                    required: ["prohibitions", "requirements", "response_length"]
                 }
             },
-            required: ["instruction"]
+            required: ["instruction", "metadata"]
         },
 
         // ====================================================================
@@ -248,17 +245,16 @@ const ComponentSchemas = {
                 },
                 metadata: {
                     type: "object",
-                    nullable: true,
                     properties: {
                         output_type: {
                             type: "string",
-                            nullable: true,
                             description: "Primary output format (single-select chip)"
                         }
-                    }
+                    },
+                    required: ["output_type"]
                 }
             },
-            required: ["instruction"]
+            required: ["instruction", "metadata"]
         },
 
         // ====================================================================
@@ -274,6 +270,32 @@ const ComponentSchemas = {
                 }
             },
             required: ["instruction"]
+        },
+
+        // ====================================================================
+        // TOP-LEVEL METADATA: Persona summary & taxonomy
+        // ====================================================================
+        metadata: {
+            type: "object",
+            properties: {
+                suggested_name: {
+                    type: "string",
+                    description: "2-4 word memorable name for this persona based on role/domain"
+                },
+                suggested_title: {
+                    type: "string",
+                    description: "Professional title or role (e.g., 'Chief AI Architect', 'Senior Tax Consultant')"
+                },
+                domain: {
+                    type: "string",
+                    description: "Primary domain: 'tech' | 'creative' | 'business' | 'education' | 'health' | 'lifestyle' | 'other'"
+                },
+                primary_intent: {
+                    type: "string",
+                    description: "One sentence describing persona purpose"
+                }
+            },
+            required: ["suggested_name", "suggested_title", "domain", "primary_intent"]
         }
     },
 
@@ -318,7 +340,10 @@ const ComponentSchemas = {
      * const partialSchema = ComponentSchemas.buildCombinedSchema(['persona', 'tone']);
      */
     buildCombinedSchema(componentIds = null) {
-        const ids = componentIds || this.componentIds;
+        const ids = componentIds ? [...componentIds] : [...this.componentIds];
+        if (!ids.includes('metadata')) {
+            ids.push('metadata');
+        }
         const properties = {};
         const required = [];
 
@@ -355,9 +380,11 @@ const ComponentSchemas = {
 
         const errors = [];
 
-        // === Check instruction field (required for all v4 dimensions) ===
-        if (!data.instruction || typeof data.instruction !== 'string') {
-            errors.push(`Missing or invalid 'instruction' field`);
+        // === Check instruction field (required for all v4 dimensions except metadata) ===
+        if (componentId !== 'metadata') {
+            if (typeof data?.instruction !== 'string') {
+                errors.push(`Missing or invalid 'instruction' field`);
+            }
         }
 
         // === Validate metadata if present ===

@@ -38,7 +38,7 @@ class ModelManagerUI {
         await this.manager.init();
 
         // Render the UI
-        this.render();
+        await this.render();
 
         // Set up event listeners
         this.setupEventListeners();

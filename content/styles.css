@@ -1226,3 +1226,90 @@ body[data-gemini-theme="light"] {
 .gemini-ext-empty-state.api-key-missing .empty-state-hint {
     margin-bottom: 12px;
 }
+
+/* ============================================================================
+   ERROR BANNER - Displayed on API errors (replaces textarea corruption)
+   ============================================================================ */
+
+.gemini-ext-error-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    margin: 0 16px 8px;
+    border-radius: 12px;
+    background: rgba(234, 67, 53, 0.08);
+    border: 1px solid rgba(234, 67, 53, 0.2);
+    animation: errorBannerSlideIn 0.25s ease-out;
+}
+
+.gemini-ext-error-banner[style*="display: flex"],
+.gemini-ext-error-banner.visible {
+    display: flex;
+}
+
+@keyframes errorBannerSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.gemini-ext-error-banner-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.gemini-ext-error-icon {
+    flex-shrink: 0;
+    color: var(--ext-color-error);
+    margin-top: 1px;
+}
+
+.gemini-ext-error-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.gemini-ext-error-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ext-color-error);
+    font-family: 'Google Sans', sans-serif;
+}
+
+.gemini-ext-error-message {
+    font-size: 12px;
+    color: var(--ext-color-text-secondary, rgba(255,255,255,0.6));
+    font-family: 'Google Sans', sans-serif;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.gemini-ext-error-retry {
+    flex-shrink: 0;
+    font-size: 12px !important;
+    padding: 4px 12px !important;
+    height: 28px !important;
+    border-radius: 14px !important;
+}
+
+/* Light theme adjustments */
+.theme-light .gemini-ext-error-banner {
+    background: rgba(217, 48, 37, 0.06);
+    border-color: rgba(217, 48, 37, 0.15);
+}
+
+.theme-light .gemini-ext-error-message {
+    color: var(--ext-color-text-secondary, rgba(0,0,0,0.6));
+}
