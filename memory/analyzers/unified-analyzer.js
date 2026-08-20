@@ -115,6 +115,7 @@ Synthesize a comprehensive, modular Expert Persona from the conversation history
 1. **CONCISE & DENSE**: Each dimension's \`instruction\` field MUST be 2 to 4 sentences (under 80 words). NEVER write runaway monologues, repetitive essays, or endless descriptions.
 2. **DISTRIBUTE ACROSS ALL DIMENSIONS**: Do NOT dump all information into \`persona\`. Keep \`persona\` strictly for identity/credentials (under 80 words), and populate each specific dimension with its dedicated guidance and structured metadata chips.
 3. **GROUNDED & SPECIFIC**: Mention the exact product/technology/domain being discussed (e.g. Claude naming, React, AWS). If not explicitly stated, infer top-tier credentials for that specific subject.
+4. **PROPORTIONAL CREDENTIALS**: If the conversation is brief or covers a single focused task, calibrate the persona's credentials and scope proportionally to the subject without inventing exaggerated, fictitious academic backgrounds.
 
 ${ratingContext}
 
@@ -158,22 +159,22 @@ ${recentText}
 - **instruction**: 2-4 lines (40-80 words max) showing a representative input and ideal expert response snippet.
 
 ### 8. metadata (Top-Level Summary)
-- **suggested_name**: 2-4 word memorable name (e.g., "AI Nomenclature Architect")
-- **suggested_title**: Professional title (e.g., "Chief Computational Lexicographer")
-- **domain**: Lowercase domain category ("tech", "creative", "business", etc.)
-- **primary_intent**: One sentence describing core persona purpose
+- **suggested_name**: Exactly 2 to 3 words. A punchy, memorable archetype name (e.g., "Prompt Architect", "Code Mentor", "UX Strategist", "Lexicon Guide"). NEVER include subtitles, hyphens, colons, or multi-part clauses.
+- **suggested_title**: Professional role in 2 to 4 words (e.g., "AI Lexicographer")
+- **domain**: Lowercase domain category ("tech", "creative", "business", "education", "health", "lifestyle", "other")
+- **primary_intent**: One concise sentence describing core persona purpose
 
 ## REQUIRED OUTPUT JSON FORMAT
 Return a SINGLE JSON object containing ALL dimensions and metadata:
 {
-  "persona": { "instruction": "You are Dr. Elara Vance, Chief Lexicographer of AI Nomenclature with 20 years of experience in computational linguistics and semiotics, holding a PhD from Cambridge. Your mission is to deconstruct AI model naming conventions and reveal their etymological and strategic framing.", "version": 4, "source": "synthesis" },
+  "persona": { "instruction": "You are Dr. Elara Vance, an AI Lexicographer specializing in model nomenclature with 15 years of experience. Your mission is to deconstruct AI naming conventions and reveal their strategic framing.", "version": 4, "source": "synthesis" },
   "context": { "instruction": "Apply deep domain expertise in AI branding and computational semiotics, focusing on Anthropic Claude model nomenclature and historical linguistic roots.", "version": 4, "source": "synthesis", "metadata": { "domain": "Tech", "scope_tags": ["Anthropic Claude", "AI Model Naming", "Computational Linguistics", "Semiotics"] } },
   "tone": { "instruction": "Communicate with academic rigor, precision, and scholarly authority. Avoid colloquialisms and superficial explanations.", "version": 4, "source": "synthesis", "metadata": { "style_tags": ["Technical", "Authoritative", "Academic", "Precise"], "banned_phrases": ["simple name", "just a branding choice"] } },
   "framework": { "instruction": "Structure analysis using semiotic deconstruction and historical etymology. Step 1: Identify root origins. Step 2: Connect to technological capabilities.", "version": 4, "source": "synthesis", "metadata": { "reasoning_type": "Analytical" } },
   "constraints": { "instruction": "Always ground interpretations in documented linguistic evidence. Never use generic tech buzzwords or ungrounded claims.", "version": 4, "source": "synthesis", "metadata": { "prohibitions": ["Generic buzzwords", "Superficial summaries"], "requirements": ["Linguistic evidence", "Etymological origins"], "response_length": "Structured" } },
   "format": { "instruction": "Format responses using clean Markdown with hierarchical headings, bullet points, and comparative tables.", "version": 4, "source": "synthesis", "metadata": { "output_type": "Markdown" } },
   "exemplar": { "instruction": "User: Why did Anthropic name their model 'Opus'?\\nAI: 'Opus' stems from Latin meaning 'a work of art or masterwork', signifying peak reasoning capability in contrast to 'Sonnet' (structural harmony) and 'Haiku' (concise efficiency).", "version": 4, "source": "synthesis" },
-  "metadata": { "suggested_name": "AI Nomenclature Architect", "suggested_title": "Chief Computational Lexicographer", "domain": "tech", "primary_intent": "Analyze and deconstruct AI model naming conventions and semiotics." }
+  "metadata": { "suggested_name": "Lexicon Guide", "suggested_title": "AI Lexicographer", "domain": "tech", "primary_intent": "Analyze and deconstruct AI model naming conventions and semiotics." }
 }
 
 CRITICAL: Return ONLY the valid JSON object with ALL 8 top-level keys. Each instruction MUST be concise and under 80 words.`;
@@ -248,45 +249,59 @@ CRITICAL: Return ONLY valid JSON (no markdown, no code blocks).`;
         return null;
       }
 
+      // Convert array response to object if needed
+      if (Array.isArray(result)) {
+        console.log('[UnifiedAnalyzer] Converting dimension array to object');
+        const obj = {};
+        for (const item of result) {
+          if (item && typeof item === 'object') {
+            const key = (item.id || item.name || item.dimension || item.component || item.type || '').toLowerCase().trim();
+            if (key) {
+              obj[key] = item;
+            }
+          }
+        }
+        if (Object.keys(obj).length > 0) {
+          result = obj;
+        }
+      }
+
       // Handle wrapped responses from various LLM structures
-      if (result?.memory_layer && typeof result.memory_layer === 'object') {
-        console.log('[UnifiedAnalyzer] Unwrapping memory_layer from response');
-        result = result.memory_layer;
+      const unwrappers = ['memory_layer', 'dimensions', 'components', 'persona_components', 'synthesis', 'data', 'output'];
+      for (const prop of unwrappers) {
+        if (result?.[prop] && typeof result[prop] === 'object' && !Array.isArray(result[prop])) {
+          console.log(`[UnifiedAnalyzer] Unwrapping/merging '${prop}' from response`);
+          result = { ...result[prop], ...result };
+        }
       }
-      if (result?.dimensions && typeof result.dimensions === 'object') {
-        console.log('[UnifiedAnalyzer] Unwrapping dimensions from response');
-        result = result.dimensions;
+
+      // Lowercase all top-level keys for case-insensitive matching
+      const normalizedResult = {};
+      for (const [k, v] of Object.entries(result)) {
+        normalizedResult[k.toLowerCase().trim()] = v;
       }
-      if (result?.components && typeof result.components === 'object') {
-        console.log('[UnifiedAnalyzer] Unwrapping components from response');
-        result = result.components;
-      }
-      if (result?.data && typeof result.data === 'object' && !result.persona) {
-        console.log('[UnifiedAnalyzer] Unwrapping data from response');
-        result = result.data;
-      } else if (result?.output && typeof result.output === 'object' && !result.persona) {
-        console.log('[UnifiedAnalyzer] Unwrapping output from response');
-        result = result.output;
-      }
+      result = { ...result, ...normalizedResult };
 
       // ================================================================
       // KEY ALIAS MAPPING - Map non-canonical names to canonical dimensions
       // ================================================================
       const keyAliases = {
-        context: ['domain_context', 'domain', 'knowledge', 'scope', 'domain_scope'],
-        exemplar: ['examples', 'exemplars', 'few_shot', 'samples', 'few_shot_examples'],
-        format: ['output_format', 'outputType', 'structure', 'format_instructions', 'output_preferences'],
-        framework: ['methodology', 'reasoning', 'workflow', 'reasoning_pattern', 'reasoning_framework'],
-        constraints: ['rules', 'prohibitions', 'custom_context', 'requirements', 'limits', 'constraints_rules'],
-        persona: ['persona_synthesizer', 'synthesized_persona', 'identity', 'role', 'expert_persona']
+        persona: ['persona_synthesizer', 'synthesized_persona', 'identity', 'role', 'expert_persona', 'persona_instruction', 'system_prompt', 'persona_prompt', 'expert_identity'],
+        context: ['domain_context', 'domain', 'knowledge', 'scope', 'domain_scope', 'context_scope', 'background_context', 'domain_knowledge'],
+        tone: ['tone_and_style', 'tone_style', 'style', 'voice', 'voice_and_tone', 'tone_preferences', 'communication_style', 'tone_guide', 'style_guide', 'tone_and_voice', 'voice_tone'],
+        framework: ['methodology', 'reasoning', 'workflow', 'reasoning_pattern', 'reasoning_framework', 'method', 'framework_methodology', 'thinking_process', 'approach'],
+        constraints: ['rules', 'prohibitions', 'custom_context', 'requirements', 'limits', 'constraints_rules', 'negative_constraints', 'guidelines', 'boundaries', 'rules_and_constraints', 'restrictions', 'limitations'],
+        format: ['output_format', 'outputtype', 'output_type', 'structure', 'format_instructions', 'output_preferences', 'output', 'format_structure', 'output_style'],
+        exemplar: ['examples', 'exemplars', 'few_shot', 'samples', 'few_shot_examples', 'example_patterns', 'patterns', 'few_shot_patterns', 'sample_dialogues', 'example_interactions', 'sample_conversations', 'few_shot_exemplars']
       };
 
       for (const [canonicalKey, aliases] of Object.entries(keyAliases)) {
         if (!result[canonicalKey]) {
           for (const alias of aliases) {
-            if (result[alias] !== undefined) {
-              console.log(`[UnifiedAnalyzer] Mapping alias '${alias}' to canonical dimension '${canonicalKey}'`);
-              result[canonicalKey] = result[alias];
+            const lowerAlias = alias.toLowerCase();
+            if (result[lowerAlias] !== undefined) {
+              console.log(`[UnifiedAnalyzer] Mapping alias '${lowerAlias}' to canonical dimension '${canonicalKey}'`);
+              result[canonicalKey] = result[lowerAlias];
               break;
             }
           }
@@ -319,6 +334,20 @@ CRITICAL: Return ONLY valid JSON (no markdown, no code blocks).`;
           // Normalize string to object
           if (typeof result[key] === 'string') {
             result[key] = { instruction: result[key] };
+          } else if (Array.isArray(result[key])) {
+            // Normalize array of items/strings to instruction text
+            const textLines = result[key].map(item => {
+              if (typeof item === 'string') return item;
+              if (item && typeof item === 'object') {
+                if (item.instruction) return item.instruction;
+                if (item.text) return item.text;
+                if (item.user && item.ai) return `User: ${item.user}\nAI: ${item.ai}`;
+                if (item.rule) return item.rule;
+                return JSON.stringify(item);
+              }
+              return String(item);
+            }).filter(Boolean);
+            result[key] = { instruction: textLines.join('\n') };
           }
 
           // If result[key] is an object but lacks an explicit instruction string, synthesize via migrateFromV3
@@ -338,7 +367,9 @@ CRITICAL: Return ONLY valid JSON (no markdown, no code blocks).`;
           result[key] = {
             ...defaultEmpty,
             ...result[key],
-            instruction: result[key].instruction || '',
+            instruction: (result[key].instruction !== undefined && result[key].instruction !== null)
+              ? String(result[key].instruction).trim()
+              : '',
             metadata: {
               ...(defaultEmpty.metadata || {}),
               ...(result[key].metadata || {})

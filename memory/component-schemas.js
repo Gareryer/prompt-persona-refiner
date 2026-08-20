@@ -280,11 +280,11 @@ const ComponentSchemas = {
             properties: {
                 suggested_name: {
                     type: "string",
-                    description: "2-4 word memorable name for this persona based on role/domain"
+                    description: "2-3 word punchy, memorable archetype name (e.g., 'Prompt Architect', 'Code Mentor', 'UX Strategist'). No subtitles or hyphens."
                 },
                 suggested_title: {
                     type: "string",
-                    description: "Professional title or role (e.g., 'Chief AI Architect', 'Senior Tax Consultant')"
+                    description: "2-4 word professional role (e.g., 'AI Systems Architect', 'Tax Consultant')"
                 },
                 domain: {
                     type: "string",

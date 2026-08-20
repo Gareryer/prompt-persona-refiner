@@ -607,7 +607,7 @@ RULE: Extract ALL examples VERBATIM, or adopt top-tier examples for domain
 }
 
 ## metadata
-- suggested_name: 2-4 words, memorable
+- suggested_name: 2-3 words, punchy and memorable archetype name (no subtitles or hyphens)
 - use_case_keywords: Exactly 5 keywords
 - primary_intent: One sentence
 - target_audience: Who benefits

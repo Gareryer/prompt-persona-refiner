@@ -2439,11 +2439,9 @@ function renderSynthesizedPersona(component) {
         const name = component.personaName || data.personaName || data.name || null;
         const title = data.title || data.role || null;
 
-        // Build display: "Name - Title" or just "Name" or fallback
+        // Build display: Single, memorable archetype name (never concatenate "Name - Title")
         let displayText;
-        if (name && title) {
-            displayText = `${name} - ${title}`;
-        } else if (name) {
+        if (name) {
             displayText = name;
         } else if (title) {
             displayText = title;
@@ -2451,7 +2449,19 @@ function renderSynthesizedPersona(component) {
             displayText = component.imported ? 'Imported Persona' : (hasPersonaData ? 'SmartRun Persona' : 'No Persona Active');
         }
 
+        // Sanitize any legacy hyphenated strings (e.g. "Name - Subtitle") to just the primary archetype name
+        if (displayText && displayText.includes(' - ')) {
+            displayText = displayText.split(' - ')[0].trim();
+        }
+
         topPersonaNameEl.textContent = displayText;
+
+        // Provide full professional title/role as a clean hover tooltip
+        if (title && name && title !== name) {
+            topPersonaNameEl.title = title;
+        } else {
+            topPersonaNameEl.title = displayText;
+        }
     }
 
     // Update PIN button state - now uses Material Symbol icon

@@ -52,26 +52,26 @@ This is "working memory" - what's being discussed RIGHT NOW.
 Your analysis helps the persona understand the current state and momentum of the conversation.
 This is different from overall summary - it's about the LIVE, IMMEDIATE context.
 
-IMPORTANT:
-Only analyze what's happening in these recent turns, not the entire conversation.
-Focus on: What are they working on now? What was just asked? What's the current momentum?
+CRITICAL BREVITY RULES (MANDATORY):
+- Keep each property strictly concise (1 sentence max, under 20 words).
+- Do NOT generate paragraphs or long narrative descriptions.
 ${ratingContext}
 RECENT CONVERSATION (Last ${recentMessages.length} turns):
 ${conversationText}
 
-ANALYZE THE IMMEDIATE CONTEXT AND RETURN JSON:
+ANALYZE THE IMMEDIATE CONTEXT AND RETURN ONLY JSON:
 {
-  "currentFocus": "What is being actively worked on or discussed right now?",
-  "lastRequest": "What did the user most recently ask for or want?",
-  "activeTask": "What task/activity is in progress? (e.g., 'implementing feature X', 'debugging Y')",
+  "currentFocus": "1 concise sentence (<20 words): What is being actively discussed right now?",
+  "lastRequest": "1 concise sentence (<20 words): What did the user most recently ask for?",
+  "activeTask": "Short phrase (<15 words): What task or activity is in progress?",
   "momentum": {
     "direction": "progressing/refining/stuck/pivoting/wrapping-up",
-    "observation": "Brief note on why you assessed this"
+    "observation": "Brief 1-sentence note (<15 words) on why you assessed this"
   },
   "recentSatisfaction": "low/neutral/high based on recent ratings, or 'unknown' if no ratings",
-  "openItems": ["Any unresolved questions or pending items"],
-  "immediateNeeds": "What does the user likely need next based on current context?",
-  "continuityContext": "Key context that should be carried into the next interaction"
+  "openItems": ["1-3 short bullet items of unresolved questions or pending tasks"],
+  "immediateNeeds": "1 concise sentence (<20 words): What does the user need next?",
+  "continuityContext": "1 concise sentence (<20 words): Key context to carry forward"
 }`;
     },
 

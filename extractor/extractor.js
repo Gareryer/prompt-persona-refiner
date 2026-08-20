@@ -168,8 +168,8 @@ Example interactions or patterns.
 }
 
 ## metadata (for search/filtering)
-- suggested_name: 2 word memorable name
-- suggested_title: Professional title (e.g., "Chief AI Architect")
+- suggested_name: 2-3 word punchy, memorable archetype name (e.g., "Prompt Architect", "Code Mentor", "UX Strategist"). No subtitles or hyphens.
+- suggested_title: Professional title in 2-4 words (e.g., "AI Systems Architect")
 - use_case_keywords: Array of exactly 5 searchable keywords (FIRST must be PRIMARY SUBJECT)
 - primary_intent: One sentence main purpose
 - target_audience: Who this persona serves

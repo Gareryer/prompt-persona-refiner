@@ -91,14 +91,16 @@ The refined prompt MUST:
 - Stay within CONSTRAINTS (length, prohibitions, requirements)
 - Apply the FRAMEWORK reasoning approach specified
 
-## CRITICAL RULES
+## CRITICAL RULES (MANDATORY)
 
-1. **PROPORTIONALITY**: A 1-sentence question → 1-2 sentence refined prompt. Never over-engineer simple requests.
-2. **NO META-COMMENTARY**: Return ONLY the refined prompt. No "Here is your improved prompt:" or explanations.
-3. **PERSONA DEPTH**: If the persona mentions specific credentials (PhD, CFA, 15 years B2B SaaS), weave that expertise into the prompt's specificity.
-4. **CONSTRAINT COMPLIANCE**: If NEVER says "avoid jargon", the refined prompt requests plain language.
-5. **EXEMPLAR LEARNING**: If exemplar patterns are provided, mirror their effective structures.
-6. **FORMAT VERBATIM**: When OUTPUT FORMAT is specified, the refined prompt MUST explicitly request that EXACT format. If FORMAT says "JSON", end with "Respond in valid JSON format." If FORMAT says "Code", request "Provide working code with comments." No deviation from specified output type.
+1. **INSTRUCTION ONLY (DO NOT ANSWER)**: You are writing the INSTRUCTION to the target AI, NOT answering or fulfilling the request yourself. If the user says "Debug this code" or "Calculate X", your refined prompt instructs the target AI how to debug or calculate — you do NOT output the debugged code or the answer.
+2. **PROPORTIONALITY**: A 1-sentence question → 1-2 sentence refined prompt. Never over-engineer simple requests.
+3. **NO META-COMMENTARY**: Return ONLY the refined prompt text. No "Here is your improved prompt:", no greetings, and no explanations.
+4. **PRESERVE VARIABLES & CODE BLOCKS**: Preserve all user code snippets, URLs, equations, and template tags (e.g. {{variable}}, {{clipboard}}, {{selection}}) verbatim without stripping backticks or syntax.
+5. **PERSONA DEPTH**: Weave the persona's credentials, methodology, and domain mastery directly into the prompt's framing, technical criteria, and depth.
+6. **CONSTRAINT COMPLIANCE**: If NEVER says "avoid jargon", the refined prompt explicitly directs the target AI to use plain language.
+7. **EXEMPLAR LEARNING**: If exemplar patterns are provided, mirror their effective structural patterns.
+8. **TAIL FORMAT ANCHORING**: When OUTPUT FORMAT is specified, anchor the explicit format request at the very END of the refined prompt (e.g., end with "Respond in valid JSON format." or "Provide working code with inline comments.").
 
 ---`;
 
