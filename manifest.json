@@ -11,6 +11,7 @@
   },
   "permissions": [
     "storage",
+    "unlimitedStorage",
     "scripting",
     "tabs",
     "clipboardWrite",
@@ -104,7 +105,13 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "icons/icon128.png"
+        "icons/icon16.png",
+        "icons/icon32.png",
+        "icons/icon48.png",
+        "icons/icon128.png",
+        "sidepanel/index.html",
+        "sidepanel/sidepanel.js",
+        "sidepanel/sidepanel.css"
       ],
       "matches": [
         "https://gemini.google.com/*"

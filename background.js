@@ -52,12 +52,26 @@ const bgLog = (level, msg, data = {}) => {
 
 bgLog('info', 'Background service worker starting...');
 
+// Initialize session storage access level for content script bridge access
+if (chrome?.storage?.session?.setAccessLevel) {
+  chrome.storage.session.setAccessLevel({
+    accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS'
+  }).catch(err => {
+    bgLog('warn', 'Failed to set session storage access level', { error: err.message });
+  });
+}
+
 // ============================================================================
 // First-Run & API Key Onboarding
 // ============================================================================
 
 // Open options page on first install if no API key configured
 chrome.runtime.onInstalled.addListener(async (details) => {
+  if (chrome?.storage?.session?.setAccessLevel) {
+    chrome.storage.session.setAccessLevel({
+      accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS'
+    }).catch(() => {});
+  }
   if (details.reason === 'install') {
     bgLog('info', 'Extension installed - checking for API key');
     const { geminiApiKey } = await chrome.storage.local.get('geminiApiKey');
