@@ -1,11 +1,11 @@
 ---
 name: gortex-6-dirs
-description: "Work in the . +6 dirs area — 45 symbols across 10 files (73% cohesion)"
+description: "Work in the . +6 dirs area — 40 symbols across 10 files (74% cohesion)"
 ---
 
 # . +6 dirs
 
-45 symbols | 10 files | 73% cohesion
+40 symbols | 10 files | 74% cohesion
 
 ## When to Use
 
@@ -25,16 +25,16 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `` | padStart, slice, toUpperCase, from, charAt |
-| `background.js` | getEncryptionKey, decryptApiKey |
+| `` | from, slice, padStart |
+| `background.js` | decryptApiKey, getEncryptionKey |
 | `content\scraper.js` | pad |
 | `memory\analyzer-registry.js` | AnalyzerRegistry.getAllAnalyzers |
 | `memory\analyzers\recent-focus.js` | RecentFocus.analyze |
-| `memory\memory-controller.js` | _sanitizeComponentData, _truncateString |
-| `security\runtime-security.js` | getSessionId, SecurityManager.getSessionId, generateKey |
-| `sidepanel\sidepanel.js` | capitalizeFirst, parseExtractionResult, updateDimensionPinButton, formatMemoryKey |
-| `supabase\schema.sql` | update_persona_rating, increment_import_count |
-| `supabase\supabase-client.js` | searchPersonas, init, createPersona, loadSupabaseLib, getPersona, ... |
+| `memory\memory-controller.js` | _truncateString, _sanitizeComponentData |
+| `security\runtime-security.js` | SecurityManager.getSessionId, getSessionId, generateKey |
+| `sidepanel\sidepanel.js` | parseExtractionResult |
+| `supabase\schema.sql` | increment_import_count, update_persona_rating |
+| `supabase\supabase-client.js` | deletePersona, SupabaseClient, getUser, hasRatedPersona, createSavedPrompt, ... |
 
 ## Entry Points
 
@@ -43,20 +43,21 @@ Use this skill when working on files in:
 
 ## Connected Communities
 
-- **memory +7 dirs** (8 cross-edges)
 - **. +7 dirs** (6 cross-edges)
-- **content +4 dirs** (3 cross-edges)
-- **content +5 dirs** (3 cross-edges)
-- **content +3 dirs** (2 cross-edges)
-- **. +5 dirs** (2 cross-edges)
-- **. +2 dirs · bgLog** (1 cross-edges)
-- **. +2 dirs · stringify** (1 cross-edges)
+- **memory +4 dirs · validateExtractionResponse** (4 cross-edges)
+- **content +5 dirs** (2 cross-edges)
+- **. +5 dirs · includes** (2 cross-edges)
+- **. +5 dirs · replace** (2 cross-edges)
+- **content +4 dirs** (2 cross-edges)
 - **. +1 dirs · spLog** (1 cross-edges)
+- **. +2 dirs · bgLog** (1 cross-edges)
+- **memory +4 dirs · map** (1 cross-edges)
+- **. +2 dirs · stringify** (1 cross-edges)
 
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-36")
+analyze(operation:"communities", id:"community-32")
 explore(operation:"context", task:"understand . +6 dirs", format:"gcx")
 relations(operation:"usages", target:{symbol:"supabase\supabase-client.js::SupabaseClient.updatePersona"}, format:"gcx")
 ```

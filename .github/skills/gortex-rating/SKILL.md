@@ -18,7 +18,7 @@ Use this skill when working on files in:
 | File | Symbols |
 |------|---------|
 | `rating\rating-injector.js` | RatingInjector.refreshAll |
-| `rating\rating-manager.js` | load, clearAll, ratingLog, getRating, setRating, ... |
+| `rating\rating-manager.js` | getRating, save, constructor, ratingLog, removeRating, ... |
 
 ## Entry Points
 
@@ -27,19 +27,20 @@ Use this skill when working on files in:
 ## Connected Communities
 
 - **. +7 dirs** (7 cross-edges)
-- **memory +7 dirs** (5 cross-edges)
-- **content +3 dirs** (2 cross-edges)
+- **memory +4 dirs · validateExtractionResponse** (4 cross-edges)
 - **. +2 dirs · bgLog** (2 cross-edges)
+- **content +3 dirs** (2 cross-edges)
 - **. +6 dirs** (2 cross-edges)
 - **memory +3 dirs** (1 cross-edges)
-- **content +4 dirs** (1 cross-edges)
-- **content +5 dirs** (1 cross-edges)
+- **. +5 dirs · replace** (1 cross-edges)
 - **. +2 dirs · stringify** (1 cross-edges)
+- **content +5 dirs** (1 cross-edges)
+- **content +4 dirs** (1 cross-edges)
 
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-21")
+analyze(operation:"communities", id:"community-16")
 explore(operation:"context", task:"understand rating", format:"gcx")
 relations(operation:"usages", target:{symbol:"rating\rating-manager.js::RatingManager.restoreFromStorage"}, format:"gcx")
 ```

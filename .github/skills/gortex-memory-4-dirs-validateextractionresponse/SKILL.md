@@ -22,7 +22,7 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `` | keys, substring, entries, repeat, startsWith |
+| `` | startsWith, entries, keys, repeat, substring |
 | `memory\analyzer-registry.js` | AnalyzerRegistry.getAnalyzerIds |
 | `memory\context-assembler.js` | _buildSummary |
 | `model\model-manager.js` | _validateApiKeyFormat, maskApiKey |
@@ -36,17 +36,17 @@ Use this skill when working on files in:
 
 ## Connected Communities
 
-- **. +5 dirs** (9 cross-edges)
+- **. +5 dirs · includes** (9 cross-edges)
 - **. +1 dirs · spLog** (5 cross-edges)
 - **. +6 dirs** (4 cross-edges)
-- **. +4 dirs** (4 cross-edges)
+- **. +5 dirs · replace** (4 cross-edges)
 - **content +5 dirs** (3 cross-edges)
-- **. +1 dirs · handlePersonaSearch** (2 cross-edges)
-- **memory +3 dirs** (1 cross-edges)
-- **. +2 dirs · stringify** (1 cross-edges)
+- **memory +4 dirs · map** (2 cross-edges)
 - **. +7 dirs** (1 cross-edges)
 - **. +2 dirs · bgLog** (1 cross-edges)
 - **rating** (1 cross-edges)
+- **. +2 dirs · stringify** (1 cross-edges)
+- **memory +3 dirs** (1 cross-edges)
 
 ## How to Explore
 

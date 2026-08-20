@@ -16,12 +16,12 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `supabase\schema.sql` | source_prompt, memory_layer, updated_at, rating_sum, avg_rating, ... |
+| `supabase\schema.sql` | metadata, provider, llm_model, use_case_keywords, rating_count, ... |
 
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-31")
+analyze(operation:"communities", id:"community-27")
 explore(operation:"context", task:"understand supabase · personas", format:"gcx")
 ```
 

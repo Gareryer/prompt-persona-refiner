@@ -22,7 +22,7 @@ Use this skill when working on files in:
 | `` | removeEventListener |
 | `llm\llm-client.js` | handler |
 | `logging\logger.js` | handler |
-| `sidepanel\sidepanel.js` | cleanup, handleConfirm, handleCancel, cleanup, handleRetry, ... |
+| `sidepanel\sidepanel.js` | handleCancel, cleanup, handleKeydown, handleCancel, handleConfirm, ... |
 
 ## Connected Communities
 
@@ -32,7 +32,7 @@ Use this skill when working on files in:
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-24")
+analyze(operation:"communities", id:"community-19")
 explore(operation:"context", task:"understand . +3 dirs · removeEventListener", format:"gcx")
 ```
 

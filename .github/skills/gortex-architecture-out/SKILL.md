@@ -16,7 +16,7 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `architecture-out\architecture.html` | renderTabs, el, renderFlows, $, esc, ... |
+| `architecture-out\architecture.html` | selectFlow, paint, drawEdges, renderSteps, esc, ... |
 
 ## How to Explore
 

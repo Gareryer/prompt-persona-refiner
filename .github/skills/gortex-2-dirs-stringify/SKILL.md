@@ -20,28 +20,28 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `` | stringify, substr |
-| `background.js` | anthropic.buildBody, openrouter.buildBody, gemini.buildBody, openai.buildBody |
-| `llm\llm-client.js` | _delay, _callWithRetry, _calculateBackoff, _sanitizeApiKey, isConfigured, ... |
+| `` | substr, stringify |
+| `background.js` | gemini.buildBody, anthropic.buildBody, openai.buildBody, openrouter.buildBody |
+| `llm\llm-client.js` | call, configure, _callOpenRouter, _sanitizeApiKey, _callWithRetry, ... |
 | `memory\component-schemas.js` | ComponentSchemas.buildSchemaHintsPrompt |
 | `memory\memory-controller.js` | _estimateSize |
 
 ## Connected Communities
 
 - **. +7 dirs** (6 cross-edges)
-- **memory +7 dirs** (4 cross-edges)
-- **. +5 dirs** (4 cross-edges)
+- **. +5 dirs · includes** (4 cross-edges)
+- **. +5 dirs · replace** (4 cross-edges)
 - **content +3 dirs** (2 cross-edges)
 - **memory +3 dirs** (2 cross-edges)
 - **. +3 dirs · removeEventListener** (2 cross-edges)
-- **. +2 dirs · bgLog** (1 cross-edges)
 - **content +5 dirs** (1 cross-edges)
 - **. +6 dirs** (1 cross-edges)
+- **. +2 dirs · bgLog** (1 cross-edges)
 
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-13")
+analyze(operation:"communities", id:"community-7")
 explore(operation:"context", task:"understand . +2 dirs · stringify", format:"gcx")
 ```
 

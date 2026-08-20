@@ -21,12 +21,12 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `` | forEach, addEventListener, cloneNode, then, removeAttribute, ... |
+| `` | then, forEach, cloneNode, blur, getElementById, ... |
 | `content\observer.js` | api.setEnabled |
 | `content\scraper.js` | _extractContent |
 | `rating\rating-injector.js` | RatingInjector.handleNewNode |
 | `rating\rating-ui.js` | highlightStars, setStarsRating |
-| `sidepanel\sidepanel.js` | showNotification, createExtEditableTag, updateTagsInStorage, closest, openPromptPreviewDialog, ... |
+| `sidepanel\sidepanel.js` | navigateToPersonaPage, savePersonaToStorage, openPromptPreviewDialog, isFactDisabled, closeSourcePromptViewer, ... |
 
 ## Entry Points
 
@@ -38,24 +38,26 @@ Use this skill when working on files in:
 
 ## Connected Communities
 
-- **content +5 dirs** (57 cross-edges)
-- **. +3 dirs · appendChild** (38 cross-edges)
-- **. +1 dirs · spLog** (35 cross-edges)
+- **content +5 dirs** (62 cross-edges)
+- **. +3 dirs · appendChild** (43 cross-edges)
+- **. +1 dirs · spLog** (31 cross-edges)
 - **. +7 dirs** (17 cross-edges)
-- **memory +7 dirs** (16 cross-edges)
-- **. +2 dirs · bgLog** (13 cross-edges)
-- **. +6 dirs** (9 cross-edges)
-- **. +1 dirs · handlePersonaSearch** (6 cross-edges)
-- **. +5 dirs** (5 cross-edges)
+- **. +2 dirs · bgLog** (15 cross-edges)
+- **memory +4 dirs · map** (13 cross-edges)
+- **. +2 dirs · escapeHtml** (8 cross-edges)
+- **. +6 dirs** (7 cross-edges)
+- **memory +4 dirs · validateExtractionResponse** (6 cross-edges)
+- **. +5 dirs · includes** (5 cross-edges)
 - **content +4 dirs** (4 cross-edges)
 - **. +3 dirs · removeEventListener** (4 cross-edges)
+- **. +5 dirs · replace** (3 cross-edges)
 - **memory +3 dirs** (3 cross-edges)
 - **. +2 dirs · stringify** (1 cross-edges)
 
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-28")
+analyze(operation:"communities", id:"community-24")
 explore(operation:"context", task:"understand content +3 dirs", format:"gcx")
 relations(operation:"usages", target:{symbol:"sidepanel\sidepanel.js::setupPersonaNavigation"}, format:"gcx")
 ```

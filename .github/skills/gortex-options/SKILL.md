@@ -16,20 +16,20 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `options\model-manager-ui.js` | renderModal, handleActivate, render, showToast, handleTestFromModal, ... |
+| `options\model-manager-ui.js` | handleTest, constructor, closeModal, handleTestFromModal, handleActivate, ... |
 
 ## Connected Communities
 
 - **content +5 dirs** (18 cross-edges)
 - **content +3 dirs** (6 cross-edges)
 - **. +7 dirs** (6 cross-edges)
-- **memory +7 dirs** (3 cross-edges)
+- **memory +4 dirs · map** (3 cross-edges)
 - **. +3 dirs · appendChild** (2 cross-edges)
 
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-20")
+analyze(operation:"communities", id:"community-15")
 explore(operation:"context", task:"understand options", format:"gcx")
 ```
 

@@ -1,11 +1,11 @@
 ---
 name: gortex-7-dirs
-description: "Work in the . +7 dirs area — 73 symbols across 10 files (71% cohesion)"
+description: "Work in the . +7 dirs area — 72 symbols across 10 files (71% cohesion)"
 ---
 
 # . +7 dirs
 
-73 symbols | 10 files | 71% cohesion
+72 symbols | 10 files | 71% cohesion
 
 ## When to Use
 
@@ -25,16 +25,16 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `` | log, reverse, every, isArray, values |
-| `build.js` | buildJS, validateSources, cleanOutdir, copyStaticFiles, build, ... |
-| `content\observer.js` | getTabId, triggerNativeSend |
-| `content\scraper.js` | scrape, getChatHistory, _getRating, hasHistory, _findMessageContainers, ... |
+| `` | log, isArray, every, reverse, values |
+| `build.js` | validateSources, copyStaticFiles, build, buildCSS, buildJS, ... |
+| `content\observer.js` | triggerNativeSend, getTabId |
+| `content\scraper.js` | getPreviousPromptsWithRatings, getChatHistory, customScraperMethod, scrape, _findMessageContainers, ... |
 | `llm\llm-client.js` | _callGemini |
 | `memory\analyzers\unified-analyzer.js` | UnifiedAnalyzer.analyze |
 | `memory\memory-controller.js` | _isCharArray |
-| `model\model-manager.js` | resolve, init, testConnection, _makeBridgeRequest, deleteModel, ... |
-| `rating\rating-injector.js` | RatingInjector.findModelResponses, RatingInjector.disconnect, RatingInjector.initialize, RatingInjector.findChatContainer, RatingInjector.setupObserver, ... |
-| `sidepanel\sidepanel.js` | onUpdate, onUpdate, onUpdate, onUpdate, onUpdate, ... |
+| `model\model-manager.js` | deleteModel, testConnection, reject, getActiveModelId, enableModel, ... |
+| `rating\rating-injector.js` | RatingInjector.findChatContainer, RatingInjector.disconnect, RatingInjector.initialize, RatingInjector.setupObserver, RatingInjector.injectAll, ... |
+| `sidepanel\sidepanel.js` | loadMemoryData, onUpdate, onUpdate, onUpdate, onUpdate, ... |
 
 ## Entry Points
 
@@ -45,24 +45,26 @@ Use this skill when working on files in:
 
 ## Connected Communities
 
-- **memory +7 dirs** (17 cross-edges)
-- **content +3 dirs** (12 cross-edges)
+- **memory +4 dirs · validateExtractionResponse** (13 cross-edges)
 - **content +5 dirs** (12 cross-edges)
+- **content +3 dirs** (12 cross-edges)
 - **. +6 dirs** (6 cross-edges)
 - **. +2 dirs · bgLog** (5 cross-edges)
-- **. +1 dirs · spLog** (3 cross-edges)
+- **. +5 dirs · replace** (4 cross-edges)
 - **memory +3 dirs** (3 cross-edges)
-- **. +1 dirs · GeminiConversationScraper** (2 cross-edges)
-- **. +5 dirs** (2 cross-edges)
 - **rating** (2 cross-edges)
+- **. +5 dirs · includes** (2 cross-edges)
+- **. +1 dirs · GeminiConversationScraper** (2 cross-edges)
+- **memory +4 dirs · map** (2 cross-edges)
 - **. +2 dirs · stringify** (2 cross-edges)
+- **. +1 dirs · spLog** (2 cross-edges)
 - **. +2 dirs · _getModelManager** (1 cross-edges)
-- **. +1 dirs · handlePersonaSearch** (1 cross-edges)
+- **. +2 dirs · escapeHtml** (1 cross-edges)
 
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-7")
+analyze(operation:"communities", id:"community-2")
 explore(operation:"context", task:"understand . +7 dirs", format:"gcx")
 relations(operation:"usages", target:{symbol:"memory\analyzers\unified-analyzer.js::UnifiedAnalyzer.analyze@199"}, format:"gcx")
 ```

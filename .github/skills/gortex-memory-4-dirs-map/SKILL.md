@@ -28,7 +28,7 @@ Use this skill when working on files in:
 | `memory\analyzers\unified-analyzer.js` | UnifiedAnalyzer._formatConversation |
 | `memory\component-schemas.js` | ComponentSchemas.migrateFromV3 |
 | `memory\context-assembler.js` | formatForRefinement |
-| `model\model-registry.js` | fetchOpenAIModels, fetchGeminiModels, fetchOpenRouterModels, sanitizeApiKey, fetchModelsForProvider |
+| `model\model-registry.js` | fetchModelsForProvider, fetchOpenRouterModels, fetchOpenAIModels, sanitizeApiKey, fetchGeminiModels |
 
 ## Entry Points
 
@@ -38,16 +38,16 @@ Use this skill when working on files in:
 ## Connected Communities
 
 - **memory +3 dirs** (4 cross-edges)
-- **. +4 dirs** (3 cross-edges)
 - **memory +4 dirs · validateExtractionResponse** (3 cross-edges)
-- **. +7 dirs** (3 cross-edges)
+- **. +4 dirs** (3 cross-edges)
 - **. +5 dirs** (3 cross-edges)
+- **. +7 dirs** (3 cross-edges)
+- **. +2 dirs · stringify** (2 cross-edges)
 - **content +3 dirs** (2 cross-edges)
 - **. +6 dirs** (2 cross-edges)
-- **. +2 dirs · stringify** (2 cross-edges)
-- **content +5 dirs** (1 cross-edges)
 - **. +2 dirs · _getModelManager** (1 cross-edges)
 - **. +1 dirs · handlePersonaSearch** (1 cross-edges)
+- **content +5 dirs** (1 cross-edges)
 
 ## How to Explore
 

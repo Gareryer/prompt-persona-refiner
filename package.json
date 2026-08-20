@@ -10,7 +10,6 @@
     },
     "devDependencies": {
         "esbuild": "^0.20.0",
-        "javascript-obfuscator": "^4.1.1",
         "rimraf": "^5.0.5"
     }
 }

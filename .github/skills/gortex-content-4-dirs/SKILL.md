@@ -21,26 +21,27 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `` | reduce, charCodeAt, split, fromCharCode |
-| `content\diff.js` | diffWords, renderDiffHtml, escapeHtml |
+| `` | split, charCodeAt, reduce, fromCharCode |
+| `content\diff.js` | renderDiffHtml, diffWords, escapeHtml |
 | `content\observer.js` | generateDiffHTML |
 | `memory\analyzers\unified-analyzer.js` | UnifiedAnalyzer._getRatingContext |
-| `security\runtime-security.js` | SecurityManager.deriveKey, generateFingerprint, SecurityManager.decrypt, SecurityManager.encrypt, deriveKey |
-| `sidepanel\sidepanel.js` | formatFieldLabel, getNestedValue |
+| `security\runtime-security.js` | SecurityManager.decrypt, generateFingerprint, SecurityManager.encrypt, SecurityManager.deriveKey, deriveKey |
+| `sidepanel\sidepanel.js` | getNestedValue, formatFieldLabel |
 
 ## Connected Communities
 
-- **memory +7 dirs** (3 cross-edges)
-- **. +6 dirs** (2 cross-edges)
-- **content +5 dirs** (1 cross-edges)
-- **. +3 dirs · appendChild** (1 cross-edges)
+- **memory +4 dirs · map** (2 cross-edges)
+- **. +3 dirs · appendChild** (2 cross-edges)
 - **memory +3 dirs** (1 cross-edges)
-- **. +1 dirs · spLog** (1 cross-edges)
+- **. +2 dirs · escapeHtml** (1 cross-edges)
+- **. +6 dirs** (1 cross-edges)
+- **. +5 dirs · replace** (1 cross-edges)
+- **content +5 dirs** (1 cross-edges)
 
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-22")
+analyze(operation:"communities", id:"community-17")
 explore(operation:"context", task:"understand content +4 dirs", format:"gcx")
 ```
 

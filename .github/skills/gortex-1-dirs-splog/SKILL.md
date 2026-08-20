@@ -1,11 +1,11 @@
 ---
 name: gortex-1-dirs-splog
-description: "Work in the . +1 dirs · spLog area — 52 symbols across 2 files (57% cohesion)"
+description: "Work in the . +1 dirs · spLog area — 40 symbols across 2 files (56% cohesion)"
 ---
 
 # . +1 dirs · spLog
 
-52 symbols | 2 files | 57% cohesion
+40 symbols | 2 files | 56% cohesion
 
 ## When to Use
 
@@ -17,8 +17,8 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `` | toFixed, unshift, some, lastIndexOf |
-| `sidepanel\sidepanel.js` | handleImportPersona, handleDeletePersona, handleViewPersona, importPersonaJSON, spLog, ... |
+| `` | some, lastIndexOf, unshift |
+| `sidepanel\sidepanel.js` | submitRating, restoreVersion, handleExtractPersona, deleteSavedPrompt, showAlertDialog, ... |
 
 ## Entry Points
 
@@ -30,25 +30,26 @@ Use this skill when working on files in:
 
 ## Connected Communities
 
-- **content +3 dirs** (96 cross-edges)
-- **content +5 dirs** (54 cross-edges)
-- **memory +7 dirs** (21 cross-edges)
-- **. +3 dirs · appendChild** (15 cross-edges)
+- **content +3 dirs** (75 cross-edges)
+- **content +5 dirs** (32 cross-edges)
 - **. +2 dirs · bgLog** (13 cross-edges)
-- **. +7 dirs** (10 cross-edges)
-- **. +5 dirs** (7 cross-edges)
-- **. +6 dirs** (7 cross-edges)
-- **. +2 dirs · stringify** (4 cross-edges)
+- **. +2 dirs · escapeHtml** (11 cross-edges)
+- **. +7 dirs** (8 cross-edges)
+- **. +3 dirs · appendChild** (7 cross-edges)
+- **memory +4 dirs · map** (7 cross-edges)
+- **memory +4 dirs · validateExtractionResponse** (6 cross-edges)
+- **. +5 dirs · includes** (5 cross-edges)
+- **. +5 dirs · replace** (5 cross-edges)
+- **. +2 dirs · stringify** (3 cross-edges)
 - **memory +3 dirs** (3 cross-edges)
-- **content +4 dirs** (1 cross-edges)
-- **. +1 dirs · handlePersonaSearch** (1 cross-edges)
+- **. +6 dirs** (2 cross-edges)
 - **. +1 dirs · extLog** (1 cross-edges)
 - **. +2 dirs · _getModelManager** (1 cross-edges)
 
 ## How to Explore
 
 ```
-analyze(operation:"communities", id:"community-29")
+analyze(operation:"communities", id:"community-25")
 explore(operation:"context", task:"understand . +1 dirs · spLog", format:"gcx")
 relations(operation:"usages", target:{symbol:"sidepanel\sidepanel.js::handleSaveDraft"}, format:"gcx")
 ```

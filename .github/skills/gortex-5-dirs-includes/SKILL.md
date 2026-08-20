@@ -1,9 +1,9 @@
 ---
-name: gortex-5-dirs
-description: "Work in the . +5 dirs area — 54 symbols across 6 files (72% cohesion)"
+name: gortex-5-dirs-includes
+description: "Work in the . +5 dirs · includes area — 54 symbols across 6 files (72% cohesion)"
 ---
 
-# . +5 dirs
+# . +5 dirs · includes
 
 54 symbols | 6 files | 72% cohesion
 
@@ -21,10 +21,10 @@ Use this skill when working on files in:
 
 | File | Symbols |
 |------|---------|
-| `` | assign, includes, delete, removeChild |
-| `content\observer.js` | isExtensionContextValid, api.state, showExtensionReloadNotification, safeSendMessage |
+| `` | delete, includes, assign, removeChild |
+| `content\observer.js` | showExtensionReloadNotification, api.state, isExtensionContextValid, safeSendMessage |
 | `llm\llm-client.js` | _classifyError |
-| `logging\logger.js` | length, error, getStats, info, constructor, ... |
+| `logging\logger.js` | clear, _storageSet, constructor, endOperation, time, ... |
 | `memory\component-schemas.js` | ComponentSchemas.buildCombinedSchema |
 | `model\model-manager.js` | isMaskedKey |
 
@@ -36,26 +36,25 @@ Use this skill when working on files in:
 
 ## Connected Communities
 
-- **. +7 dirs** (6 cross-edges)
 - **. +2 dirs · bgLog** (6 cross-edges)
+- **. +7 dirs** (6 cross-edges)
+- **memory +4 dirs · map** (4 cross-edges)
 - **. +3 dirs · appendChild** (4 cross-edges)
 - **. +6 dirs** (3 cross-edges)
 - **content +3 dirs** (3 cross-edges)
-- **memory +4 dirs · map** (3 cross-edges)
-- **memory +4 dirs · validateExtractionResponse** (2 cross-edges)
 - **. +2 dirs · stringify** (2 cross-edges)
-- **. +1 dirs · handlePersonaSearch** (1 cross-edges)
-- **content +4 dirs** (1 cross-edges)
+- **memory +4 dirs · validateExtractionResponse** (2 cross-edges)
 - **content +5 dirs** (1 cross-edges)
-- **. +3 dirs · removeEventListener** (1 cross-edges)
-- **. +4 dirs** (1 cross-edges)
+- **content +4 dirs** (1 cross-edges)
+- **. +5 dirs · replace** (1 cross-edges)
 - **memory +3 dirs** (1 cross-edges)
+- **. +3 dirs · removeEventListener** (1 cross-edges)
 
 ## How to Explore
 
 ```
 analyze(operation:"communities", id:"community-6")
-explore(operation:"context", task:"understand . +5 dirs", format:"gcx")
+explore(operation:"context", task:"understand . +5 dirs · includes", format:"gcx")
 relations(operation:"usages", target:{symbol:"content\observer.js::safeSendMessage"}, format:"gcx")
 ```
 
