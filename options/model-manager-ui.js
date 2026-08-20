@@ -77,21 +77,38 @@ class ModelManagerUI {
     }
 
     /**
+     * Standard 5-character HTML escape helper
+     * @param {string} str
+     * @returns {string}
+     */
+    escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    /**
      * Render a single model card
+     * @param {Object} model - Model configuration
+     * @param {boolean} isActive - Whether this is the active model
      */
     renderModelCard(model, isActive) {
-        const provider = MODEL_PROVIDERS[model.provider] || MODEL_PROVIDERS.custom;
-        const hasKey = !!model.apiKey;
+        const provider = ModelRegistry.getProvider(model.provider) || { name: model.provider, icon: '🤖' };
+        const hasKey = this.manager.hasApiKey(model.id);
         const statusClass = model.enabled ? 'enabled' : 'disabled';
         const activeClass = isActive ? 'active' : '';
         const statusText = model.enabled ? (isActive ? 'Active' : 'Enabled') : 'Disabled';
         const statusIcon = model.enabled ? (isActive ? '●' : '○') : '○';
 
         return `
-            <div class="model-card ${statusClass} ${activeClass}" data-model-id="${model.id}">
+            <div class="model-card ${statusClass} ${activeClass}" data-model-id="${this.escapeHtml(model.id)}">
                 <div class="model-card-header">
                     <div class="model-info">
-                        <span class="model-name">${model.name}</span>
+                        <span class="model-name">${this.escapeHtml(model.name)}</span>
                     </div>
                     <div class="model-status ${statusClass}">
                         <span class="status-icon">${statusIcon}</span>
@@ -101,24 +118,24 @@ class ModelManagerUI {
                 
                 <div class="model-card-body">
                     <div class="model-details">
-                        <span class="provider-badge">${provider.name}</span>
-                        <span class="model-badge">${model.model || 'Not configured'}</span>
+                        <span class="provider-badge">${this.escapeHtml(provider.name)}</span>
+                        <span class="model-badge">${this.escapeHtml(model.model || 'Not configured')}</span>
                         ${hasKey ? '<span class="key-badge">Key set</span>' : '<span class="key-badge missing">No key</span>'}
                     </div>
                 </div>
                 
                 <div class="model-card-actions">
-                    <button class="action-btn test-btn" data-action="test" data-model-id="${model.id}" ${!hasKey ? 'disabled' : ''}>
+                    <button class="action-btn test-btn" data-action="test" data-model-id="${this.escapeHtml(model.id)}" ${!hasKey ? 'disabled' : ''}>
                         Test
                     </button>
-                    <button class="action-btn edit-btn" data-action="edit" data-model-id="${model.id}">
+                    <button class="action-btn edit-btn" data-action="edit" data-model-id="${this.escapeHtml(model.id)}">
                         Edit
                     </button>
-                    <button class="action-btn toggle-btn" data-action="toggle" data-model-id="${model.id}">
+                    <button class="action-btn toggle-btn" data-action="toggle" data-model-id="${this.escapeHtml(model.id)}">
                         ${model.enabled ? 'Disable' : 'Enable'}
                     </button>
                     ${isActive ? '' : model.enabled ? `
-                        <button class="action-btn activate-btn" data-action="activate" data-model-id="${model.id}">
+                        <button class="action-btn activate-btn" data-action="activate" data-model-id="${this.escapeHtml(model.id)}">
                             Set Active
                         </button>
                     ` : ''}
@@ -132,12 +149,12 @@ class ModelManagerUI {
      */
     renderModal() {
         return `
-            <div id="model-edit-modal" class="modal hidden">
+            <div id="model-edit-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
                 <div class="modal-backdrop" data-action="close-modal"></div>
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3 id="modal-title">Edit Model</h3>
-                        <button class="modal-close" data-action="close-modal">×</button>
+                        <button class="modal-close" data-action="close-modal" aria-label="Close dialog">×</button>
                     </div>
                     
                     <div class="modal-body">
@@ -725,7 +742,7 @@ class ModelManagerUI {
 
         toast.innerHTML = `
             <span class="toast-icon">${icons[type] || icons.info}</span>
-            <span class="toast-message">${message}</span>
+            <span class="toast-message">${this.escapeHtml(message)}</span>
         `;
 
         container.appendChild(toast);

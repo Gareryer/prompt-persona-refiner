@@ -1068,8 +1068,13 @@ function setupAnalyzerToggles() {
 
     toggles.forEach(toggle => {
         toggle.addEventListener('change', (e) => {
-            const componentId = e.target.dataset.component;
+            let componentId = e.target.dataset.component;
+            if (componentId.startsWith('ext_')) {
+                componentId = componentId.substring(4);
+            }
             const enabled = e.target.checked;
+
+            updateSectionBadge(componentId, { isEnabled: enabled });
 
             spLog('info', 'Analyzer toggle changed', {
                 analyzer: componentId,
@@ -2569,7 +2574,7 @@ function renderContext(data) {
 
     const domainDiv = document.createElement('div');
     domainDiv.className = 'fact-item';
-    domainDiv.innerHTML = `<strong>Domain:</strong> <span class="editable-text ctx-field" data-component="context" data-field="domain">${data?.domain || 'Unspecified'}</span>`;
+    domainDiv.innerHTML = `<strong>Domain:</strong> <span class="editable-text ctx-field" data-component="context" data-field="domain">${escapeHtml(data?.domain || 'Unspecified')}</span>`;
     container.appendChild(domainDiv);
 
     if (container.children.length === 0) {
@@ -2634,7 +2639,7 @@ function renderTone(data) {
     container.innerHTML = '';
     const voiceDiv = document.createElement('div');
     voiceDiv.className = 'fact-item';
-    voiceDiv.innerHTML = `<strong>Voice:</strong> ${data?.voice || 'Neutral'}`;
+    voiceDiv.innerHTML = `<strong>Voice:</strong> ${escapeHtml(data?.voice || 'Neutral')}`;
     container.appendChild(voiceDiv);
     setupContextInlineEditing(container);
 }
@@ -3338,8 +3343,13 @@ function setupLogViewer() {
 }
 
 function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 // ============================================================================
@@ -4061,9 +4071,11 @@ const _sectionBadgeState = {
  * Update a section's badge based on content state
  * 
  * Badge Priority:
- * 1. isPinned = true → VERBATIM badge with clickable pin icon
- * 2. isStale = true (generation < currentGeneration) → STALE badge
- * 3. Otherwise → hide badge
+ * 1. isStale = true (generation < currentGeneration) OR !isEnabled → STALE badge on header
+ * 2. Otherwise → hide header badge
+ * 
+ * Note: Verbatim status (pinned) is indicated by the pushpin button in the header
+ * and the in-section VERBATIM badge + toggle controls.
  * 
  * @param {string} sectionId - Section identifier (context, tone, etc.)
  * @param {Object} options - { content?, isEnabled?, setOriginal?, generation?, isStale?, isPinned? }
@@ -4095,14 +4107,18 @@ function updateSectionBadge(sectionId, options = {}) {
     // Determine badge state for the ACCORDION HEADER
     badge.classList.remove('stale', 'hidden');
 
-    if (!state.isPinned && state.isStale) {
-        // === STALE = Not updated in last rebuild ===
+    const shouldShowStale = state.isStale || !state.isEnabled;
+
+    if (shouldShowStale) {
+        // === STALE = Preserved from earlier generation or toggled off ===
         badge.innerHTML = 'STALE';
         badge.classList.add('stale');
-        badge.title = 'This section was not included in the last Rebuild Memory';
+        badge.title = !state.isEnabled
+            ? 'This section is disabled from prompt refinement'
+            : 'This section was preserved / not updated in the last Rebuild Memory';
         badge.style.cursor = 'default';
     } else {
-        // === Current or Pinned = hide header badge (Verbatim status is shown inside the section) ===
+        // === Current & Enabled = hide header badge (Verbatim status is shown inside the section) ===
         badge.classList.add('hidden');
         badge.innerHTML = '';
         badge.title = '';
@@ -4115,9 +4131,8 @@ function updateSectionBadge(sectionId, options = {}) {
  * Sets original content, pinned state, and calculates STALE status
  * 
  * Badge Priority:
- * 1. isPinned → VERBATIM (exempt from STALE calculation)
- * 2. isStale (generation < currentGeneration) → STALE
- * 3. Otherwise → hidden
+ * 1. isStale (generation < currentGeneration) OR !isEnabled → STALE
+ * 2. Otherwise → hidden
  * 
  * @param {Object} memoryData - Full session memory data with components and currentGeneration
  */
@@ -4133,14 +4148,18 @@ function initializeSectionBadges(memoryData) {
         const componentGeneration = componentData?.generation ?? 0;
         const isPinned = componentData?.pinned === true;
 
+        // Check if dimension toggle is currently checked
+        const toggle = document.querySelector(`.toggle-switch input[data-component="${sectionId}"]`);
+        const isEnabled = toggle ? toggle.checked : true;
+
         // STALE = component.generation < currentGeneration
-        // BUT: Pinned components are EXEMPT from STALE (they intentionally stay at old gen)
-        const isStale = !isPinned && componentGeneration < currentGeneration;
+        // Pinned components that stay at older generations are STALE relative to the latest rebuild
+        const isStale = currentGeneration > 0 && componentGeneration < currentGeneration;
 
         // Reset state with generation and pinned info
         _sectionBadgeState[sectionId] = {
             originalContent: content,
-            isEnabled: true,
+            isEnabled: isEnabled,
             generation: componentGeneration,
             isStale: isStale,
             isPinned: isPinned
@@ -4152,11 +4171,12 @@ function initializeSectionBadges(memoryData) {
             content,
             generation: componentGeneration,
             isStale: isStale,
-            isPinned: isPinned
+            isPinned: isPinned,
+            isEnabled: isEnabled
         });
 
         if (isPinned) {
-            spLog('debug', `Section ${sectionId} is PINNED (VERBATIM)`, { componentGeneration });
+            spLog('debug', `Section ${sectionId} is PINNED (VERBATIM)`, { componentGeneration, isStale });
         } else if (isStale) {
             spLog('debug', `Section ${sectionId} is STALE`, {
                 componentGeneration,
@@ -4176,20 +4196,21 @@ function setupBadgeListeners() {
     const sections = ['context', 'tone', 'framework', 'constraints', 'format', 'exemplar', 'persona'];
 
     sections.forEach(sectionId => {
-        const textarea = document.getElementById(`v4-${sectionId}-textarea`);
+        const textarea = document.getElementById(`v4-${sectionId}-textarea`) ||
+            (sectionId === 'persona' ? document.getElementById('synthesized-persona-input') : null);
         if (textarea) {
             textarea.addEventListener('input', () => {
                 updateSectionBadge(sectionId);
             });
         }
 
-        // Listen for toggle changes on Edit Persona page
-        const toggle = document.querySelector(`input[data-component="ext_${sectionId}"]`);
-        if (toggle) {
+        // Listen for toggle changes on both Main Context tab and Edit Persona page
+        const toggles = document.querySelectorAll(`input[data-component="${sectionId}"], input[data-component="ext_${sectionId}"]`);
+        toggles.forEach(toggle => {
             toggle.addEventListener('change', (e) => {
                 updateSectionBadge(sectionId, { isEnabled: e.target.checked });
             });
-        }
+        });
     });
 }
 
@@ -4491,7 +4512,7 @@ function renderExtTopicSummary(container, data) {
     topicDiv.className = 'fact-item';
     topicDiv.innerHTML = `
         <strong>Primary Topic:</strong> 
-        <span class="editable-text ext-field" data-component="topic_summarizer" data-field="primaryTopic">${data.primaryTopic || 'Unknown'}</span>
+        <span class="editable-text ext-field" data-component="topic_summarizer" data-field="primaryTopic">${escapeHtml(data.primaryTopic || 'Unknown')}</span>
     `;
     container.appendChild(topicDiv);
 
@@ -4500,7 +4521,7 @@ function renderExtTopicSummary(container, data) {
     summaryDiv.className = 'fact-item';
     summaryDiv.innerHTML = `
         <strong>Summary:</strong> 
-        <span class="editable-text ext-field" data-component="topic_summarizer" data-field="summary">${data.summary || 'No summary'}</span>
+        <span class="editable-text ext-field" data-component="topic_summarizer" data-field="summary">${escapeHtml(data.summary || 'No summary')}</span>
     `;
     container.appendChild(summaryDiv);
 
@@ -4529,7 +4550,7 @@ function renderExtIntent(container, data) {
     goalDiv.className = 'fact-item';
     goalDiv.innerHTML = `
         <strong>Goal:</strong> 
-        <span class="editable-text ext-field" data-component="intent_classifier" data-field="goal">${data.goal || 'Unknown'}</span>
+        <span class="editable-text ext-field" data-component="intent_classifier" data-field="goal">${escapeHtml(data.goal || 'Unknown')}</span>
     `;
     container.appendChild(goalDiv);
 
@@ -5868,9 +5889,9 @@ function showPersonaDetailModal(persona) {
                 <p class="persona-description">${escapeHtml(memoryLayer?.persona_synthesizer?.synthesizedPersona || 'No description available.')}</p>
             </div>
             <div class="modal-meta">
-                <span><strong>Provider:</strong> ${provider}</span>
-                <span><strong>Model:</strong> ${llmModel}</span>
-                <span><strong>Created:</strong> ${createdAt}</span>
+                <span><strong>Provider:</strong> ${escapeHtml(provider)}</span>
+                <span><strong>Model:</strong> ${escapeHtml(llmModel)}</span>
+                <span><strong>Created:</strong> ${escapeHtml(createdAt)}</span>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-primary btn-large btn-with-spinner modal-import-btn">

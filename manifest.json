@@ -4,11 +4,13 @@
   "version": "1.0.0",
   "description": "Persist personas and refine prompts in gemini.google.com",
   "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
   "permissions": [
     "storage",
-    "unlimitedStorage",
     "scripting",
     "tabs",
     "clipboardWrite",
@@ -32,6 +34,9 @@
   "action": {
     "default_title": "Open Memory Control Panel",
     "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
@@ -68,6 +73,10 @@
       "matches": [
         "https://gemini.google.com/*"
       ],
+      "css": [
+        "content/styles.css",
+        "rating/rating.css"
+      ],
       "js": [
         "logging/logger.js",
         "model/model-registry.js",
@@ -76,6 +85,8 @@
         "rating/rating-ui.js",
         "rating/rating-injector.js",
         "content/scraper.js",
+        "content/diff.js",
+        "content/templates.js",
         "llm/llm-client.js",
         "llm/llm-config.js",
         "memory/component-schemas.js",
@@ -84,22 +95,7 @@
         "memory/analyzers/recent-focus.js",
         "memory/analyzers/unified-analyzer.js",
         "memory/context-assembler.js",
-        "memory/index.js"
-      ],
-      "world": "MAIN",
-      "run_at": "document_idle"
-    },
-    {
-      "matches": [
-        "https://gemini.google.com/*"
-      ],
-      "css": [
-        "content/styles.css",
-        "rating/rating.css"
-      ],
-      "js": [
-        "content/diff.js",
-        "content/templates.js",
+        "memory/index.js",
         "content/observer.js"
       ],
       "run_at": "document_idle"
@@ -108,9 +104,6 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "sidepanel/index.html",
-        "sidepanel/sidepanel.js",
-        "sidepanel/sidepanel.css",
         "icons/icon128.png"
       ],
       "matches": [

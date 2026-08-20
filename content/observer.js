@@ -130,7 +130,7 @@ function showExtensionReloadNotification() {
         <div style="font-weight: 500; margin-bottom: 4px;">Extension Updated</div>
         <div style="opacity: 0.8; font-size: 12px;">Please refresh this page to continue using Prompt Assistant.</div>
       </div>
-      <button onclick="location.reload()" style="
+      <button class="pa-toast-refresh-btn" style="
         background: #4a9eff;
         color: white;
         border: none;
@@ -141,7 +141,7 @@ function showExtensionReloadNotification() {
         margin-left: 12px;
         white-space: nowrap;
       ">Refresh</button>
-      <button onclick="this.parentElement.remove()" style="
+      <button class="pa-toast-close-btn" style="
         background: none;
         border: none;
         color: rgba(255,255,255,0.6);
@@ -158,6 +158,10 @@ function showExtensionReloadNotification() {
       }
     </style>
   `;
+  const refreshBtn = toast.querySelector('.pa-toast-refresh-btn');
+  if (refreshBtn) refreshBtn.addEventListener('click', () => window.location.reload());
+  const closeBtn = toast.querySelector('.pa-toast-close-btn');
+  if (closeBtn) closeBtn.addEventListener('click', () => toast.remove());
   document.body.appendChild(toast);
   obsLog('warn', 'Extension context invalidated - showing reload notification');
 }
@@ -711,32 +715,14 @@ function createReviewModal() {
     updateEmptyState();
   };
 
-  // Simple diff generator - word-level comparison with HTML highlighting
+  // Word-level diff generator with HTML highlighting via GeminiDiff
   const generateDiffHTML = (original, refined) => {
     if (!original || !refined) return '<em>No changes to display</em>';
-
-    // Split into words for comparison
-    const origWords = original.split(/\s+/);
-    const refWords = refined.split(/\s+/);
-
-    let html = '';
-    const maxLen = Math.max(origWords.length, refWords.length);
-
-    for (let i = 0; i < maxLen; i++) {
-      const origWord = origWords[i] || '';
-      const refWord = refWords[i] || '';
-
-      if (origWord === refWord) {
-        html += refWord + ' ';
-      } else if (!origWord && refWord) {
-        html += `<span class="diff-added">${refWord}</span> `;
-      } else if (origWord && !refWord) {
-        html += `<span class="diff-removed">${origWord}</span> `;
-      } else {
-        html += `<span class="diff-removed">${origWord}</span> <span class="diff-added">${refWord}</span> `;
-      }
+    if (typeof window.GeminiDiff !== 'undefined' && typeof window.GeminiDiff.renderDiffHtml === 'function') {
+      return window.GeminiDiff.renderDiffHtml(original, refined);
     }
-    return html;
+    const escape = (str) => String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `<span class="diff-removed">${escape(original)}</span> <span class="diff-added">${escape(refined)}</span>`;
   };
 
   // Update character count based on active tab
@@ -2117,8 +2103,17 @@ function toggleSplitView() {
 
 // --- Init ---
 // CSS is loaded via manifest.json
+let injectDebounceTimer = null;
+const debouncedInject = () => {
+  if (injectDebounceTimer) return;
+  injectDebounceTimer = setTimeout(() => {
+    injectDebounceTimer = null;
+    injectInterface();
+  }, 250);
+};
+
 const observer = new MutationObserver(() => {
-  injectInterface();
+  debouncedInject();
 });
 observer.observe(document.body, { childList: true, subtree: true });
 setTimeout(injectInterface, 1500);

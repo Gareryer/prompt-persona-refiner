@@ -294,7 +294,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           const sessionId = urlMatch ? urlMatch[1] : null;
 
           if (!sessionId) {
-            // No session ID in URL (e.g., gemini.google.com/app) - skip
             skippedCount++;
             continue;
           }
@@ -304,7 +303,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           const stored = await chrome.storage.local.get([sessionKey]);
 
           if (stored[sessionKey]?.components && Object.keys(stored[sessionKey].components).length > 0) {
-            // Memory already exists - skip this tab
             skippedCount++;
             continue;
           }
@@ -334,6 +332,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     (async () => {
       let keepAliveInterval = null;
       try {
+        const ALLOWED_PROXY_HOSTS = [
+          'generativelanguage.googleapis.com',
+          'api.openai.com',
+          'api.anthropic.com',
+          'openrouter.ai'
+        ];
+
+        let targetUrl;
+        try {
+          targetUrl = new URL(message.url);
+        } catch {
+          sendResponse({ ok: false, status: 400, error: 'Invalid URL supplied to API proxy' });
+          return;
+        }
+
+        if (targetUrl.protocol !== 'https:' || !ALLOWED_PROXY_HOSTS.includes(targetUrl.hostname)) {
+          bgLog('warn', 'API Proxy: Blocked unauthorized host', { host: targetUrl.hostname });
+          sendResponse({ ok: false, status: 403, error: `Host '${targetUrl.hostname}' not permitted by extension security policy` });
+          return;
+        }
+
         bgLog('debug', 'API Proxy: Processing request', {
           url: message.url?.substring(0, 50) + '...',
           method: message.options?.method || 'GET'
@@ -375,10 +394,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     })();
     return true; // Keep channel open for async response
   }
-
-  // ========================================================================
-  // Persona Extractor Message Handlers
-  // ========================================================================
 
   /**
    * GET_MODEL_CONFIG - Return current active model configuration
@@ -439,7 +454,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
    */
   if (message.type === 'EXTRACT_PERSONA') {
     (async () => {
-      const { prompt, modelConfig } = message.payload;
+      const { prompt, modelConfig } = message.payload || {};
       bgLog('info', 'EXTRACT_PERSONA: Starting extraction', {
         provider: modelConfig?.provider,
         promptLength: prompt?.length
@@ -455,8 +470,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       activeExtractions.set('persona', abortController);
 
       try {
-        // Build the full extraction prompt using Structured Expert Prompting (SEP)
-        // Based on MIT/Harvard research: 87% higher accuracy, eliminates persona ambiguity        // Build the full extraction prompt using Rigid-Flexible Mapping Strategy
         const extractionPrompt = `You are the "PERSONA ARCHITECT" - an expert Context-Aware Engineer specializing in Structured Expert Prompting (SEP).
 
 ## THE PERSONA DEPTH GAP (CRITICAL)

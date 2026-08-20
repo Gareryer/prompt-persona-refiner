@@ -9,6 +9,9 @@ const outdir = 'dist';
 // Static files to copy directly
 const staticFiles = [
     'manifest.json',
+    'icons/icon16.png',
+    'icons/icon32.png',
+    'icons/icon48.png',
     'icons/icon128.png',
     'sidepanel/index.html',
     'options/index.html',
@@ -148,12 +151,21 @@ async function build() {
 
         if (isWatch) {
             await buildCSS();
-            const allEntries = [
-                { in: 'background/index.js', out: 'background' },
-                ...unbundledJsFiles.map(f => ({ in: f, out: f.replace(/\.js$/, '') }))
-            ];
-            const ctx = await esbuild.context({
-                entryPoints: allEntries,
+            // 1. Service Worker Context (bundled ES modules)
+            const bgCtx = await esbuild.context({
+                entryPoints: [{ in: 'background/index.js', out: 'background' }],
+                outdir: outdir,
+                bundle: true,
+                minify: false,
+                sourcemap: 'inline',
+                target: ['chrome100'],
+                format: 'iife',
+                logLevel: 'info'
+            });
+
+            // 2. Standalone scripts Context (unbundled)
+            const standaloneCtx = await esbuild.context({
+                entryPoints: unbundledJsFiles.map(f => ({ in: f, out: f.replace(/\.js$/, '') })),
                 outdir: outdir,
                 bundle: false,
                 minify: false,
@@ -162,8 +174,10 @@ async function build() {
                 format: 'iife',
                 logLevel: 'info'
             });
-            await ctx.watch();
-            console.log('\n[WATCH] Watching for source file changes...');
+
+            await bgCtx.watch();
+            await standaloneCtx.watch();
+            console.log('\n[WATCH] Watching for source file changes (Service Worker bundled + Standalone scripts)...');
             return;
         }
 

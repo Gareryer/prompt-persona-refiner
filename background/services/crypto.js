@@ -1,9 +1,8 @@
-/**
- * @fileoverview Cryptographic Utilities for API Key Encryption/Decryption
- * @module background/services/crypto
- */
+let cachedKey = null;
 
 export async function getEncryptionKey() {
+  if (cachedKey) return cachedKey;
+
   const extensionId = chrome.runtime.id;
   const salt = new TextEncoder().encode('prompt-assistant-api-key-salt-v1');
   const keyMaterial = await crypto.subtle.importKey(
@@ -14,7 +13,7 @@ export async function getEncryptionKey() {
     ['deriveBits', 'deriveKey']
   );
 
-  return await crypto.subtle.deriveKey(
+  cachedKey = await crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
       salt: salt,
@@ -26,12 +25,42 @@ export async function getEncryptionKey() {
     false,
     ['encrypt', 'decrypt']
   );
+
+  return cachedKey;
+}
+
+export async function encryptApiKey(plaintext) {
+  if (!plaintext) return '';
+  try {
+    const key = await getEncryptionKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = new TextEncoder().encode(plaintext);
+    const encrypted = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      encoded
+    );
+    const combined = new Uint8Array(iv.length + encrypted.byteLength);
+    combined.set(iv, 0);
+    combined.set(new Uint8Array(encrypted), iv.length);
+    const base64 = btoa(String.fromCharCode(...combined));
+    return 'enc:v1:' + base64;
+  } catch (error) {
+    console.error('Encryption error:', error);
+    return plaintext;
+  }
 }
 
 export async function decryptApiKey(encryptedData) {
+  if (!encryptedData) return '';
+  if (!isEncrypted(encryptedData)) {
+    return encryptedData; // Already plaintext
+  }
+
   try {
+    const rawBase64 = encryptedData.replace(/^enc:v1:/, '');
     const key = await getEncryptionKey();
-    const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
+    const combined = Uint8Array.from(atob(rawBase64), c => c.charCodeAt(0));
 
     const iv = combined.slice(0, 12);
     const encrypted = combined.slice(12);
@@ -50,5 +79,5 @@ export async function decryptApiKey(encryptedData) {
 }
 
 export function isEncrypted(value) {
-  return value && /^[A-Za-z0-9+/=]+$/.test(value) && value.length > 50;
+  return typeof value === 'string' && value.startsWith('enc:v1:');
 }

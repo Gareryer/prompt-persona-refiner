@@ -269,11 +269,8 @@ class PersonaExtractor {
                 return { success: false, error: 'No LLM model configured. Please set up a model first.' };
             }
 
-            // Build the extraction prompt
-            const fullPrompt = EXTRACTION_PROMPT.replace('{PROMPT}', prompt);
-
-            // Send to background for LLM call
-            const response = await this.callLLM(fullPrompt, modelConfig);
+            // Send raw prompt to background extraction engine
+            const response = await this.callLLM(prompt, modelConfig);
 
             if (!response.success) {
                 return { success: false, error: response.error || 'LLM call failed' };

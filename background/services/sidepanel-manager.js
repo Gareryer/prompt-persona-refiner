@@ -11,18 +11,34 @@ export const sidepanelWindowPorts = new Map();
 export function handleSidepanelConnect(port) {
   if (port.name === 'sidepanel') {
     openSidepanelPorts.add(port);
-    const windowId = port.sender?.tab?.windowId;
-    if (windowId) {
-      sidepanelWindowPorts.set(windowId, port);
+    let resolvedWindowId = port.sender?.tab?.windowId;
+
+    const registerWindow = (winId) => {
+      if (winId) {
+        sidepanelWindowPorts.set(winId, port);
+        bgLog('info', 'Sidepanel port associated with window', { windowId: winId });
+      }
+    };
+
+    if (resolvedWindowId) {
+      registerWindow(resolvedWindowId);
+    } else if (chrome.windows?.getLastFocused) {
+      chrome.windows.getLastFocused({ populate: false }).then(win => {
+        if (win?.id) {
+          resolvedWindowId = win.id;
+          registerWindow(resolvedWindowId);
+        }
+      }).catch(() => {});
     }
-    bgLog('info', 'Sidepanel port connected', { windowId });
+
+    bgLog('info', 'Sidepanel port connected');
 
     port.onDisconnect.addListener(() => {
       openSidepanelPorts.delete(port);
-      if (windowId && sidepanelWindowPorts.get(windowId) === port) {
-        sidepanelWindowPorts.delete(windowId);
+      if (resolvedWindowId && sidepanelWindowPorts.get(resolvedWindowId) === port) {
+        sidepanelWindowPorts.delete(resolvedWindowId);
       }
-      bgLog('info', 'Sidepanel port disconnected', { windowId });
+      bgLog('info', 'Sidepanel port disconnected', { windowId: resolvedWindowId });
     });
   }
 }

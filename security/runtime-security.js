@@ -15,49 +15,27 @@
     'use strict';
 
     // === DOMAIN LOCK ===
-    const ALLOWED_DOMAINS = ['gemini.google.com'];
     const currentDomain = window.location.hostname;
+    const isAllowedDomain = currentDomain === 'gemini.google.com' || currentDomain.endsWith('.gemini.google.com');
 
-    if (!ALLOWED_DOMAINS.some(d => currentDomain.endsWith(d))) {
-        console.error('[Security] Unauthorized domain');
+    if (!isAllowedDomain) {
+        console.error('[Security] Unauthorized domain:', currentDomain);
         window.__GEMINI_EXT_DISABLED__ = true;
         return;
     }
 
-    // === EPHEMERAL KEY GENERATION ===
+    // === EPHEMERAL SESSION KEY GENERATION ===
     // Keys exist ONLY in RAM within this closure
     const _keyStore = (function () {
-        // Generate cryptographically secure random bytes
         const generateKey = (length = 32) => {
             const array = new Uint8Array(length);
             crypto.getRandomValues(array);
             return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
         };
 
-        // Generate session fingerprint from environment
-        const generateFingerprint = () => {
-            const data = [
-                navigator.userAgent,
-                navigator.language,
-                screen.width + 'x' + screen.height,
-                new Date().getTimezoneOffset(),
-                performance.timeOrigin.toString(),
-            ].join('|');
-
-            // Simple hash (not cryptographic, just for fingerprinting)
-            let hash = 0;
-            for (let i = 0; i < data.length; i++) {
-                const char = data.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
-            }
-            return hash.toString(16);
-        };
-
-        // Keys are generated once per session, never stored
         const _sessionKey = generateKey(32);
         const _instanceKey = generateKey(16);
-        const _fingerprint = generateFingerprint();
+        const _fingerprint = generateKey(8);
         const _timestamp = Date.now();
 
         // Derive a combined key (XOR of session + instance)
@@ -75,6 +53,7 @@
                 // Check if keys are intact
                 return _sessionKey.length === 64 &&
                     _instanceKey.length === 32 &&
+                    _fingerprint.length === 16 &&
                     _timestamp > 0;
             }
         };
