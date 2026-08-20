@@ -103,6 +103,23 @@ function showExtensionReloadNotification() {
   if (extensionReloadNotificationShown) return;
   extensionReloadNotificationShown = true;
 
+  // Clean up observers and timers
+  try {
+    if (typeof themeObserver !== 'undefined' && themeObserver?.disconnect) {
+      themeObserver.disconnect();
+    }
+    if (typeof observer !== 'undefined' && observer?.disconnect) {
+      observer.disconnect();
+    }
+    if (typeof injectDebounceTimer !== 'undefined' && injectDebounceTimer) {
+      clearTimeout(injectDebounceTimer);
+    }
+    // Clean up injected UI elements to prevent dead controls
+    document.querySelectorAll('.gemini-ext-settings-wrapper, .gemini-ext-toggle-wrapper, .gemini-ext-modal-overlay, #gemini-ext-split-view, .gemini-rating-wrapper, #gemini-rating-badge').forEach(el => el.remove());
+  } catch (e) {
+    // Ignore teardown errors
+  }
+
   // Create toast notification
   const toast = document.createElement('div');
   toast.id = 'gemini-ext-reload-toast';
@@ -2113,6 +2130,11 @@ const debouncedInject = () => {
 };
 
 const observer = new MutationObserver(() => {
+  if (!isExtensionContextValid()) {
+    observer.disconnect();
+    if (injectDebounceTimer) clearTimeout(injectDebounceTimer);
+    return;
+  }
   debouncedInject();
 });
 observer.observe(document.body, { childList: true, subtree: true });

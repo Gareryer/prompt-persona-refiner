@@ -372,11 +372,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           method: message.options?.method || 'GET'
         });
 
-        // Keep service worker active during long LLM API calls in MV3
-        keepAliveInterval = setInterval(() => {
-          chrome.runtime.getPlatformInfo(() => {});
-        }, 5000);
-
         const response = await fetch(message.url, message.options);
         const contentType = response.headers.get('content-type') || '';
 
@@ -400,10 +395,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           status: 0,
           error: error.message
         });
-      } finally {
-        if (keepAliveInterval) {
-          clearInterval(keepAliveInterval);
-        }
       }
     })();
     return true; // Keep channel open for async response
