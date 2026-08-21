@@ -217,10 +217,15 @@ class Logger {
     _makeBridgeRequest(action, key, data = null, area = 'local') {
         return new Promise((resolve, reject) => {
             const requestId = `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            let timerId = null;
 
             const handler = (event) => {
                 const { requestId: resId, success, data, error } = event.detail || {};
                 if (resId === requestId) {
+                    if (timerId) {
+                        clearTimeout(timerId);
+                        timerId = null;
+                    }
                     window.removeEventListener('pa-storage-response', handler);
                     if (success) {
                         resolve(data);
@@ -236,7 +241,7 @@ class Logger {
                 detail: { action, key, data, requestId, area }
             }));
 
-            setTimeout(() => {
+            timerId = setTimeout(() => {
                 window.removeEventListener('pa-storage-response', handler);
                 reject(new Error('Bridge timeout'));
             }, 3000);

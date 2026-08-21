@@ -806,9 +806,7 @@ class MemoryController {
 
         // Check if all values are single characters
         const values = Object.values(obj);
-        const isSingleChars = values.every(v => typeof v === 'string' && v.length === 1);
-
-        return isSingleChars && keys.length > 10; // Only fix if it looks like a string (>10 chars)
+        return isSingleChars && keys.length > 0;
     }
 
     /**

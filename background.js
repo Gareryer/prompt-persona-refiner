@@ -326,14 +326,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const isOpen = isSidepanelOpen(windowId);
 
         if (isOpen) {
-          // Close: disable sidepanel to force close
-          await chrome.sidePanel.setOptions({ tabId, enabled: false });
-          // Re-enable for next open
-          await chrome.sidePanel.setOptions({
-            tabId,
-            path: 'sidepanel/index.html',
-            enabled: true
-          });
+          // Find the port associated with this window or any open sidepanel port
+          const port = (windowId && sidepanelWindowPorts.get(windowId)) || Array.from(openSidepanelPorts)[0];
+          if (port) {
+            try {
+              port.postMessage({ type: 'CLOSE_SIDEPANEL' });
+            } catch (e) {
+              console.warn('[Background] Failed to send CLOSE_SIDEPANEL to port:', e);
+            }
+          }
+          // Also broadcast via runtime message
+          chrome.runtime.sendMessage({ type: 'CLOSE_SIDEPANEL' }).catch(() => {});
+
           console.log('[Background] Sidepanel closed for tab:', tabId, 'window:', windowId);
           sendResponse({ success: true, isOpen: false });
         } else {

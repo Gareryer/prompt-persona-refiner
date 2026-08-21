@@ -683,7 +683,8 @@ function getPreviousPromptsWithRatings(count = 5) {
 
     for (const message of result.messages || []) {
         if (message.user?.prompt) {
-            const turnIndex = message.id;
+            // Turn index is 0-based in RatingManager, message.id is 1-based pair ID
+            const turnIndex = message.id != null ? message.id - 1 : 0;
 
             // Get rating for this turn's model response (if any)
             let rating = null;

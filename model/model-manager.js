@@ -205,6 +205,17 @@ class ModelManager {
     }
 
     /**
+     * Check if a model has an API key configured
+     * @param {string} id - Model ID
+     * @returns {boolean}
+     */
+    hasApiKey(id) {
+        if (!this._cache) return false;
+        const model = this._cache[id];
+        return Boolean(model && model.apiKey && typeof model.apiKey === 'string' && model.apiKey.trim().length > 0);
+    }
+
+    /**
      * Update a model configuration
      * @param {string} id - Model ID
      * @param {Object} updates - Properties to update
@@ -358,7 +369,7 @@ class ModelManager {
                 type: 'LLM_CONFIG_SAVED',
                 payload: { configured: true, modelId: id },
                 requestId: `model_enable_${Date.now()}`
-            }, '*');
+            }, window.location?.origin || '*');
         }
 
         modelLog('info', 'Model enabled', { id });
@@ -464,7 +475,7 @@ class ModelManager {
                 type: 'LLM_CONFIG_SAVED',
                 payload: { configured: true, modelId: id },
                 requestId: `model_active_${Date.now()}`
-            }, '*');
+            }, window.location?.origin || '*');
         }
 
         console.log(`[ModelManager] setActiveModel: Complete - active model is now ${id}`);
@@ -734,13 +745,16 @@ class ModelManager {
                 console.log('[ModelManager] Storage changed externally, invalidating cache');
                 this._cache = null;
                 this._initialized = false;
+                this._initPromise = null;
                 if (_modelManagerInstance) {
                     _modelManagerInstance._cache = null;
                     _modelManagerInstance._initialized = false;
+                    _modelManagerInstance._initPromise = null;
                 }
                 if (typeof window !== 'undefined' && window._modelManagerInstance) {
                     window._modelManagerInstance._cache = null;
                     window._modelManagerInstance._initialized = false;
+                    window._modelManagerInstance._initPromise = null;
                 }
             }
         });
@@ -798,15 +812,21 @@ class ModelManager {
 
         // Fallback for non-MAIN world (shouldn't happen but just in case)
         return new Promise((resolve) => {
-            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-                chrome.storage.local.get(keys, (result) => {
-                    if (Array.isArray(keys)) {
-                        resolve(result);
-                    } else {
-                        resolve(result[keys]);
-                    }
-                });
-            } else {
+            try {
+                if (typeof chrome !== 'undefined' && chrome.runtime?.id && chrome.storage?.local) {
+                    chrome.storage.local.get(keys, (result) => {
+                        if (chrome.runtime.lastError) {
+                            resolve(Array.isArray(keys) ? {} : null);
+                        } else if (Array.isArray(keys)) {
+                            resolve(result || {});
+                        } else {
+                            resolve(result ? result[keys] : null);
+                        }
+                    });
+                } else {
+                    resolve(Array.isArray(keys) ? {} : null);
+                }
+            } catch (_) {
                 resolve(Array.isArray(keys) ? {} : null);
             }
         });
@@ -830,16 +850,20 @@ class ModelManager {
 
         // Fallback for non-MAIN world
         return new Promise((resolve, reject) => {
-            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-                chrome.storage.local.set({ [key]: value }, () => {
-                    if (chrome.runtime.lastError) {
-                        reject(chrome.runtime.lastError);
-                    } else {
-                        resolve();
-                    }
-                });
-            } else {
-                reject(new Error('No storage available'));
+            try {
+                if (typeof chrome !== 'undefined' && chrome.runtime?.id && chrome.storage?.local) {
+                    chrome.storage.local.set({ [key]: value }, () => {
+                        if (chrome.runtime.lastError) {
+                            reject(chrome.runtime.lastError);
+                        } else {
+                            resolve();
+                        }
+                    });
+                } else {
+                    resolve();
+                }
+            } catch (_) {
+                resolve();
             }
         });
     }
@@ -865,9 +889,15 @@ class ModelManager {
 
         // Fallback for non-MAIN world
         return new Promise((resolve) => {
-            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-                chrome.storage.local.remove(keys, resolve);
-            } else {
+            try {
+                if (typeof chrome !== 'undefined' && chrome.runtime?.id && chrome.storage?.local) {
+                    chrome.storage.local.remove(keys, () => {
+                        resolve();
+                    });
+                } else {
+                    resolve();
+                }
+            } catch (_) {
                 resolve();
             }
         });

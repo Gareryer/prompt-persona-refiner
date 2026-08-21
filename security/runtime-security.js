@@ -38,10 +38,15 @@
         const _fingerprint = generateKey(8);
         const _timestamp = Date.now();
 
-        // Derive a combined key (XOR of session + instance)
+        // Derive a combined key using non-commutative polynomial rolling hash (djb2)
         const deriveKey = (purpose) => {
-            const purposeHash = purpose.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-            return _sessionKey.slice(0, 16) + purposeHash.toString(16) + _instanceKey.slice(0, 8);
+            let hash = 5381;
+            for (let i = 0; i < purpose.length; i++) {
+                hash = ((hash << 5) + hash) + purpose.charCodeAt(i);
+                hash = hash & 0xffffffff;
+            }
+            const purposeHash = (hash >>> 0).toString(16).padStart(8, '0');
+            return _sessionKey.slice(0, 16) + purposeHash + _instanceKey.slice(0, 8);
         };
 
         return {
@@ -106,18 +111,64 @@
         // Check if running in authorized context
         isAuthorized: () => !window.__GEMINI_EXT_DISABLED__,
 
-        // Simple encrypt (XOR with derived key) for non-critical data
-        encrypt: (text, purpose = 'default') => {
-            const key = _keyStore.deriveKey(purpose);
-            return text.split('').map((c, i) =>
-                String.fromCharCode(c.charCodeAt(0) ^ key.charCodeAt(i % key.length))
-            ).join('');
+        // Encrypt with derived key using AES-GCM (256-bit)
+        encrypt: async (text, purpose = 'default') => {
+            if (typeof text !== 'string') return '';
+            try {
+                const keyStr = _keyStore.deriveKey(purpose);
+                const enc = new TextEncoder();
+                const keyHash = await crypto.subtle.digest('SHA-256', enc.encode(keyStr));
+                const cryptoKey = await crypto.subtle.importKey(
+                    'raw',
+                    keyHash,
+                    { name: 'AES-GCM' },
+                    false,
+                    ['encrypt']
+                );
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const cipher = await crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv },
+                    cryptoKey,
+                    enc.encode(text)
+                );
+                const combined = new Uint8Array(iv.length + cipher.byteLength);
+                combined.set(iv, 0);
+                combined.set(new Uint8Array(cipher), iv.length);
+                return btoa(String.fromCharCode(...combined));
+            } catch (err) {
+                console.error('[Security] Encryption failed:', err);
+                return '';
+            }
         },
 
-        // Simple decrypt
-        decrypt: (encrypted, purpose = 'default') => {
-            // XOR is symmetric
-            return SecurityManager.encrypt(encrypted, purpose);
+        // Decrypt with derived key using AES-GCM (256-bit)
+        decrypt: async (encryptedBase64, purpose = 'default') => {
+            if (typeof encryptedBase64 !== 'string') return '';
+            try {
+                const combined = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+                if (combined.length < 13) return '';
+                const iv = combined.slice(0, 12);
+                const cipher = combined.slice(12);
+                const keyStr = _keyStore.deriveKey(purpose);
+                const enc = new TextEncoder();
+                const keyHash = await crypto.subtle.digest('SHA-256', enc.encode(keyStr));
+                const cryptoKey = await crypto.subtle.importKey(
+                    'raw',
+                    keyHash,
+                    { name: 'AES-GCM' },
+                    false,
+                    ['decrypt']
+                );
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv },
+                    cryptoKey,
+                    cipher
+                );
+                return new TextDecoder().decode(decrypted);
+            } catch (err) {
+                console.error('[Security] Decryption failed:', err);
+                return null;
+            }
         }
     });
 

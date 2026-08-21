@@ -267,7 +267,7 @@ CRITICAL: Return ONLY valid JSON (no markdown, no code blocks).`;
       }
 
       // Handle wrapped responses from various LLM structures
-      const unwrappers = ['memory_layer', 'dimensions', 'components', 'persona_components', 'synthesis', 'data', 'output'];
+      const unwrappers = ['memory_layer', 'dimensions', 'components', 'persona_components', 'synthesis', 'data', 'output', 'response', 'result', 'analysis', 'expert_persona'];
       for (const prop of unwrappers) {
         if (result?.[prop] && typeof result[prop] === 'object' && !Array.isArray(result[prop])) {
           console.log(`[UnifiedAnalyzer] Unwrapping/merging '${prop}' from response`);
@@ -302,6 +302,32 @@ CRITICAL: Return ONLY valid JSON (no markdown, no code blocks).`;
             if (result[lowerAlias] !== undefined) {
               console.log(`[UnifiedAnalyzer] Mapping alias '${lowerAlias}' to canonical dimension '${canonicalKey}'`);
               result[canonicalKey] = result[lowerAlias];
+              break;
+            }
+          }
+        }
+      }
+
+      // ================================================================
+      // SECTION DECONSTRUCTION FALLBACK - Parse embedded markdown sections
+      // ================================================================
+      const primaryText = (typeof result.persona?.instruction === 'string' && result.persona.instruction)
+        || (typeof result.persona === 'string' && result.persona)
+        || (typeof result.instruction === 'string' && result.instruction)
+        || '';
+
+      if (primaryText && (!result.context || !result.tone || !result.framework || !result.constraints || !result.format || !result.exemplar)) {
+        const sectionRegex = /##+\s*(?:\d+\.\s*)?([A-Za-z &]+)[\r\n]+([\s\S]*?)(?=(?:##+\s*(?:\d+\.\s*)?[A-Za-z &]+|$))/g;
+        let match;
+        while ((match = sectionRegex.exec(primaryText)) !== null) {
+          const rawHeading = match[1].toLowerCase().trim();
+          const sectionContent = match[2].trim();
+          if (!sectionContent) continue;
+
+          for (const [canonicalKey, aliases] of Object.entries(keyAliases)) {
+            if (!result[canonicalKey] && (rawHeading.includes(canonicalKey) || aliases.some(a => rawHeading.includes(a)))) {
+              console.log(`[UnifiedAnalyzer] Extracted embedded section '${rawHeading}' for '${canonicalKey}'`);
+              result[canonicalKey] = { instruction: sectionContent };
               break;
             }
           }

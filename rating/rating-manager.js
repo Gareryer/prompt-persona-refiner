@@ -399,16 +399,14 @@ class RatingManager {
      * }
      */
     getRating(turnIndex) {
-        // Warn if cache not loaded
+        // Ensure cache loaded
         if (!this._cache) {
-            ratingLog('warn', 'Cache not loaded - call load() first');
-            console.warn('[RatingManager] Cache not loaded. Call load() first.');
-            return null;
+            this.load();
         }
 
         // Build turn key and lookup
         const key = `turn_${turnIndex}`;
-        return this._cache[key] || null;
+        return this._cache ? (this._cache[key] || null) : null;
     }
 
     /**
@@ -497,6 +495,9 @@ class RatingManager {
      * // { "turn_0": { rating: 4, ratedAt: ... }, "turn_2": { rating: 5, ratedAt: ... } }
      */
     getAllRatings() {
+        if (!this._cache) {
+            this.load();
+        }
         return this._cache || {};
     }
 
@@ -514,6 +515,9 @@ class RatingManager {
      * // [{ turnIndex: 0, rating: 4, ratedAt: ... }, { turnIndex: 2, rating: 5, ratedAt: ... }]
      */
     getRatingsArray() {
+        if (!this._cache) {
+            this.load();
+        }
         const ratings = [];
 
         // Iterate over cached ratings
@@ -561,6 +565,9 @@ class RatingManager {
      * console.log(`${manager.getRatedCount()} of ${totalTurns} turns rated`);
      */
     getRatedCount() {
+        if (!this._cache) {
+            this.load();
+        }
         return Object.keys(this._cache || {}).length;
     }
 
@@ -620,7 +627,7 @@ function getCurrentRatingManager() {
     const sessionId = RatingManager.extractSessionId(window.location.href);
 
     if (!sessionId) {
-        ratingLog('warn', 'Cannot create RatingManager - no session ID in URL');
+        ratingLog('debug', 'Cannot create RatingManager - no session ID in URL');
         return null;
     }
 

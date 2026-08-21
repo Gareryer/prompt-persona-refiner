@@ -351,7 +351,12 @@ async function fetchGeminiModels(apiKey) {
 
     try {
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models?key=${cleanKey}`
+            'https://generativelanguage.googleapis.com/v1beta/models',
+            {
+                headers: {
+                    'x-goog-api-key': cleanKey
+                }
+            }
         );
 
         if (!response.ok) {

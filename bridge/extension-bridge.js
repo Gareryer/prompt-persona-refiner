@@ -296,7 +296,7 @@ if (chrome.runtime?.id) {
 
     // Single static response listener for all MAIN-world bridge responses
     window.addEventListener('message', (event) => {
-        if (event.source !== window) return;
+        if (event.source !== window || event.origin !== window.location.origin) return;
         if (event.data?.source === 'ext-bridge-response' && event.data?.requestId) {
             const pending = pendingBridgeRequests.get(event.data.requestId);
             if (pending) {
@@ -330,7 +330,7 @@ if (chrome.runtime?.id) {
                 source: 'ext-bridge',
                 type: msg.type,
                 payload: msg
-            }, '*');
+            }, window.location.origin);
             return false; // Close port immediately
         }
 
@@ -352,7 +352,7 @@ if (chrome.runtime?.id) {
                 type: msg.type,
                 payload: msg,
                 requestId
-            }, '*');
+            }, window.location.origin);
 
             return true; // Keep channel open for async response
         }

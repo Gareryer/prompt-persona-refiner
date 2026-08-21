@@ -94,7 +94,8 @@ class LLMConfigManager {
         if (!manager) return null;
 
         await manager.init();
-        return await manager.getActiveModel();
+        const model = await manager.getActiveModel();
+        return model ? { ...model, parameters: { ...(model.parameters || {}) } } : null;
     }
 }
 

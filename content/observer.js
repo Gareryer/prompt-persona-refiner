@@ -251,9 +251,11 @@ const themeObserver = new MutationObserver(() => {
     applyThemeToDocument(currentTheme);
 
     // Notify sidepanel of theme change
-    chrome.runtime.sendMessage({ type: 'THEME_CHANGED', theme: currentTheme }).catch(() => {
-      // Sidepanel may not be open or context invalidated, ignore error
-    });
+    if (isExtensionContextValid()) {
+      chrome.runtime.sendMessage({ type: 'THEME_CHANGED', theme: currentTheme }).catch(() => {
+        // Sidepanel may not be open or context invalidated, ignore error
+      });
+    }
   }
 });
 
@@ -422,7 +424,11 @@ function createSettingsIcon() {
     e.stopPropagation();
     if (btn.classList.contains('enabled')) {
       // Send message to background to toggle sidepanel
-      chrome.runtime.sendMessage({ type: 'TOGGLE_SIDEPANEL' });
+      if (isExtensionContextValid()) {
+        chrome.runtime.sendMessage({ type: 'TOGGLE_SIDEPANEL' }).catch(() => {});
+      } else {
+        showExtensionReloadNotification();
+      }
     }
   });
 
@@ -832,15 +838,23 @@ function createReviewModal() {
   // Check if API key is configured
   const checkApiKey = () => {
     return new Promise(resolve => {
-      if (!chrome?.runtime?.sendMessage) {
+      if (!isExtensionContextValid()) {
         resolve(false);
         return;
       }
-      chrome.runtime.sendMessage({ type: 'CHECK_API_KEY' }, response => {
-        state.hasApiKey = response?.hasKey || false;
-        updateEmptyState();
-        resolve(state.hasApiKey);
-      });
+      try {
+        chrome.runtime.sendMessage({ type: 'CHECK_API_KEY' }, response => {
+          if (chrome.runtime?.lastError) {
+            resolve(false);
+            return;
+          }
+          state.hasApiKey = response?.hasKey || false;
+          updateEmptyState();
+          resolve(state.hasApiKey);
+        });
+      } catch (_) {
+        resolve(false);
+      }
     });
   };
 
@@ -867,7 +881,11 @@ function createReviewModal() {
   // Configure API button click - open options page via background script
   if (btnConfigureApi) {
     btnConfigureApi.addEventListener('click', () => {
-      chrome.runtime.sendMessage({ type: 'OPEN_OPTIONS_PAGE' });
+      if (isExtensionContextValid()) {
+        chrome.runtime.sendMessage({ type: 'OPEN_OPTIONS_PAGE' }).catch(() => {});
+      } else {
+        showExtensionReloadNotification();
+      }
     });
   }
 
@@ -1269,9 +1287,13 @@ function createReviewModal() {
     state.lateResponse = null;
 
     // Send STOP_REFINEMENT message to background to abort the actual fetch
-    chrome.runtime.sendMessage({ type: 'STOP_REFINEMENT' }, (response) => {
-      obsLog('info', 'Stop refinement response', response);
-    });
+    if (isExtensionContextValid()) {
+      try {
+        chrome.runtime.sendMessage({ type: 'STOP_REFINEMENT' }, (response) => {
+          obsLog('info', 'Stop refinement response', response);
+        });
+      } catch (_) {}
+    }
 
     // Also abort local controller if present
     if (state.currentAbortController) {
@@ -1430,9 +1452,24 @@ function createReviewModal() {
       ? getPreviousPromptsWithRatings(5)
       : [];
 
-    chrome.runtime.sendMessage(
-      { type: 'REFINE_PROMPT', payload: { text: currentContent, persona, context, previousPrompts } },
-      (response) => {
+    if (!isExtensionContextValid()) {
+      showExtensionReloadNotification();
+      btnSendFinal.disabled = false;
+      btnReRefine.disabled = false;
+      return;
+    }
+
+    try {
+      chrome.runtime.sendMessage(
+        { type: 'REFINE_PROMPT', payload: { text: currentContent, persona, context, previousPrompts } },
+        (response) => {
+          if (chrome.runtime?.lastError) {
+            obsLog('error', 'Refinement runtime error', { error: chrome.runtime.lastError.message });
+            modal.showError('Extension updated. Please refresh the page.');
+            btnSendFinal.disabled = false;
+            btnReRefine.disabled = false;
+            return;
+          }
         obsLog('info', 'Refinement response received', {
           success: !!response?.refined,
           aborted: !!response?.aborted,
@@ -1459,9 +1496,12 @@ function createReviewModal() {
         } else if (response?.error) {
           api.showError(response.error);
         }
-      }
-    );
-
+      });
+    } catch (err) {
+      modal.showError('Extension updated. Please refresh the page.');
+      btnSendFinal.disabled = false;
+      btnReRefine.disabled = false;
+    }
   };
 
   // REMOVED: Click on backdrop no longer closes modal
@@ -2015,14 +2055,28 @@ async function triggerRefinement(inputEl, overlayEl, toggleApi) {
   // Step 6: Request refinement from background script (AFTER connection check completes)
   obsLog('debug', '[triggerRefinement] Sending REFINE_PROMPT to background');
   console.log('[Observer] triggerRefinement: Sending refinement request to background...');
-  chrome.runtime.sendMessage(
-    { type: 'REFINE_PROMPT', payload: { text, persona, context, previousPrompts } },
-    (response) => {
-      obsLog('debug', '[triggerRefinement] Response received', { hasRefined: !!response?.refined, aborted: !!response?.aborted });
-      console.log('[Observer] triggerRefinement: Response received:', !!response?.refined, 'aborted:', !!response?.aborted);
 
-      // Remove loading state from overlay
-      if (overlayEl) overlayEl.classList.remove('loading');
+  if (!isExtensionContextValid()) {
+    showExtensionReloadNotification();
+    if (overlayEl) overlayEl.classList.remove('loading');
+    modal.showError('Extension updated. Please refresh the page.');
+    return;
+  }
+
+  try {
+    chrome.runtime.sendMessage(
+      { type: 'REFINE_PROMPT', payload: { text, persona, context, previousPrompts } },
+      (response) => {
+        if (chrome.runtime?.lastError) {
+          if (overlayEl) overlayEl.classList.remove('loading');
+          modal.showError('Extension updated. Please refresh the page.');
+          return;
+        }
+        obsLog('debug', '[triggerRefinement] Response received', { hasRefined: !!response?.refined, aborted: !!response?.aborted });
+        console.log('[Observer] triggerRefinement: Response received:', !!response?.refined, 'aborted:', !!response?.aborted);
+
+        // Remove loading state from overlay
+        if (overlayEl) overlayEl.classList.remove('loading');
 
       // If aborted by user, don't show error - stop button already showed feedback
       if (response?.aborted) {
@@ -2048,8 +2102,11 @@ async function triggerRefinement(inputEl, overlayEl, toggleApi) {
 
       obsLog('info', '[triggerRefinement] COMPLETE');
       console.log('[Observer] triggerRefinement COMPLETE');
-    }
-  );
+    });
+  } catch (err) {
+    if (overlayEl) overlayEl.classList.remove('loading');
+    modal.showError('Extension updated. Please refresh the page.');
+  }
 }
 
 // Listen for keyboard shortcut from background

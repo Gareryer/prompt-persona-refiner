@@ -951,11 +951,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Connect long-lived port to background service worker for accurate open/close tracking
     let sidepanelPort = null;
+    const handleCloseSidepanel = (msg) => {
+        if (msg?.type === 'CLOSE_SIDEPANEL') {
+            console.log('[Sidepanel] Received CLOSE_SIDEPANEL command - closing sidepanel');
+            window.close();
+        }
+    };
+
     try {
         sidepanelPort = chrome.runtime.connect({ name: 'sidepanel' });
+        sidepanelPort.onMessage.addListener(handleCloseSidepanel);
     } catch (e) {
         console.warn('[Sidepanel] Failed to connect port to background:', e);
     }
+
+    // Also listen on runtime messages for close requests
+    chrome.runtime.onMessage.addListener(handleCloseSidepanel);
 
     // Listen for storage changes
     chrome.storage.onChanged.addListener(handleStorageChange);
@@ -2312,7 +2323,7 @@ function createMultiSelectChips(config) {
         currentSelected.filter(v => !presetOptions.includes(v)).forEach(customValue => {
             const chip = document.createElement('span');
             chip.className = 'filter-chip v4-chip custom selected';
-            chip.innerHTML = `${customValue} <button class="chip-remove" title="Remove">×</button>`;
+            chip.innerHTML = `${escapeHtml(customValue)} <button class="chip-remove" title="Remove">×</button>`;
 
             chip.querySelector('.chip-remove').addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -5790,7 +5801,7 @@ function showPersonaPopup(persona, isOwned = false) {
             <div class="popup-meta">
                 <span><span class="material-symbols-outlined">download</span> ${importCount}</span>
                 <span><span class="material-symbols-outlined">star</span> ${avgRating}</span>
-                <span>${provider}</span>
+                <span>${escapeHtml(provider)}</span>
                 ${exportButton}
             </div>
             <div class="popup-keywords">
@@ -6684,17 +6695,6 @@ function loadPersonaToEdit(persona) {
 function handleViewPersona(persona) {
     // Show popup with Edit button (owned persona)
     showPersonaPopup(persona, true);
-}
-
-/**
- * HTML escape helper
- * @param {string} text
- * @returns {string}
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 // ============================================================================
@@ -8069,12 +8069,24 @@ async function submitRating(personaId, rating) {
 }
 
 // Check rating eligibility periodically when on Context tab
-setInterval(() => {
+let ratingEligibilityInterval = setInterval(() => {
     const contextTab = document.getElementById('tab-content-context');
     if (contextTab && !contextTab.classList.contains('hidden')) {
         checkRatingEligibility();
     }
 }, 30000); // Check every 30 seconds
+
+// Clean up background timers on sidepanel unload
+window.addEventListener('beforeunload', () => {
+    if (ratingEligibilityInterval) {
+        clearInterval(ratingEligibilityInterval);
+        ratingEligibilityInterval = null;
+    }
+    if (typeof logRefreshInterval !== 'undefined' && logRefreshInterval) {
+        clearInterval(logRefreshInterval);
+        logRefreshInterval = null;
+    }
+});
 
 // ============================================================================
 // Moderation System

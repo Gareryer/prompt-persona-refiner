@@ -152,7 +152,7 @@ const RatingInjector = {
         // Uses getCurrentRatingManager() which extracts session ID from URL
         this._ratingManager = getCurrentRatingManager();
         if (!this._ratingManager) {
-            console.warn('[RatingInjector] Could not get rating manager - not on a valid session page');
+            console.log('[RatingInjector] No active session ID on current URL - skipping rating injection');
             return;
         }
 

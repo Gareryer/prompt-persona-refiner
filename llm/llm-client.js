@@ -176,6 +176,20 @@ class LLMClient {
             // Use proxy bridge
             return new Promise((resolve, reject) => {
                 const requestId = `api_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                let timeoutId = null;
+                let onAbort = null;
+
+                const cleanup = () => {
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                        timeoutId = null;
+                    }
+                    window.removeEventListener('pa-api-proxy-response', handler);
+                    if (abortSignal && onAbort) {
+                        abortSignal.removeEventListener('abort', onAbort);
+                        onAbort = null;
+                    }
+                };
 
                 // Handle abort signal
                 if (abortSignal) {
@@ -184,19 +198,20 @@ class LLMClient {
                         return;
                     }
 
-                    abortSignal.addEventListener('abort', () => {
-                        window.removeEventListener('pa-api-proxy-response', handler);
+                    onAbort = () => {
+                        cleanup();
                         // Dispatch abort event to bridge
                         window.dispatchEvent(new CustomEvent('pa-api-proxy-abort', {
                             detail: { requestId }
                         }));
                         reject(new DOMException('Request aborted', 'AbortError'));
-                    });
+                    };
+                    abortSignal.addEventListener('abort', onAbort, { once: true });
                 }
 
                 const handler = (event) => {
                     if (event.detail?.requestId === requestId) {
-                        window.removeEventListener('pa-api-proxy-response', handler);
+                        cleanup();
 
                         if (event.detail.success) {
                             resolve(event.detail.data);
@@ -214,8 +229,8 @@ class LLMClient {
                 }));
 
                 // Timeout after 60 seconds
-                setTimeout(() => {
-                    window.removeEventListener('pa-api-proxy-response', handler);
+                timeoutId = setTimeout(() => {
+                    cleanup();
                     reject(new Error('API proxy timeout (60s)'));
                 }, 60000);
             });
@@ -443,7 +458,7 @@ class LLMClient {
         this._log('debug', '[_callGemini] START', { model: this.model, hasSchema: !!options.schema });
 
         // Step 1: Build URL
-        const url = `${API_ENDPOINTS[LLM_PROVIDERS.GEMINI]}/${this.model}:generateContent?key=${this.apiKey}`;
+        const url = `${API_ENDPOINTS[LLM_PROVIDERS.GEMINI]}/${this.model}:generateContent`;
         console.log('[LLMClient] _callGemini: URL constructed');
 
         // Step 2: Build request body
@@ -453,8 +468,8 @@ class LLMClient {
                 parts: [{ text: prompt }]
             }],
             generationConfig: {
-                temperature: options.temperature || 0.7,
-                maxOutputTokens: options.maxTokens || 8192
+                temperature: options.temperature ?? 0.7,
+                maxOutputTokens: options.maxTokens ?? 8192
             }
         };
         console.log('[LLMClient] _callGemini: Body constructed', { promptLength: prompt.length });
@@ -478,7 +493,10 @@ class LLMClient {
 
         const proxyResponse = await this._proxyFetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': this.apiKey
+            },
             body: JSON.stringify(body)
         }, options.abortSignal);
 
@@ -523,8 +541,8 @@ class LLMClient {
         const body = {
             model: this.model,
             messages,
-            temperature: options.temperature || 0.7,
-            max_tokens: options.maxTokens || 8192
+            temperature: options.temperature ?? 0.7,
+            max_tokens: options.maxTokens ?? 8192
         };
 
         // JSON mode with optional schema enforcement
@@ -585,9 +603,13 @@ class LLMClient {
 
         const body = {
             model: this.model,
-            max_tokens: options.maxTokens || 8192,
+            max_tokens: Math.min(Math.max(1, options.maxTokens ?? 4096), 8192),
             messages: [{ role: 'user', content: enhancedPrompt }]
         };
+
+        if (options.temperature != null) {
+            body.temperature = Math.max(0, Math.min(1, options.temperature));
+        }
 
         if (options.systemPrompt) {
             body.system = options.systemPrompt;
@@ -640,8 +662,8 @@ class LLMClient {
         const body = {
             model: this.model,
             messages,
-            temperature: options.temperature || 0.7,
-            max_tokens: options.maxTokens || 8192
+            temperature: options.temperature ?? 0.7,
+            max_tokens: options.maxTokens ?? 8192
         };
 
         const proxyResponse = await this._proxyFetch(url, {

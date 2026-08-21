@@ -68,9 +68,8 @@ memLog('info', 'Loading Memory Architecture Layer...');
 // Convenience Functions
 // ============================================================================
 
-// B4 FIX: Global analysis mutex to prevent overlapping runs
-let analysisInProgress = false;
-let analysisPromise = null;
+// Session-scoped analysis mutexes to prevent overlapping runs on the same session
+const sessionMutexes = new Map();
 
 /**
  * Run complete analysis pipeline on a session
@@ -81,24 +80,21 @@ let analysisPromise = null;
  * @returns {Promise<{memory: MemoryController, context: ContextAssembler, results: Object}>}
  */
 async function analyzeSession(url, options = {}) {
-    // B4 FIX: Mutex check - if analysis is already in progress, wait for it
-    if (analysisInProgress && analysisPromise) {
-        memLog('info', 'Analysis already in progress, waiting for existing run...');
-        return analysisPromise;
+    // Extract session ID
+    const sessionId = MemoryController.extractSessionId(url);
+    if (!sessionId) {
+        throw new Error('Could not extract session ID from URL');
     }
 
-    // Set mutex
-    analysisInProgress = true;
+    // Session-scoped mutex check - if analysis is already in progress for this session, wait for it
+    if (sessionMutexes.has(sessionId)) {
+        memLog('info', `Analysis already in progress for session ${sessionId}, waiting for existing run...`);
+        return sessionMutexes.get(sessionId);
+    }
 
-    // Wrap in try/finally to ensure mutex is released
-    analysisPromise = (async () => {
+    // Wrap in try/finally to ensure session mutex is released
+    const runPromise = (async () => {
         try {
-            // Extract session ID
-            const sessionId = MemoryController.extractSessionId(url);
-            if (!sessionId) {
-                throw new Error('Could not extract session ID from URL');
-            }
-
             console.log(`[Memory] Analyzing session: ${sessionId}`);
 
             // Initialize memory controller
@@ -295,14 +291,14 @@ async function analyzeSession(url, options = {}) {
 
             return { memory, context, results };
         } finally {
-            // B4 FIX: Always release the mutex
-            analysisInProgress = false;
-            analysisPromise = null;
-            memLog('debug', 'Analysis mutex released');
+            // Always release the session mutex
+            sessionMutexes.delete(sessionId);
+            memLog('debug', `Analysis mutex released for session ${sessionId}`);
         }
     })();
 
-    return analysisPromise;
+    sessionMutexes.set(sessionId, runPromise);
+    return runPromise;
 }
 
 /**
@@ -343,7 +339,8 @@ if (typeof module !== 'undefined' && module.exports) {
 // from bridge/extension-bridge.js which runs in ISOLATED world
 
 window.addEventListener('message', async (event) => {
-    // Only process messages from our extension bridge
+    // Only process messages from same window origin and our extension bridge
+    if (event.source !== window || event.origin !== window.location.origin) return;
     if (event.data?.source !== 'ext-bridge') return;
 
     const { type, payload, requestId } = event.data;
@@ -354,7 +351,7 @@ window.addEventListener('message', async (event) => {
             source: 'ext-bridge-response',
             requestId: requestId,
             result: result
-        }, '*');
+        }, window.location.origin);
     };
 
     if (type === 'REBUILD_MEMORY_REQUEST') {

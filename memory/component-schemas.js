@@ -134,11 +134,10 @@ const ComponentSchemas = {
                             items: { type: "string" },
                             description: "Topics in scope (multi-select + custom tags)"
                         }
-                    },
-                    required: ["domain", "scope_tags"]
+                    }
                 }
             },
-            required: ["instruction", "metadata"]
+            required: ["instruction"]
         },
 
         // ====================================================================
@@ -165,11 +164,10 @@ const ComponentSchemas = {
                             items: { type: "string" },
                             description: "Phrases to avoid (multi-select + custom)"
                         }
-                    },
-                    required: ["style_tags", "banned_phrases"]
+                    }
                 }
             },
-            required: ["instruction", "metadata"]
+            required: ["instruction"]
         },
 
         // ====================================================================
@@ -190,11 +188,10 @@ const ComponentSchemas = {
                             type: "string",
                             description: "Reasoning approach (single-select chip)"
                         }
-                    },
-                    required: ["reasoning_type"]
+                    }
                 }
             },
-            required: ["instruction", "metadata"]
+            required: ["instruction"]
         },
 
         // ====================================================================
@@ -225,11 +222,10 @@ const ComponentSchemas = {
                             type: "string",
                             description: "Length limit e.g., '500 words' (auto-generated if empty)"
                         }
-                    },
-                    required: ["prohibitions", "requirements", "response_length"]
+                    }
                 }
             },
-            required: ["instruction", "metadata"]
+            required: ["instruction"]
         },
 
         // ====================================================================
@@ -250,11 +246,10 @@ const ComponentSchemas = {
                             type: "string",
                             description: "Primary output format (single-select chip)"
                         }
-                    },
-                    required: ["output_type"]
+                    }
                 }
             },
-            required: ["instruction", "metadata"]
+            required: ["instruction"]
         },
 
         // ====================================================================

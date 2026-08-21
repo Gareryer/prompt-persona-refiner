@@ -21,6 +21,8 @@ graph.mmd
 # Generated knowledge-graph artifacts
 graphify-out/
 wiki/
+audit_master_log.md
+.antigravity/
 
 # Media
 *.mp4

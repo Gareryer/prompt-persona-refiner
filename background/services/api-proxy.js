@@ -139,8 +139,11 @@ export const MODEL_CONFIGS = {
 
 export const LLM_TRANSPORTS = {
   gemini: {
-    buildUrl: (model, apiKey, endpoint) => endpoint ? `${endpoint}?key=${apiKey}` : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-    buildHeaders: () => ({ 'Content-Type': 'application/json' }),
+    buildUrl: (model, apiKey, endpoint) => endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    buildHeaders: (apiKey) => ({
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey
+    }),
     buildBody: (prompt, params = {}) => JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
