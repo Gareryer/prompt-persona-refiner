@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import React from 'react';
 import { resolveChatbotAdapter } from '../src/adapters/chatbots/registry';
-import { sendRpcMessage } from '../src/lib/messaging/client';
+import { contentObserver } from '../src/content/observer';
 import { RefinerBadge } from '../src/components/injections/RefinerBadge';
 import './../src/components/injections/injections.css';
 
@@ -27,31 +27,10 @@ export default defineContentScript({
 
     console.log(`[WXT] Active Chatbot Adapter: ${adapter.platform.toUpperCase()} on ${location.hostname}`);
 
-    // Refinement executor function
-    const executeRefinement = async () => {
-      const rawPrompt = adapter.getInputText();
-      if (!rawPrompt || rawPrompt.trim().length === 0) return;
+    // Initialize content script observer (theme, shortcuts, message dispatch)
+    contentObserver.init();
 
-      const result = await sendRpcMessage('REFINE_PROMPT', { rawPrompt });
-      if (result.success && result.refinedPrompt) {
-        adapter.setInputText(result.refinedPrompt);
-      }
-    };
-
-    // 1. Listen for background keyboard shortcut
-    browser.runtime.onMessage.addListener(async (message) => {
-      if (message.type === 'SET_COMPOSER_TEXT') {
-        if (message.text) {
-          adapter.setInputText(message.text);
-        }
-      }
-
-      if (message.type === 'TRIGGER_REFINE_SHORTCUT') {
-        await executeRefinement();
-      }
-    });
-
-    // 2. Mount Shadow DOM Floating Refiner Badge
+    // Mount Shadow DOM Floating Refiner Badge
     try {
       const ui = await createShadowRootUi(ctx, {
         name: 'prompt-refiner-overlay',
@@ -64,7 +43,11 @@ export default defineContentScript({
             React.createElement(
               'div',
               { style: { position: 'fixed', bottom: '24px', right: '24px', zIndex: 999999 } },
-              React.createElement(RefinerBadge, { onRefine: executeRefinement })
+              React.createElement(RefinerBadge, {
+                onRefine: async () => {
+                  await contentObserver.executeRefinement();
+                }
+              })
             )
           );
           return root;

@@ -1,12 +1,12 @@
 {
-  "generated": "2026-08-30T18:31:51.884Z",
+  "generated": "2026-08-30T18:36:22.684Z",
   "summary": {
     "totalLegacySymbols": 2509,
-    "ported": 1077,
-    "missing": 1432,
-    "newInWxt": 508,
-    "portedPct": "42.9%",
-    "missingPct": "57.1%"
+    "ported": 1132,
+    "missing": 1377,
+    "newInWxt": 529,
+    "portedPct": "45.1%",
+    "missingPct": "54.9%"
   },
   "missingByFile": {
     "sidepanel/sidepanel.js": [
@@ -44,11 +44,6 @@
         "name": "getTagValues",
         "type": "function",
         "line": 92
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 93
       },
       {
         "name": "EXTRACTION_SCHEMA",
@@ -94,11 +89,6 @@
         "name": "scrim",
         "type": "variable",
         "line": 211
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 212
       },
       {
         "name": "cleanup",
@@ -151,11 +141,6 @@
         "line": 313
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 314
-      },
-      {
         "name": "cleanup",
         "type": "function",
         "line": 316
@@ -204,11 +189,6 @@
         "name": "scrim",
         "type": "variable",
         "line": 406
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 407
       },
       {
         "name": "cleanup",
@@ -596,11 +576,6 @@
         "line": 1570
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 1571
-      },
-      {
         "name": "tag",
         "type": "variable",
         "line": 1578
@@ -651,19 +626,9 @@
         "line": 1661
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 1663
-      },
-      {
         "name": "handleEditTag",
         "type": "function",
         "line": 1676
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 1678
       },
       {
         "name": "handleAddTag",
@@ -709,11 +674,6 @@
         "name": "createContextEditableTagList",
         "type": "function",
         "line": 1729
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 1730
       },
       {
         "name": "tag",
@@ -796,11 +756,6 @@
         "line": 1838
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 1839
-      },
-      {
         "name": "updateContextTagsInData",
         "type": "function",
         "line": 1847
@@ -829,11 +784,6 @@
         "name": "renderV4Section",
         "type": "function",
         "line": 1940
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 1941
       },
       {
         "name": "isEditable",
@@ -1151,11 +1101,6 @@
         "line": 2566
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 2567
-      },
-      {
         "name": "v4Data",
         "type": "variable",
         "line": 2594
@@ -1169,11 +1114,6 @@
         "name": "renderTone",
         "type": "function",
         "line": 2632
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 2633
       },
       {
         "name": "v4Data",
@@ -1191,11 +1131,6 @@
         "line": 2693
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 2694
-      },
-      {
         "name": "v4Data",
         "type": "variable",
         "line": 2721
@@ -1204,11 +1139,6 @@
         "name": "renderConstraints",
         "type": "function",
         "line": 2749
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 2750
       },
       {
         "name": "v4Data",
@@ -1221,11 +1151,6 @@
         "line": 2805
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 2806
-      },
-      {
         "name": "v4Data",
         "type": "variable",
         "line": 2833
@@ -1234,11 +1159,6 @@
         "name": "renderExemplar",
         "type": "function",
         "line": 2861
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 2862
       },
       {
         "name": "v4Data",
@@ -1314,11 +1234,6 @@
         "name": "splitViewToggleInProgress",
         "type": "variable",
         "line": 3044
-      },
-      {
-        "name": "isActive",
-        "type": "variable",
-        "line": 3064
       },
       {
         "name": "formState",
@@ -1414,11 +1329,6 @@
         "name": "colors",
         "type": "variable",
         "line": 3324
-      },
-      {
-        "name": "toast",
-        "type": "variable",
-        "line": 3333
       },
       {
         "name": "capitalizeFirst",
@@ -1756,11 +1666,6 @@
         "line": 3813
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 3814
-      },
-      {
         "name": "accordion",
         "type": "variable",
         "line": 3822
@@ -1829,11 +1734,6 @@
         "name": "chip",
         "type": "variable",
         "line": 3937
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 3958
       },
       {
         "name": "metadataSection",
@@ -2311,11 +2211,6 @@
         "line": 5105
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 5106
-      },
-      {
         "name": "tag",
         "type": "variable",
         "line": 5113
@@ -2401,11 +2296,6 @@
         "line": 5216
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 5219
-      },
-      {
         "name": "tags",
         "type": "variable",
         "line": 5222
@@ -2439,11 +2329,6 @@
         "name": "populateEditableTags",
         "type": "function",
         "line": 5291
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 5292
       },
       {
         "name": "addBtn",
@@ -2676,11 +2561,6 @@
         "line": 5751
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 5752
-      },
-      {
         "name": "importCount",
         "type": "variable",
         "line": 5761
@@ -2801,11 +2681,6 @@
         "line": 6051
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 6052
-      },
-      {
         "name": "published",
         "type": "variable",
         "line": 6082
@@ -2819,11 +2694,6 @@
         "name": "loadSavedPrompts",
         "type": "function",
         "line": 6126
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 6127
       },
       {
         "name": "localPrompts",
@@ -3141,11 +3011,6 @@
         "line": 7032
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 7033
-      },
-      {
         "name": "nameEl",
         "type": "variable",
         "line": 7034
@@ -3194,11 +3059,6 @@
         "name": "generateDiffView",
         "type": "function",
         "line": 7157
-      },
-      {
-        "name": "html",
-        "type": "variable",
-        "line": 7162
       },
       {
         "name": "diffObjects",
@@ -3551,11 +3411,6 @@
         "line": 7937
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 7941
-      },
-      {
         "name": "icon",
         "type": "variable",
         "line": 7942
@@ -3594,11 +3449,6 @@
         "name": "selectedRating",
         "type": "variable",
         "line": 8034
-      },
-      {
-        "name": "toast",
-        "type": "variable",
-        "line": 8096
       },
       {
         "name": "ratingEligibilityInterval",
@@ -3644,11 +3494,6 @@
         "name": "submitReport",
         "type": "function",
         "line": 8306
-      },
-      {
-        "name": "toast",
-        "type": "variable",
-        "line": 8318
       }
     ],
     "content/observer.js": [
@@ -3658,49 +3503,9 @@
         "line": 36
       },
       {
-        "name": "detectPageTheme",
-        "type": "function",
-        "line": 54
-      },
-      {
-        "name": "bodyClasses",
-        "type": "variable",
-        "line": 59
-      },
-      {
-        "name": "bgColor",
-        "type": "variable",
-        "line": 64
-      },
-      {
-        "name": "rgb",
-        "type": "variable",
-        "line": 65
-      },
-      {
-        "name": "brightness",
-        "type": "variable",
-        "line": 67
-      },
-      {
-        "name": "isExtensionContextValid",
-        "type": "function",
-        "line": 87
-      },
-      {
         "name": "extensionReloadNotificationShown",
         "type": "variable",
         "line": 96
-      },
-      {
-        "name": "showExtensionReloadNotification",
-        "type": "function",
-        "line": 102
-      },
-      {
-        "name": "toast",
-        "type": "variable",
-        "line": 130
       },
       {
         "name": "refreshBtn",
@@ -3733,11 +3538,6 @@
         "line": 244
       },
       {
-        "name": "currentTheme",
-        "type": "variable",
-        "line": 251
-      },
-      {
         "name": "initThemeObservation",
         "type": "function",
         "line": 269
@@ -3746,11 +3546,6 @@
         "name": "observeElement",
         "type": "function",
         "line": 270
-      },
-      {
-        "name": "pageTheme",
-        "type": "variable",
-        "line": 292
       },
       {
         "name": "SELECTORS",
@@ -3871,21 +3666,6 @@
         "name": "detectTheme",
         "type": "function",
         "line": 562
-      },
-      {
-        "name": "bgColor",
-        "type": "variable",
-        "line": 564
-      },
-      {
-        "name": "rgb",
-        "type": "variable",
-        "line": 566
-      },
-      {
-        "name": "brightness",
-        "type": "variable",
-        "line": 568
       },
       {
         "name": "overlay",
@@ -4423,11 +4203,6 @@
         "line": 1644
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 1660
-      },
-      {
         "name": "expandIcon",
         "type": "variable",
         "line": 1661
@@ -4608,11 +4383,6 @@
         "line": 2139
       },
       {
-        "name": "iframe",
-        "type": "variable",
-        "line": 2151
-      },
-      {
         "name": "injectDebounceTimer",
         "type": "variable",
         "line": 2179
@@ -4621,11 +4391,6 @@
         "name": "debouncedInject",
         "type": "function",
         "line": 2180
-      },
-      {
-        "name": "observer",
-        "type": "variable",
-        "line": 2188
       }
     ],
     "content/scraper.js": [
@@ -4830,11 +4595,6 @@
         "line": 453
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 456
-      },
-      {
         "name": "turn",
         "type": "variable",
         "line": 476
@@ -5022,11 +4782,6 @@
         "line": 354
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 355
-      },
-      {
         "name": "ModelManagerUI.openAddModal",
         "type": "method",
         "line": 378
@@ -5205,16 +4960,6 @@
         "name": "customModel",
         "type": "variable",
         "line": 686
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 725
-      },
-      {
-        "name": "toast",
-        "type": "variable",
-        "line": 732
       },
       {
         "name": "icons",
@@ -5669,11 +5414,6 @@
         "name": "Logger._startAutoPersist",
         "type": "method",
         "line": 684
-      },
-      {
-        "name": "Logger.destroy",
-        "type": "method",
-        "line": 692
       }
     ],
     "memory/index.js": [
@@ -6294,123 +6034,6 @@
         "line": 203
       }
     ],
-    "rating/rating-injector.js": [
-      {
-        "name": "RATING_SELECTORS",
-        "type": "constant",
-        "line": 52
-      },
-      {
-        "name": "RatingInjector",
-        "type": "variable",
-        "line": 118
-      },
-      {
-        "name": "responses",
-        "type": "variable",
-        "line": 202
-      },
-      {
-        "name": "actions",
-        "type": "variable",
-        "line": 223
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 243
-      },
-      {
-        "name": "responses",
-        "type": "variable",
-        "line": 271
-      },
-      {
-        "name": "currentRating",
-        "type": "variable",
-        "line": 304
-      },
-      {
-        "name": "ratingUI",
-        "type": "variable",
-        "line": 307
-      },
-      {
-        "name": "inserted",
-        "type": "variable",
-        "line": 312
-      },
-      {
-        "name": "actionsDiv",
-        "type": "variable",
-        "line": 316
-      },
-      {
-        "name": "textSelectors",
-        "type": "variable",
-        "line": 330
-      },
-      {
-        "name": "textEl",
-        "type": "variable",
-        "line": 341
-      },
-      {
-        "name": "turn",
-        "type": "variable",
-        "line": 388
-      },
-      {
-        "name": "allResponses",
-        "type": "variable",
-        "line": 392
-      },
-      {
-        "name": "allTurns",
-        "type": "variable",
-        "line": 403
-      },
-      {
-        "name": "chatHistory",
-        "type": "variable",
-        "line": 426
-      },
-      {
-        "name": "isModelResponse",
-        "type": "variable",
-        "line": 475
-      },
-      {
-        "name": "turnIndex",
-        "type": "variable",
-        "line": 484
-      },
-      {
-        "name": "childResponses",
-        "type": "variable",
-        "line": 496
-      },
-      {
-        "name": "turnIndex",
-        "type": "variable",
-        "line": 499
-      },
-      {
-        "name": "ratingContainers",
-        "type": "variable",
-        "line": 530
-      },
-      {
-        "name": "turnIndex",
-        "type": "variable",
-        "line": 533
-      },
-      {
-        "name": "INIT_DELAY_MS",
-        "type": "constant",
-        "line": 568
-      }
-    ],
     "rating/rating-manager.js": [
       {
         "name": "ratingLog",
@@ -6526,6 +6149,118 @@
         "name": "getCurrentRatingManager",
         "type": "function",
         "line": 625
+      }
+    ],
+    "rating/rating-injector.js": [
+      {
+        "name": "RATING_SELECTORS",
+        "type": "constant",
+        "line": 52
+      },
+      {
+        "name": "RatingInjector",
+        "type": "variable",
+        "line": 118
+      },
+      {
+        "name": "responses",
+        "type": "variable",
+        "line": 202
+      },
+      {
+        "name": "actions",
+        "type": "variable",
+        "line": 223
+      },
+      {
+        "name": "responses",
+        "type": "variable",
+        "line": 271
+      },
+      {
+        "name": "currentRating",
+        "type": "variable",
+        "line": 304
+      },
+      {
+        "name": "ratingUI",
+        "type": "variable",
+        "line": 307
+      },
+      {
+        "name": "inserted",
+        "type": "variable",
+        "line": 312
+      },
+      {
+        "name": "actionsDiv",
+        "type": "variable",
+        "line": 316
+      },
+      {
+        "name": "textSelectors",
+        "type": "variable",
+        "line": 330
+      },
+      {
+        "name": "textEl",
+        "type": "variable",
+        "line": 341
+      },
+      {
+        "name": "turn",
+        "type": "variable",
+        "line": 388
+      },
+      {
+        "name": "allResponses",
+        "type": "variable",
+        "line": 392
+      },
+      {
+        "name": "allTurns",
+        "type": "variable",
+        "line": 403
+      },
+      {
+        "name": "chatHistory",
+        "type": "variable",
+        "line": 426
+      },
+      {
+        "name": "isModelResponse",
+        "type": "variable",
+        "line": 475
+      },
+      {
+        "name": "turnIndex",
+        "type": "variable",
+        "line": 484
+      },
+      {
+        "name": "childResponses",
+        "type": "variable",
+        "line": 496
+      },
+      {
+        "name": "turnIndex",
+        "type": "variable",
+        "line": 499
+      },
+      {
+        "name": "ratingContainers",
+        "type": "variable",
+        "line": 530
+      },
+      {
+        "name": "turnIndex",
+        "type": "variable",
+        "line": 533
+      },
+      {
+        "name": "INIT_DELAY_MS",
+        "type": "constant",
+        "line": 568
       }
     ],
     "memory/analyzers/unified-analyzer.js": [
@@ -6950,11 +6685,6 @@
         "line": 72
       },
       {
-        "name": "container",
-        "type": "variable",
-        "line": 74
-      },
-      {
         "name": "starsContainer",
         "type": "variable",
         "line": 87
@@ -7094,11 +6824,6 @@
         "name": "modelManagerUI",
         "type": "variable",
         "line": 83
-      },
-      {
-        "name": "container",
-        "type": "variable",
-        "line": 101
       }
     ],
     "sidepanel/modules/dimension-view.js": [
@@ -7285,15 +7010,15 @@
     },
     "content/observer.js": {
       "total": 226,
-      "ported": 31,
-      "missing": 195,
-      "pct": "13.7%"
+      "ported": 47,
+      "missing": 179,
+      "pct": "20.8%"
     },
     "content/scraper.js": {
       "total": 77,
-      "ported": 16,
-      "missing": 61,
-      "pct": "20.8%"
+      "ported": 17,
+      "missing": 60,
+      "pct": "22.1%"
     },
     "content/templates.js": {
       "total": 1,
@@ -7321,9 +7046,9 @@
     },
     "logging/logger.js": {
       "total": 92,
-      "ported": 47,
-      "missing": 45,
-      "pct": "51.1%"
+      "ported": 48,
+      "missing": 44,
+      "pct": "52.2%"
     },
     "memory/analyzer-registry.js": {
       "total": 6,
@@ -7381,21 +7106,21 @@
     },
     "options/index.js": {
       "total": 5,
-      "ported": 0,
-      "missing": 5,
-      "pct": "0.0%"
+      "ported": 1,
+      "missing": 4,
+      "pct": "20.0%"
     },
     "options/model-manager-ui.js": {
       "total": 83,
-      "ported": 26,
-      "missing": 57,
-      "pct": "31.3%"
+      "ported": 29,
+      "missing": 54,
+      "pct": "34.9%"
     },
     "rating/rating-injector.js": {
       "total": 26,
-      "ported": 3,
-      "missing": 23,
-      "pct": "11.5%"
+      "ported": 4,
+      "missing": 22,
+      "pct": "15.4%"
     },
     "rating/rating-manager.js": {
       "total": 43,
@@ -7405,9 +7130,9 @@
     },
     "rating/rating-ui.js": {
       "total": 15,
-      "ported": 3,
-      "missing": 12,
-      "pct": "20.0%"
+      "ported": 4,
+      "missing": 11,
+      "pct": "26.7%"
     },
     "sidepanel/modules/cloud-sync.js": {
       "total": 2,
@@ -7429,9 +7154,9 @@
     },
     "sidepanel/sidepanel.js": {
       "total": 965,
-      "ported": 237,
-      "missing": 728,
-      "pct": "24.6%"
+      "ported": 268,
+      "missing": 697,
+      "pct": "27.8%"
     },
     "storage/storage-repository.js": {
       "total": 17,
