@@ -7,9 +7,9 @@ This document is the authoritative Single Source of Truth (SSOT) tracking the pr
 ## 📊 Executive Migration Dashboard
 
 - **Total Estimated LOC**: ~20,000 LOC
-- **Overall Progress**: 75.0% Complete (Batches 0, 1, 2, 3, 4, 5 Complete)
+- **Overall Progress**: 87.5% Complete (Batches 0, 1, 2, 3, 4, 5, 6 Complete)
 - **Target Location**: `wxt-extension/`
-- **Current Phase**: Batch 6 - Injected UI (Shadow DOM Refiner Badge & Rating Overlay)
+- **Current Phase**: Batch 7 - UI Applications (React 19 Sidepanel & Options Apps)
 
 ---
 
@@ -23,8 +23,8 @@ This document is the authoritative Single Source of Truth (SSOT) tracking the pr
 | **3** | **Storage & Supabase Sync** | `storage/*`, `supabase/*` | `src/core/storage/*`, `src/lib/storage/*`, `src/adapters/storage/*` | ~500 | `[G1, G2, G4, Inv3]` | 🟢 Complete |
 | **4** | **Background & Messaging** | `background/*`, `bridge/*` | `entrypoints/background.ts`, `src/lib/messaging/*`, `src/services/*` | ~1,200 | `[G1, G2, G4, Inv3]` | 🟢 Complete |
 | **5** | **Multi-Chatbot Adapters** | `content/scraper.js`, `observer.js` | `src/adapters/chatbots/*`, `entrypoints/content.ts` | ~2,500 | `[G1, G2, G4, Inv3]` | 🟢 Complete |
-| **6** | **Injected UI (Shadow DOM)** | `rating/*`, in-page refiner | `src/components/injections/*` | ~900 | `[G1, G5]` | 🟡 Ready / Next |
-| **7** | **UI Apps (Sidepanel & Options)** | `sidepanel/*`, `options/*` | `entrypoints/sidepanel/*`, `entrypoints/options/*` | ~3,500 | `[G1, G4, G5]` | ⚪ Pending |
+| **6** | **Injected UI (Shadow DOM)** | `rating/*`, in-page refiner | `src/components/injections/*`, `entrypoints/content.ts` | ~900 | `[G1, G2, G4, Inv3]` | 🟢 Complete |
+| **7** | **UI Apps (Sidepanel & Options)** | `sidepanel/*`, `options/*` | `entrypoints/sidepanel/*`, `entrypoints/options/*` | ~3,500 | `[G1, G4, G5]` | 🟡 Ready / Next |
 | **8** | **Decommissioning & Cutover** | Legacy root files | Promotion of `wxt-extension/` to root | - | `[All Gates]` | ⚪ Pending |
 
 ---
