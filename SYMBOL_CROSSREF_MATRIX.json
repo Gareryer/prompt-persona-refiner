@@ -1,0 +1,9499 @@
+{
+  "generated": "2026-08-30T18:10:31.637Z",
+  "summary": {
+    "totalLegacySymbols": 2509,
+    "ported": 671,
+    "missing": 1838,
+    "newInWxt": 452,
+    "portedPct": "26.7%",
+    "missingPct": "73.3%"
+  },
+  "missingByFile": {
+    "sidepanel/sidepanel.js": [
+      {
+        "name": "spLog",
+        "type": "function",
+        "line": 25
+      },
+      {
+        "name": "_currentExtraction",
+        "type": "variable",
+        "line": 53
+      },
+      {
+        "name": "getSupabaseClient",
+        "type": "function",
+        "line": 68
+      },
+      {
+        "name": "getChipGroupValue",
+        "type": "function",
+        "line": 80
+      },
+      {
+        "name": "chipGroup",
+        "type": "variable",
+        "line": 81
+      },
+      {
+        "name": "selectedChip",
+        "type": "variable",
+        "line": 83
+      },
+      {
+        "name": "getTagValues",
+        "type": "function",
+        "line": 92
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 93
+      },
+      {
+        "name": "EXTRACTION_SCHEMA",
+        "type": "constant",
+        "line": 113
+      },
+      {
+        "name": "VALID_ENUMS",
+        "type": "constant",
+        "line": 151
+      },
+      {
+        "name": "showAlertDialog",
+        "type": "function",
+        "line": 177
+      },
+      {
+        "name": "dialog",
+        "type": "variable",
+        "line": 179
+      },
+      {
+        "name": "detailsSection",
+        "type": "variable",
+        "line": 192
+      },
+      {
+        "name": "detailsContent",
+        "type": "variable",
+        "line": 193
+      },
+      {
+        "name": "retryBtn",
+        "type": "variable",
+        "line": 202
+      },
+      {
+        "name": "dismissBtn",
+        "type": "variable",
+        "line": 210
+      },
+      {
+        "name": "scrim",
+        "type": "variable",
+        "line": 211
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 212
+      },
+      {
+        "name": "cleanup",
+        "type": "function",
+        "line": 214
+      },
+      {
+        "name": "handleDismiss",
+        "type": "function",
+        "line": 222
+      },
+      {
+        "name": "handleRetry",
+        "type": "function",
+        "line": 228
+      },
+      {
+        "name": "handleScrimClick",
+        "type": "function",
+        "line": 235
+      },
+      {
+        "name": "handleKeydown",
+        "type": "function",
+        "line": 243
+      },
+      {
+        "name": "showConfirmDialog",
+        "type": "function",
+        "line": 290
+      },
+      {
+        "name": "dialog",
+        "type": "variable",
+        "line": 292
+      },
+      {
+        "name": "confirmBtn",
+        "type": "variable",
+        "line": 307
+      },
+      {
+        "name": "cancelBtn",
+        "type": "variable",
+        "line": 308
+      },
+      {
+        "name": "scrim",
+        "type": "variable",
+        "line": 313
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 314
+      },
+      {
+        "name": "cleanup",
+        "type": "function",
+        "line": 316
+      },
+      {
+        "name": "handleConfirm",
+        "type": "function",
+        "line": 324
+      },
+      {
+        "name": "handleCancel",
+        "type": "function",
+        "line": 329
+      },
+      {
+        "name": "handleScrimClick",
+        "type": "function",
+        "line": 335
+      },
+      {
+        "name": "handleKeydown",
+        "type": "function",
+        "line": 343
+      },
+      {
+        "name": "showPromptDialog",
+        "type": "function",
+        "line": 381
+      },
+      {
+        "name": "dialog",
+        "type": "variable",
+        "line": 383
+      },
+      {
+        "name": "confirmBtn",
+        "type": "variable",
+        "line": 401
+      },
+      {
+        "name": "cancelBtn",
+        "type": "variable",
+        "line": 402
+      },
+      {
+        "name": "scrim",
+        "type": "variable",
+        "line": 406
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 407
+      },
+      {
+        "name": "cleanup",
+        "type": "function",
+        "line": 409
+      },
+      {
+        "name": "handleConfirm",
+        "type": "function",
+        "line": 417
+      },
+      {
+        "name": "handleCancel",
+        "type": "function",
+        "line": 422
+      },
+      {
+        "name": "handleScrimClick",
+        "type": "function",
+        "line": 428
+      },
+      {
+        "name": "handleKeydown",
+        "type": "function",
+        "line": 435
+      },
+      {
+        "name": "setupM3Dropdown",
+        "type": "function",
+        "line": 463
+      },
+      {
+        "name": "dropdown",
+        "type": "variable",
+        "line": 464
+      },
+      {
+        "name": "trigger",
+        "type": "variable",
+        "line": 470
+      },
+      {
+        "name": "menu",
+        "type": "variable",
+        "line": 471
+      },
+      {
+        "name": "valueSpan",
+        "type": "variable",
+        "line": 472
+      },
+      {
+        "name": "items",
+        "type": "variable",
+        "line": 473
+      },
+      {
+        "name": "toggleDropdown",
+        "type": "function",
+        "line": 481
+      },
+      {
+        "name": "selected",
+        "type": "variable",
+        "line": 488
+      },
+      {
+        "name": "selectItem",
+        "type": "function",
+        "line": 494
+      },
+      {
+        "name": "itemsArray",
+        "type": "variable",
+        "line": 546
+      },
+      {
+        "name": "currentIndex",
+        "type": "variable",
+        "line": 547
+      },
+      {
+        "name": "nextIndex",
+        "type": "variable",
+        "line": 557
+      },
+      {
+        "name": "prevIndex",
+        "type": "variable",
+        "line": 562
+      },
+      {
+        "name": "validateExtractionResponse",
+        "type": "function",
+        "line": 607
+      },
+      {
+        "name": "errorMsg",
+        "type": "variable",
+        "line": 610
+      },
+      {
+        "name": "missingMemoryFields",
+        "type": "variable",
+        "line": 818
+      },
+      {
+        "name": "metadataDefaults",
+        "type": "variable",
+        "line": 836
+      },
+      {
+        "name": "personaDim",
+        "type": "variable",
+        "line": 860
+      },
+      {
+        "name": "legacyPersona",
+        "type": "variable",
+        "line": 861
+      },
+      {
+        "name": "hasV4Instruction",
+        "type": "variable",
+        "line": 871
+      },
+      {
+        "name": "personaAsString",
+        "type": "variable",
+        "line": 874
+      },
+      {
+        "name": "hasAnyPersonaContent",
+        "type": "variable",
+        "line": 875
+      },
+      {
+        "name": "legacySynthesized",
+        "type": "variable",
+        "line": 878
+      },
+      {
+        "name": "hasLegacyPersona",
+        "type": "variable",
+        "line": 879
+      },
+      {
+        "name": "suggestedName",
+        "type": "variable",
+        "line": 896
+      },
+      {
+        "name": "currentSessionId",
+        "type": "variable",
+        "line": 933
+      },
+      {
+        "name": "memoryData",
+        "type": "variable",
+        "line": 934
+      },
+      {
+        "name": "disabledFacts",
+        "type": "variable",
+        "line": 935
+      },
+      {
+        "name": "themeToggleBtn",
+        "type": "variable",
+        "line": 949
+      },
+      {
+        "name": "sidepanelPort",
+        "type": "variable",
+        "line": 982
+      },
+      {
+        "name": "handleCloseSidepanel",
+        "type": "function",
+        "line": 983
+      },
+      {
+        "name": "handleTabActivated",
+        "type": "function",
+        "line": 1039
+      },
+      {
+        "name": "previousSessionId",
+        "type": "variable",
+        "line": 1040
+      },
+      {
+        "name": "tab",
+        "type": "variable",
+        "line": 1043
+      },
+      {
+        "name": "handleTabUpdated",
+        "type": "function",
+        "line": 1052
+      },
+      {
+        "name": "currentTab",
+        "type": "variable",
+        "line": 1055
+      },
+      {
+        "name": "loadSessionFromTab",
+        "type": "function",
+        "line": 1070
+      },
+      {
+        "name": "hasModel",
+        "type": "variable",
+        "line": 1072
+      },
+      {
+        "name": "setupAnalyzerToggles",
+        "type": "function",
+        "line": 1106
+      },
+      {
+        "name": "toggles",
+        "type": "variable",
+        "line": 1107
+      },
+      {
+        "name": "componentId",
+        "type": "variable",
+        "line": 1111
+      },
+      {
+        "name": "loadCurrentSession",
+        "type": "function",
+        "line": 1133
+      },
+      {
+        "name": "hasModel",
+        "type": "variable",
+        "line": 1136
+      },
+      {
+        "name": "showNoModelOverlay",
+        "type": "function",
+        "line": 1184
+      },
+      {
+        "name": "hideNoModelOverlay",
+        "type": "function",
+        "line": 1199
+      },
+      {
+        "name": "logsTabActive",
+        "type": "variable",
+        "line": 1208
+      },
+      {
+        "name": "footer",
+        "type": "variable",
+        "line": 1209
+      },
+      {
+        "name": "showNoSession",
+        "type": "function",
+        "line": 1218
+      },
+      {
+        "name": "showSession",
+        "type": "function",
+        "line": 1230
+      },
+      {
+        "name": "logsTabActive",
+        "type": "variable",
+        "line": 1237
+      },
+      {
+        "name": "extractSessionId",
+        "type": "function",
+        "line": 1248
+      },
+      {
+        "name": "urlObj",
+        "type": "variable",
+        "line": 1250
+      },
+      {
+        "name": "pathParts",
+        "type": "variable",
+        "line": 1251
+      },
+      {
+        "name": "loadMemoryData",
+        "type": "function",
+        "line": 1266
+      },
+      {
+        "name": "lastUpdatedEl",
+        "type": "variable",
+        "line": 1284
+      },
+      {
+        "name": "date",
+        "type": "variable",
+        "line": 1287
+      },
+      {
+        "name": "checkLLMStatus",
+        "type": "function",
+        "line": 1308
+      },
+      {
+        "name": "statusEl",
+        "type": "variable",
+        "line": 1309
+      },
+      {
+        "name": "dotEl",
+        "type": "variable",
+        "line": 1310
+      },
+      {
+        "name": "iconEl",
+        "type": "variable",
+        "line": 1311
+      },
+      {
+        "name": "textEl",
+        "type": "variable",
+        "line": 1312
+      },
+      {
+        "name": "activeModelData",
+        "type": "variable",
+        "line": 1318
+      },
+      {
+        "name": "activeModelId",
+        "type": "variable",
+        "line": 1319
+      },
+      {
+        "name": "activeModel",
+        "type": "variable",
+        "line": 1325
+      },
+      {
+        "name": "modelName",
+        "type": "variable",
+        "line": 1327
+      },
+      {
+        "name": "restoreFormStateFromSplitView",
+        "type": "function",
+        "line": 1363
+      },
+      {
+        "name": "isIframe",
+        "type": "variable",
+        "line": 1364
+      },
+      {
+        "name": "formState",
+        "type": "variable",
+        "line": 1369
+      },
+      {
+        "name": "personaInput",
+        "type": "variable",
+        "line": 1373
+      },
+      {
+        "name": "contextInput",
+        "type": "variable",
+        "line": 1374
+      },
+      {
+        "name": "updateDimensionPinButton",
+        "type": "function",
+        "line": 1402
+      },
+      {
+        "name": "pinBtn",
+        "type": "variable",
+        "line": 1403
+      },
+      {
+        "name": "iconEl",
+        "type": "variable",
+        "line": 1405
+      },
+      {
+        "name": "verbatimToggle",
+        "type": "variable",
+        "line": 1419
+      },
+      {
+        "name": "verbatimBadge",
+        "type": "variable",
+        "line": 1420
+      },
+      {
+        "name": "renderAllComponents",
+        "type": "function",
+        "line": 1438
+      },
+      {
+        "name": "components",
+        "type": "variable",
+        "line": 1439
+      },
+      {
+        "name": "getActiveCompData",
+        "type": "function",
+        "line": 1447
+      },
+      {
+        "name": "personaComp",
+        "type": "variable",
+        "line": 1454
+      },
+      {
+        "name": "dimensions",
+        "type": "variable",
+        "line": 1459
+      },
+      {
+        "name": "comp",
+        "type": "variable",
+        "line": 1461
+      },
+      {
+        "name": "injectedContextInput",
+        "type": "variable",
+        "line": 1484
+      },
+      {
+        "name": "ctx",
+        "type": "variable",
+        "line": 1488
+      },
+      {
+        "name": "lines",
+        "type": "variable",
+        "line": 1489
+      },
+      {
+        "name": "createEditableTagList",
+        "type": "function",
+        "line": 1570
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 1571
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 1578
+      },
+      {
+        "name": "addBtn",
+        "type": "variable",
+        "line": 1583
+      },
+      {
+        "name": "createEditableTag",
+        "type": "function",
+        "line": 1596
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 1597
+      },
+      {
+        "name": "removeBtn",
+        "type": "variable",
+        "line": 1603
+      },
+      {
+        "name": "textSpan",
+        "type": "variable",
+        "line": 1613
+      },
+      {
+        "name": "range",
+        "type": "variable",
+        "line": 1623
+      },
+      {
+        "name": "sel",
+        "type": "variable",
+        "line": 1625
+      },
+      {
+        "name": "newValue",
+        "type": "variable",
+        "line": 1634
+      },
+      {
+        "name": "handleRemoveTag",
+        "type": "function",
+        "line": 1661
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 1663
+      },
+      {
+        "name": "handleEditTag",
+        "type": "function",
+        "line": 1676
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 1678
+      },
+      {
+        "name": "handleAddTag",
+        "type": "function",
+        "line": 1688
+      },
+      {
+        "name": "addBtn",
+        "type": "variable",
+        "line": 1689
+      },
+      {
+        "name": "existingTags",
+        "type": "variable",
+        "line": 1690
+      },
+      {
+        "name": "newIndex",
+        "type": "variable",
+        "line": 1691
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 1694
+      },
+      {
+        "name": "textSpan",
+        "type": "variable",
+        "line": 1698
+      },
+      {
+        "name": "updateTagsInStorage",
+        "type": "function",
+        "line": 1708
+      },
+      {
+        "name": "tags",
+        "type": "variable",
+        "line": 1712
+      },
+      {
+        "name": "createContextEditableTagList",
+        "type": "function",
+        "line": 1729
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 1730
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 1737
+      },
+      {
+        "name": "addBtn",
+        "type": "variable",
+        "line": 1742
+      },
+      {
+        "name": "createContextEditableTag",
+        "type": "function",
+        "line": 1755
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 1756
+      },
+      {
+        "name": "removeBtn",
+        "type": "variable",
+        "line": 1762
+      },
+      {
+        "name": "textSpan",
+        "type": "variable",
+        "line": 1772
+      },
+      {
+        "name": "range",
+        "type": "variable",
+        "line": 1781
+      },
+      {
+        "name": "sel",
+        "type": "variable",
+        "line": 1783
+      },
+      {
+        "name": "newValue",
+        "type": "variable",
+        "line": 1792
+      },
+      {
+        "name": "handleAddContextTag",
+        "type": "function",
+        "line": 1819
+      },
+      {
+        "name": "addBtn",
+        "type": "variable",
+        "line": 1820
+      },
+      {
+        "name": "existingTags",
+        "type": "variable",
+        "line": 1821
+      },
+      {
+        "name": "newIndex",
+        "type": "variable",
+        "line": 1822
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 1824
+      },
+      {
+        "name": "textSpan",
+        "type": "variable",
+        "line": 1828
+      },
+      {
+        "name": "handleRemoveContextTag",
+        "type": "function",
+        "line": 1838
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 1839
+      },
+      {
+        "name": "updateContextTagsInData",
+        "type": "function",
+        "line": 1847
+      },
+      {
+        "name": "tags",
+        "type": "variable",
+        "line": 1851
+      },
+      {
+        "name": "fieldParts",
+        "type": "variable",
+        "line": 1854
+      },
+      {
+        "name": "setupContextInlineEditing",
+        "type": "function",
+        "line": 1871
+      },
+      {
+        "name": "updateContextFieldInData",
+        "type": "function",
+        "line": 1905
+      },
+      {
+        "name": "renderV4Section",
+        "type": "function",
+        "line": 1940
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 1941
+      },
+      {
+        "name": "isEditable",
+        "type": "variable",
+        "line": 1941
+      },
+      {
+        "name": "onUpdate",
+        "type": "variable",
+        "line": 1941
+      },
+      {
+        "name": "textareaWrapper",
+        "type": "variable",
+        "line": 1948
+      },
+      {
+        "name": "textarea",
+        "type": "variable",
+        "line": 1951
+      },
+      {
+        "name": "expandBtn",
+        "type": "variable",
+        "line": 1961
+      },
+      {
+        "name": "compState",
+        "type": "variable",
+        "line": 1968
+      },
+      {
+        "name": "verbatimWrapper",
+        "type": "variable",
+        "line": 1971
+      },
+      {
+        "name": "verbatimBadge",
+        "type": "variable",
+        "line": 1974
+      },
+      {
+        "name": "toggleLabel",
+        "type": "variable",
+        "line": 1980
+      },
+      {
+        "name": "toggleInput",
+        "type": "variable",
+        "line": 1983
+      },
+      {
+        "name": "toggleSlider",
+        "type": "variable",
+        "line": 1989
+      },
+      {
+        "name": "shouldPin",
+        "type": "variable",
+        "line": 2000
+      },
+      {
+        "name": "autoSaveTimeout",
+        "type": "variable",
+        "line": 2048
+      },
+      {
+        "name": "triggerUpdate",
+        "type": "function",
+        "line": 2049
+      },
+      {
+        "name": "newData",
+        "type": "variable",
+        "line": 2051
+      },
+      {
+        "name": "comp",
+        "type": "variable",
+        "line": 2073
+      },
+      {
+        "name": "metadata",
+        "type": "variable",
+        "line": 2101
+      },
+      {
+        "name": "domainChips",
+        "type": "variable",
+        "line": 2107
+      },
+      {
+        "name": "scopeChips",
+        "type": "variable",
+        "line": 2120
+      },
+      {
+        "name": "styleChips",
+        "type": "variable",
+        "line": 2135
+      },
+      {
+        "name": "bannedChips",
+        "type": "variable",
+        "line": 2149
+      },
+      {
+        "name": "reasoningChips",
+        "type": "variable",
+        "line": 2164
+      },
+      {
+        "name": "prohibChips",
+        "type": "variable",
+        "line": 2179
+      },
+      {
+        "name": "reqChips",
+        "type": "variable",
+        "line": 2191
+      },
+      {
+        "name": "lengthInput",
+        "type": "variable",
+        "line": 2203
+      },
+      {
+        "name": "typeChips",
+        "type": "variable",
+        "line": 2218
+      },
+      {
+        "name": "createSingleSelectChips",
+        "type": "function",
+        "line": 2247
+      },
+      {
+        "name": "options",
+        "type": "variable",
+        "line": 2248
+      },
+      {
+        "name": "selected",
+        "type": "variable",
+        "line": 2248
+      },
+      {
+        "name": "wrapper",
+        "type": "variable",
+        "line": 2250
+      },
+      {
+        "name": "labelEl",
+        "type": "variable",
+        "line": 2253
+      },
+      {
+        "name": "chipsContainer",
+        "type": "variable",
+        "line": 2258
+      },
+      {
+        "name": "chip",
+        "type": "variable",
+        "line": 2262
+      },
+      {
+        "name": "isCurrentlySelected",
+        "type": "variable",
+        "line": 2271
+      },
+      {
+        "name": "createMultiSelectChips",
+        "type": "function",
+        "line": 2300
+      },
+      {
+        "name": "presetOptions",
+        "type": "variable",
+        "line": 2301
+      },
+      {
+        "name": "selected",
+        "type": "variable",
+        "line": 2301
+      },
+      {
+        "name": "allowCustom",
+        "type": "variable",
+        "line": 2301
+      },
+      {
+        "name": "wrapper",
+        "type": "variable",
+        "line": 2303
+      },
+      {
+        "name": "labelEl",
+        "type": "variable",
+        "line": 2306
+      },
+      {
+        "name": "chipsContainer",
+        "type": "variable",
+        "line": 2311
+      },
+      {
+        "name": "currentSelected",
+        "type": "variable",
+        "line": 2315
+      },
+      {
+        "name": "renderChips",
+        "type": "function",
+        "line": 2318
+      },
+      {
+        "name": "chip",
+        "type": "variable",
+        "line": 2323
+      },
+      {
+        "name": "chip",
+        "type": "variable",
+        "line": 2346
+      },
+      {
+        "name": "addBtn",
+        "type": "variable",
+        "line": 2362
+      },
+      {
+        "name": "handleAdd",
+        "type": "function",
+        "line": 2377
+      },
+      {
+        "name": "createTextInput",
+        "type": "function",
+        "line": 2412
+      },
+      {
+        "name": "placeholder",
+        "type": "variable",
+        "line": 2413
+      },
+      {
+        "name": "wrapper",
+        "type": "variable",
+        "line": 2415
+      },
+      {
+        "name": "labelEl",
+        "type": "variable",
+        "line": 2418
+      },
+      {
+        "name": "renderSynthesizedPersona",
+        "type": "function",
+        "line": 2447
+      },
+      {
+        "name": "textarea",
+        "type": "variable",
+        "line": 2448
+      },
+      {
+        "name": "insightsContainer",
+        "type": "variable",
+        "line": 2449
+      },
+      {
+        "name": "pinBtn",
+        "type": "variable",
+        "line": 2450
+      },
+      {
+        "name": "personaNameEl",
+        "type": "variable",
+        "line": 2451
+      },
+      {
+        "name": "personaType",
+        "type": "variable",
+        "line": 2460
+      },
+      {
+        "name": "topPersonaNameEl",
+        "type": "variable",
+        "line": 2465
+      },
+      {
+        "name": "hasPersonaData",
+        "type": "variable",
+        "line": 2469
+      },
+      {
+        "name": "displayText",
+        "type": "variable",
+        "line": 2476
+      },
+      {
+        "name": "iconEl",
+        "type": "variable",
+        "line": 2502
+      },
+      {
+        "name": "personaText",
+        "type": "variable",
+        "line": 2519
+      },
+      {
+        "name": "parts",
+        "type": "variable",
+        "line": 2531
+      },
+      {
+        "name": "renderContext",
+        "type": "function",
+        "line": 2566
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 2567
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 2594
+      },
+      {
+        "name": "domainDiv",
+        "type": "variable",
+        "line": 2618
+      },
+      {
+        "name": "renderTone",
+        "type": "function",
+        "line": 2632
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 2633
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 2660
+      },
+      {
+        "name": "voiceDiv",
+        "type": "variable",
+        "line": 2683
+      },
+      {
+        "name": "renderFramework",
+        "type": "function",
+        "line": 2693
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 2694
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 2721
+      },
+      {
+        "name": "renderConstraints",
+        "type": "function",
+        "line": 2749
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 2750
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 2777
+      },
+      {
+        "name": "renderFormat",
+        "type": "function",
+        "line": 2805
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 2806
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 2833
+      },
+      {
+        "name": "renderExemplar",
+        "type": "function",
+        "line": 2861
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 2862
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 2889
+      },
+      {
+        "name": "isFactDisabled",
+        "type": "function",
+        "line": 2923
+      },
+      {
+        "name": "handleFactToggle",
+        "type": "function",
+        "line": 2931
+      },
+      {
+        "name": "toggleable",
+        "type": "variable",
+        "line": 2933
+      },
+      {
+        "name": "path",
+        "type": "variable",
+        "line": 2934
+      },
+      {
+        "name": "updateToggleStates",
+        "type": "function",
+        "line": 2954
+      },
+      {
+        "name": "path",
+        "type": "variable",
+        "line": 2956
+      },
+      {
+        "name": "setupAccordions",
+        "type": "function",
+        "line": 2976
+      },
+      {
+        "name": "icon",
+        "type": "variable",
+        "line": 2980
+      },
+      {
+        "name": "accordion",
+        "type": "variable",
+        "line": 3003
+      },
+      {
+        "name": "icon",
+        "type": "variable",
+        "line": 3005
+      },
+      {
+        "name": "setupButtonHandlers",
+        "type": "function",
+        "line": 3034
+      },
+      {
+        "name": "splitBtn",
+        "type": "variable",
+        "line": 3041
+      },
+      {
+        "name": "splitIcon",
+        "type": "variable",
+        "line": 3042
+      },
+      {
+        "name": "isIframe",
+        "type": "variable",
+        "line": 3043
+      },
+      {
+        "name": "splitViewToggleInProgress",
+        "type": "variable",
+        "line": 3044
+      },
+      {
+        "name": "isActive",
+        "type": "variable",
+        "line": 3064
+      },
+      {
+        "name": "formState",
+        "type": "variable",
+        "line": 3073
+      },
+      {
+        "name": "confirmed",
+        "type": "variable",
+        "line": 3140
+      },
+      {
+        "name": "componentId",
+        "type": "variable",
+        "line": 3162
+      },
+      {
+        "name": "msgType",
+        "type": "variable",
+        "line": 3171
+      },
+      {
+        "name": "msgType",
+        "type": "variable",
+        "line": 3180
+      },
+      {
+        "name": "saveComponent",
+        "type": "function",
+        "line": 3204
+      },
+      {
+        "name": "rebuildMemory",
+        "type": "function",
+        "line": 3220
+      },
+      {
+        "name": "btn",
+        "type": "variable",
+        "line": 3221
+      },
+      {
+        "name": "contextTab",
+        "type": "variable",
+        "line": 3230
+      },
+      {
+        "name": "toggles",
+        "type": "variable",
+        "line": 3231
+      },
+      {
+        "name": "enabledAnalyzers",
+        "type": "variable",
+        "line": 3232
+      },
+      {
+        "name": "VALID_DIMENSIONS",
+        "type": "constant",
+        "line": 3235
+      },
+      {
+        "name": "componentId",
+        "type": "variable",
+        "line": 3239
+      },
+      {
+        "name": "successCount",
+        "type": "variable",
+        "line": 3276
+      },
+      {
+        "name": "failedCount",
+        "type": "variable",
+        "line": 3277
+      },
+      {
+        "name": "filteredCount",
+        "type": "variable",
+        "line": 3278
+      },
+      {
+        "name": "failedNames",
+        "type": "variable",
+        "line": 3286
+      },
+      {
+        "name": "showNotification",
+        "type": "function",
+        "line": 3322
+      },
+      {
+        "name": "colors",
+        "type": "variable",
+        "line": 3324
+      },
+      {
+        "name": "toast",
+        "type": "variable",
+        "line": 3333
+      },
+      {
+        "name": "capitalizeFirst",
+        "type": "function",
+        "line": 3342
+      },
+      {
+        "name": "handleStorageChange",
+        "type": "function",
+        "line": 3346
+      },
+      {
+        "name": "sessionKey",
+        "type": "variable",
+        "line": 3350
+      },
+      {
+        "name": "activeEl",
+        "type": "variable",
+        "line": 3355
+      },
+      {
+        "name": "isUserEditing",
+        "type": "variable",
+        "line": 3356
+      },
+      {
+        "name": "logRefreshInterval",
+        "type": "variable",
+        "line": 3373
+      },
+      {
+        "name": "setupLogViewer",
+        "type": "function",
+        "line": 3379
+      },
+      {
+        "name": "setupTabNavigation",
+        "type": "function",
+        "line": 3402
+      },
+      {
+        "name": "tabBtns",
+        "type": "variable",
+        "line": 3403
+      },
+      {
+        "name": "contextTab",
+        "type": "variable",
+        "line": 3404
+      },
+      {
+        "name": "logsTab",
+        "type": "variable",
+        "line": 3405
+      },
+      {
+        "name": "personaTab",
+        "type": "variable",
+        "line": 3406
+      },
+      {
+        "name": "tab",
+        "type": "variable",
+        "line": 3410
+      },
+      {
+        "name": "navigateToPersonaPage",
+        "type": "function",
+        "line": 3474
+      },
+      {
+        "name": "pages",
+        "type": "variable",
+        "line": 3475
+      },
+      {
+        "name": "targetPage",
+        "type": "variable",
+        "line": 3476
+      },
+      {
+        "name": "backBtn",
+        "type": "variable",
+        "line": 3494
+      },
+      {
+        "name": "personaFooter",
+        "type": "variable",
+        "line": 3500
+      },
+      {
+        "name": "fab",
+        "type": "variable",
+        "line": 3501
+      },
+      {
+        "name": "showFabPages",
+        "type": "variable",
+        "line": 3504
+      },
+      {
+        "name": "hideFooterPages",
+        "type": "variable",
+        "line": 3513
+      },
+      {
+        "name": "browseBtn",
+        "type": "variable",
+        "line": 3521
+      },
+      {
+        "name": "createBtn",
+        "type": "variable",
+        "line": 3522
+      },
+      {
+        "name": "publishBtn",
+        "type": "variable",
+        "line": 3523
+      },
+      {
+        "name": "promptsBtn",
+        "type": "variable",
+        "line": 3524
+      },
+      {
+        "name": "savePromptBtn",
+        "type": "variable",
+        "line": 3525
+      },
+      {
+        "name": "setupPersonaNavigation",
+        "type": "function",
+        "line": 3553
+      },
+      {
+        "name": "fab",
+        "type": "variable",
+        "line": 3555
+      },
+      {
+        "name": "myPersonasBtn",
+        "type": "variable",
+        "line": 3561
+      },
+      {
+        "name": "targetPage",
+        "type": "variable",
+        "line": 3570
+      },
+      {
+        "name": "currentPageEl",
+        "type": "variable",
+        "line": 3571
+      },
+      {
+        "name": "currentPage",
+        "type": "variable",
+        "line": 3572
+      },
+      {
+        "name": "isNewExtraction",
+        "type": "variable",
+        "line": 3575
+      },
+      {
+        "name": "hasChanges",
+        "type": "variable",
+        "line": 3576
+      },
+      {
+        "name": "finishEdit",
+        "type": "variable",
+        "line": 3583
+      },
+      {
+        "name": "extractBtn",
+        "type": "variable",
+        "line": 3606
+      },
+      {
+        "name": "versionHistoryBtn",
+        "type": "variable",
+        "line": 3610
+      },
+      {
+        "name": "exportBtn",
+        "type": "variable",
+        "line": 3614
+      },
+      {
+        "name": "promptsBtn",
+        "type": "variable",
+        "line": 3619
+      },
+      {
+        "name": "addPromptFab",
+        "type": "variable",
+        "line": 3626
+      },
+      {
+        "name": "savePromptBtn",
+        "type": "variable",
+        "line": 3632
+      },
+      {
+        "name": "importBtn",
+        "type": "variable",
+        "line": 3636
+      },
+      {
+        "name": "importFile",
+        "type": "variable",
+        "line": 3637
+      },
+      {
+        "name": "importPromptBtn",
+        "type": "variable",
+        "line": 3647
+      },
+      {
+        "name": "importPromptFileInput",
+        "type": "variable",
+        "line": 3648
+      },
+      {
+        "name": "sourcePromptFab",
+        "type": "variable",
+        "line": 3658
+      },
+      {
+        "name": "closeViewerBtn",
+        "type": "variable",
+        "line": 3662
+      },
+      {
+        "name": "rebuildBtn",
+        "type": "variable",
+        "line": 3666
+      },
+      {
+        "name": "sourceViewer",
+        "type": "variable",
+        "line": 3670
+      },
+      {
+        "name": "filtersBtn",
+        "type": "variable",
+        "line": 3676
+      },
+      {
+        "name": "filtersPanel",
+        "type": "variable",
+        "line": 3677
+      },
+      {
+        "name": "emptyState",
+        "type": "variable",
+        "line": 3681
+      },
+      {
+        "name": "filterPanel",
+        "type": "variable",
+        "line": 3688
+      },
+      {
+        "name": "getSelectedChipValue",
+        "type": "function",
+        "line": 3691
+      },
+      {
+        "name": "group",
+        "type": "variable",
+        "line": 3692
+      },
+      {
+        "name": "selected",
+        "type": "variable",
+        "line": 3693
+      },
+      {
+        "name": "hasActiveFilters",
+        "type": "function",
+        "line": 3698
+      },
+      {
+        "name": "onFilterChange",
+        "type": "function",
+        "line": 3705
+      },
+      {
+        "name": "searchInput",
+        "type": "variable",
+        "line": 3706
+      },
+      {
+        "name": "query",
+        "type": "variable",
+        "line": 3707
+      },
+      {
+        "name": "group",
+        "type": "variable",
+        "line": 3723
+      },
+      {
+        "name": "isSingleSelect",
+        "type": "variable",
+        "line": 3724
+      },
+      {
+        "name": "filterResetBtn",
+        "type": "variable",
+        "line": 3740
+      },
+      {
+        "name": "group",
+        "type": "variable",
+        "line": 3744
+      },
+      {
+        "name": "searchInput",
+        "type": "variable",
+        "line": 3762
+      },
+      {
+        "name": "searchClearBtn",
+        "type": "variable",
+        "line": 3763
+      },
+      {
+        "name": "searchTimeout",
+        "type": "variable",
+        "line": 3764
+      },
+      {
+        "name": "publishBtn",
+        "type": "variable",
+        "line": 3793
+      },
+      {
+        "name": "setupEditPersonaAccordions",
+        "type": "function",
+        "line": 3813
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 3814
+      },
+      {
+        "name": "accordion",
+        "type": "variable",
+        "line": 3822
+      },
+      {
+        "name": "icon",
+        "type": "variable",
+        "line": 3824
+      },
+      {
+        "name": "targetId",
+        "type": "variable",
+        "line": 3842
+      },
+      {
+        "name": "icon",
+        "type": "variable",
+        "line": 3844
+      },
+      {
+        "name": "setupTagList",
+        "type": "function",
+        "line": 3864
+      },
+      {
+        "name": "addBtn",
+        "type": "variable",
+        "line": 3865
+      },
+      {
+        "name": "maxTags",
+        "type": "variable",
+        "line": 3870
+      },
+      {
+        "name": "existingTags",
+        "type": "variable",
+        "line": 3871
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 3882
+      },
+      {
+        "name": "removeBtn",
+        "type": "variable",
+        "line": 3887
+      },
+      {
+        "name": "textSpan",
+        "type": "variable",
+        "line": 3897
+      },
+      {
+        "name": "saveTag",
+        "type": "function",
+        "line": 3908
+      },
+      {
+        "name": "setupExtractedPageInteractions",
+        "type": "function",
+        "line": 3933
+      },
+      {
+        "name": "chip",
+        "type": "variable",
+        "line": 3937
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 3958
+      },
+      {
+        "name": "metadataSection",
+        "type": "variable",
+        "line": 3965
+      },
+      {
+        "name": "handleExtractPersona",
+        "type": "function",
+        "line": 3975
+      },
+      {
+        "name": "promptInput",
+        "type": "variable",
+        "line": 3976
+      },
+      {
+        "name": "extractBtn",
+        "type": "variable",
+        "line": 3977
+      },
+      {
+        "name": "finishEdit",
+        "type": "variable",
+        "line": 3982
+      },
+      {
+        "name": "modelConfig",
+        "type": "variable",
+        "line": 4017
+      },
+      {
+        "name": "parseExtractionResult",
+        "type": "function",
+        "line": 4074
+      },
+      {
+        "name": "_sectionBadgeState",
+        "type": "variable",
+        "line": 4103
+      },
+      {
+        "name": "updateSectionBadge",
+        "type": "function",
+        "line": 4126
+      },
+      {
+        "name": "badge",
+        "type": "variable",
+        "line": 4127
+      },
+      {
+        "name": "shouldShowStale",
+        "type": "variable",
+        "line": 4153
+      },
+      {
+        "name": "initializeSectionBadges",
+        "type": "function",
+        "line": 4182
+      },
+      {
+        "name": "currentGeneration",
+        "type": "variable",
+        "line": 4184
+      },
+      {
+        "name": "componentData",
+        "type": "variable",
+        "line": 4189
+      },
+      {
+        "name": "componentGeneration",
+        "type": "variable",
+        "line": 4191
+      },
+      {
+        "name": "toggle",
+        "type": "variable",
+        "line": 4195
+      },
+      {
+        "name": "isStale",
+        "type": "variable",
+        "line": 4200
+      },
+      {
+        "name": "setupBadgeListeners",
+        "type": "function",
+        "line": 4238
+      },
+      {
+        "name": "textarea",
+        "type": "variable",
+        "line": 4242
+      },
+      {
+        "name": "toggles",
+        "type": "variable",
+        "line": 4251
+      },
+      {
+        "name": "populateExtractionResults",
+        "type": "function",
+        "line": 4269
+      },
+      {
+        "name": "providerEl",
+        "type": "variable",
+        "line": 4274
+      },
+      {
+        "name": "modelEl",
+        "type": "variable",
+        "line": 4275
+      },
+      {
+        "name": "setChipSelection",
+        "type": "function",
+        "line": 4280
+      },
+      {
+        "name": "group",
+        "type": "variable",
+        "line": 4282
+      },
+      {
+        "name": "chip",
+        "type": "variable",
+        "line": 4285
+      },
+      {
+        "name": "personaTextarea",
+        "type": "variable",
+        "line": 4295
+      },
+      {
+        "name": "personaText",
+        "type": "variable",
+        "line": 4299
+      },
+      {
+        "name": "parts",
+        "type": "variable",
+        "line": 4301
+      },
+      {
+        "name": "roleEl",
+        "type": "variable",
+        "line": 4313
+      },
+      {
+        "name": "purposeEl",
+        "type": "variable",
+        "line": 4314
+      },
+      {
+        "name": "credentialsEl",
+        "type": "variable",
+        "line": 4315
+      },
+      {
+        "name": "contextContent",
+        "type": "variable",
+        "line": 4321
+      },
+      {
+        "name": "context",
+        "type": "variable",
+        "line": 4322
+      },
+      {
+        "name": "toneContent",
+        "type": "variable",
+        "line": 4330
+      },
+      {
+        "name": "tone",
+        "type": "variable",
+        "line": 4331
+      },
+      {
+        "name": "frameworkContent",
+        "type": "variable",
+        "line": 4339
+      },
+      {
+        "name": "framework",
+        "type": "variable",
+        "line": 4340
+      },
+      {
+        "name": "constraintsContent",
+        "type": "variable",
+        "line": 4348
+      },
+      {
+        "name": "constraints",
+        "type": "variable",
+        "line": 4349
+      },
+      {
+        "name": "formatContent",
+        "type": "variable",
+        "line": 4357
+      },
+      {
+        "name": "format",
+        "type": "variable",
+        "line": 4358
+      },
+      {
+        "name": "exemplarContent",
+        "type": "variable",
+        "line": 4366
+      },
+      {
+        "name": "exemplar",
+        "type": "variable",
+        "line": 4367
+      },
+      {
+        "name": "injectedContextEl",
+        "type": "variable",
+        "line": 4375
+      },
+      {
+        "name": "ctx",
+        "type": "variable",
+        "line": 4379
+      },
+      {
+        "name": "lines",
+        "type": "variable",
+        "line": 4380
+      },
+      {
+        "name": "audienceEl",
+        "type": "variable",
+        "line": 4476
+      },
+      {
+        "name": "existingSourcePrompt",
+        "type": "variable",
+        "line": 4484
+      },
+      {
+        "name": "textareaSourcePrompt",
+        "type": "variable",
+        "line": 4485
+      },
+      {
+        "name": "setupFormDirtyTracking",
+        "type": "function",
+        "line": 4516
+      },
+      {
+        "name": "extractedPage",
+        "type": "variable",
+        "line": 4517
+      },
+      {
+        "name": "inputs",
+        "type": "variable",
+        "line": 4521
+      },
+      {
+        "name": "chips",
+        "type": "variable",
+        "line": 4528
+      },
+      {
+        "name": "editables",
+        "type": "variable",
+        "line": 4535
+      },
+      {
+        "name": "renderExtTopicSummary",
+        "type": "function",
+        "line": 4550
+      },
+      {
+        "name": "topicDiv",
+        "type": "variable",
+        "line": 4554
+      },
+      {
+        "name": "summaryDiv",
+        "type": "variable",
+        "line": 4563
+      },
+      {
+        "name": "keywordsDiv",
+        "type": "variable",
+        "line": 4573
+      },
+      {
+        "name": "tagList",
+        "type": "variable",
+        "line": 4576
+      },
+      {
+        "name": "renderExtIntent",
+        "type": "function",
+        "line": 4588
+      },
+      {
+        "name": "goalDiv",
+        "type": "variable",
+        "line": 4592
+      },
+      {
+        "name": "typeDiv",
+        "type": "variable",
+        "line": 4601
+      },
+      {
+        "name": "confDiv",
+        "type": "variable",
+        "line": 4619
+      },
+      {
+        "name": "subDiv",
+        "type": "variable",
+        "line": 4626
+      },
+      {
+        "name": "tagList",
+        "type": "variable",
+        "line": 4629
+      },
+      {
+        "name": "renderExtEntities",
+        "type": "function",
+        "line": 4641
+      },
+      {
+        "name": "categories",
+        "type": "variable",
+        "line": 4643
+      },
+      {
+        "name": "hasEntities",
+        "type": "variable",
+        "line": 4645
+      },
+      {
+        "name": "categoryDiv",
+        "type": "variable",
+        "line": 4650
+      },
+      {
+        "name": "tagList",
+        "type": "variable",
+        "line": 4653
+      },
+      {
+        "name": "renderExtStyle",
+        "type": "function",
+        "line": 4667
+      },
+      {
+        "name": "toneDiv",
+        "type": "variable",
+        "line": 4671
+      },
+      {
+        "name": "verbDiv",
+        "type": "variable",
+        "line": 4680
+      },
+      {
+        "name": "techDiv",
+        "type": "variable",
+        "line": 4693
+      },
+      {
+        "name": "dirDiv",
+        "type": "variable",
+        "line": 4707
+      },
+      {
+        "name": "traits",
+        "type": "variable",
+        "line": 4720
+      },
+      {
+        "name": "traitsDiv",
+        "type": "variable",
+        "line": 4722
+      },
+      {
+        "name": "tagList",
+        "type": "variable",
+        "line": 4725
+      },
+      {
+        "name": "prefDiv",
+        "type": "variable",
+        "line": 4732
+      },
+      {
+        "name": "renderExtFocus",
+        "type": "function",
+        "line": 4748
+      },
+      {
+        "name": "topicDiv",
+        "type": "variable",
+        "line": 4752
+      },
+      {
+        "name": "taskDiv",
+        "type": "variable",
+        "line": 4761
+      },
+      {
+        "name": "reqDiv",
+        "type": "variable",
+        "line": 4771
+      },
+      {
+        "name": "momDiv",
+        "type": "variable",
+        "line": 4782
+      },
+      {
+        "name": "itemsDiv",
+        "type": "variable",
+        "line": 4793
+      },
+      {
+        "name": "tagList",
+        "type": "variable",
+        "line": 4796
+      },
+      {
+        "name": "renderExtContext",
+        "type": "function",
+        "line": 4811
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 4831
+      },
+      {
+        "name": "renderExtTone",
+        "type": "function",
+        "line": 4860
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 4880
+      },
+      {
+        "name": "renderExtFramework",
+        "type": "function",
+        "line": 4909
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 4929
+      },
+      {
+        "name": "renderExtConstraints",
+        "type": "function",
+        "line": 4958
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 4978
+      },
+      {
+        "name": "renderExtFormat",
+        "type": "function",
+        "line": 5007
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 5027
+      },
+      {
+        "name": "renderExtExemplar",
+        "type": "function",
+        "line": 5056
+      },
+      {
+        "name": "v4Data",
+        "type": "variable",
+        "line": 5076
+      },
+      {
+        "name": "createExtEditableTagList",
+        "type": "function",
+        "line": 5105
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 5106
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 5113
+      },
+      {
+        "name": "addBtn",
+        "type": "variable",
+        "line": 5118
+      },
+      {
+        "name": "createExtEditableTag",
+        "type": "function",
+        "line": 5131
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 5132
+      },
+      {
+        "name": "removeBtn",
+        "type": "variable",
+        "line": 5138
+      },
+      {
+        "name": "textSpan",
+        "type": "variable",
+        "line": 5148
+      },
+      {
+        "name": "range",
+        "type": "variable",
+        "line": 5157
+      },
+      {
+        "name": "sel",
+        "type": "variable",
+        "line": 5159
+      },
+      {
+        "name": "newValue",
+        "type": "variable",
+        "line": 5168
+      },
+      {
+        "name": "handleExtRemoveTag",
+        "type": "function",
+        "line": 5192
+      },
+      {
+        "name": "handleExtAddTag",
+        "type": "function",
+        "line": 5197
+      },
+      {
+        "name": "addBtn",
+        "type": "variable",
+        "line": 5198
+      },
+      {
+        "name": "existingTags",
+        "type": "variable",
+        "line": 5199
+      },
+      {
+        "name": "newIndex",
+        "type": "variable",
+        "line": 5200
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 5202
+      },
+      {
+        "name": "textSpan",
+        "type": "variable",
+        "line": 5206
+      },
+      {
+        "name": "updateExtTagsInData",
+        "type": "function",
+        "line": 5216
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 5219
+      },
+      {
+        "name": "tags",
+        "type": "variable",
+        "line": 5222
+      },
+      {
+        "name": "parts",
+        "type": "variable",
+        "line": 5225
+      },
+      {
+        "name": "obj",
+        "type": "variable",
+        "line": 5226
+      },
+      {
+        "name": "setupExtInlineEditing",
+        "type": "function",
+        "line": 5238
+      },
+      {
+        "name": "setupExtSelectChange",
+        "type": "function",
+        "line": 5264
+      },
+      {
+        "name": "updateExtFieldInData",
+        "type": "function",
+        "line": 5275
+      },
+      {
+        "name": "populateEditableTags",
+        "type": "function",
+        "line": 5291
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 5292
+      },
+      {
+        "name": "addBtn",
+        "type": "variable",
+        "line": 5298
+      },
+      {
+        "name": "tag",
+        "type": "variable",
+        "line": 5304
+      },
+      {
+        "name": "removeBtn",
+        "type": "variable",
+        "line": 5310
+      },
+      {
+        "name": "textSpan",
+        "type": "variable",
+        "line": 5320
+      },
+      {
+        "name": "handleSaveDraft",
+        "type": "function",
+        "line": 5341
+      },
+      {
+        "name": "tone",
+        "type": "variable",
+        "line": 5363
+      },
+      {
+        "name": "complexity",
+        "type": "variable",
+        "line": 5364
+      },
+      {
+        "name": "keywords",
+        "type": "variable",
+        "line": 5367
+      },
+      {
+        "name": "subdomains",
+        "type": "variable",
+        "line": 5368
+      },
+      {
+        "name": "audienceEl",
+        "type": "variable",
+        "line": 5370
+      },
+      {
+        "name": "audience",
+        "type": "variable",
+        "line": 5371
+      },
+      {
+        "name": "draft",
+        "type": "variable",
+        "line": 5378
+      },
+      {
+        "name": "handlePublishPersona",
+        "type": "function",
+        "line": 5412
+      },
+      {
+        "name": "nameInput",
+        "type": "variable",
+        "line": 5422
+      },
+      {
+        "name": "tone",
+        "type": "variable",
+        "line": 5436
+      },
+      {
+        "name": "complexity",
+        "type": "variable",
+        "line": 5437
+      },
+      {
+        "name": "missing",
+        "type": "variable",
+        "line": 5440
+      },
+      {
+        "name": "publishBtn",
+        "type": "variable",
+        "line": 5453
+      },
+      {
+        "name": "authError",
+        "type": "variable",
+        "line": 5464
+      },
+      {
+        "name": "publicBtn",
+        "type": "variable",
+        "line": 5471
+      },
+      {
+        "name": "isPublic",
+        "type": "variable",
+        "line": 5472
+      },
+      {
+        "name": "synthesizedPersona",
+        "type": "variable",
+        "line": 5475
+      },
+      {
+        "name": "injectedContext",
+        "type": "variable",
+        "line": 5479
+      },
+      {
+        "name": "keywords",
+        "type": "variable",
+        "line": 5481
+      },
+      {
+        "name": "subdomains",
+        "type": "variable",
+        "line": 5482
+      },
+      {
+        "name": "audienceEl",
+        "type": "variable",
+        "line": 5484
+      },
+      {
+        "name": "audience",
+        "type": "variable",
+        "line": 5485
+      },
+      {
+        "name": "personaData",
+        "type": "variable",
+        "line": 5500
+      },
+      {
+        "name": "existingId",
+        "type": "variable",
+        "line": 5524
+      },
+      {
+        "name": "isUpdate",
+        "type": "variable",
+        "line": 5525
+      },
+      {
+        "name": "changeNotes",
+        "type": "variable",
+        "line": 5544
+      },
+      {
+        "name": "promptInput",
+        "type": "variable",
+        "line": 5581
+      },
+      {
+        "name": "errorTitle",
+        "type": "variable",
+        "line": 5592
+      },
+      {
+        "name": "errorDetails",
+        "type": "variable",
+        "line": 5593
+      },
+      {
+        "name": "handlePersonaSearch",
+        "type": "function",
+        "line": 5624
+      },
+      {
+        "name": "resultsContainer",
+        "type": "variable",
+        "line": 5625
+      },
+      {
+        "name": "filterPanel",
+        "type": "variable",
+        "line": 5626
+      },
+      {
+        "name": "getChipValue",
+        "type": "function",
+        "line": 5629
+      },
+      {
+        "name": "group",
+        "type": "variable",
+        "line": 5630
+      },
+      {
+        "name": "selected",
+        "type": "variable",
+        "line": 5631
+      },
+      {
+        "name": "filters",
+        "type": "variable",
+        "line": 5636
+      },
+      {
+        "name": "supabase",
+        "type": "variable",
+        "line": 5656
+      },
+      {
+        "name": "keywords",
+        "type": "variable",
+        "line": 5672
+      },
+      {
+        "name": "searchStr",
+        "type": "variable",
+        "line": 5673
+      },
+      {
+        "name": "loadPopularPersonas",
+        "type": "function",
+        "line": 5704
+      },
+      {
+        "name": "resultsContainer",
+        "type": "variable",
+        "line": 5705
+      },
+      {
+        "name": "supabase",
+        "type": "variable",
+        "line": 5711
+      },
+      {
+        "name": "renderPersonaResults",
+        "type": "function",
+        "line": 5751
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 5752
+      },
+      {
+        "name": "importCount",
+        "type": "variable",
+        "line": 5761
+      },
+      {
+        "name": "isLocal",
+        "type": "variable",
+        "line": 5762
+      },
+      {
+        "name": "showPersonaPopup",
+        "type": "function",
+        "line": 5788
+      },
+      {
+        "name": "existingPopup",
+        "type": "variable",
+        "line": 5790
+      },
+      {
+        "name": "keywords",
+        "type": "variable",
+        "line": 5794
+      },
+      {
+        "name": "preview",
+        "type": "variable",
+        "line": 5795
+      },
+      {
+        "name": "importCount",
+        "type": "variable",
+        "line": 5796
+      },
+      {
+        "name": "avgRating",
+        "type": "variable",
+        "line": 5797
+      },
+      {
+        "name": "isLocal",
+        "type": "variable",
+        "line": 5799
+      },
+      {
+        "name": "actionButton",
+        "type": "variable",
+        "line": 5802
+      },
+      {
+        "name": "exportButton",
+        "type": "variable",
+        "line": 5811
+      },
+      {
+        "name": "popup",
+        "type": "variable",
+        "line": 5815
+      },
+      {
+        "name": "prevExtraction",
+        "type": "variable",
+        "line": 5873
+      },
+      {
+        "name": "showPersonaDetailModal",
+        "type": "function",
+        "line": 5887
+      },
+      {
+        "name": "existingModal",
+        "type": "variable",
+        "line": 5888
+      },
+      {
+        "name": "keywords",
+        "type": "variable",
+        "line": 5892
+      },
+      {
+        "name": "memoryLayer",
+        "type": "variable",
+        "line": 5893
+      },
+      {
+        "name": "importCount",
+        "type": "variable",
+        "line": 5894
+      },
+      {
+        "name": "avgRating",
+        "type": "variable",
+        "line": 5895
+      },
+      {
+        "name": "raterCount",
+        "type": "variable",
+        "line": 5896
+      },
+      {
+        "name": "llmModel",
+        "type": "variable",
+        "line": 5898
+      },
+      {
+        "name": "version",
+        "type": "variable",
+        "line": 5900
+      },
+      {
+        "name": "modal",
+        "type": "variable",
+        "line": 5902
+      },
+      {
+        "name": "btn",
+        "type": "variable",
+        "line": 5967
+      },
+      {
+        "name": "formatMemoryKey",
+        "type": "function",
+        "line": 5980
+      },
+      {
+        "name": "handleImportPersona",
+        "type": "function",
+        "line": 5989
+      },
+      {
+        "name": "supabase",
+        "type": "variable",
+        "line": 6013
+      },
+      {
+        "name": "loadMyPersonas",
+        "type": "function",
+        "line": 6051
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 6052
+      },
+      {
+        "name": "published",
+        "type": "variable",
+        "line": 6082
+      },
+      {
+        "name": "allPersonas",
+        "type": "variable",
+        "line": 6096
+      },
+      {
+        "name": "loadSavedPrompts",
+        "type": "function",
+        "line": 6126
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 6127
+      },
+      {
+        "name": "localPrompts",
+        "type": "variable",
+        "line": 6142
+      },
+      {
+        "name": "cloudPrompts",
+        "type": "variable",
+        "line": 6145
+      },
+      {
+        "name": "allPrompts",
+        "type": "variable",
+        "line": 6165
+      },
+      {
+        "name": "createPromptListItem",
+        "type": "function",
+        "line": 6193
+      },
+      {
+        "name": "preview",
+        "type": "variable",
+        "line": 6201
+      },
+      {
+        "name": "date",
+        "type": "variable",
+        "line": 6202
+      },
+      {
+        "name": "handleSavePrompt",
+        "type": "function",
+        "line": 6244
+      },
+      {
+        "name": "titleInput",
+        "type": "variable",
+        "line": 6245
+      },
+      {
+        "name": "contentInput",
+        "type": "variable",
+        "line": 6246
+      },
+      {
+        "name": "saveBtn",
+        "type": "variable",
+        "line": 6247
+      },
+      {
+        "name": "savePromptLocal",
+        "type": "function",
+        "line": 6297
+      },
+      {
+        "name": "prompts",
+        "type": "variable",
+        "line": 6299
+      },
+      {
+        "name": "newPrompt",
+        "type": "variable",
+        "line": 6301
+      },
+      {
+        "name": "deleteSavedPrompt",
+        "type": "function",
+        "line": 6319
+      },
+      {
+        "name": "confirmed",
+        "type": "variable",
+        "line": 6320
+      },
+      {
+        "name": "prompts",
+        "type": "variable",
+        "line": 6343
+      },
+      {
+        "name": "openPromptPreviewDialog",
+        "type": "function",
+        "line": 6359
+      },
+      {
+        "name": "dialog",
+        "type": "variable",
+        "line": 6360
+      },
+      {
+        "name": "closeDialog",
+        "type": "function",
+        "line": 6385
+      },
+      {
+        "name": "extractFromSavedPrompt",
+        "type": "function",
+        "line": 6404
+      },
+      {
+        "name": "textarea",
+        "type": "variable",
+        "line": 6408
+      },
+      {
+        "name": "createPersonaListItem",
+        "type": "function",
+        "line": 6425
+      },
+      {
+        "name": "keywords",
+        "type": "variable",
+        "line": 6434
+      },
+      {
+        "name": "version",
+        "type": "variable",
+        "line": 6435
+      },
+      {
+        "name": "isPublic",
+        "type": "variable",
+        "line": 6436
+      },
+      {
+        "name": "createRipple",
+        "type": "function",
+        "line": 6491
+      },
+      {
+        "name": "existingRipple",
+        "type": "variable",
+        "line": 6492
+      },
+      {
+        "name": "ripple",
+        "type": "variable",
+        "line": 6495
+      },
+      {
+        "name": "rect",
+        "type": "variable",
+        "line": 6498
+      },
+      {
+        "name": "x",
+        "type": "variable",
+        "line": 6500
+      },
+      {
+        "name": "y",
+        "type": "variable",
+        "line": 6501
+      },
+      {
+        "name": "handleVisibilityChange",
+        "type": "function",
+        "line": 6520
+      },
+      {
+        "name": "draftIndex",
+        "type": "variable",
+        "line": 6525
+      },
+      {
+        "name": "handleEditPersona",
+        "type": "function",
+        "line": 6559
+      },
+      {
+        "name": "confirmed",
+        "type": "variable",
+        "line": 6599
+      },
+      {
+        "name": "isDraft",
+        "type": "variable",
+        "line": 6614
+      },
+      {
+        "name": "loadPersonaToEdit",
+        "type": "function",
+        "line": 6657
+      },
+      {
+        "name": "nameInput",
+        "type": "variable",
+        "line": 6691
+      },
+      {
+        "name": "privateBtn",
+        "type": "variable",
+        "line": 6700
+      },
+      {
+        "name": "publicBtn",
+        "type": "variable",
+        "line": 6701
+      },
+      {
+        "name": "handleViewPersona",
+        "type": "function",
+        "line": 6717
+      },
+      {
+        "name": "openSourcePromptViewer",
+        "type": "function",
+        "line": 6741
+      },
+      {
+        "name": "viewer",
+        "type": "variable",
+        "line": 6742
+      },
+      {
+        "name": "textarea",
+        "type": "variable",
+        "line": 6743
+      },
+      {
+        "name": "sourcePrompt",
+        "type": "variable",
+        "line": 6747
+      },
+      {
+        "name": "closeSourcePromptViewer",
+        "type": "function",
+        "line": 6777
+      },
+      {
+        "name": "viewer",
+        "type": "variable",
+        "line": 6778
+      },
+      {
+        "name": "handleSourceViewerKeydown",
+        "type": "function",
+        "line": 6789
+      },
+      {
+        "name": "viewer",
+        "type": "variable",
+        "line": 6791
+      },
+      {
+        "name": "_rebuildInProgress",
+        "type": "variable",
+        "line": 6804
+      },
+      {
+        "name": "_rebuildCancelled",
+        "type": "variable",
+        "line": 6805
+      },
+      {
+        "name": "_hasUnsavedChanges",
+        "type": "variable",
+        "line": 6806
+      },
+      {
+        "name": "markFormDirty",
+        "type": "function",
+        "line": 6811
+      },
+      {
+        "name": "resetFormDirty",
+        "type": "function",
+        "line": 6818
+      },
+      {
+        "name": "hasUnsavedChanges",
+        "type": "function",
+        "line": 6825
+      },
+      {
+        "name": "handleRebuildFromSource",
+        "type": "function",
+        "line": 6829
+      },
+      {
+        "name": "sourcePrompt",
+        "type": "variable",
+        "line": 6830
+      },
+      {
+        "name": "rebuildBtn",
+        "type": "variable",
+        "line": 6842
+      },
+      {
+        "name": "modelConfig",
+        "type": "variable",
+        "line": 6857
+      },
+      {
+        "name": "confirmed",
+        "type": "variable",
+        "line": 6896
+      },
+      {
+        "name": "preserved",
+        "type": "variable",
+        "line": 6909
+      },
+      {
+        "name": "cancelRebuild",
+        "type": "function",
+        "line": 6959
+      },
+      {
+        "name": "rebuildBtn",
+        "type": "variable",
+        "line": 6971
+      },
+      {
+        "name": "openVersionHistory",
+        "type": "function",
+        "line": 7004
+      },
+      {
+        "name": "loadVersionHistory",
+        "type": "function",
+        "line": 7032
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 7033
+      },
+      {
+        "name": "nameEl",
+        "type": "variable",
+        "line": 7034
+      },
+      {
+        "name": "versions",
+        "type": "variable",
+        "line": 7056
+      },
+      {
+        "name": "currentVersion",
+        "type": "variable",
+        "line": 7057
+      },
+      {
+        "name": "currentItem",
+        "type": "variable",
+        "line": 7082
+      },
+      {
+        "name": "prevSnapshot",
+        "type": "variable",
+        "line": 7091
+      },
+      {
+        "name": "createVersionItem",
+        "type": "function",
+        "line": 7106
+      },
+      {
+        "name": "version",
+        "type": "variable",
+        "line": 7111
+      },
+      {
+        "name": "date",
+        "type": "variable",
+        "line": 7112
+      },
+      {
+        "name": "notes",
+        "type": "variable",
+        "line": 7113
+      },
+      {
+        "name": "diffEl",
+        "type": "variable",
+        "line": 7133
+      },
+      {
+        "name": "generateDiffView",
+        "type": "function",
+        "line": 7157
+      },
+      {
+        "name": "html",
+        "type": "variable",
+        "line": 7162
+      },
+      {
+        "name": "diffObjects",
+        "type": "function",
+        "line": 7165
+      },
+      {
+        "name": "allKeys",
+        "type": "variable",
+        "line": 7166
+      },
+      {
+        "name": "currVal",
+        "type": "variable",
+        "line": 7172
+      },
+      {
+        "name": "prevVal",
+        "type": "variable",
+        "line": 7173
+      },
+      {
+        "name": "fullKey",
+        "type": "variable",
+        "line": 7174
+      },
+      {
+        "name": "currStr",
+        "type": "variable",
+        "line": 7183
+      },
+      {
+        "name": "prevStr",
+        "type": "variable",
+        "line": 7184
+      },
+      {
+        "name": "formatDiffValue",
+        "type": "function",
+        "line": 7211
+      },
+      {
+        "name": "str",
+        "type": "variable",
+        "line": 7216
+      },
+      {
+        "name": "formatFieldLabel",
+        "type": "function",
+        "line": 7225
+      },
+      {
+        "name": "parts",
+        "type": "variable",
+        "line": 7227
+      },
+      {
+        "name": "last",
+        "type": "variable",
+        "line": 7228
+      },
+      {
+        "name": "getNestedValue",
+        "type": "function",
+        "line": 7242
+      },
+      {
+        "name": "restoreVersion",
+        "type": "function",
+        "line": 7250
+      },
+      {
+        "name": "confirmed",
+        "type": "variable",
+        "line": 7251
+      },
+      {
+        "name": "restoredData",
+        "type": "variable",
+        "line": 7261
+      },
+      {
+        "name": "exportPersonaJSON",
+        "type": "function",
+        "line": 7289
+      },
+      {
+        "name": "exportData",
+        "type": "variable",
+        "line": 7300
+      },
+      {
+        "name": "personaName",
+        "type": "variable",
+        "line": 7318
+      },
+      {
+        "name": "safeName",
+        "type": "variable",
+        "line": 7319
+      },
+      {
+        "name": "filename",
+        "type": "variable",
+        "line": 7320
+      },
+      {
+        "name": "jsonData",
+        "type": "variable",
+        "line": 7323
+      },
+      {
+        "name": "handle",
+        "type": "variable",
+        "line": 7330
+      },
+      {
+        "name": "writable",
+        "type": "variable",
+        "line": 7338
+      },
+      {
+        "name": "ALLOWED_IMPORT_EXTENSIONS",
+        "type": "constant",
+        "line": 7389
+      },
+      {
+        "name": "MAX_IMPORT_FILE_SIZE",
+        "type": "constant",
+        "line": 7394
+      },
+      {
+        "name": "readAndSanitizeFile",
+        "type": "function",
+        "line": 7401
+      },
+      {
+        "name": "fileName",
+        "type": "variable",
+        "line": 7403
+      },
+      {
+        "name": "extension",
+        "type": "variable",
+        "line": 7404
+      },
+      {
+        "name": "allowedMimes",
+        "type": "variable",
+        "line": 7424
+      },
+      {
+        "name": "rawText",
+        "type": "variable",
+        "line": 7435
+      },
+      {
+        "name": "sanitizedContent",
+        "type": "variable",
+        "line": 7438
+      },
+      {
+        "name": "sanitizeTextContent",
+        "type": "function",
+        "line": 7465
+      },
+      {
+        "name": "importPersonaFile",
+        "type": "function",
+        "line": 7485
+      },
+      {
+        "name": "textarea",
+        "type": "variable",
+        "line": 7504
+      },
+      {
+        "name": "processPersonaImport",
+        "type": "function",
+        "line": 7526
+      },
+      {
+        "name": "sanitizedPersona",
+        "type": "variable",
+        "line": 7533
+      },
+      {
+        "name": "nameInput",
+        "type": "variable",
+        "line": 7556
+      },
+      {
+        "name": "safeName",
+        "type": "variable",
+        "line": 7559
+      },
+      {
+        "name": "importPromptFile",
+        "type": "function",
+        "line": 7573
+      },
+      {
+        "name": "titleInput",
+        "type": "variable",
+        "line": 7587
+      },
+      {
+        "name": "contentInput",
+        "type": "variable",
+        "line": 7588
+      },
+      {
+        "name": "textContent",
+        "type": "variable",
+        "line": 7592
+      },
+      {
+        "name": "baseName",
+        "type": "variable",
+        "line": 7611
+      },
+      {
+        "name": "importPersonaJSON",
+        "type": "function",
+        "line": 7629
+      },
+      {
+        "name": "sanitizeImportedData",
+        "type": "function",
+        "line": 7639
+      },
+      {
+        "name": "sanitized",
+        "type": "variable",
+        "line": 7657
+      },
+      {
+        "name": "formatDate",
+        "type": "function",
+        "line": 7672
+      },
+      {
+        "name": "setupLogsPageHandlers",
+        "type": "function",
+        "line": 7687
+      },
+      {
+        "name": "levelFilter",
+        "type": "variable",
+        "line": 7688
+      },
+      {
+        "name": "exportBtn",
+        "type": "variable",
+        "line": 7689
+      },
+      {
+        "name": "clearBtn",
+        "type": "variable",
+        "line": 7690
+      },
+      {
+        "name": "contentLogs",
+        "type": "variable",
+        "line": 7705
+      },
+      {
+        "name": "bgLogs",
+        "type": "variable",
+        "line": 7706
+      },
+      {
+        "name": "exportData",
+        "type": "variable",
+        "line": 7708
+      },
+      {
+        "name": "renderLogsPage",
+        "type": "function",
+        "line": 7742
+      },
+      {
+        "name": "logViewer",
+        "type": "variable",
+        "line": 7743
+      },
+      {
+        "name": "logStats",
+        "type": "variable",
+        "line": 7744
+      },
+      {
+        "name": "logStatsText",
+        "type": "variable",
+        "line": 7745
+      },
+      {
+        "name": "levelFilter",
+        "type": "variable",
+        "line": 7746
+      },
+      {
+        "name": "tabLogCount",
+        "type": "variable",
+        "line": 7747
+      },
+      {
+        "name": "selectedLevel",
+        "type": "variable",
+        "line": 7758
+      },
+      {
+        "name": "displayLogs",
+        "type": "variable",
+        "line": 7771
+      },
+      {
+        "name": "byLevel",
+        "type": "variable",
+        "line": 7788
+      },
+      {
+        "name": "statsStr",
+        "type": "variable",
+        "line": 7792
+      },
+      {
+        "name": "setupSynthesizedPersonaSave",
+        "type": "function",
+        "line": 7803
+      },
+      {
+        "name": "textarea",
+        "type": "variable",
+        "line": 7804
+      },
+      {
+        "name": "verbatimToggle",
+        "type": "variable",
+        "line": 7805
+      },
+      {
+        "name": "verbatimBadge",
+        "type": "variable",
+        "line": 7806
+      },
+      {
+        "name": "shouldPin",
+        "type": "variable",
+        "line": 7813
+      },
+      {
+        "name": "autoSaveTimeout",
+        "type": "variable",
+        "line": 7847
+      },
+      {
+        "name": "savePersonaToStorage",
+        "type": "function",
+        "line": 7881
+      },
+      {
+        "name": "sessionKey",
+        "type": "variable",
+        "line": 7886
+      },
+      {
+        "name": "sessionData",
+        "type": "variable",
+        "line": 7888
+      },
+      {
+        "name": "setupExpandModal",
+        "type": "function",
+        "line": 7933
+      },
+      {
+        "name": "btn",
+        "type": "variable",
+        "line": 7937
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 7941
+      },
+      {
+        "name": "icon",
+        "type": "variable",
+        "line": 7942
+      },
+      {
+        "name": "isExpanding",
+        "type": "variable",
+        "line": 7945
+      },
+      {
+        "name": "textarea",
+        "type": "variable",
+        "line": 7955
+      },
+      {
+        "name": "expanded",
+        "type": "variable",
+        "line": 7964
+      },
+      {
+        "name": "icon",
+        "type": "variable",
+        "line": 7968
+      },
+      {
+        "name": "checkRatingEligibility",
+        "type": "function",
+        "line": 7984
+      },
+      {
+        "name": "showRatingPrompt",
+        "type": "function",
+        "line": 8002
+      },
+      {
+        "name": "selectedRating",
+        "type": "variable",
+        "line": 8034
+      },
+      {
+        "name": "toast",
+        "type": "variable",
+        "line": 8096
+      },
+      {
+        "name": "ratingEligibilityInterval",
+        "type": "variable",
+        "line": 8118
+      },
+      {
+        "name": "contextTab",
+        "type": "variable",
+        "line": 8119
+      },
+      {
+        "name": "scanContentForModeration",
+        "type": "function",
+        "line": 8146
+      },
+      {
+        "name": "showModerationWarning",
+        "type": "function",
+        "line": 8176
+      },
+      {
+        "name": "dialog",
+        "type": "variable",
+        "line": 8178
+      },
+      {
+        "name": "showReportDialog",
+        "type": "function",
+        "line": 8228
+      },
+      {
+        "name": "existingDialog",
+        "type": "variable",
+        "line": 8229
+      },
+      {
+        "name": "dialog",
+        "type": "variable",
+        "line": 8232
+      },
+      {
+        "name": "reason",
+        "type": "variable",
+        "line": 8288
+      },
+      {
+        "name": "details",
+        "type": "variable",
+        "line": 8289
+      },
+      {
+        "name": "submitReport",
+        "type": "function",
+        "line": 8306
+      },
+      {
+        "name": "toast",
+        "type": "variable",
+        "line": 8318
+      }
+    ],
+    "content/observer.js": [
+      {
+        "name": "obsLog",
+        "type": "function",
+        "line": 36
+      },
+      {
+        "name": "detectPageTheme",
+        "type": "function",
+        "line": 54
+      },
+      {
+        "name": "bodyClasses",
+        "type": "variable",
+        "line": 59
+      },
+      {
+        "name": "bgColor",
+        "type": "variable",
+        "line": 64
+      },
+      {
+        "name": "rgb",
+        "type": "variable",
+        "line": 65
+      },
+      {
+        "name": "brightness",
+        "type": "variable",
+        "line": 67
+      },
+      {
+        "name": "isExtensionContextValid",
+        "type": "function",
+        "line": 87
+      },
+      {
+        "name": "extensionReloadNotificationShown",
+        "type": "variable",
+        "line": 96
+      },
+      {
+        "name": "showExtensionReloadNotification",
+        "type": "function",
+        "line": 102
+      },
+      {
+        "name": "toast",
+        "type": "variable",
+        "line": 130
+      },
+      {
+        "name": "refreshBtn",
+        "type": "variable",
+        "line": 184
+      },
+      {
+        "name": "closeBtn",
+        "type": "variable",
+        "line": 186
+      },
+      {
+        "name": "safeSendMessage",
+        "type": "function",
+        "line": 197
+      },
+      {
+        "name": "applyThemeToDocument",
+        "type": "function",
+        "line": 230
+      },
+      {
+        "name": "lastDetectedTheme",
+        "type": "variable",
+        "line": 243
+      },
+      {
+        "name": "themeObserver",
+        "type": "variable",
+        "line": 244
+      },
+      {
+        "name": "currentTheme",
+        "type": "variable",
+        "line": 251
+      },
+      {
+        "name": "initThemeObservation",
+        "type": "function",
+        "line": 269
+      },
+      {
+        "name": "observeElement",
+        "type": "function",
+        "line": 270
+      },
+      {
+        "name": "pageTheme",
+        "type": "variable",
+        "line": 292
+      },
+      {
+        "name": "SELECTORS",
+        "type": "constant",
+        "line": 316
+      },
+      {
+        "name": "findElement",
+        "type": "function",
+        "line": 356
+      },
+      {
+        "name": "selectors",
+        "type": "variable",
+        "line": 357
+      },
+      {
+        "name": "findChatInput",
+        "type": "function",
+        "line": 387
+      },
+      {
+        "name": "findSendButton",
+        "type": "function",
+        "line": 391
+      },
+      {
+        "name": "findInputContainer",
+        "type": "function",
+        "line": 395
+      },
+      {
+        "name": "fromConfig",
+        "type": "variable",
+        "line": 397
+      },
+      {
+        "name": "style",
+        "type": "variable",
+        "line": 407
+      },
+      {
+        "name": "createSettingsIcon",
+        "type": "function",
+        "line": 419
+      },
+      {
+        "name": "wrapper",
+        "type": "variable",
+        "line": 420
+      },
+      {
+        "name": "btn",
+        "type": "variable",
+        "line": 423
+      },
+      {
+        "name": "modelDot",
+        "type": "variable",
+        "line": 444
+      },
+      {
+        "name": "updateModelIndicator",
+        "type": "function",
+        "line": 451
+      },
+      {
+        "name": "activeModelData",
+        "type": "variable",
+        "line": 456
+      },
+      {
+        "name": "activeModelId",
+        "type": "variable",
+        "line": 457
+      },
+      {
+        "name": "activeModel",
+        "type": "variable",
+        "line": 461
+      },
+      {
+        "name": "api",
+        "type": "variable",
+        "line": 487
+      },
+      {
+        "name": "createRefineToggle",
+        "type": "function",
+        "line": 507
+      },
+      {
+        "name": "wrapper",
+        "type": "variable",
+        "line": 508
+      },
+      {
+        "name": "toggle",
+        "type": "variable",
+        "line": 515
+      },
+      {
+        "name": "isOn",
+        "type": "variable",
+        "line": 518
+      },
+      {
+        "name": "updateState",
+        "type": "function",
+        "line": 527
+      },
+      {
+        "name": "api",
+        "type": "variable",
+        "line": 544
+      },
+      {
+        "name": "modalInstance",
+        "type": "variable",
+        "line": 556
+      },
+      {
+        "name": "createReviewModal",
+        "type": "function",
+        "line": 558
+      },
+      {
+        "name": "detectTheme",
+        "type": "function",
+        "line": 562
+      },
+      {
+        "name": "bgColor",
+        "type": "variable",
+        "line": 564
+      },
+      {
+        "name": "rgb",
+        "type": "variable",
+        "line": 566
+      },
+      {
+        "name": "brightness",
+        "type": "variable",
+        "line": 568
+      },
+      {
+        "name": "overlay",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "refinedTextarea",
+        "type": "variable",
+        "line": 587
+      },
+      {
+        "name": "originalTextarea",
+        "type": "variable",
+        "line": 588
+      },
+      {
+        "name": "loader",
+        "type": "variable",
+        "line": 589
+      },
+      {
+        "name": "stopButtonArea",
+        "type": "variable",
+        "line": 590
+      },
+      {
+        "name": "btnClose",
+        "type": "variable",
+        "line": 591
+      },
+      {
+        "name": "btnRollback",
+        "type": "variable",
+        "line": 592
+      },
+      {
+        "name": "btnReRefine",
+        "type": "variable",
+        "line": 593
+      },
+      {
+        "name": "btnCopy",
+        "type": "variable",
+        "line": 594
+      },
+      {
+        "name": "btnSendFinal",
+        "type": "variable",
+        "line": 595
+      },
+      {
+        "name": "btnStop",
+        "type": "variable",
+        "line": 596
+      },
+      {
+        "name": "charCount",
+        "type": "variable",
+        "line": 597
+      },
+      {
+        "name": "diffViewEl",
+        "type": "variable",
+        "line": 598
+      },
+      {
+        "name": "tabs",
+        "type": "variable",
+        "line": 599
+      },
+      {
+        "name": "panels",
+        "type": "variable",
+        "line": 600
+      },
+      {
+        "name": "navPrevOriginal",
+        "type": "variable",
+        "line": 603
+      },
+      {
+        "name": "navNextOriginal",
+        "type": "variable",
+        "line": 604
+      },
+      {
+        "name": "navPrevRefined",
+        "type": "variable",
+        "line": 605
+      },
+      {
+        "name": "navNextRefined",
+        "type": "variable",
+        "line": 606
+      },
+      {
+        "name": "navToRefined",
+        "type": "variable",
+        "line": 609
+      },
+      {
+        "name": "navToOriginal",
+        "type": "variable",
+        "line": 610
+      },
+      {
+        "name": "emptyStateEl",
+        "type": "variable",
+        "line": 630
+      },
+      {
+        "name": "btnConfigureApi",
+        "type": "variable",
+        "line": 631
+      },
+      {
+        "name": "errorBanner",
+        "type": "variable",
+        "line": 634
+      },
+      {
+        "name": "errorBannerMessage",
+        "type": "variable",
+        "line": 635
+      },
+      {
+        "name": "btnErrorRetry",
+        "type": "variable",
+        "line": 636
+      },
+      {
+        "name": "feedbackEl",
+        "type": "variable",
+        "line": 639
+      },
+      {
+        "name": "checkConnection",
+        "type": "function",
+        "line": 642
+      },
+      {
+        "name": "latency",
+        "type": "variable",
+        "line": 647
+      },
+      {
+        "name": "typeText",
+        "type": "function",
+        "line": 657
+      },
+      {
+        "name": "showConnectionFeedback",
+        "type": "function",
+        "line": 669
+      },
+      {
+        "name": "quality",
+        "type": "variable",
+        "line": 679
+      },
+      {
+        "name": "labels",
+        "type": "variable",
+        "line": 680
+      },
+      {
+        "name": "getActiveTextarea",
+        "type": "function",
+        "line": 720
+      },
+      {
+        "name": "switchTab",
+        "type": "function",
+        "line": 725
+      },
+      {
+        "name": "generateDiffHTML",
+        "type": "function",
+        "line": 748
+      },
+      {
+        "name": "escape",
+        "type": "function",
+        "line": 753
+      },
+      {
+        "name": "updateCharCount",
+        "type": "function",
+        "line": 758
+      },
+      {
+        "name": "activeTextarea",
+        "type": "variable",
+        "line": 759
+      },
+      {
+        "name": "updateUI",
+        "type": "function",
+        "line": 775
+      },
+      {
+        "name": "canOriginalPrev",
+        "type": "variable",
+        "line": 777
+      },
+      {
+        "name": "canOriginalNext",
+        "type": "variable",
+        "line": 778
+      },
+      {
+        "name": "refinedIndices",
+        "type": "variable",
+        "line": 781
+      },
+      {
+        "name": "currentRefinedPos",
+        "type": "variable",
+        "line": 786
+      },
+      {
+        "name": "canRefinedPrev",
+        "type": "variable",
+        "line": 790
+      },
+      {
+        "name": "canRefinedNext",
+        "type": "variable",
+        "line": 791
+      },
+      {
+        "name": "canRollback",
+        "type": "variable",
+        "line": 794
+      },
+      {
+        "name": "currentOriginalPair",
+        "type": "variable",
+        "line": 805
+      },
+      {
+        "name": "canGoToRefined",
+        "type": "variable",
+        "line": 806
+      },
+      {
+        "name": "currentRefinedPair",
+        "type": "variable",
+        "line": 809
+      },
+      {
+        "name": "canGoToOriginal",
+        "type": "variable",
+        "line": 810
+      },
+      {
+        "name": "updateEmptyState",
+        "type": "function",
+        "line": 819
+      },
+      {
+        "name": "hasContent",
+        "type": "variable",
+        "line": 822
+      },
+      {
+        "name": "footerButtonsDisabled",
+        "type": "variable",
+        "line": 827
+      },
+      {
+        "name": "checkApiKey",
+        "type": "function",
+        "line": 845
+      },
+      {
+        "name": "saveCurrentPairEdits",
+        "type": "function",
+        "line": 899
+      },
+      {
+        "name": "navigatePrevOriginal",
+        "type": "function",
+        "line": 910
+      },
+      {
+        "name": "pair",
+        "type": "variable",
+        "line": 913
+      },
+      {
+        "name": "navigateNextOriginal",
+        "type": "function",
+        "line": 920
+      },
+      {
+        "name": "pair",
+        "type": "variable",
+        "line": 923
+      },
+      {
+        "name": "navigatePrevRefined",
+        "type": "function",
+        "line": 930
+      },
+      {
+        "name": "targetIndex",
+        "type": "variable",
+        "line": 932
+      },
+      {
+        "name": "navigateNextRefined",
+        "type": "function",
+        "line": 944
+      },
+      {
+        "name": "targetIndex",
+        "type": "variable",
+        "line": 946
+      },
+      {
+        "name": "currentPair",
+        "type": "variable",
+        "line": 968
+      },
+      {
+        "name": "indexChanged",
+        "type": "variable",
+        "line": 980
+      },
+      {
+        "name": "originalContainer",
+        "type": "variable",
+        "line": 987
+      },
+      {
+        "name": "refinedContainer",
+        "type": "variable",
+        "line": 988
+      },
+      {
+        "name": "refinedExpandBtn",
+        "type": "variable",
+        "line": 998
+      },
+      {
+        "name": "expandIcon",
+        "type": "variable",
+        "line": 1000
+      },
+      {
+        "name": "collapseIcon",
+        "type": "variable",
+        "line": 1001
+      },
+      {
+        "name": "currentPair",
+        "type": "variable",
+        "line": 1015
+      },
+      {
+        "name": "indexChanged",
+        "type": "variable",
+        "line": 1027
+      },
+      {
+        "name": "originalContainer",
+        "type": "variable",
+        "line": 1034
+      },
+      {
+        "name": "refinedContainer",
+        "type": "variable",
+        "line": 1035
+      },
+      {
+        "name": "originalExpandBtn",
+        "type": "variable",
+        "line": 1045
+      },
+      {
+        "name": "expandIcon",
+        "type": "variable",
+        "line": 1047
+      },
+      {
+        "name": "collapseIcon",
+        "type": "variable",
+        "line": 1048
+      },
+      {
+        "name": "api",
+        "type": "variable",
+        "line": 1065
+      },
+      {
+        "name": "pair",
+        "type": "variable",
+        "line": 1074
+      },
+      {
+        "name": "roughText",
+        "type": "variable",
+        "line": 1092
+      },
+      {
+        "name": "wasStopPressed",
+        "type": "variable",
+        "line": 1096
+      },
+      {
+        "name": "newPair",
+        "type": "variable",
+        "line": 1177
+      },
+      {
+        "name": "canProceed",
+        "type": "variable",
+        "line": 1198
+      },
+      {
+        "name": "roughText",
+        "type": "variable",
+        "line": 1228
+      },
+      {
+        "name": "dismissErrorBanner",
+        "type": "function",
+        "line": 1260
+      },
+      {
+        "name": "hadResponseAtStop",
+        "type": "variable",
+        "line": 1289
+      },
+      {
+        "name": "hasLateResponse",
+        "type": "variable",
+        "line": 1325
+      },
+      {
+        "name": "hasResponseNow",
+        "type": "variable",
+        "line": 1326
+      },
+      {
+        "name": "pair",
+        "type": "variable",
+        "line": 1377
+      },
+      {
+        "name": "originalHTML",
+        "type": "variable",
+        "line": 1394
+      },
+      {
+        "name": "currentContent",
+        "type": "variable",
+        "line": 1413
+      },
+      {
+        "name": "wasOnRefinedTab",
+        "type": "variable",
+        "line": 1414
+      },
+      {
+        "name": "newPair",
+        "type": "variable",
+        "line": 1434
+      },
+      {
+        "name": "canProceed",
+        "type": "variable",
+        "line": 1453
+      },
+      {
+        "name": "context",
+        "type": "variable",
+        "line": 1463
+      },
+      {
+        "name": "previousPrompts",
+        "type": "variable",
+        "line": 1464
+      },
+      {
+        "name": "expandedContainer",
+        "type": "variable",
+        "line": 1531
+      },
+      {
+        "name": "panel",
+        "type": "variable",
+        "line": 1534
+      },
+      {
+        "name": "tabName",
+        "type": "variable",
+        "line": 1535
+      },
+      {
+        "name": "expandIcon",
+        "type": "variable",
+        "line": 1544
+      },
+      {
+        "name": "collapseIcon",
+        "type": "variable",
+        "line": 1545
+      },
+      {
+        "name": "isRefineEnabled",
+        "type": "variable",
+        "line": 1557
+      },
+      {
+        "name": "isRefineEnabled",
+        "type": "variable",
+        "line": 1576
+      },
+      {
+        "name": "focusableSelectors",
+        "type": "variable",
+        "line": 1608
+      },
+      {
+        "name": "focusableElements",
+        "type": "variable",
+        "line": 1616
+      },
+      {
+        "name": "firstFocusable",
+        "type": "variable",
+        "line": 1619
+      },
+      {
+        "name": "lastFocusable",
+        "type": "variable",
+        "line": 1620
+      },
+      {
+        "name": "originalAddOpen",
+        "type": "variable",
+        "line": 1638
+      },
+      {
+        "name": "firstFocusable",
+        "type": "variable",
+        "line": 1644
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 1660
+      },
+      {
+        "name": "expandIcon",
+        "type": "variable",
+        "line": 1661
+      },
+      {
+        "name": "collapseIcon",
+        "type": "variable",
+        "line": 1662
+      },
+      {
+        "name": "isExpanding",
+        "type": "variable",
+        "line": 1665
+      },
+      {
+        "name": "textarea",
+        "type": "variable",
+        "line": 1676
+      },
+      {
+        "name": "pasteToInput",
+        "type": "function",
+        "line": 1688
+      },
+      {
+        "name": "injectInterface",
+        "type": "function",
+        "line": 1700
+      },
+      {
+        "name": "sendBtn",
+        "type": "variable",
+        "line": 1701
+      },
+      {
+        "name": "inputEl",
+        "type": "variable",
+        "line": 1702
+      },
+      {
+        "name": "buttonContainer",
+        "type": "variable",
+        "line": 1707
+      },
+      {
+        "name": "inputContainer",
+        "type": "variable",
+        "line": 1711
+      },
+      {
+        "name": "settingsApi",
+        "type": "variable",
+        "line": 1717
+      },
+      {
+        "name": "existingWrapper",
+        "type": "variable",
+        "line": 1718
+      },
+      {
+        "name": "updateSettingsPosition",
+        "type": "function",
+        "line": 1731
+      },
+      {
+        "name": "rect",
+        "type": "variable",
+        "line": 1733
+      },
+      {
+        "name": "thinkingBtn",
+        "type": "variable",
+        "line": 1755
+      },
+      {
+        "name": "buttons",
+        "type": "variable",
+        "line": 1759
+      },
+      {
+        "name": "trailingActionsWrapper",
+        "type": "variable",
+        "line": 1769
+      },
+      {
+        "name": "toggleApi",
+        "type": "variable",
+        "line": 1771
+      },
+      {
+        "name": "existingToggle",
+        "type": "variable",
+        "line": 1773
+      },
+      {
+        "name": "settingsWrapper",
+        "type": "variable",
+        "line": 1787
+      },
+      {
+        "name": "inputButtonsWrapper",
+        "type": "variable",
+        "line": 1801
+      },
+      {
+        "name": "existingOverlay",
+        "type": "variable",
+        "line": 1817
+      },
+      {
+        "name": "updateVisibility",
+        "type": "function",
+        "line": 1877
+      },
+      {
+        "name": "cachedTabId",
+        "type": "variable",
+        "line": 1898
+      },
+      {
+        "name": "getTabId",
+        "type": "function",
+        "line": 1899
+      },
+      {
+        "name": "skipNextRefinement",
+        "type": "variable",
+        "line": 1923
+      },
+      {
+        "name": "triggerNativeSend",
+        "type": "function",
+        "line": 1929
+      },
+      {
+        "name": "inputEl",
+        "type": "variable",
+        "line": 1937
+      },
+      {
+        "name": "sendBtn",
+        "type": "variable",
+        "line": 1966
+      },
+      {
+        "name": "triggerRefinement",
+        "type": "function",
+        "line": 1987
+      },
+      {
+        "name": "modal",
+        "type": "variable",
+        "line": 2015
+      },
+      {
+        "name": "context",
+        "type": "variable",
+        "line": 2041
+      },
+      {
+        "name": "previousPrompts",
+        "type": "variable",
+        "line": 2048
+      },
+      {
+        "name": "inputEl",
+        "type": "variable",
+        "line": 2114
+      },
+      {
+        "name": "toggleWrapper",
+        "type": "variable",
+        "line": 2115
+      },
+      {
+        "name": "toggleApi",
+        "type": "variable",
+        "line": 2116
+      },
+      {
+        "name": "splitViewActive",
+        "type": "variable",
+        "line": 2136
+      },
+      {
+        "name": "toggleSplitView",
+        "type": "function",
+        "line": 2138
+      },
+      {
+        "name": "existingFrame",
+        "type": "variable",
+        "line": 2139
+      },
+      {
+        "name": "iframe",
+        "type": "variable",
+        "line": 2151
+      },
+      {
+        "name": "injectDebounceTimer",
+        "type": "variable",
+        "line": 2179
+      },
+      {
+        "name": "debouncedInject",
+        "type": "function",
+        "line": 2180
+      },
+      {
+        "name": "observer",
+        "type": "variable",
+        "line": 2188
+      }
+    ],
+    "memory/context-assembler.js": [
+      {
+        "name": "ctxLog",
+        "type": "function",
+        "line": 15
+      },
+      {
+        "name": "filterByGeneration",
+        "type": "variable",
+        "line": 45
+      },
+      {
+        "name": "unifiedContext",
+        "type": "variable",
+        "line": 46
+      },
+      {
+        "name": "currentGeneration",
+        "type": "variable",
+        "line": 47
+      },
+      {
+        "name": "ContextAssembler._buildSummary",
+        "type": "method",
+        "line": 77
+      },
+      {
+        "name": "summary",
+        "type": "variable",
+        "line": 78
+      },
+      {
+        "name": "isCurrent",
+        "type": "variable",
+        "line": 86
+      },
+      {
+        "name": "ContextAssembler._isComponentCurrent",
+        "type": "method",
+        "line": 106
+      },
+      {
+        "name": "ContextAssembler._getComponent",
+        "type": "method",
+        "line": 120
+      },
+      {
+        "name": "ContextAssembler._getComponentData",
+        "type": "method",
+        "line": 129
+      },
+      {
+        "name": "ContextAssembler._extractV4Data",
+        "type": "method",
+        "line": 144
+      },
+      {
+        "name": "ContextAssembler._buildRefinementContext",
+        "type": "method",
+        "line": 173
+      },
+      {
+        "name": "context",
+        "type": "variable",
+        "line": 174
+      },
+      {
+        "name": "staleComponents",
+        "type": "variable",
+        "line": 175
+      },
+      {
+        "name": "includedComponents",
+        "type": "variable",
+        "line": 176
+      },
+      {
+        "name": "isFactDisabled",
+        "type": "function",
+        "line": 178
+      },
+      {
+        "name": "trackComponent",
+        "type": "function",
+        "line": 183
+      },
+      {
+        "name": "personaComp",
+        "type": "variable",
+        "line": 200
+      },
+      {
+        "name": "personaData",
+        "type": "variable",
+        "line": 201
+      },
+      {
+        "name": "personaIncluded",
+        "type": "variable",
+        "line": 202
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 206
+      },
+      {
+        "name": "contextComp",
+        "type": "variable",
+        "line": 226
+      },
+      {
+        "name": "contextData",
+        "type": "variable",
+        "line": 227
+      },
+      {
+        "name": "contextIncluded",
+        "type": "variable",
+        "line": 228
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 232
+      },
+      {
+        "name": "exemplarComp",
+        "type": "variable",
+        "line": 252
+      },
+      {
+        "name": "exemplarData",
+        "type": "variable",
+        "line": 253
+      },
+      {
+        "name": "exemplarIncluded",
+        "type": "variable",
+        "line": 254
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 258
+      },
+      {
+        "name": "formatComp",
+        "type": "variable",
+        "line": 273
+      },
+      {
+        "name": "formatData",
+        "type": "variable",
+        "line": 274
+      },
+      {
+        "name": "formatIncluded",
+        "type": "variable",
+        "line": 275
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 279
+      },
+      {
+        "name": "toneComp",
+        "type": "variable",
+        "line": 297
+      },
+      {
+        "name": "toneData",
+        "type": "variable",
+        "line": 298
+      },
+      {
+        "name": "toneIncluded",
+        "type": "variable",
+        "line": 299
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 303
+      },
+      {
+        "name": "frameworkComp",
+        "type": "variable",
+        "line": 326
+      },
+      {
+        "name": "frameworkData",
+        "type": "variable",
+        "line": 327
+      },
+      {
+        "name": "frameworkIncluded",
+        "type": "variable",
+        "line": 328
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 332
+      },
+      {
+        "name": "constraintsComp",
+        "type": "variable",
+        "line": 349
+      },
+      {
+        "name": "constraintsData",
+        "type": "variable",
+        "line": 350
+      },
+      {
+        "name": "constraintsIncluded",
+        "type": "variable",
+        "line": 351
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 355
+      },
+      {
+        "name": "recentFocusComp",
+        "type": "variable",
+        "line": 374
+      },
+      {
+        "name": "recentFocusData",
+        "type": "variable",
+        "line": 375
+      },
+      {
+        "name": "ContextAssembler.formatForRefinement",
+        "type": "method",
+        "line": 403
+      },
+      {
+        "name": "ctx",
+        "type": "variable",
+        "line": 408
+      },
+      {
+        "name": "personaSection",
+        "type": "variable",
+        "line": 420
+      },
+      {
+        "name": "scopeTags",
+        "type": "variable",
+        "line": 432
+      },
+      {
+        "name": "domainSection",
+        "type": "variable",
+        "line": 435
+      },
+      {
+        "name": "terms",
+        "type": "variable",
+        "line": 439
+      },
+      {
+        "name": "styleTags",
+        "type": "variable",
+        "line": 447
+      },
+      {
+        "name": "toneSection",
+        "type": "variable",
+        "line": 448
+      },
+      {
+        "name": "toneSection",
+        "type": "variable",
+        "line": 454
+      },
+      {
+        "name": "reasoningType",
+        "type": "variable",
+        "line": 465
+      },
+      {
+        "name": "frameworkSection",
+        "type": "variable",
+        "line": 468
+      },
+      {
+        "name": "steps",
+        "type": "variable",
+        "line": 473
+      },
+      {
+        "name": "constraintSection",
+        "type": "variable",
+        "line": 484
+      },
+      {
+        "name": "reqs",
+        "type": "variable",
+        "line": 486
+      },
+      {
+        "name": "rules",
+        "type": "variable",
+        "line": 490
+      },
+      {
+        "name": "outputType",
+        "type": "variable",
+        "line": 504
+      },
+      {
+        "name": "formatSection",
+        "type": "variable",
+        "line": 507
+      },
+      {
+        "name": "recentSection",
+        "type": "variable",
+        "line": 526
+      },
+      {
+        "name": "ContextAssembler.getContextJSON",
+        "type": "method",
+        "line": 540
+      },
+      {
+        "name": "ContextAssembler.hasContext",
+        "type": "method",
+        "line": 551
+      },
+      {
+        "name": "ContextAssembler.clearCache",
+        "type": "method",
+        "line": 558
+      }
+    ],
+    "background/services/memory-orchestrator.js": [
+      {
+        "name": "getCurrentTabSessionId",
+        "type": "function",
+        "line": 8
+      },
+      {
+        "name": "tab",
+        "type": "variable",
+        "line": 9
+      },
+      {
+        "name": "pathParts",
+        "type": "variable",
+        "line": 27
+      },
+      {
+        "name": "getSessionMemory",
+        "type": "function",
+        "line": 42
+      },
+      {
+        "name": "updateMemoryComponent",
+        "type": "function",
+        "line": 53
+      },
+      {
+        "name": "memory",
+        "type": "variable",
+        "line": 58
+      },
+      {
+        "name": "pinPersona",
+        "type": "function",
+        "line": 80
+      },
+      {
+        "name": "memory",
+        "type": "variable",
+        "line": 85
+      },
+      {
+        "name": "personaComponent",
+        "type": "variable",
+        "line": 98
+      },
+      {
+        "name": "unpinPersona",
+        "type": "function",
+        "line": 115
+      },
+      {
+        "name": "memory",
+        "type": "variable",
+        "line": 120
+      },
+      {
+        "name": "personaComponent",
+        "type": "variable",
+        "line": 123
+      },
+      {
+        "name": "pinComponent",
+        "type": "function",
+        "line": 148
+      },
+      {
+        "name": "memory",
+        "type": "variable",
+        "line": 154
+      },
+      {
+        "name": "unpinComponent",
+        "type": "function",
+        "line": 187
+      },
+      {
+        "name": "memory",
+        "type": "variable",
+        "line": 193
+      },
+      {
+        "name": "toggleFact",
+        "type": "function",
+        "line": 209
+      },
+      {
+        "name": "disabled",
+        "type": "variable",
+        "line": 214
+      },
+      {
+        "name": "buildV4RefinementContext",
+        "type": "function",
+        "line": 233
+      },
+      {
+        "name": "components",
+        "type": "variable",
+        "line": 236
+      },
+      {
+        "name": "dimensions",
+        "type": "variable",
+        "line": 237
+      },
+      {
+        "name": "isFactDisabled",
+        "type": "function",
+        "line": 240
+      },
+      {
+        "name": "getActiveData",
+        "type": "function",
+        "line": 245
+      },
+      {
+        "name": "personaLegacy",
+        "type": "variable",
+        "line": 258
+      },
+      {
+        "name": "personaData",
+        "type": "variable",
+        "line": 260
+      },
+      {
+        "name": "personaText",
+        "type": "variable",
+        "line": 261
+      },
+      {
+        "name": "contextV4",
+        "type": "variable",
+        "line": 279
+      },
+      {
+        "name": "contextLegacy",
+        "type": "variable",
+        "line": 280
+      },
+      {
+        "name": "contextData",
+        "type": "variable",
+        "line": 282
+      },
+      {
+        "name": "contextLegacyData",
+        "type": "variable",
+        "line": 283
+      },
+      {
+        "name": "scopeTags",
+        "type": "variable",
+        "line": 287
+      },
+      {
+        "name": "instruction",
+        "type": "variable",
+        "line": 288
+      },
+      {
+        "name": "toneV4",
+        "type": "variable",
+        "line": 312
+      },
+      {
+        "name": "toneLegacy",
+        "type": "variable",
+        "line": 313
+      },
+      {
+        "name": "toneData",
+        "type": "variable",
+        "line": 315
+      },
+      {
+        "name": "toneLegacyData",
+        "type": "variable",
+        "line": 316
+      },
+      {
+        "name": "styleTags",
+        "type": "variable",
+        "line": 319
+      },
+      {
+        "name": "bannedPhrases",
+        "type": "variable",
+        "line": 320
+      },
+      {
+        "name": "toneSection",
+        "type": "variable",
+        "line": 323
+      },
+      {
+        "name": "frameworkV4",
+        "type": "variable",
+        "line": 348
+      },
+      {
+        "name": "fw",
+        "type": "variable",
+        "line": 349
+      },
+      {
+        "name": "reasoningType",
+        "type": "variable",
+        "line": 352
+      },
+      {
+        "name": "constraintsV4",
+        "type": "variable",
+        "line": 365
+      },
+      {
+        "name": "c",
+        "type": "variable",
+        "line": 366
+      },
+      {
+        "name": "prohibitions",
+        "type": "variable",
+        "line": 369
+      },
+      {
+        "name": "requirements",
+        "type": "variable",
+        "line": 370
+      },
+      {
+        "name": "responseLength",
+        "type": "variable",
+        "line": 371
+      },
+      {
+        "name": "constraintSection",
+        "type": "variable",
+        "line": 374
+      },
+      {
+        "name": "formatV4",
+        "type": "variable",
+        "line": 393
+      },
+      {
+        "name": "fmt",
+        "type": "variable",
+        "line": 394
+      },
+      {
+        "name": "outputType",
+        "type": "variable",
+        "line": 397
+      },
+      {
+        "name": "exemplarV4",
+        "type": "variable",
+        "line": 410
+      },
+      {
+        "name": "ex",
+        "type": "variable",
+        "line": 411
+      },
+      {
+        "name": "recentFocus",
+        "type": "variable",
+        "line": 426
+      },
+      {
+        "name": "recentSection",
+        "type": "variable",
+        "line": 429
+      },
+      {
+        "name": "rebuildSessionMemory",
+        "type": "function",
+        "line": 453
+      },
+      {
+        "name": "targetTab",
+        "type": "variable",
+        "line": 468
+      },
+      {
+        "name": "matchingTabs",
+        "type": "variable",
+        "line": 469
+      },
+      {
+        "name": "_sessionLocks",
+        "type": "variable",
+        "line": 526
+      },
+      {
+        "name": "acquireSessionLock",
+        "type": "function",
+        "line": 534
+      },
+      {
+        "name": "existingLock",
+        "type": "variable",
+        "line": 537
+      },
+      {
+        "name": "releaseSessionLock",
+        "type": "function",
+        "line": 556
+      }
+    ],
+    "content/scraper.js": [
+      {
+        "name": "scrapeLog",
+        "type": "function",
+        "line": 71
+      },
+      {
+        "name": "SCRAPER_CONFIG",
+        "type": "constant",
+        "line": 85
+      },
+      {
+        "name": "GEMINI_SELECTORS",
+        "type": "constant",
+        "line": 106
+      },
+      {
+        "name": "GeminiConversationScraper",
+        "type": "class",
+        "line": 178
+      },
+      {
+        "name": "GeminiConversationScraper.hasHistory",
+        "type": "method",
+        "line": 190
+      },
+      {
+        "name": "containers",
+        "type": "variable",
+        "line": 191
+      },
+      {
+        "name": "GeminiConversationScraper._getRating",
+        "type": "method",
+        "line": 200
+      },
+      {
+        "name": "GeminiConversationScraper.loadRatings",
+        "type": "method",
+        "line": 217
+      },
+      {
+        "name": "GeminiConversationScraper.scrape",
+        "type": "method",
+        "line": 235
+      },
+      {
+        "name": "config",
+        "type": "variable",
+        "line": 240
+      },
+      {
+        "name": "formatDate",
+        "type": "function",
+        "line": 249
+      },
+      {
+        "name": "d",
+        "type": "variable",
+        "line": 250
+      },
+      {
+        "name": "pad",
+        "type": "function",
+        "line": 251
+      },
+      {
+        "name": "containers",
+        "type": "variable",
+        "line": 258
+      },
+      {
+        "name": "totalBytes",
+        "type": "variable",
+        "line": 283
+      },
+      {
+        "name": "wasTruncated",
+        "type": "variable",
+        "line": 283
+      },
+      {
+        "name": "sliceOffset",
+        "type": "variable",
+        "line": 283
+      },
+      {
+        "name": "targetContainers",
+        "type": "variable",
+        "line": 283
+      },
+      {
+        "name": "titleEl",
+        "type": "variable",
+        "line": 298
+      },
+      {
+        "name": "pairId",
+        "type": "variable",
+        "line": 307
+      },
+      {
+        "name": "skippedPairCount",
+        "type": "variable",
+        "line": 310
+      },
+      {
+        "name": "turn",
+        "type": "variable",
+        "line": 313
+      },
+      {
+        "name": "pair",
+        "type": "variable",
+        "line": 317
+      },
+      {
+        "name": "turnIndex",
+        "type": "variable",
+        "line": 331
+      },
+      {
+        "name": "lastPair",
+        "type": "variable",
+        "line": 351
+      },
+      {
+        "name": "GeminiConversationScraper._findMessageContainers",
+        "type": "method",
+        "line": 382
+      },
+      {
+        "name": "allMessages",
+        "type": "variable",
+        "line": 383
+      },
+      {
+        "name": "userSelectors",
+        "type": "variable",
+        "line": 386
+      },
+      {
+        "name": "userElements",
+        "type": "variable",
+        "line": 387
+      },
+      {
+        "name": "found",
+        "type": "variable",
+        "line": 390
+      },
+      {
+        "name": "modelSelectors",
+        "type": "variable",
+        "line": 402
+      },
+      {
+        "name": "modelElements",
+        "type": "variable",
+        "line": 403
+      },
+      {
+        "name": "found",
+        "type": "variable",
+        "line": 406
+      },
+      {
+        "name": "position",
+        "type": "variable",
+        "line": 426
+      },
+      {
+        "name": "GeminiConversationScraper._extractTurns",
+        "type": "method",
+        "line": 445
+      },
+      {
+        "name": "totalBytes",
+        "type": "variable",
+        "line": 447
+      },
+      {
+        "name": "wasTruncated",
+        "type": "variable",
+        "line": 448
+      },
+      {
+        "name": "maxContainers",
+        "type": "variable",
+        "line": 451
+      },
+      {
+        "name": "targetContainers",
+        "type": "variable",
+        "line": 452
+      },
+      {
+        "name": "sliceOffset",
+        "type": "variable",
+        "line": 453
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 456
+      },
+      {
+        "name": "turn",
+        "type": "variable",
+        "line": 476
+      },
+      {
+        "name": "GeminiConversationScraper._extractContent",
+        "type": "method",
+        "line": 500
+      },
+      {
+        "name": "clone",
+        "type": "variable",
+        "line": 502
+      },
+      {
+        "name": "hidden",
+        "type": "variable",
+        "line": 505
+      },
+      {
+        "name": "preBlocks",
+        "type": "variable",
+        "line": 509
+      },
+      {
+        "name": "inlineCode",
+        "type": "variable",
+        "line": 515
+      },
+      {
+        "name": "GeminiConversationScraper._determineRole",
+        "type": "method",
+        "line": 538
+      },
+      {
+        "name": "GeminiConversationScraper._matchesIndicator",
+        "type": "method",
+        "line": 568
+      },
+      {
+        "name": "GeminiConversationScraper._formatOutput",
+        "type": "method",
+        "line": 587
+      },
+      {
+        "name": "roleHeader",
+        "type": "variable",
+        "line": 590
+      },
+      {
+        "name": "rolePrefix",
+        "type": "variable",
+        "line": 597
+      },
+      {
+        "name": "GeminiConversationScraper._generateSessionId",
+        "type": "method",
+        "line": 609
+      },
+      {
+        "name": "customScraperMethod",
+        "type": "function",
+        "line": 629
+      },
+      {
+        "name": "scraper",
+        "type": "variable",
+        "line": 630
+      },
+      {
+        "name": "getChatHistory",
+        "type": "function",
+        "line": 657
+      },
+      {
+        "name": "scraper",
+        "type": "variable",
+        "line": 658
+      },
+      {
+        "name": "getPreviousPromptsWithRatings",
+        "type": "function",
+        "line": 682
+      },
+      {
+        "name": "scraper",
+        "type": "variable",
+        "line": 683
+      },
+      {
+        "name": "prompts",
+        "type": "variable",
+        "line": 700
+      },
+      {
+        "name": "turnIndex",
+        "type": "variable",
+        "line": 705
+      }
+    ],
+    "options/model-manager-ui.js": [
+      {
+        "name": "ModelManagerUI",
+        "type": "class",
+        "line": 14
+      },
+      {
+        "name": "ModelManagerUI.render",
+        "type": "method",
+        "line": 52
+      },
+      {
+        "name": "ModelManagerUI.renderModelCard",
+        "type": "method",
+        "line": 99
+      },
+      {
+        "name": "statusClass",
+        "type": "variable",
+        "line": 102
+      },
+      {
+        "name": "activeClass",
+        "type": "variable",
+        "line": 103
+      },
+      {
+        "name": "statusText",
+        "type": "variable",
+        "line": 104
+      },
+      {
+        "name": "statusIcon",
+        "type": "variable",
+        "line": 105
+      },
+      {
+        "name": "ModelManagerUI.renderModal",
+        "type": "method",
+        "line": 150
+      },
+      {
+        "name": "ModelManagerUI.setupEventListeners",
+        "type": "method",
+        "line": 236
+      },
+      {
+        "name": "modelId",
+        "type": "variable",
+        "line": 242
+      },
+      {
+        "name": "ModelManagerUI.setupModalEvents",
+        "type": "method",
+        "line": 286
+      },
+      {
+        "name": "providerSelect",
+        "type": "variable",
+        "line": 288
+      },
+      {
+        "name": "ModelManagerUI.onProviderChange",
+        "type": "method",
+        "line": 311
+      },
+      {
+        "name": "link",
+        "type": "variable",
+        "line": 316
+      },
+      {
+        "name": "baseUrlGroup",
+        "type": "variable",
+        "line": 326
+      },
+      {
+        "name": "modelSelect",
+        "type": "variable",
+        "line": 334
+      },
+      {
+        "name": "customModelGroup",
+        "type": "variable",
+        "line": 340
+      },
+      {
+        "name": "ModelManagerUI.renderParameters",
+        "type": "method",
+        "line": 354
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 355
+      },
+      {
+        "name": "ModelManagerUI.openAddModal",
+        "type": "method",
+        "line": 378
+      },
+      {
+        "name": "modal",
+        "type": "variable",
+        "line": 383
+      },
+      {
+        "name": "providerSelect",
+        "type": "variable",
+        "line": 391
+      },
+      {
+        "name": "ModelManagerUI.openEditModal",
+        "type": "method",
+        "line": 401
+      },
+      {
+        "name": "modal",
+        "type": "variable",
+        "line": 409
+      },
+      {
+        "name": "providerSelect",
+        "type": "variable",
+        "line": 417
+      },
+      {
+        "name": "modelSelect",
+        "type": "variable",
+        "line": 422
+      },
+      {
+        "name": "ModelManagerUI.showModal",
+        "type": "method",
+        "line": 443
+      },
+      {
+        "name": "modal",
+        "type": "variable",
+        "line": 444
+      },
+      {
+        "name": "ModelManagerUI.closeModal",
+        "type": "method",
+        "line": 452
+      },
+      {
+        "name": "modal",
+        "type": "variable",
+        "line": 453
+      },
+      {
+        "name": "ModelManagerUI.handleTest",
+        "type": "method",
+        "line": 463
+      },
+      {
+        "name": "card",
+        "type": "variable",
+        "line": 464
+      },
+      {
+        "name": "btn",
+        "type": "variable",
+        "line": 465
+      },
+      {
+        "name": "originalText",
+        "type": "variable",
+        "line": 468
+      },
+      {
+        "name": "ModelManagerUI.handleTestFromModal",
+        "type": "method",
+        "line": 490
+      },
+      {
+        "name": "statusEl",
+        "type": "variable",
+        "line": 491
+      },
+      {
+        "name": "formData",
+        "type": "variable",
+        "line": 497
+      },
+      {
+        "name": "testConfig",
+        "type": "variable",
+        "line": 500
+      },
+      {
+        "name": "client",
+        "type": "variable",
+        "line": 509
+      },
+      {
+        "name": "ModelManagerUI.handleFetchModels",
+        "type": "method",
+        "line": 526
+      },
+      {
+        "name": "modal",
+        "type": "variable",
+        "line": 527
+      },
+      {
+        "name": "providerDef",
+        "type": "variable",
+        "line": 529
+      },
+      {
+        "name": "apiKeyInput",
+        "type": "variable",
+        "line": 530
+      },
+      {
+        "name": "fetchBtn",
+        "type": "variable",
+        "line": 531
+      },
+      {
+        "name": "modelSelect",
+        "type": "variable",
+        "line": 532
+      },
+      {
+        "name": "hintEl",
+        "type": "variable",
+        "line": 533
+      },
+      {
+        "name": "originalText",
+        "type": "variable",
+        "line": 554
+      },
+      {
+        "name": "ModelManagerUI.handleToggle",
+        "type": "method",
+        "line": 594
+      },
+      {
+        "name": "ModelManagerUI.handleActivate",
+        "type": "method",
+        "line": 630
+      },
+      {
+        "name": "ModelManagerUI.handleSave",
+        "type": "method",
+        "line": 645
+      },
+      {
+        "name": "formData",
+        "type": "variable",
+        "line": 648
+      },
+      {
+        "name": "ModelManagerUI.getModalFormData",
+        "type": "method",
+        "line": 679
+      },
+      {
+        "name": "modal",
+        "type": "variable",
+        "line": 680
+      },
+      {
+        "name": "providerDef",
+        "type": "variable",
+        "line": 682
+      },
+      {
+        "name": "modelId",
+        "type": "variable",
+        "line": 685
+      },
+      {
+        "name": "customModel",
+        "type": "variable",
+        "line": 686
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 725
+      },
+      {
+        "name": "toast",
+        "type": "variable",
+        "line": 732
+      },
+      {
+        "name": "icons",
+        "type": "variable",
+        "line": 736
+      }
+    ],
+    "memory/memory-controller.js": [
+      {
+        "name": "MEMORY_SCHEMA_VERSION",
+        "type": "constant",
+        "line": 43
+      },
+      {
+        "name": "DIMENSION_NAMES",
+        "type": "constant",
+        "line": 48
+      },
+      {
+        "name": "SESSION_KEY_PREFIX",
+        "type": "constant",
+        "line": 55
+      },
+      {
+        "name": "MEMORY_SIZE_LIMITS",
+        "type": "constant",
+        "line": 61
+      },
+      {
+        "name": "memCtrlLog",
+        "type": "function",
+        "line": 69
+      },
+      {
+        "name": "MemoryController.extractSessionId",
+        "type": "method",
+        "line": 103
+      },
+      {
+        "name": "urlObj",
+        "type": "variable",
+        "line": 105
+      },
+      {
+        "name": "pathParts",
+        "type": "variable",
+        "line": 106
+      },
+      {
+        "name": "MemoryController.isExtensionContext",
+        "type": "method",
+        "line": 130
+      },
+      {
+        "name": "MemoryController._bridgeRequestId",
+        "type": "property",
+        "line": 139
+      },
+      {
+        "name": "MemoryController._bridgeRequests",
+        "type": "property",
+        "line": 140
+      },
+      {
+        "name": "MemoryController._bridgeInitialized",
+        "type": "property",
+        "line": 141
+      },
+      {
+        "name": "MemoryController._initBridgeListener",
+        "type": "method",
+        "line": 146
+      },
+      {
+        "name": "requestId",
+        "type": "variable",
+        "line": 151
+      },
+      {
+        "name": "pending",
+        "type": "variable",
+        "line": 153
+      },
+      {
+        "name": "MemoryController._makeBridgeRequest",
+        "type": "method",
+        "line": 173
+      },
+      {
+        "name": "requestId",
+        "type": "variable",
+        "line": 177
+      },
+      {
+        "name": "timeout",
+        "type": "variable",
+        "line": 179
+      },
+      {
+        "name": "MemoryController._ensureCache",
+        "type": "method",
+        "line": 209
+      },
+      {
+        "name": "MemoryController.getComponent",
+        "type": "method",
+        "line": 270
+      },
+      {
+        "name": "MemoryController.setComponent",
+        "type": "method",
+        "line": 289
+      },
+      {
+        "name": "sanitizedData",
+        "type": "variable",
+        "line": 320
+      },
+      {
+        "name": "historyLength",
+        "type": "variable",
+        "line": 339
+      },
+      {
+        "name": "MemoryController.incrementGeneration",
+        "type": "method",
+        "line": 382
+      },
+      {
+        "name": "MemoryController.getComponentGeneration",
+        "type": "method",
+        "line": 408
+      },
+      {
+        "name": "MemoryController.isComponentCurrent",
+        "type": "method",
+        "line": 419
+      },
+      {
+        "name": "MemoryController.pinPersona",
+        "type": "method",
+        "line": 435
+      },
+      {
+        "name": "personaComponent",
+        "type": "variable",
+        "line": 438
+      },
+      {
+        "name": "MemoryController.unpinPersona",
+        "type": "method",
+        "line": 464
+      },
+      {
+        "name": "personaComponent",
+        "type": "variable",
+        "line": 467
+      },
+      {
+        "name": "MemoryController.isPersonaPinned",
+        "type": "method",
+        "line": 485
+      },
+      {
+        "name": "MemoryController.getEffectivePersona",
+        "type": "method",
+        "line": 494
+      },
+      {
+        "name": "personaComponent",
+        "type": "variable",
+        "line": 497
+      },
+      {
+        "name": "MemoryController.updatePinnedPersona",
+        "type": "method",
+        "line": 512
+      },
+      {
+        "name": "personaComponent",
+        "type": "variable",
+        "line": 515
+      },
+      {
+        "name": "MemoryController.pinComponent",
+        "type": "method",
+        "line": 545
+      },
+      {
+        "name": "MemoryController.unpinComponent",
+        "type": "method",
+        "line": 570
+      },
+      {
+        "name": "MemoryController.isComponentPinned",
+        "type": "method",
+        "line": 594
+      },
+      {
+        "name": "MemoryController.getEffectiveComponent",
+        "type": "method",
+        "line": 605
+      },
+      {
+        "name": "MemoryController.getUnifiedContext",
+        "type": "method",
+        "line": 622
+      },
+      {
+        "name": "context",
+        "type": "variable",
+        "line": 625
+      },
+      {
+        "name": "MemoryController.hasContext",
+        "type": "method",
+        "line": 648
+      },
+      {
+        "name": "MemoryController._getEmptyMemory",
+        "type": "method",
+        "line": 675
+      },
+      {
+        "name": "MemoryController._estimateSize",
+        "type": "method",
+        "line": 691
+      },
+      {
+        "name": "MemoryController._truncateString",
+        "type": "method",
+        "line": 706
+      },
+      {
+        "name": "encoder",
+        "type": "variable",
+        "line": 709
+      },
+      {
+        "name": "low",
+        "type": "variable",
+        "line": 715
+      },
+      {
+        "name": "high",
+        "type": "variable",
+        "line": 715
+      },
+      {
+        "name": "mid",
+        "type": "variable",
+        "line": 717
+      },
+      {
+        "name": "MemoryController._sanitizeComponentData",
+        "type": "method",
+        "line": 733
+      },
+      {
+        "name": "sanitized",
+        "type": "variable",
+        "line": 742
+      },
+      {
+        "name": "MemoryController._isCharArray",
+        "type": "method",
+        "line": 779
+      },
+      {
+        "name": "keys",
+        "type": "variable",
+        "line": 783
+      },
+      {
+        "name": "isNumericKeys",
+        "type": "variable",
+        "line": 787
+      },
+      {
+        "name": "MemoryController.getStorageUsage",
+        "type": "method",
+        "line": 799
+      },
+      {
+        "name": "total",
+        "type": "variable",
+        "line": 810
+      }
+    ],
+    "background/services/api-proxy.js": [
+      {
+        "name": "getUserFriendlyError",
+        "type": "function",
+        "line": 21
+      },
+      {
+        "name": "providerName",
+        "type": "variable",
+        "line": 22
+      },
+      {
+        "name": "rawStr",
+        "type": "variable",
+        "line": 30
+      },
+      {
+        "name": "REFINEMENT_SYSTEM_PROMPT",
+        "type": "constant",
+        "line": 66
+      },
+      {
+        "name": "MODEL_CONFIGS",
+        "type": "constant",
+        "line": 116
+      },
+      {
+        "name": "LLM_TRANSPORTS",
+        "type": "constant",
+        "line": 147
+      },
+      {
+        "name": "effective",
+        "type": "variable",
+        "line": 151
+      },
+      {
+        "name": "RETRY_CONFIG_BG",
+        "type": "constant",
+        "line": 218
+      },
+      {
+        "name": "calculateRetryDelay",
+        "type": "function",
+        "line": 230
+      },
+      {
+        "name": "exponentialDelay",
+        "type": "variable",
+        "line": 231
+      },
+      {
+        "name": "cappedDelay",
+        "type": "variable",
+        "line": 232
+      },
+      {
+        "name": "jitter",
+        "type": "variable",
+        "line": 234
+      },
+      {
+        "name": "executeLlmRequest",
+        "type": "function",
+        "line": 241
+      },
+      {
+        "name": "timer",
+        "type": "variable",
+        "line": 280
+      },
+      {
+        "name": "rawModel",
+        "type": "variable",
+        "line": 290
+      },
+      {
+        "name": "headers",
+        "type": "variable",
+        "line": 302
+      },
+      {
+        "name": "rawError",
+        "type": "variable",
+        "line": 315
+      },
+      {
+        "name": "errMsg",
+        "type": "variable",
+        "line": 318
+      },
+      {
+        "name": "callLLMForExtraction",
+        "type": "function",
+        "line": 374
+      },
+      {
+        "name": "safeConfig",
+        "type": "variable",
+        "line": 375
+      },
+      {
+        "name": "rawModel",
+        "type": "variable",
+        "line": 376
+      },
+      {
+        "name": "handleRefinement",
+        "type": "function",
+        "line": 390
+      },
+      {
+        "name": "abortController",
+        "type": "variable",
+        "line": 392
+      },
+      {
+        "name": "signal",
+        "type": "variable",
+        "line": 400
+      },
+      {
+        "name": "syncStorage",
+        "type": "variable",
+        "line": 403
+      },
+      {
+        "name": "localStorage",
+        "type": "variable",
+        "line": 409
+      },
+      {
+        "name": "paModels",
+        "type": "variable",
+        "line": 410
+      },
+      {
+        "name": "activeModelId",
+        "type": "variable",
+        "line": 411
+      },
+      {
+        "name": "effectiveModelId",
+        "type": "variable",
+        "line": 413
+      },
+      {
+        "name": "modelConfig",
+        "type": "variable",
+        "line": 414
+      },
+      {
+        "name": "rawModel",
+        "type": "variable",
+        "line": 423
+      },
+      {
+        "name": "effectivePersona",
+        "type": "variable",
+        "line": 438
+      },
+      {
+        "name": "memoryData",
+        "type": "variable",
+        "line": 440
+      },
+      {
+        "name": "personaComponent",
+        "type": "variable",
+        "line": 448
+      },
+      {
+        "name": "synthesizedPersona",
+        "type": "variable",
+        "line": 449
+      },
+      {
+        "name": "counter",
+        "type": "variable",
+        "line": 478
+      },
+      {
+        "name": "processedText",
+        "type": "variable",
+        "line": 498
+      },
+      {
+        "name": "variables",
+        "type": "variable",
+        "line": 501
+      },
+      {
+        "name": "escapedKey",
+        "type": "variable",
+        "line": 503
+      },
+      {
+        "name": "regex",
+        "type": "variable",
+        "line": 504
+      },
+      {
+        "name": "contextStr",
+        "type": "variable",
+        "line": 514
+      },
+      {
+        "name": "previousPromptsStr",
+        "type": "variable",
+        "line": 520
+      },
+      {
+        "name": "ratingLabel",
+        "type": "variable",
+        "line": 526
+      },
+      {
+        "name": "disabledFacts",
+        "type": "variable",
+        "line": 536
+      },
+      {
+        "name": "disabledKey",
+        "type": "variable",
+        "line": 538
+      },
+      {
+        "name": "disabledResult",
+        "type": "variable",
+        "line": 539
+      },
+      {
+        "name": "v4Context",
+        "type": "variable",
+        "line": 546
+      },
+      {
+        "name": "isPersonaDisabled",
+        "type": "variable",
+        "line": 549
+      },
+      {
+        "name": "personaToUse",
+        "type": "variable",
+        "line": 552
+      },
+      {
+        "name": "personaSection",
+        "type": "variable",
+        "line": 557
+      },
+      {
+        "name": "promptText",
+        "type": "variable",
+        "line": 573
+      },
+      {
+        "name": "llmResponse",
+        "type": "variable",
+        "line": 599
+      }
+    ],
+    "logging/logger.js": [
+      {
+        "name": "LOG_LEVELS",
+        "type": "constant",
+        "line": 32
+      },
+      {
+        "name": "LOG_COLORS",
+        "type": "constant",
+        "line": 43
+      },
+      {
+        "name": "LOGGER_CONFIG",
+        "type": "constant",
+        "line": 55
+      },
+      {
+        "name": "PII_PATTERNS",
+        "type": "constant",
+        "line": 68
+      },
+      {
+        "name": "RingBuffer.getAll",
+        "type": "method",
+        "line": 95
+      },
+      {
+        "name": "RingBuffer.get_length",
+        "type": "accessor",
+        "line": 111
+      },
+      {
+        "name": "LogEntry._detectContext",
+        "type": "method",
+        "line": 132
+      },
+      {
+        "name": "LogEntry.toJSON",
+        "type": "method",
+        "line": 146
+      },
+      {
+        "name": "LogEntry.format",
+        "type": "method",
+        "line": 160
+      },
+      {
+        "name": "Logger._instance",
+        "type": "property",
+        "line": 170
+      },
+      {
+        "name": "Logger._hasDirectStorage",
+        "type": "method",
+        "line": 210
+      },
+      {
+        "name": "Logger._makeBridgeRequest",
+        "type": "method",
+        "line": 217
+      },
+      {
+        "name": "requestId",
+        "type": "variable",
+        "line": 219
+      },
+      {
+        "name": "timerId",
+        "type": "variable",
+        "line": 220
+      },
+      {
+        "name": "handler",
+        "type": "function",
+        "line": 222
+      },
+      {
+        "name": "resId",
+        "type": "variable",
+        "line": 223
+      },
+      {
+        "name": "Logger._storageGet",
+        "type": "method",
+        "line": 254
+      },
+      {
+        "name": "storageArea",
+        "type": "variable",
+        "line": 256
+      },
+      {
+        "name": "Logger._storageSet",
+        "type": "method",
+        "line": 263
+      },
+      {
+        "name": "storageArea",
+        "type": "variable",
+        "line": 265
+      },
+      {
+        "name": "Logger.setLevel",
+        "type": "method",
+        "line": 277
+      },
+      {
+        "name": "Logger._restoreLevel",
+        "type": "method",
+        "line": 295
+      },
+      {
+        "name": "savedLevel",
+        "type": "variable",
+        "line": 297
+      },
+      {
+        "name": "Logger._log",
+        "type": "method",
+        "line": 318
+      },
+      {
+        "name": "tags",
+        "type": "variable",
+        "line": 322
+      },
+      {
+        "name": "correlationId",
+        "type": "variable",
+        "line": 322
+      },
+      {
+        "name": "restData",
+        "type": "variable",
+        "line": 322
+      },
+      {
+        "name": "sanitizedMessage",
+        "type": "variable",
+        "line": 325
+      },
+      {
+        "name": "sanitizedData",
+        "type": "variable",
+        "line": 326
+      },
+      {
+        "name": "Logger.timeEnd",
+        "type": "method",
+        "line": 392
+      },
+      {
+        "name": "Logger.startOperation",
+        "type": "method",
+        "line": 420
+      },
+      {
+        "name": "correlationId",
+        "type": "variable",
+        "line": 421
+      },
+      {
+        "name": "Logger.endOperation",
+        "type": "method",
+        "line": 442
+      },
+      {
+        "name": "op",
+        "type": "variable",
+        "line": 443
+      },
+      {
+        "name": "Logger._sanitize",
+        "type": "method",
+        "line": 467
+      },
+      {
+        "name": "sanitized",
+        "type": "variable",
+        "line": 470
+      },
+      {
+        "name": "Logger._sanitizeObject",
+        "type": "method",
+        "line": 480
+      },
+      {
+        "name": "sanitized",
+        "type": "variable",
+        "line": 489
+      },
+      {
+        "name": "Logger._consoleOutput",
+        "type": "method",
+        "line": 508
+      },
+      {
+        "name": "styles",
+        "type": "variable",
+        "line": 512
+      },
+      {
+        "name": "Logger._notifyListeners",
+        "type": "method",
+        "line": 526
+      },
+      {
+        "name": "Logger.getLogs",
+        "type": "method",
+        "line": 539
+      },
+      {
+        "name": "Logger.export",
+        "type": "method",
+        "line": 579
+      },
+      {
+        "name": "Logger.downloadExport",
+        "type": "method",
+        "line": 592
+      },
+      {
+        "name": "byLevel",
+        "type": "variable",
+        "line": 614
+      },
+      {
+        "name": "byComponent",
+        "type": "variable",
+        "line": 615
+      },
+      {
+        "name": "Logger._persist",
+        "type": "method",
+        "line": 642
+      },
+      {
+        "name": "Logger._restore",
+        "type": "method",
+        "line": 661
+      },
+      {
+        "name": "Logger._startAutoPersist",
+        "type": "method",
+        "line": 684
+      },
+      {
+        "name": "Logger.destroy",
+        "type": "method",
+        "line": 692
+      }
+    ],
+    "llm/llm-client.js": [
+      {
+        "name": "DEFAULT_MODELS",
+        "type": "constant",
+        "line": 39
+      },
+      {
+        "name": "API_ENDPOINTS",
+        "type": "constant",
+        "line": 49
+      },
+      {
+        "name": "LLM_ERROR_TYPES",
+        "type": "constant",
+        "line": 69
+      },
+      {
+        "name": "RETRYABLE_ERRORS",
+        "type": "constant",
+        "line": 82
+      },
+      {
+        "name": "LLMClient.isConfigured",
+        "type": "method",
+        "line": 135
+      },
+      {
+        "name": "LLMClient._sanitizeApiKey",
+        "type": "method",
+        "line": 145
+      },
+      {
+        "name": "sanitized",
+        "type": "variable",
+        "line": 148
+      },
+      {
+        "name": "LLMClient._proxyFetch",
+        "type": "method",
+        "line": 163
+      },
+      {
+        "name": "onGeminiPage",
+        "type": "variable",
+        "line": 166
+      },
+      {
+        "name": "isMainWorld",
+        "type": "variable",
+        "line": 170
+      },
+      {
+        "name": "requestId",
+        "type": "variable",
+        "line": 178
+      },
+      {
+        "name": "timeoutId",
+        "type": "variable",
+        "line": 179
+      },
+      {
+        "name": "onAbort",
+        "type": "variable",
+        "line": 180
+      },
+      {
+        "name": "cleanup",
+        "type": "function",
+        "line": 182
+      },
+      {
+        "name": "handler",
+        "type": "function",
+        "line": 212
+      },
+      {
+        "name": "fetchOptions",
+        "type": "variable",
+        "line": 241
+      },
+      {
+        "name": "contentType",
+        "type": "variable",
+        "line": 247
+      },
+      {
+        "name": "LLMClient.configure",
+        "type": "method",
+        "line": 271
+      },
+      {
+        "name": "mergedOptions",
+        "type": "variable",
+        "line": 302
+      },
+      {
+        "name": "LLMClient._callWithRetry",
+        "type": "method",
+        "line": 319
+      },
+      {
+        "name": "errorType",
+        "type": "variable",
+        "line": 339
+      },
+      {
+        "name": "LLMClient._executeCall",
+        "type": "method",
+        "line": 364
+      },
+      {
+        "name": "LLMClient._classifyError",
+        "type": "method",
+        "line": 384
+      },
+      {
+        "name": "status",
+        "type": "variable",
+        "line": 386
+      },
+      {
+        "name": "LLMClient._calculateBackoff",
+        "type": "method",
+        "line": 433
+      },
+      {
+        "name": "jitter",
+        "type": "variable",
+        "line": 439
+      },
+      {
+        "name": "LLMClient._delay",
+        "type": "method",
+        "line": 446
+      },
+      {
+        "name": "LLMClient._callGemini",
+        "type": "method",
+        "line": 456
+      },
+      {
+        "name": "startTime",
+        "type": "variable",
+        "line": 492
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 494
+      },
+      {
+        "name": "fetchDuration",
+        "type": "variable",
+        "line": 503
+      },
+      {
+        "name": "errorData",
+        "type": "variable",
+        "line": 510
+      },
+      {
+        "name": "LLMClient._callOpenAI",
+        "type": "method",
+        "line": 532
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 567
+      },
+      {
+        "name": "LLMClient._callAnthropic",
+        "type": "method",
+        "line": 594
+      },
+      {
+        "name": "enhancedPrompt",
+        "type": "variable",
+        "line": 598
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 618
+      },
+      {
+        "name": "LLMClient._callOpenRouter",
+        "type": "method",
+        "line": 646
+      },
+      {
+        "name": "enhancedPrompt",
+        "type": "variable",
+        "line": 650
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 669
+      },
+      {
+        "name": "LLMClient._fixTruncatedJSON",
+        "type": "method",
+        "line": 698
+      },
+      {
+        "name": "inString",
+        "type": "variable",
+        "line": 699
+      },
+      {
+        "name": "escape",
+        "type": "variable",
+        "line": 700
+      },
+      {
+        "name": "stack",
+        "type": "variable",
+        "line": 701
+      },
+      {
+        "name": "char",
+        "type": "variable",
+        "line": 704
+      },
+      {
+        "name": "open",
+        "type": "variable",
+        "line": 750
+      },
+      {
+        "name": "LLMClient._parseJSON",
+        "type": "method",
+        "line": 762
+      },
+      {
+        "name": "jsonMatch",
+        "type": "variable",
+        "line": 787
+      },
+      {
+        "name": "LLMClient.getAvailableModels",
+        "type": "method",
+        "line": 820
+      }
+    ],
+    "background/index.js": [
+      {
+        "name": "geminiApiKey",
+        "type": "variable",
+        "line": 53
+      },
+      {
+        "name": "openOptions",
+        "type": "variable",
+        "line": 64
+      },
+      {
+        "name": "openOptions",
+        "type": "variable",
+        "line": 100
+      },
+      {
+        "name": "hasEnabledModelWithKey",
+        "type": "variable",
+        "line": 122
+      },
+      {
+        "name": "jsonData",
+        "type": "variable",
+        "line": 147
+      },
+      {
+        "name": "filename",
+        "type": "variable",
+        "line": 147
+      },
+      {
+        "name": "filenameListener",
+        "type": "function",
+        "line": 152
+      },
+      {
+        "name": "base64Data",
+        "type": "variable",
+        "line": 158
+      },
+      {
+        "name": "dataUrl",
+        "type": "variable",
+        "line": 159
+      },
+      {
+        "name": "tabId",
+        "type": "variable",
+        "line": 204
+      },
+      {
+        "name": "disabledKey",
+        "type": "variable",
+        "line": 280
+      },
+      {
+        "name": "tabs",
+        "type": "variable",
+        "line": 298
+      },
+      {
+        "name": "sentCount",
+        "type": "variable",
+        "line": 300
+      },
+      {
+        "name": "skippedCount",
+        "type": "variable",
+        "line": 301
+      },
+      {
+        "name": "urlMatch",
+        "type": "variable",
+        "line": 307
+      },
+      {
+        "name": "sessionKey",
+        "type": "variable",
+        "line": 316
+      },
+      {
+        "name": "keepAliveInterval",
+        "type": "variable",
+        "line": 347
+      },
+      {
+        "name": "ALLOWED_PROXY_HOSTS",
+        "type": "constant",
+        "line": 349
+      },
+      {
+        "name": "targetUrl",
+        "type": "variable",
+        "line": 356
+      },
+      {
+        "name": "contentType",
+        "type": "variable",
+        "line": 376
+      },
+      {
+        "name": "activeModel",
+        "type": "variable",
+        "line": 415
+      },
+      {
+        "name": "enabledModel",
+        "type": "variable",
+        "line": 432
+      },
+      {
+        "name": "modelConfig",
+        "type": "variable",
+        "line": 462
+      },
+      {
+        "name": "abortController",
+        "type": "variable",
+        "line": 469
+      },
+      {
+        "name": "memoryLayer",
+        "type": "variable",
+        "line": 657
+      },
+      {
+        "name": "personaName",
+        "type": "variable",
+        "line": 657
+      },
+      {
+        "name": "memory",
+        "type": "variable",
+        "line": 671
+      },
+      {
+        "name": "dimensionNames",
+        "type": "variable",
+        "line": 677
+      },
+      {
+        "name": "memory",
+        "type": "variable",
+        "line": 819
+      },
+      {
+        "name": "ratingKey",
+        "type": "variable",
+        "line": 828
+      },
+      {
+        "name": "ratingResult",
+        "type": "variable",
+        "line": 829
+      },
+      {
+        "name": "exchangeCount",
+        "type": "variable",
+        "line": 836
+      },
+      {
+        "name": "MIN_EXCHANGES",
+        "type": "constant",
+        "line": 837
+      },
+      {
+        "name": "ratingKey",
+        "type": "variable",
+        "line": 877
+      },
+      {
+        "name": "personaName",
+        "type": "variable",
+        "line": 906
+      },
+      {
+        "name": "severeTerms",
+        "type": "variable",
+        "line": 911
+      },
+      {
+        "name": "warningTerms",
+        "type": "variable",
+        "line": 917
+      },
+      {
+        "name": "contentLower",
+        "type": "variable",
+        "line": 923
+      },
+      {
+        "name": "severeFound",
+        "type": "variable",
+        "line": 926
+      },
+      {
+        "name": "warningFound",
+        "type": "variable",
+        "line": 941
+      },
+      {
+        "name": "reason",
+        "type": "variable",
+        "line": 975
+      },
+      {
+        "name": "details",
+        "type": "variable",
+        "line": 975
+      },
+      {
+        "name": "reportKey",
+        "type": "variable",
+        "line": 980
+      },
+      {
+        "name": "reports",
+        "type": "variable",
+        "line": 993
+      }
+    ],
+    "memory/index.js": [
+      {
+        "name": "memLog",
+        "type": "function",
+        "line": 39
+      },
+      {
+        "name": "sessionMutexes",
+        "type": "variable",
+        "line": 72
+      },
+      {
+        "name": "analyzeSession",
+        "type": "function",
+        "line": 82
+      },
+      {
+        "name": "runPromise",
+        "type": "variable",
+        "line": 96
+      },
+      {
+        "name": "memory",
+        "type": "variable",
+        "line": 101
+      },
+      {
+        "name": "scraper",
+        "type": "variable",
+        "line": 131
+      },
+      {
+        "name": "scrapedData",
+        "type": "variable",
+        "line": 143
+      },
+      {
+        "name": "isSelectiveRebuild",
+        "type": "variable",
+        "line": 148
+      },
+      {
+        "name": "shouldIncrementGen",
+        "type": "variable",
+        "line": 149
+      },
+      {
+        "name": "newGen",
+        "type": "variable",
+        "line": 152
+      },
+      {
+        "name": "results",
+        "type": "variable",
+        "line": 164
+      },
+      {
+        "name": "enabledComponents",
+        "type": "variable",
+        "line": 177
+      },
+      {
+        "name": "pinnedComponents",
+        "type": "variable",
+        "line": 181
+      },
+      {
+        "name": "allDimensions",
+        "type": "variable",
+        "line": 182
+      },
+      {
+        "name": "startTime",
+        "type": "variable",
+        "line": 214
+      },
+      {
+        "name": "unifiedResults",
+        "type": "variable",
+        "line": 215
+      },
+      {
+        "name": "dimensionIds",
+        "type": "variable",
+        "line": 226
+      },
+      {
+        "name": "context",
+        "type": "variable",
+        "line": 287
+      },
+      {
+        "name": "isLLMConfigured",
+        "type": "function",
+        "line": 308
+      },
+      {
+        "name": "getCurrentSessionId",
+        "type": "function",
+        "line": 317
+      },
+      {
+        "name": "requestId",
+        "type": "variable",
+        "line": 346
+      },
+      {
+        "name": "sendBridgeResponse",
+        "type": "function",
+        "line": 349
+      },
+      {
+        "name": "SmartAutoRun",
+        "type": "variable",
+        "line": 398
+      },
+      {
+        "name": "isConfigured",
+        "type": "variable",
+        "line": 417
+      },
+      {
+        "name": "scraper",
+        "type": "variable",
+        "line": 427
+      },
+      {
+        "name": "completeTurns",
+        "type": "variable",
+        "line": 434
+      },
+      {
+        "name": "memory",
+        "type": "variable",
+        "line": 449
+      },
+      {
+        "name": "hasExistingMemory",
+        "type": "variable",
+        "line": 451
+      },
+      {
+        "name": "chatContainer",
+        "type": "variable",
+        "line": 467
+      },
+      {
+        "name": "isModelResponse",
+        "type": "variable",
+        "line": 495
+      },
+      {
+        "name": "canRun",
+        "type": "variable",
+        "line": 514
+      },
+      {
+        "name": "completeTurns",
+        "type": "variable",
+        "line": 514
+      },
+      {
+        "name": "reason",
+        "type": "variable",
+        "line": 514
+      },
+      {
+        "name": "enabledAnalyzers",
+        "type": "variable",
+        "line": 536
+      },
+      {
+        "name": "disabledKey",
+        "type": "variable",
+        "line": 540
+      },
+      {
+        "name": "disabledFacts",
+        "type": "variable",
+        "line": 541
+      },
+      {
+        "name": "canRun",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "reason",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "hasMemory",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "completeTurns",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "currentUrl",
+        "type": "variable",
+        "line": 592
+      },
+      {
+        "name": "newSessionId",
+        "type": "variable",
+        "line": 593
+      },
+      {
+        "name": "originalPushState",
+        "type": "variable",
+        "line": 630
+      },
+      {
+        "name": "originalReplaceState",
+        "type": "variable",
+        "line": 637
+      }
+    ],
+    "model/model-manager.js": [
+      {
+        "name": "modelLog",
+        "type": "function",
+        "line": 41
+      },
+      {
+        "name": "LEGACY_STORAGE_KEYS",
+        "type": "constant",
+        "line": 60
+      },
+      {
+        "name": "ModelManager._doInit",
+        "type": "method",
+        "line": 106
+      },
+      {
+        "name": "ModelManager._ensureInitialized",
+        "type": "method",
+        "line": 154
+      },
+      {
+        "name": "cached",
+        "type": "variable",
+        "line": 185
+      },
+      {
+        "name": "freshData",
+        "type": "variable",
+        "line": 192
+      },
+      {
+        "name": "ModelManager.hasApiKey",
+        "type": "method",
+        "line": 212
+      },
+      {
+        "name": "ModelManager.addModel",
+        "type": "method",
+        "line": 274
+      },
+      {
+        "name": "ModelManager.deleteModel",
+        "type": "method",
+        "line": 310
+      },
+      {
+        "name": "ModelManager.enableModel",
+        "type": "method",
+        "line": 343
+      },
+      {
+        "name": "ModelManager.disableModel",
+        "type": "method",
+        "line": 384
+      },
+      {
+        "name": "ModelManager.getEnabledModels",
+        "type": "method",
+        "line": 403
+      },
+      {
+        "name": "ModelManager.getActiveModelId",
+        "type": "method",
+        "line": 416
+      },
+      {
+        "name": "ModelManager.ensureActiveModel",
+        "type": "method",
+        "line": 488
+      },
+      {
+        "name": "client",
+        "type": "variable",
+        "line": 530
+      },
+      {
+        "name": "ModelManager._validateApiKeyFormat",
+        "type": "method",
+        "line": 560
+      },
+      {
+        "name": "ModelManager.maskApiKey",
+        "type": "method",
+        "line": 598
+      },
+      {
+        "name": "suffix",
+        "type": "variable",
+        "line": 603
+      },
+      {
+        "name": "masked",
+        "type": "variable",
+        "line": 604
+      },
+      {
+        "name": "ModelManager.isMaskedKey",
+        "type": "method",
+        "line": 614
+      },
+      {
+        "name": "ModelManager._migrateFromLegacy",
+        "type": "method",
+        "line": 626
+      },
+      {
+        "name": "legacy",
+        "type": "variable",
+        "line": 628
+      },
+      {
+        "name": "migrated",
+        "type": "variable",
+        "line": 637
+      },
+      {
+        "name": "llmConfig",
+        "type": "variable",
+        "line": 658
+      },
+      {
+        "name": "firstEnabled",
+        "type": "variable",
+        "line": 678
+      },
+      {
+        "name": "ModelManager._isMainWorld",
+        "type": "method",
+        "line": 708
+      },
+      {
+        "name": "ModelManager._bridgeRequestId",
+        "type": "property",
+        "line": 717
+      },
+      {
+        "name": "ModelManager._bridgeRequests",
+        "type": "property",
+        "line": 718
+      },
+      {
+        "name": "ModelManager._bridgeInitialized",
+        "type": "property",
+        "line": 719
+      },
+      {
+        "name": "ModelManager._initBridgeListener",
+        "type": "method",
+        "line": 724
+      },
+      {
+        "name": "requestId",
+        "type": "variable",
+        "line": 729
+      },
+      {
+        "name": "pending",
+        "type": "variable",
+        "line": 730
+      },
+      {
+        "name": "changes",
+        "type": "variable",
+        "line": 743
+      },
+      {
+        "name": "ModelManager._makeBridgeRequest",
+        "type": "method",
+        "line": 766
+      },
+      {
+        "name": "requestId",
+        "type": "variable",
+        "line": 770
+      },
+      {
+        "name": "timeout",
+        "type": "variable",
+        "line": 772
+      },
+      {
+        "name": "ModelManager._getFromStorage",
+        "type": "method",
+        "line": 798
+      },
+      {
+        "name": "ModelManager._saveToStorage",
+        "type": "method",
+        "line": 839
+      },
+      {
+        "name": "ModelManager._removeFromStorage",
+        "type": "method",
+        "line": 875
+      },
+      {
+        "name": "keyArray",
+        "type": "variable",
+        "line": 879
+      },
+      {
+        "name": "_modelManagerInstance",
+        "type": "variable",
+        "line": 911
+      },
+      {
+        "name": "getModelManager",
+        "type": "function",
+        "line": 917
+      }
+    ],
+    "memory/analyzers/unified-analyzer.js": [
+      {
+        "name": "resp",
+        "type": "variable",
+        "line": 32
+      },
+      {
+        "name": "ratedCount",
+        "type": "variable",
+        "line": 48
+      },
+      {
+        "name": "avgRating",
+        "type": "variable",
+        "line": 51
+      },
+      {
+        "name": "conversationText",
+        "type": "variable",
+        "line": 88
+      },
+      {
+        "name": "ratingContext",
+        "type": "variable",
+        "line": 89
+      },
+      {
+        "name": "recentMessages",
+        "type": "variable",
+        "line": 90
+      },
+      {
+        "name": "recentText",
+        "type": "variable",
+        "line": 91
+      },
+      {
+        "name": "allDimensions",
+        "type": "variable",
+        "line": 94
+      },
+      {
+        "name": "dimensions",
+        "type": "variable",
+        "line": 103
+      },
+      {
+        "name": "dimensionList",
+        "type": "variable",
+        "line": 107
+      },
+      {
+        "name": "basePrompt",
+        "type": "variable",
+        "line": 109
+      },
+      {
+        "name": "enabledComponents",
+        "type": "variable",
+        "line": 211
+      },
+      {
+        "name": "dimensionCount",
+        "type": "variable",
+        "line": 212
+      },
+      {
+        "name": "startTime",
+        "type": "variable",
+        "line": 215
+      },
+      {
+        "name": "schema",
+        "type": "variable",
+        "line": 224
+      },
+      {
+        "name": "rawResult",
+        "type": "variable",
+        "line": 227
+      },
+      {
+        "name": "obj",
+        "type": "variable",
+        "line": 255
+      },
+      {
+        "name": "unwrappers",
+        "type": "variable",
+        "line": 270
+      },
+      {
+        "name": "normalizedResult",
+        "type": "variable",
+        "line": 279
+      },
+      {
+        "name": "keyAliases",
+        "type": "variable",
+        "line": 288
+      },
+      {
+        "name": "lowerAlias",
+        "type": "variable",
+        "line": 301
+      },
+      {
+        "name": "primaryText",
+        "type": "variable",
+        "line": 314
+      },
+      {
+        "name": "sectionRegex",
+        "type": "variable",
+        "line": 320
+      },
+      {
+        "name": "match",
+        "type": "variable",
+        "line": 321
+      },
+      {
+        "name": "rawHeading",
+        "type": "variable",
+        "line": 323
+      },
+      {
+        "name": "sectionContent",
+        "type": "variable",
+        "line": 324
+      },
+      {
+        "name": "expectedKeys",
+        "type": "variable",
+        "line": 340
+      },
+      {
+        "name": "hasAnyValidDimension",
+        "type": "variable",
+        "line": 351
+      },
+      {
+        "name": "textLines",
+        "type": "variable",
+        "line": 365
+      },
+      {
+        "name": "migrated",
+        "type": "variable",
+        "line": 381
+      },
+      {
+        "name": "defaultEmpty",
+        "type": "variable",
+        "line": 389
+      },
+      {
+        "name": "empty",
+        "type": "variable",
+        "line": 410
+      }
+    ],
+    "supabase/supabase-client.js": [
+      {
+        "name": "SUPABASE_URL",
+        "type": "constant",
+        "line": 23
+      },
+      {
+        "name": "SUPABASE_ANON_KEY",
+        "type": "constant",
+        "line": 24
+      },
+      {
+        "name": "sbLog",
+        "type": "function",
+        "line": 36
+      },
+      {
+        "name": "hasData",
+        "type": "variable",
+        "line": 39
+      },
+      {
+        "name": "SupabaseClient.#initPromise",
+        "type": "property",
+        "line": 60
+      },
+      {
+        "name": "SupabaseClient.loadSupabaseLib",
+        "type": "method",
+        "line": 127
+      },
+      {
+        "name": "SupabaseClient.signUp",
+        "type": "method",
+        "line": 156
+      },
+      {
+        "name": "SupabaseClient.signIn",
+        "type": "method",
+        "line": 179
+      },
+      {
+        "name": "SupabaseClient.signInAnonymously",
+        "type": "method",
+        "line": 200
+      },
+      {
+        "name": "SupabaseClient.signOut",
+        "type": "method",
+        "line": 218
+      },
+      {
+        "name": "SupabaseClient.getUser",
+        "type": "method",
+        "line": 228
+      },
+      {
+        "name": "SupabaseClient.isAuthenticated",
+        "type": "method",
+        "line": 236
+      },
+      {
+        "name": "SupabaseClient.createPersona",
+        "type": "method",
+        "line": 261
+      },
+      {
+        "name": "SupabaseClient.updatePersona",
+        "type": "method",
+        "line": 301
+      },
+      {
+        "name": "fetchError",
+        "type": "variable",
+        "line": 309
+      },
+      {
+        "name": "newVersion",
+        "type": "variable",
+        "line": 321
+      },
+      {
+        "name": "snapshot",
+        "type": "variable",
+        "line": 324
+      },
+      {
+        "name": "existingHistory",
+        "type": "variable",
+        "line": 338
+      },
+      {
+        "name": "versionHistory",
+        "type": "variable",
+        "line": 339
+      },
+      {
+        "name": "SupabaseClient.getMyPersonas",
+        "type": "method",
+        "line": 395
+      },
+      {
+        "name": "SupabaseClient.searchPersonas",
+        "type": "method",
+        "line": 427
+      },
+      {
+        "name": "queryBuilder",
+        "type": "variable",
+        "line": 430
+      },
+      {
+        "name": "limit",
+        "type": "variable",
+        "line": 452
+      },
+      {
+        "name": "offset",
+        "type": "variable",
+        "line": 453
+      },
+      {
+        "name": "SupabaseClient.incrementImportCount",
+        "type": "method",
+        "line": 496
+      },
+      {
+        "name": "SupabaseClient.hasRatedPersona",
+        "type": "method",
+        "line": 550
+      },
+      {
+        "name": "SupabaseClient.createSavedPrompt",
+        "type": "method",
+        "line": 577
+      },
+      {
+        "name": "SupabaseClient.getMySavedPrompts",
+        "type": "method",
+        "line": 607
+      },
+      {
+        "name": "SupabaseClient.deleteSavedPrompt",
+        "type": "method",
+        "line": 634
+      }
+    ],
+    "rating/rating-manager.js": [
+      {
+        "name": "ratingLog",
+        "type": "function",
+        "line": 52
+      },
+      {
+        "name": "logFn",
+        "type": "variable",
+        "line": 56
+      },
+      {
+        "name": "RatingManager.hasDirectStorageAccess",
+        "type": "method",
+        "line": 148
+      },
+      {
+        "name": "RatingManager.extractSessionId",
+        "type": "method",
+        "line": 169
+      },
+      {
+        "name": "urlObj",
+        "type": "variable",
+        "line": 171
+      },
+      {
+        "name": "pathParts",
+        "type": "variable",
+        "line": 173
+      },
+      {
+        "name": "ratingCount",
+        "type": "variable",
+        "line": 215
+      },
+      {
+        "name": "RatingManager.backupToStorage",
+        "type": "method",
+        "line": 266
+      },
+      {
+        "name": "backupKey",
+        "type": "variable",
+        "line": 273
+      },
+      {
+        "name": "RatingManager.restoreFromStorage",
+        "type": "method",
+        "line": 305
+      },
+      {
+        "name": "backupKey",
+        "type": "variable",
+        "line": 312
+      },
+      {
+        "name": "backup",
+        "type": "variable",
+        "line": 314
+      },
+      {
+        "name": "ratingCount",
+        "type": "variable",
+        "line": 320
+      },
+      {
+        "name": "backupAge",
+        "type": "variable",
+        "line": 321
+      },
+      {
+        "name": "ageMinutes",
+        "type": "variable",
+        "line": 322
+      },
+      {
+        "name": "RatingManager.backupAllRatings",
+        "type": "method",
+        "line": 348
+      },
+      {
+        "name": "allBackups",
+        "type": "variable",
+        "line": 355
+      },
+      {
+        "name": "RatingManager.removeRating",
+        "type": "method",
+        "line": 464
+      },
+      {
+        "name": "RatingManager.getRatingsArray",
+        "type": "method",
+        "line": 517
+      },
+      {
+        "name": "ratings",
+        "type": "variable",
+        "line": 521
+      },
+      {
+        "name": "match",
+        "type": "variable",
+        "line": 526
+      },
+      {
+        "name": "RatingManager.hasRating",
+        "type": "method",
+        "line": 555
+      },
+      {
+        "name": "RatingManager.getRatedCount",
+        "type": "method",
+        "line": 567
+      },
+      {
+        "name": "RatingManager.clearAll",
+        "type": "method",
+        "line": 584
+      },
+      {
+        "name": "_currentRatingManager",
+        "type": "variable",
+        "line": 606
+      },
+      {
+        "name": "getCurrentRatingManager",
+        "type": "function",
+        "line": 625
+      }
+    ],
+    "build.js": [
+      {
+        "name": "esbuild",
+        "type": "variable",
+        "line": 1
+      },
+      {
+        "name": "fs",
+        "type": "variable",
+        "line": 2
+      },
+      {
+        "name": "path",
+        "type": "variable",
+        "line": 3
+      },
+      {
+        "name": "isWatch",
+        "type": "variable",
+        "line": 5
+      },
+      {
+        "name": "isDev",
+        "type": "variable",
+        "line": 6
+      },
+      {
+        "name": "outdir",
+        "type": "variable",
+        "line": 7
+      },
+      {
+        "name": "staticFiles",
+        "type": "variable",
+        "line": 10
+      },
+      {
+        "name": "cssFiles",
+        "type": "variable",
+        "line": 22
+      },
+      {
+        "name": "unbundledJsFiles",
+        "type": "variable",
+        "line": 30
+      },
+      {
+        "name": "ensureDir",
+        "type": "function",
+        "line": 64
+      },
+      {
+        "name": "dir",
+        "type": "variable",
+        "line": 65
+      },
+      {
+        "name": "cleanOutdir",
+        "type": "function",
+        "line": 71
+      },
+      {
+        "name": "copyStaticFiles",
+        "type": "function",
+        "line": 90
+      },
+      {
+        "name": "src",
+        "type": "variable",
+        "line": 93
+      },
+      {
+        "name": "dest",
+        "type": "variable",
+        "line": 94
+      },
+      {
+        "name": "buildJS",
+        "type": "function",
+        "line": 105
+      },
+      {
+        "name": "standaloneEntries",
+        "type": "variable",
+        "line": 122
+      },
+      {
+        "name": "buildCSS",
+        "type": "function",
+        "line": 141
+      },
+      {
+        "name": "src",
+        "type": "variable",
+        "line": 144
+      },
+      {
+        "name": "dest",
+        "type": "variable",
+        "line": 145
+      },
+      {
+        "name": "build",
+        "type": "function",
+        "line": 159
+      },
+      {
+        "name": "startTime",
+        "type": "variable",
+        "line": 162
+      },
+      {
+        "name": "bgCtx",
+        "type": "variable",
+        "line": 171
+      },
+      {
+        "name": "standaloneCtx",
+        "type": "variable",
+        "line": 183
+      },
+      {
+        "name": "elapsed",
+        "type": "variable",
+        "line": 203
+      }
+    ],
+    "rating/rating-injector.js": [
+      {
+        "name": "RATING_SELECTORS",
+        "type": "constant",
+        "line": 52
+      },
+      {
+        "name": "RatingInjector",
+        "type": "variable",
+        "line": 118
+      },
+      {
+        "name": "responses",
+        "type": "variable",
+        "line": 202
+      },
+      {
+        "name": "actions",
+        "type": "variable",
+        "line": 223
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 243
+      },
+      {
+        "name": "responses",
+        "type": "variable",
+        "line": 271
+      },
+      {
+        "name": "currentRating",
+        "type": "variable",
+        "line": 304
+      },
+      {
+        "name": "ratingUI",
+        "type": "variable",
+        "line": 307
+      },
+      {
+        "name": "inserted",
+        "type": "variable",
+        "line": 312
+      },
+      {
+        "name": "actionsDiv",
+        "type": "variable",
+        "line": 316
+      },
+      {
+        "name": "textSelectors",
+        "type": "variable",
+        "line": 330
+      },
+      {
+        "name": "textEl",
+        "type": "variable",
+        "line": 341
+      },
+      {
+        "name": "turn",
+        "type": "variable",
+        "line": 388
+      },
+      {
+        "name": "allResponses",
+        "type": "variable",
+        "line": 392
+      },
+      {
+        "name": "allTurns",
+        "type": "variable",
+        "line": 403
+      },
+      {
+        "name": "chatHistory",
+        "type": "variable",
+        "line": 426
+      },
+      {
+        "name": "isModelResponse",
+        "type": "variable",
+        "line": 475
+      },
+      {
+        "name": "turnIndex",
+        "type": "variable",
+        "line": 484
+      },
+      {
+        "name": "childResponses",
+        "type": "variable",
+        "line": 496
+      },
+      {
+        "name": "turnIndex",
+        "type": "variable",
+        "line": 499
+      },
+      {
+        "name": "ratingContainers",
+        "type": "variable",
+        "line": 530
+      },
+      {
+        "name": "turnIndex",
+        "type": "variable",
+        "line": 533
+      },
+      {
+        "name": "INIT_DELAY_MS",
+        "type": "constant",
+        "line": 568
+      }
+    ],
+    "memory/component-schemas.js": [
+      {
+        "name": "ids",
+        "type": "variable",
+        "line": 338
+      },
+      {
+        "name": "properties",
+        "type": "variable",
+        "line": 342
+      },
+      {
+        "name": "required",
+        "type": "variable",
+        "line": 343
+      },
+      {
+        "name": "schema",
+        "type": "variable",
+        "line": 371
+      },
+      {
+        "name": "errors",
+        "type": "variable",
+        "line": 376
+      },
+      {
+        "name": "base",
+        "type": "variable",
+        "line": 403
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 448
+      },
+      {
+        "name": "personaParts",
+        "type": "variable",
+        "line": 457
+      },
+      {
+        "name": "contextParts",
+        "type": "variable",
+        "line": 468
+      },
+      {
+        "name": "terms",
+        "type": "variable",
+        "line": 474
+      },
+      {
+        "name": "toneParts",
+        "type": "variable",
+        "line": 485
+      },
+      {
+        "name": "fwParts",
+        "type": "variable",
+        "line": 500
+      },
+      {
+        "name": "steps",
+        "type": "variable",
+        "line": 503
+      },
+      {
+        "name": "cParts",
+        "type": "variable",
+        "line": 516
+      },
+      {
+        "name": "rules",
+        "type": "variable",
+        "line": 518
+      },
+      {
+        "name": "reqs",
+        "type": "variable",
+        "line": 524
+      },
+      {
+        "name": "limits",
+        "type": "variable",
+        "line": 530
+      },
+      {
+        "name": "fmtParts",
+        "type": "variable",
+        "line": 544
+      },
+      {
+        "name": "prefs",
+        "type": "variable",
+        "line": 547
+      },
+      {
+        "name": "exParts",
+        "type": "variable",
+        "line": 564
+      },
+      {
+        "name": "ids",
+        "type": "variable",
+        "line": 616
+      },
+      {
+        "name": "hints",
+        "type": "variable",
+        "line": 617
+      }
+    ],
+    "extractor/extractor.js": [
+      {
+        "name": "extLog",
+        "type": "function",
+        "line": 34
+      },
+      {
+        "name": "hasData",
+        "type": "variable",
+        "line": 37
+      },
+      {
+        "name": "EXTRACTION_PROMPT",
+        "type": "constant",
+        "line": 81
+      },
+      {
+        "name": "PersonaExtractor.loadDrafts",
+        "type": "method",
+        "line": 234
+      },
+      {
+        "name": "PersonaExtractor.saveDrafts",
+        "type": "method",
+        "line": 247
+      },
+      {
+        "name": "modelConfig",
+        "type": "variable",
+        "line": 267
+      },
+      {
+        "name": "PersonaExtractor.getModelConfig",
+        "type": "method",
+        "line": 313
+      },
+      {
+        "name": "PersonaExtractor.callLLM",
+        "type": "method",
+        "line": 331
+      },
+      {
+        "name": "match",
+        "type": "variable",
+        "line": 371
+      },
+      {
+        "name": "PersonaExtractor.generateDraftId",
+        "type": "method",
+        "line": 397
+      },
+      {
+        "name": "PersonaExtractor.saveCurrentDraft",
+        "type": "method",
+        "line": 410
+      },
+      {
+        "name": "PersonaExtractor.updateDraft",
+        "type": "method",
+        "line": 433
+      },
+      {
+        "name": "index",
+        "type": "variable",
+        "line": 434
+      },
+      {
+        "name": "PersonaExtractor.getCurrentDraft",
+        "type": "method",
+        "line": 471
+      },
+      {
+        "name": "PersonaExtractor.publishDraft",
+        "type": "method",
+        "line": 485
+      },
+      {
+        "name": "draft",
+        "type": "variable",
+        "line": 486
+      },
+      {
+        "name": "supabase",
+        "type": "variable",
+        "line": 494
+      },
+      {
+        "name": "PersonaExtractor.importToMemoryLayer",
+        "type": "method",
+        "line": 543
+      }
+    ],
+    "llm/llm-config.js": [
+      {
+        "name": "LLMConfigManager",
+        "type": "class",
+        "line": 6
+      },
+      {
+        "name": "LLMConfigManager._getModelManager",
+        "type": "method",
+        "line": 11
+      },
+      {
+        "name": "manager",
+        "type": "variable",
+        "line": 23
+      },
+      {
+        "name": "activeModel",
+        "type": "variable",
+        "line": 29
+      },
+      {
+        "name": "LLMConfigManager.getApiKey",
+        "type": "method",
+        "line": 43
+      },
+      {
+        "name": "manager",
+        "type": "variable",
+        "line": 44
+      },
+      {
+        "name": "LLMConfigManager.getClient",
+        "type": "method",
+        "line": 53
+      },
+      {
+        "name": "manager",
+        "type": "variable",
+        "line": 54
+      },
+      {
+        "name": "activeModel",
+        "type": "variable",
+        "line": 64
+      },
+      {
+        "name": "LLMConfigManager.isConfigured",
+        "type": "method",
+        "line": 83
+      },
+      {
+        "name": "manager",
+        "type": "variable",
+        "line": 84
+      },
+      {
+        "name": "activeModel",
+        "type": "variable",
+        "line": 88
+      },
+      {
+        "name": "LLMConfigManager.getActiveModelConfig",
+        "type": "method",
+        "line": 92
+      },
+      {
+        "name": "manager",
+        "type": "variable",
+        "line": 93
+      },
+      {
+        "name": "llmConfigManager",
+        "type": "variable",
+        "line": 102
+      }
+    ],
+    "theme/theme-controller.js": [
+      {
+        "name": "ThemeController.#subscribers",
+        "type": "property",
+        "line": 42
+      },
+      {
+        "name": "ThemeController.#resolvedTheme",
+        "type": "property",
+        "line": 45
+      },
+      {
+        "name": "ThemeController.#systemMediaQuery",
+        "type": "property",
+        "line": 48
+      },
+      {
+        "name": "ThemeController.#mediaQueryListener",
+        "type": "property",
+        "line": 95
+      },
+      {
+        "name": "ThemeController.cycleMode",
+        "type": "method",
+        "line": 166
+      },
+      {
+        "name": "modes",
+        "type": "variable",
+        "line": 168
+      },
+      {
+        "name": "currentIndex",
+        "type": "variable",
+        "line": 169
+      },
+      {
+        "name": "nextIndex",
+        "type": "variable",
+        "line": 170
+      },
+      {
+        "name": "ThemeController.getIcon",
+        "type": "method",
+        "line": 188
+      },
+      {
+        "name": "index",
+        "type": "variable",
+        "line": 201
+      },
+      {
+        "name": "ThemeController.#applyMode",
+        "type": "method",
+        "line": 215
+      },
+      {
+        "name": "ThemeController.#getSystemPreference",
+        "type": "method",
+        "line": 240
+      },
+      {
+        "name": "ThemeController.#notifySubscribers",
+        "type": "method",
+        "line": 251
+      },
+      {
+        "name": "ThemeController.#updateToggleIcons",
+        "type": "method",
+        "line": 266
+      },
+      {
+        "name": "icon",
+        "type": "variable",
+        "line": 267
+      }
+    ],
+    "background/services/sidepanel-manager.js": [
+      {
+        "name": "openSidepanelPorts",
+        "type": "variable",
+        "line": 8
+      },
+      {
+        "name": "sidepanelWindowPorts",
+        "type": "variable",
+        "line": 9
+      },
+      {
+        "name": "handleSidepanelConnect",
+        "type": "function",
+        "line": 11
+      },
+      {
+        "name": "resolvedWindowId",
+        "type": "variable",
+        "line": 14
+      },
+      {
+        "name": "registerWindow",
+        "type": "function",
+        "line": 16
+      },
+      {
+        "name": "isSidepanelOpen",
+        "type": "function",
+        "line": 46
+      },
+      {
+        "name": "toggleSidepanel",
+        "type": "function",
+        "line": 53
+      },
+      {
+        "name": "tabId",
+        "type": "variable",
+        "line": 54
+      },
+      {
+        "name": "windowId",
+        "type": "variable",
+        "line": 55
+      },
+      {
+        "name": "port",
+        "type": "variable",
+        "line": 66
+      },
+      {
+        "name": "openOptions",
+        "type": "variable",
+        "line": 80
+      },
+      {
+        "name": "toggleSplitView",
+        "type": "function",
+        "line": 95
+      },
+      {
+        "name": "tabId",
+        "type": "variable",
+        "line": 97
+      },
+      {
+        "name": "isFromIframe",
+        "type": "variable",
+        "line": 109
+      }
+    ],
+    "rating/rating-ui.js": [
+      {
+        "name": "createRatingUI",
+        "type": "function",
+        "line": 72
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 74
+      },
+      {
+        "name": "starsContainer",
+        "type": "variable",
+        "line": 87
+      },
+      {
+        "name": "star",
+        "type": "variable",
+        "line": 92
+      },
+      {
+        "name": "currentVal",
+        "type": "variable",
+        "line": 142
+      },
+      {
+        "name": "highlightStars",
+        "type": "function",
+        "line": 168
+      },
+      {
+        "name": "stars",
+        "type": "variable",
+        "line": 169
+      },
+      {
+        "name": "setStarsRating",
+        "type": "function",
+        "line": 199
+      },
+      {
+        "name": "stars",
+        "type": "variable",
+        "line": 200
+      },
+      {
+        "name": "parent",
+        "type": "variable",
+        "line": 219
+      },
+      {
+        "name": "updateRatingUI",
+        "type": "function",
+        "line": 243
+      },
+      {
+        "name": "starsContainer",
+        "type": "variable",
+        "line": 244
+      }
+    ],
+    "background/services/crypto.js": [
+      {
+        "name": "cachedKey",
+        "type": "variable",
+        "line": 1
+      },
+      {
+        "name": "getEncryptionKey",
+        "type": "function",
+        "line": 3
+      },
+      {
+        "name": "extensionId",
+        "type": "variable",
+        "line": 6
+      },
+      {
+        "name": "encryptApiKey",
+        "type": "function",
+        "line": 32
+      },
+      {
+        "name": "base64",
+        "type": "variable",
+        "line": 46
+      },
+      {
+        "name": "decryptApiKey",
+        "type": "function",
+        "line": 54
+      },
+      {
+        "name": "rawBase64",
+        "type": "variable",
+        "line": 61
+      },
+      {
+        "name": "isEncrypted",
+        "type": "function",
+        "line": 81
+      }
+    ],
+    "background/services/session-state.js": [
+      {
+        "name": "activeRefinements",
+        "type": "variable",
+        "line": 6
+      },
+      {
+        "name": "activeExtractions",
+        "type": "variable",
+        "line": 7
+      },
+      {
+        "name": "RECENT_FOCUS_REFRESH_INTERVAL",
+        "type": "constant",
+        "line": 8
+      },
+      {
+        "name": "getRefinementCounter",
+        "type": "function",
+        "line": 10
+      },
+      {
+        "name": "incrementRefinementCounter",
+        "type": "function",
+        "line": 18
+      },
+      {
+        "name": "resetRefinementCounter",
+        "type": "function",
+        "line": 28
+      }
+    ],
+    "memory/analyzer-registry.js": [
+      {
+        "name": "arLog",
+        "type": "function",
+        "line": 57
+      },
+      {
+        "name": "logFn",
+        "type": "variable",
+        "line": 61
+      },
+      {
+        "name": "AnalyzerRegistry",
+        "type": "variable",
+        "line": 102
+      },
+      {
+        "name": "existed",
+        "type": "variable",
+        "line": 170
+      },
+      {
+        "name": "deleted",
+        "type": "variable",
+        "line": 171
+      }
+    ],
+    "memory/analyzers/recent-focus.js": [
+      {
+        "name": "RecentFocus",
+        "type": "variable",
+        "line": 15
+      },
+      {
+        "name": "conversationText",
+        "type": "variable",
+        "line": 24
+      },
+      {
+        "name": "recentRatings",
+        "type": "variable",
+        "line": 36
+      },
+      {
+        "name": "ratingContext",
+        "type": "variable",
+        "line": 37
+      },
+      {
+        "name": "recentMessages",
+        "type": "variable",
+        "line": 90
+      }
+    ],
+    "options/index.js": [
+      {
+        "name": "themeToggleBtn",
+        "type": "variable",
+        "line": 53
+      },
+      {
+        "name": "themeToggleIcon",
+        "type": "variable",
+        "line": 54
+      },
+      {
+        "name": "updateThemeIcon",
+        "type": "function",
+        "line": 57
+      },
+      {
+        "name": "modelManagerUI",
+        "type": "variable",
+        "line": 83
+      },
+      {
+        "name": "container",
+        "type": "variable",
+        "line": 101
+      }
+    ],
+    "background/services/logger.js": [
+      {
+        "name": "sanitizeData",
+        "type": "function",
+        "line": 6
+      },
+      {
+        "name": "bgLog",
+        "type": "function",
+        "line": 27
+      },
+      {
+        "name": "cleanData",
+        "type": "variable",
+        "line": 28
+      },
+      {
+        "name": "dataStr",
+        "type": "variable",
+        "line": 31
+      }
+    ],
+    "model/model-registry.js": [
+      {
+        "name": "sanitized",
+        "type": "variable",
+        "line": 274
+      },
+      {
+        "name": "chatModels",
+        "type": "variable",
+        "line": 414
+      },
+      {
+        "name": "fetchOpenRouterModels",
+        "type": "function",
+        "line": 434
+      },
+      {
+        "name": "fetchModelsForProvider",
+        "type": "function",
+        "line": 478
+      }
+    ],
+    "sidepanel/modules/dimension-view.js": [
+      {
+        "name": "V4_DIMENSION_KEYS",
+        "type": "constant",
+        "line": 6
+      },
+      {
+        "name": "formatDimensionText",
+        "type": "function",
+        "line": 22
+      },
+      {
+        "name": "hard",
+        "type": "variable",
+        "line": 34
+      },
+      {
+        "name": "soft",
+        "type": "variable",
+        "line": 35
+      }
+    ],
+    "storage/storage-repository.js": [
+      {
+        "name": "StoragePartition",
+        "type": "class",
+        "line": 11
+      },
+      {
+        "name": "StoragePartition.get__area",
+        "type": "accessor",
+        "line": 19
+      },
+      {
+        "name": "StoragePartition.getMultiple",
+        "type": "method",
+        "line": 51
+      },
+      {
+        "name": "StoragePartition.setMultiple",
+        "type": "method",
+        "line": 89
+      }
+    ],
+    "sidepanel/modules/cloud-sync.js": [
+      {
+        "name": "isCloudSyncAvailable",
+        "type": "function",
+        "line": 10
+      },
+      {
+        "name": "mapCloudPersonaToLocal",
+        "type": "function",
+        "line": 21
+      }
+    ],
+    "sidepanel/modules/persona-view.js": [
+      {
+        "name": "formatPersonaText",
+        "type": "function",
+        "line": 11
+      },
+      {
+        "name": "isValidPersonaData",
+        "type": "function",
+        "line": 26
+      }
+    ],
+    "content/templates.js": [
+      {
+        "name": "getReviewModalTemplate",
+        "type": "function",
+        "line": 96
+      }
+    ]
+  },
+  "perFileCoverage": {
+    "background/index.js": {
+      "total": 70,
+      "ported": 26,
+      "missing": 44,
+      "pct": "37.1%"
+    },
+    "background/services/api-proxy.js": {
+      "total": 65,
+      "ported": 13,
+      "missing": 52,
+      "pct": "20.0%"
+    },
+    "background/services/crypto.js": {
+      "total": 20,
+      "ported": 12,
+      "missing": 8,
+      "pct": "60.0%"
+    },
+    "background/services/logger.js": {
+      "total": 7,
+      "ported": 3,
+      "missing": 4,
+      "pct": "42.9%"
+    },
+    "background/services/memory-orchestrator.js": {
+      "total": 85,
+      "ported": 23,
+      "missing": 62,
+      "pct": "27.1%"
+    },
+    "background/services/session-state.js": {
+      "total": 9,
+      "ported": 3,
+      "missing": 6,
+      "pct": "33.3%"
+    },
+    "background/services/sidepanel-manager.js": {
+      "total": 15,
+      "ported": 1,
+      "missing": 14,
+      "pct": "6.7%"
+    },
+    "build.js": {
+      "total": 27,
+      "ported": 2,
+      "missing": 25,
+      "pct": "7.4%"
+    },
+    "content/diff.js": {
+      "total": 15,
+      "ported": 15,
+      "missing": 0,
+      "pct": "100.0%"
+    },
+    "content/observer.js": {
+      "total": 226,
+      "ported": 23,
+      "missing": 203,
+      "pct": "10.2%"
+    },
+    "content/scraper.js": {
+      "total": 77,
+      "ported": 16,
+      "missing": 61,
+      "pct": "20.8%"
+    },
+    "content/templates.js": {
+      "total": 1,
+      "ported": 0,
+      "missing": 1,
+      "pct": "0.0%"
+    },
+    "extractor/extractor.js": {
+      "total": 34,
+      "ported": 16,
+      "missing": 18,
+      "pct": "47.1%"
+    },
+    "llm/llm-client.js": {
+      "total": 91,
+      "ported": 42,
+      "missing": 49,
+      "pct": "46.2%"
+    },
+    "llm/llm-config.js": {
+      "total": 20,
+      "ported": 5,
+      "missing": 15,
+      "pct": "25.0%"
+    },
+    "logging/logger.js": {
+      "total": 92,
+      "ported": 42,
+      "missing": 50,
+      "pct": "45.7%"
+    },
+    "memory/analyzer-registry.js": {
+      "total": 6,
+      "ported": 1,
+      "missing": 5,
+      "pct": "16.7%"
+    },
+    "memory/analyzers/recent-focus.js": {
+      "total": 8,
+      "ported": 3,
+      "missing": 5,
+      "pct": "37.5%"
+    },
+    "memory/analyzers/unified-analyzer.js": {
+      "total": 40,
+      "ported": 8,
+      "missing": 32,
+      "pct": "20.0%"
+    },
+    "memory/component-schemas.js": {
+      "total": 23,
+      "ported": 1,
+      "missing": 22,
+      "pct": "4.3%"
+    },
+    "memory/context-assembler.js": {
+      "total": 73,
+      "ported": 5,
+      "missing": 68,
+      "pct": "6.8%"
+    },
+    "memory/index.js": {
+      "total": 59,
+      "ported": 15,
+      "missing": 44,
+      "pct": "25.4%"
+    },
+    "memory/memory-controller.js": {
+      "total": 79,
+      "ported": 23,
+      "missing": 56,
+      "pct": "29.1%"
+    },
+    "model/model-manager.js": {
+      "total": 74,
+      "ported": 32,
+      "missing": 42,
+      "pct": "43.2%"
+    },
+    "model/model-registry.js": {
+      "total": 35,
+      "ported": 31,
+      "missing": 4,
+      "pct": "88.6%"
+    },
+    "options/index.js": {
+      "total": 5,
+      "ported": 0,
+      "missing": 5,
+      "pct": "0.0%"
+    },
+    "options/model-manager-ui.js": {
+      "total": 83,
+      "ported": 24,
+      "missing": 59,
+      "pct": "28.9%"
+    },
+    "rating/rating-injector.js": {
+      "total": 26,
+      "ported": 3,
+      "missing": 23,
+      "pct": "11.5%"
+    },
+    "rating/rating-manager.js": {
+      "total": 43,
+      "ported": 17,
+      "missing": 26,
+      "pct": "39.5%"
+    },
+    "rating/rating-ui.js": {
+      "total": 15,
+      "ported": 3,
+      "missing": 12,
+      "pct": "20.0%"
+    },
+    "sidepanel/modules/cloud-sync.js": {
+      "total": 2,
+      "ported": 0,
+      "missing": 2,
+      "pct": "0.0%"
+    },
+    "sidepanel/modules/dimension-view.js": {
+      "total": 4,
+      "ported": 0,
+      "missing": 4,
+      "pct": "0.0%"
+    },
+    "sidepanel/modules/persona-view.js": {
+      "total": 2,
+      "ported": 0,
+      "missing": 2,
+      "pct": "0.0%"
+    },
+    "sidepanel/sidepanel.js": {
+      "total": 965,
+      "ported": 198,
+      "missing": 767,
+      "pct": "20.5%"
+    },
+    "storage/storage-repository.js": {
+      "total": 17,
+      "ported": 13,
+      "missing": 4,
+      "pct": "76.5%"
+    },
+    "supabase/supabase-client.js": {
+      "total": 64,
+      "ported": 35,
+      "missing": 29,
+      "pct": "54.7%"
+    },
+    "theme/theme-controller.js": {
+      "total": 32,
+      "ported": 17,
+      "missing": 15,
+      "pct": "53.1%"
+    }
+  }
+}
