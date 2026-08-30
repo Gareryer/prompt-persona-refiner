@@ -1,3 +1,6 @@
+import { resolveChatbotAdapter } from '../src/adapters/chatbots/registry';
+import { sendRpcMessage } from '../src/lib/messaging/client';
+
 export default defineContentScript({
   matches: [
     'https://gemini.google.com/*',
@@ -11,6 +14,25 @@ export default defineContentScript({
   ],
   runAt: 'document_idle',
   main(ctx) {
-    console.log('[WXT] Content Script router attached for host:', location.hostname);
+    const adapter = resolveChatbotAdapter();
+    if (!adapter) {
+      console.log('[WXT] No chatbot adapter matched for:', location.hostname);
+      return;
+    }
+
+    console.log(`[WXT] Active Chatbot Adapter: ${adapter.platform.toUpperCase()} on ${location.hostname}`);
+
+    // Listen for keyboard trigger shortcut from background
+    browser.runtime.onMessage.addListener(async (message) => {
+      if (message.type === 'TRIGGER_REFINE_SHORTCUT') {
+        const rawPrompt = adapter.getInputText();
+        if (!rawPrompt || rawPrompt.trim().length === 0) return;
+
+        const result = await sendRpcMessage('REFINE_PROMPT', { rawPrompt });
+        if (result.success && result.refinedPrompt) {
+          adapter.setInputText(result.refinedPrompt);
+        }
+      }
+    });
   }
 });
