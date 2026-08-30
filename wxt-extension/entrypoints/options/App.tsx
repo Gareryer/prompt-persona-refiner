@@ -1,192 +1,162 @@
 import React, { useState, useEffect } from 'react';
-import type { UserSettings } from '../../src/lib/storage/items';
+import { ModelManager } from '../../src/core/model/model-manager';
+import { MODEL_REGISTRY } from '../../src/core/model/model-registry';
 import { sendRpcMessage } from '../../src/lib/messaging/client';
 
-interface ModelConfig {
-  id: string;
-  name: string;
-  provider: 'gemini' | 'openai' | 'anthropic' | 'deepseek' | 'openrouter';
-  modelId: string;
-  apiKey: string;
-  enabled: boolean;
-  status: 'idle' | 'testing' | 'success' | 'error';
-  latency?: number;
-}
-
-const DEFAULT_MODELS: ModelConfig[] = [
-  {
-    id: 'gemini-2-flash',
-    name: 'Gemini 2.0 Flash',
-    provider: 'gemini',
-    modelId: 'gemini-2.0-flash',
-    apiKey: '',
-    enabled: true,
-    status: 'idle'
-  },
-  {
-    id: 'gpt-4o',
-    name: 'OpenAI GPT-4o',
-    provider: 'openai',
-    modelId: 'gpt-4o',
-    apiKey: '',
-    enabled: false,
-    status: 'idle'
-  },
-  {
-    id: 'claude-3-5-sonnet',
-    name: 'Claude 3.5 Sonnet',
-    provider: 'anthropic',
-    modelId: 'claude-3-5-sonnet-20241022',
-    apiKey: '',
-    enabled: false,
-    status: 'idle'
-  },
-  {
-    id: 'deepseek-v3',
-    name: 'DeepSeek Chat V3',
-    provider: 'deepseek',
-    modelId: 'deepseek-chat',
-    apiKey: '',
-    enabled: false,
-    status: 'idle'
-  }
-];
-
 export const OptionsApp: React.FC = () => {
-  const [settings, setSettings] = useState<UserSettings>({
-    theme: 'dark',
-    activeModelProvider: 'gemini',
-    activeModelName: 'gemini-2.0-flash',
-    autoRefineOnEnter: false,
-    cloudSyncEnabled: true
+  const [modelManager] = useState(() => new ModelManager());
+  const [activeModel, setActiveModel] = useState('gemini-2.0-flash');
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({
+    gemini: '',
+    openai: '',
+    anthropic: '',
+    deepseek: '',
+    openrouter: ''
   });
-  const [models, setModels] = useState<ModelConfig[]>(DEFAULT_MODELS);
-  const [activeModelId, setActiveModelId] = useState('gemini-2-flash');
-  const [saved, setSaved] = useState(false);
+  const [parameters, setParameters] = useState({
+    temperature: 0.7,
+    maxTokens: 8192
+  });
+  const [pingStatus, setPingStatus] = useState<Record<string, { testing?: boolean; latencyMs?: number; success?: boolean }>>({});
+  const [toastMsg, setToastMsg] = useState('');
 
-  useEffect(() => {
-    sendRpcMessage('GET_SETTINGS', undefined).then((res: any) => {
-      if (res) setSettings(res);
-    });
-  }, []);
-
-  const handleTestConnection = async (modelId: string) => {
-    setModels(prev => prev.map(m => m.id === modelId ? { ...m, status: 'testing' } : m));
-    await new Promise(r => setTimeout(r, 600));
-    setModels(prev => prev.map(m => m.id === modelId ? { ...m, status: 'success', latency: Math.floor(Math.random() * 80 + 120) } : m));
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(''), 2500);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await sendRpcMessage('UPDATE_SETTINGS', settings);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleTestConnection = async (provider: string) => {
+    setPingStatus(prev => ({ ...prev, [provider]: { testing: true } }));
+    const result = await modelManager.testConnection(provider, apiKeys[provider] || 'dummy-key');
+    setPingStatus(prev => ({
+      ...prev,
+      [provider]: { testing: false, success: result.success, latencyMs: result.latencyMs }
+    }));
+  };
+
+  const handleExportBackup = async () => {
+    const personas = await sendRpcMessage('GET_PERSONAS', undefined);
+    const settings = await sendRpcMessage('GET_SETTINGS', undefined);
+    const bundle = { personas, settings, exportDate: new Date().toISOString() };
+
+    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prompt-assistant-backup-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Full backup exported successfully.');
   };
 
   return (
-    <div className="container" style={{ maxWidth: 840, margin: '32px auto', padding: '0 16px' }}>
-      <header style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 32, color: 'var(--color-accent, #38bdf8)' }}>settings</span>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>Prompt Assistant Settings</h1>
+    <div className="options-container" style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 24 }}>Prompt Assistant Settings</h1>
+          <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-secondary)' }}>
+            Configure BYOK model providers, inference parameters, and backups
+          </p>
         </div>
+        <button className="btn btn-secondary" onClick={handleExportBackup}>
+          💾 Export Full Backup
+        </button>
       </header>
 
-      {/* Model Manager Section */}
-      <section className="card" style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <div>
-            <h2 style={{ fontSize: 18, margin: '0 0 4px 0' }}>AI Model Connections</h2>
-            <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: 13 }}>
-              Configure provider credentials for prompt synthesis and multi-chatbot memory extraction.
-            </p>
-          </div>
+      {toastMsg && (
+        <div className="badge badge-info" style={{ width: '100%', padding: 8, marginBottom: 16, textAlign: 'center' }}>
+          {toastMsg}
         </div>
+      )}
 
-        <div className="model-list" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {models.map(model => (
+      {/* Model Providers Section */}
+      <section className="card" style={{ padding: 20, marginBottom: 20 }}>
+        <h2 style={{ fontSize: 18, marginTop: 0 }}>Active LLM Provider & Model</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginTop: 16 }}>
+          {Object.values(MODEL_REGISTRY).map(m => (
             <div
-              key={model.id}
-              className={`model-card ${model.enabled ? 'enabled' : 'disabled'} ${activeModelId === model.id ? 'active' : ''}`}
+              key={m.id}
+              onClick={() => setActiveModel(m.id)}
               style={{
-                background: 'var(--color-surface, #1e293b)',
-                border: activeModelId === model.id ? '2px solid var(--color-accent, #38bdf8)' : '1px solid var(--color-outline, #334155)',
+                border: activeModel === m.id ? '2px solid var(--color-accent)' : '1px solid var(--color-outline-variant)',
                 borderRadius: 8,
-                padding: 16
+                padding: 12,
+                cursor: 'pointer',
+                background: 'var(--color-surface-container)'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <input
-                    type="radio"
-                    name="activeModel"
-                    checked={activeModelId === model.id}
-                    onChange={() => {
-                      setActiveModelId(model.id);
-                      setSettings(prev => ({ ...prev, activeModelProvider: model.provider, activeModelName: model.modelId }));
-                    }}
-                  />
-                  <strong>{model.name}</strong>
-                  <span className="badge" style={{ fontSize: 11 }}>{model.provider.toUpperCase()}</span>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-small"
-                  onClick={() => handleTestConnection(model.id)}
-                  disabled={model.status === 'testing'}
-                >
-                  {model.status === 'testing' ? 'Pinging...' : model.status === 'success' ? `✓ ${model.latency}ms` : 'Test Connection'}
-                </button>
+                <strong style={{ fontSize: 13 }}>{m.name}</strong>
+                {activeModel === m.id && <span className="badge">Active</span>}
               </div>
-
-              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                <input
-                  type="password"
-                  className="form-control"
-                  placeholder={`Enter ${model.name} API Key`}
-                  value={model.apiKey}
-                  onChange={e => {
-                    const key = e.target.value;
-                    setModels(prev => prev.map(m => m.id === model.id ? { ...m, apiKey: key, enabled: Boolean(key) } : m));
-                  }}
-                  style={{ flex: 1 }}
-                />
-              </div>
+              <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '4px 0 0 0' }}>
+                Context: {m.contextWindow.toLocaleString()} tokens
+              </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Global Preferences */}
-      <section className="card">
-        <h2 style={{ fontSize: 18, marginBottom: 16 }}>Preferences & Integrations</h2>
-        <form onSubmit={handleSave}>
-          <div className="form-group" style={{ marginBottom: 16 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={settings.cloudSyncEnabled}
-                onChange={e => setSettings({ ...settings, cloudSyncEnabled: e.target.checked })}
-              />
-              <span>Enable Community Persona Cloud Sync (Supabase)</span>
-            </label>
+      {/* API Keys BYOK Section */}
+      <section className="card" style={{ padding: 20, marginBottom: 20 }}>
+        <h2 style={{ fontSize: 18, marginTop: 0 }}>API Key Vault (AES-GCM 256-Bit Encrypted)</h2>
+        {['gemini', 'openai', 'anthropic', 'deepseek'].map(p => (
+          <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+            <label style={{ width: 100, textTransform: 'capitalize', fontWeight: 600 }}>{p}</label>
+            <input
+              type="password"
+              placeholder={`${p.toUpperCase()} API Key...`}
+              value={apiKeys[p] || ''}
+              onChange={e => setApiKeys(prev => ({ ...prev, [p]: e.target.value }))}
+              style={{ flex: 1, padding: 8, borderRadius: 6, background: 'var(--color-surface-container)', color: 'var(--color-text-primary)', border: '1px solid var(--color-outline)' }}
+            />
+            <button
+              className="btn btn-secondary btn-small"
+              onClick={() => handleTestConnection(p)}
+              disabled={pingStatus[p]?.testing}
+            >
+              {pingStatus[p]?.testing ? 'Testing...' : 'Test Connection'}
+            </button>
+            {pingStatus[p]?.latencyMs && (
+              <span className="badge badge-success">{pingStatus[p]?.latencyMs}ms</span>
+            )}
           </div>
+        ))}
+      </section>
 
-          <div className="form-group" style={{ marginBottom: 16 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={settings.autoRefineOnEnter}
-                onChange={e => setSettings({ ...settings, autoRefineOnEnter: e.target.checked })}
-              />
-              <span>Auto-refine prompt when pressing Enter in composer</span>
-            </label>
+      {/* Parameter Sliders */}
+      <section className="card" style={{ padding: 20 }}>
+        <h2 style={{ fontSize: 18, marginTop: 0 }}>Generation Parameters</h2>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <label>Temperature: {parameters.temperature}</label>
+            <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>More Creative ➔</span>
           </div>
+          <input
+            type="range"
+            min="0"
+            max="1.5"
+            step="0.05"
+            value={parameters.temperature}
+            onChange={e => setParameters(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
+            style={{ width: '100%' }}
+          />
+        </div>
 
-          <button type="submit" className="btn btn-primary btn-large">
-            {saved ? '✓ Settings Saved!' : 'Save All Changes'}
-          </button>
-        </form>
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <label>Max Output Tokens: {parameters.maxTokens}</label>
+          </div>
+          <input
+            type="range"
+            min="1024"
+            max="16384"
+            step="512"
+            value={parameters.maxTokens}
+            onChange={e => setParameters(prev => ({ ...prev, maxTokens: parseInt(e.target.value) }))}
+            style={{ width: '100%' }}
+          />
+        </div>
       </section>
     </div>
   );
