@@ -49,3 +49,7 @@ graft/
 # WXT build artifacts
 .output/
 .wxt/
+
+wxt-extension/.output/
+wxt-extension/.wxt/
+wxt-extension/node_modules/

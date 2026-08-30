@@ -3,31 +3,13 @@
     "version": "1.0.0",
     "description": "Chrome extension for Gemini with intelligent prompt refinement",
     "scripts": {
-        "dev": "wxt",
-        "dev:firefox": "wxt -b firefox",
-        "build": "wxt build",
-        "build:firefox": "wxt build -b firefox",
-        "zip": "wxt zip",
-        "test": "vitest run",
-        "typecheck": "tsc --noEmit",
-        "prepare": "wxt prepare",
-        "build:legacy": "node build.js",
-        "build:legacy:dev": "node build.js --dev",
-        "watch:legacy": "node build.js --watch",
-        "clean:legacy": "rimraf dist"
+        "build": "node build.js",
+        "build:dev": "node build.js --dev",
+        "watch": "node build.js --watch",
+        "clean": "rimraf dist"
     },
     "devDependencies": {
-        "@types/chrome": "^0.2.7",
-        "@types/react": "^19.2.18",
-        "@types/react-dom": "^19.2.5",
-        "@wxt-dev/module-react": "^1.2.2",
         "esbuild": "^0.20.0",
-        "rimraf": "^5.0.5",
-        "typescript": "^7.0.2",
-        "vitest": "^4.1.11",
-        "wxt": "^0.21.4",
-        "zod": "^4.5.4",
-        "vite": "^6.2.0",
-        "@vitejs/plugin-react": "^4.3.4"
+        "rimraf": "^5.0.5"
     }
 }
