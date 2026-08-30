@@ -1,12 +1,12 @@
 {
-  "generated": "2026-08-30T18:27:21.730Z",
+  "generated": "2026-08-30T18:31:51.884Z",
   "summary": {
     "totalLegacySymbols": 2509,
-    "ported": 933,
-    "missing": 1576,
-    "newInWxt": 480,
-    "portedPct": "37.2%",
-    "missingPct": "62.8%"
+    "ported": 1077,
+    "missing": 1432,
+    "newInWxt": 508,
+    "portedPct": "42.9%",
+    "missingPct": "57.1%"
   },
   "missingByFile": {
     "sidepanel/sidepanel.js": [
@@ -261,11 +261,6 @@
         "line": 472
       },
       {
-        "name": "items",
-        "type": "variable",
-        "line": 473
-      },
-      {
         "name": "toggleDropdown",
         "type": "function",
         "line": 481
@@ -471,16 +466,6 @@
         "line": 1237
       },
       {
-        "name": "extractSessionId",
-        "type": "function",
-        "line": 1248
-      },
-      {
-        "name": "urlObj",
-        "type": "variable",
-        "line": 1250
-      },
-      {
         "name": "loadMemoryData",
         "type": "function",
         "line": 1266
@@ -591,11 +576,6 @@
         "line": 1447
       },
       {
-        "name": "personaComp",
-        "type": "variable",
-        "line": 1454
-      },
-      {
         "name": "comp",
         "type": "variable",
         "line": 1461
@@ -604,11 +584,6 @@
         "name": "injectedContextInput",
         "type": "variable",
         "line": 1484
-      },
-      {
-        "name": "ctx",
-        "type": "variable",
-        "line": 1488
       },
       {
         "name": "lines",
@@ -1916,11 +1891,6 @@
         "line": 4182
       },
       {
-        "name": "currentGeneration",
-        "type": "variable",
-        "line": 4184
-      },
-      {
         "name": "componentData",
         "type": "variable",
         "line": 4189
@@ -2069,11 +2039,6 @@
         "name": "injectedContextEl",
         "type": "variable",
         "line": 4375
-      },
-      {
-        "name": "ctx",
-        "type": "variable",
-        "line": 4379
       },
       {
         "name": "lines",
@@ -2751,11 +2716,6 @@
         "line": 5796
       },
       {
-        "name": "avgRating",
-        "type": "variable",
-        "line": 5797
-      },
-      {
         "name": "isLocal",
         "type": "variable",
         "line": 5799
@@ -2801,11 +2761,6 @@
         "line": 5894
       },
       {
-        "name": "avgRating",
-        "type": "variable",
-        "line": 5895
-      },
-      {
         "name": "raterCount",
         "type": "variable",
         "line": 5896
@@ -2814,11 +2769,6 @@
         "name": "llmModel",
         "type": "variable",
         "line": 5898
-      },
-      {
-        "name": "version",
-        "type": "variable",
-        "line": 5900
       },
       {
         "name": "modal",
@@ -2989,11 +2939,6 @@
         "name": "keywords",
         "type": "variable",
         "line": 6434
-      },
-      {
-        "name": "version",
-        "type": "variable",
-        "line": 6435
       },
       {
         "name": "isPublic",
@@ -3231,11 +3176,6 @@
         "line": 7106
       },
       {
-        "name": "version",
-        "type": "variable",
-        "line": 7111
-      },
-      {
         "name": "date",
         "type": "variable",
         "line": 7112
@@ -3469,11 +3409,6 @@
         "name": "sanitizeImportedData",
         "type": "function",
         "line": 7639
-      },
-      {
-        "name": "sanitized",
-        "type": "variable",
-        "line": 7657
       },
       {
         "name": "formatDate",
@@ -5287,530 +5222,6 @@
         "line": 736
       }
     ],
-    "memory/context-assembler.js": [
-      {
-        "name": "ctxLog",
-        "type": "function",
-        "line": 15
-      },
-      {
-        "name": "filterByGeneration",
-        "type": "variable",
-        "line": 45
-      },
-      {
-        "name": "unifiedContext",
-        "type": "variable",
-        "line": 46
-      },
-      {
-        "name": "currentGeneration",
-        "type": "variable",
-        "line": 47
-      },
-      {
-        "name": "ContextAssembler._buildSummary",
-        "type": "method",
-        "line": 77
-      },
-      {
-        "name": "summary",
-        "type": "variable",
-        "line": 78
-      },
-      {
-        "name": "isCurrent",
-        "type": "variable",
-        "line": 86
-      },
-      {
-        "name": "ContextAssembler._isComponentCurrent",
-        "type": "method",
-        "line": 106
-      },
-      {
-        "name": "ContextAssembler._getComponent",
-        "type": "method",
-        "line": 120
-      },
-      {
-        "name": "ContextAssembler._getComponentData",
-        "type": "method",
-        "line": 129
-      },
-      {
-        "name": "ContextAssembler._extractV4Data",
-        "type": "method",
-        "line": 144
-      },
-      {
-        "name": "ContextAssembler._buildRefinementContext",
-        "type": "method",
-        "line": 173
-      },
-      {
-        "name": "staleComponents",
-        "type": "variable",
-        "line": 175
-      },
-      {
-        "name": "includedComponents",
-        "type": "variable",
-        "line": 176
-      },
-      {
-        "name": "trackComponent",
-        "type": "function",
-        "line": 183
-      },
-      {
-        "name": "personaComp",
-        "type": "variable",
-        "line": 200
-      },
-      {
-        "name": "personaIncluded",
-        "type": "variable",
-        "line": 202
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 206
-      },
-      {
-        "name": "contextComp",
-        "type": "variable",
-        "line": 226
-      },
-      {
-        "name": "contextIncluded",
-        "type": "variable",
-        "line": 228
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 232
-      },
-      {
-        "name": "exemplarComp",
-        "type": "variable",
-        "line": 252
-      },
-      {
-        "name": "exemplarData",
-        "type": "variable",
-        "line": 253
-      },
-      {
-        "name": "exemplarIncluded",
-        "type": "variable",
-        "line": 254
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 258
-      },
-      {
-        "name": "formatComp",
-        "type": "variable",
-        "line": 273
-      },
-      {
-        "name": "formatData",
-        "type": "variable",
-        "line": 274
-      },
-      {
-        "name": "formatIncluded",
-        "type": "variable",
-        "line": 275
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 279
-      },
-      {
-        "name": "toneComp",
-        "type": "variable",
-        "line": 297
-      },
-      {
-        "name": "toneIncluded",
-        "type": "variable",
-        "line": 299
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 303
-      },
-      {
-        "name": "frameworkComp",
-        "type": "variable",
-        "line": 326
-      },
-      {
-        "name": "frameworkData",
-        "type": "variable",
-        "line": 327
-      },
-      {
-        "name": "frameworkIncluded",
-        "type": "variable",
-        "line": 328
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 332
-      },
-      {
-        "name": "constraintsComp",
-        "type": "variable",
-        "line": 349
-      },
-      {
-        "name": "constraintsData",
-        "type": "variable",
-        "line": 350
-      },
-      {
-        "name": "constraintsIncluded",
-        "type": "variable",
-        "line": 351
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 355
-      },
-      {
-        "name": "recentFocusComp",
-        "type": "variable",
-        "line": 374
-      },
-      {
-        "name": "recentFocusData",
-        "type": "variable",
-        "line": 375
-      },
-      {
-        "name": "ContextAssembler.formatForRefinement",
-        "type": "method",
-        "line": 403
-      },
-      {
-        "name": "ctx",
-        "type": "variable",
-        "line": 408
-      },
-      {
-        "name": "domainSection",
-        "type": "variable",
-        "line": 435
-      },
-      {
-        "name": "terms",
-        "type": "variable",
-        "line": 439
-      },
-      {
-        "name": "frameworkSection",
-        "type": "variable",
-        "line": 468
-      },
-      {
-        "name": "steps",
-        "type": "variable",
-        "line": 473
-      },
-      {
-        "name": "reqs",
-        "type": "variable",
-        "line": 486
-      },
-      {
-        "name": "rules",
-        "type": "variable",
-        "line": 490
-      },
-      {
-        "name": "formatSection",
-        "type": "variable",
-        "line": 507
-      },
-      {
-        "name": "ContextAssembler.getContextJSON",
-        "type": "method",
-        "line": 540
-      },
-      {
-        "name": "ContextAssembler.hasContext",
-        "type": "method",
-        "line": 551
-      },
-      {
-        "name": "ContextAssembler.clearCache",
-        "type": "method",
-        "line": 558
-      }
-    ],
-    "logging/logger.js": [
-      {
-        "name": "LOG_LEVELS",
-        "type": "constant",
-        "line": 32
-      },
-      {
-        "name": "LOG_COLORS",
-        "type": "constant",
-        "line": 43
-      },
-      {
-        "name": "LOGGER_CONFIG",
-        "type": "constant",
-        "line": 55
-      },
-      {
-        "name": "PII_PATTERNS",
-        "type": "constant",
-        "line": 68
-      },
-      {
-        "name": "RingBuffer.getAll",
-        "type": "method",
-        "line": 95
-      },
-      {
-        "name": "RingBuffer.get_length",
-        "type": "accessor",
-        "line": 111
-      },
-      {
-        "name": "LogEntry._detectContext",
-        "type": "method",
-        "line": 132
-      },
-      {
-        "name": "LogEntry.toJSON",
-        "type": "method",
-        "line": 146
-      },
-      {
-        "name": "LogEntry.format",
-        "type": "method",
-        "line": 160
-      },
-      {
-        "name": "Logger._instance",
-        "type": "property",
-        "line": 170
-      },
-      {
-        "name": "Logger._hasDirectStorage",
-        "type": "method",
-        "line": 210
-      },
-      {
-        "name": "Logger._makeBridgeRequest",
-        "type": "method",
-        "line": 217
-      },
-      {
-        "name": "requestId",
-        "type": "variable",
-        "line": 219
-      },
-      {
-        "name": "timerId",
-        "type": "variable",
-        "line": 220
-      },
-      {
-        "name": "handler",
-        "type": "function",
-        "line": 222
-      },
-      {
-        "name": "resId",
-        "type": "variable",
-        "line": 223
-      },
-      {
-        "name": "Logger._storageGet",
-        "type": "method",
-        "line": 254
-      },
-      {
-        "name": "storageArea",
-        "type": "variable",
-        "line": 256
-      },
-      {
-        "name": "Logger._storageSet",
-        "type": "method",
-        "line": 263
-      },
-      {
-        "name": "storageArea",
-        "type": "variable",
-        "line": 265
-      },
-      {
-        "name": "Logger.setLevel",
-        "type": "method",
-        "line": 277
-      },
-      {
-        "name": "Logger._restoreLevel",
-        "type": "method",
-        "line": 295
-      },
-      {
-        "name": "savedLevel",
-        "type": "variable",
-        "line": 297
-      },
-      {
-        "name": "Logger._log",
-        "type": "method",
-        "line": 318
-      },
-      {
-        "name": "tags",
-        "type": "variable",
-        "line": 322
-      },
-      {
-        "name": "correlationId",
-        "type": "variable",
-        "line": 322
-      },
-      {
-        "name": "restData",
-        "type": "variable",
-        "line": 322
-      },
-      {
-        "name": "sanitizedMessage",
-        "type": "variable",
-        "line": 325
-      },
-      {
-        "name": "sanitizedData",
-        "type": "variable",
-        "line": 326
-      },
-      {
-        "name": "Logger.timeEnd",
-        "type": "method",
-        "line": 392
-      },
-      {
-        "name": "Logger.startOperation",
-        "type": "method",
-        "line": 420
-      },
-      {
-        "name": "correlationId",
-        "type": "variable",
-        "line": 421
-      },
-      {
-        "name": "Logger.endOperation",
-        "type": "method",
-        "line": 442
-      },
-      {
-        "name": "op",
-        "type": "variable",
-        "line": 443
-      },
-      {
-        "name": "Logger._sanitize",
-        "type": "method",
-        "line": 467
-      },
-      {
-        "name": "sanitized",
-        "type": "variable",
-        "line": 470
-      },
-      {
-        "name": "Logger._sanitizeObject",
-        "type": "method",
-        "line": 480
-      },
-      {
-        "name": "sanitized",
-        "type": "variable",
-        "line": 489
-      },
-      {
-        "name": "Logger._consoleOutput",
-        "type": "method",
-        "line": 508
-      },
-      {
-        "name": "styles",
-        "type": "variable",
-        "line": 512
-      },
-      {
-        "name": "Logger._notifyListeners",
-        "type": "method",
-        "line": 526
-      },
-      {
-        "name": "Logger.getLogs",
-        "type": "method",
-        "line": 539
-      },
-      {
-        "name": "Logger.export",
-        "type": "method",
-        "line": 579
-      },
-      {
-        "name": "Logger.downloadExport",
-        "type": "method",
-        "line": 592
-      },
-      {
-        "name": "byLevel",
-        "type": "variable",
-        "line": 614
-      },
-      {
-        "name": "byComponent",
-        "type": "variable",
-        "line": 615
-      },
-      {
-        "name": "Logger._persist",
-        "type": "method",
-        "line": 642
-      },
-      {
-        "name": "Logger._restore",
-        "type": "method",
-        "line": 661
-      },
-      {
-        "name": "Logger._startAutoPersist",
-        "type": "method",
-        "line": 684
-      },
-      {
-        "name": "Logger.destroy",
-        "type": "method",
-        "line": 692
-      }
-    ],
     "llm/llm-client.js": [
       {
         "name": "DEFAULT_MODELS",
@@ -5843,11 +5254,6 @@
         "line": 145
       },
       {
-        "name": "sanitized",
-        "type": "variable",
-        "line": 148
-      },
-      {
         "name": "LLMClient._proxyFetch",
         "type": "method",
         "line": 163
@@ -5861,11 +5267,6 @@
         "name": "isMainWorld",
         "type": "variable",
         "line": 170
-      },
-      {
-        "name": "requestId",
-        "type": "variable",
-        "line": 178
       },
       {
         "name": "timeoutId",
@@ -6048,241 +5449,408 @@
         "line": 820
       }
     ],
-    "memory/memory-controller.js": [
+    "logging/logger.js": [
       {
-        "name": "MEMORY_SCHEMA_VERSION",
+        "name": "LOG_LEVELS",
+        "type": "constant",
+        "line": 32
+      },
+      {
+        "name": "LOG_COLORS",
         "type": "constant",
         "line": 43
       },
       {
-        "name": "DIMENSION_NAMES",
-        "type": "constant",
-        "line": 48
-      },
-      {
-        "name": "SESSION_KEY_PREFIX",
+        "name": "LOGGER_CONFIG",
         "type": "constant",
         "line": 55
       },
       {
-        "name": "MEMORY_SIZE_LIMITS",
+        "name": "PII_PATTERNS",
         "type": "constant",
-        "line": 61
+        "line": 68
       },
       {
-        "name": "memCtrlLog",
-        "type": "function",
-        "line": 69
-      },
-      {
-        "name": "MemoryController.extractSessionId",
+        "name": "RingBuffer.getAll",
         "type": "method",
-        "line": 103
+        "line": 95
       },
       {
-        "name": "urlObj",
-        "type": "variable",
-        "line": 105
+        "name": "RingBuffer.get_length",
+        "type": "accessor",
+        "line": 111
       },
       {
-        "name": "MemoryController.isExtensionContext",
+        "name": "LogEntry._detectContext",
         "type": "method",
-        "line": 130
+        "line": 132
       },
       {
-        "name": "MemoryController._bridgeRequestId",
-        "type": "property",
-        "line": 139
-      },
-      {
-        "name": "MemoryController._bridgeRequests",
-        "type": "property",
-        "line": 140
-      },
-      {
-        "name": "MemoryController._bridgeInitialized",
-        "type": "property",
-        "line": 141
-      },
-      {
-        "name": "MemoryController._initBridgeListener",
+        "name": "LogEntry.toJSON",
         "type": "method",
         "line": 146
       },
       {
-        "name": "requestId",
-        "type": "variable",
-        "line": 151
-      },
-      {
-        "name": "pending",
-        "type": "variable",
-        "line": 153
-      },
-      {
-        "name": "MemoryController._makeBridgeRequest",
+        "name": "LogEntry.format",
         "type": "method",
-        "line": 173
+        "line": 160
       },
       {
-        "name": "requestId",
+        "name": "Logger._instance",
+        "type": "property",
+        "line": 170
+      },
+      {
+        "name": "Logger._hasDirectStorage",
+        "type": "method",
+        "line": 210
+      },
+      {
+        "name": "timerId",
+        "type": "variable",
+        "line": 220
+      },
+      {
+        "name": "handler",
+        "type": "function",
+        "line": 222
+      },
+      {
+        "name": "resId",
+        "type": "variable",
+        "line": 223
+      },
+      {
+        "name": "Logger._storageGet",
+        "type": "method",
+        "line": 254
+      },
+      {
+        "name": "storageArea",
+        "type": "variable",
+        "line": 256
+      },
+      {
+        "name": "Logger._storageSet",
+        "type": "method",
+        "line": 263
+      },
+      {
+        "name": "storageArea",
+        "type": "variable",
+        "line": 265
+      },
+      {
+        "name": "Logger.setLevel",
+        "type": "method",
+        "line": 277
+      },
+      {
+        "name": "Logger._restoreLevel",
+        "type": "method",
+        "line": 295
+      },
+      {
+        "name": "savedLevel",
+        "type": "variable",
+        "line": 297
+      },
+      {
+        "name": "Logger._log",
+        "type": "method",
+        "line": 318
+      },
+      {
+        "name": "tags",
+        "type": "variable",
+        "line": 322
+      },
+      {
+        "name": "correlationId",
+        "type": "variable",
+        "line": 322
+      },
+      {
+        "name": "restData",
+        "type": "variable",
+        "line": 322
+      },
+      {
+        "name": "sanitizedMessage",
+        "type": "variable",
+        "line": 325
+      },
+      {
+        "name": "Logger.timeEnd",
+        "type": "method",
+        "line": 392
+      },
+      {
+        "name": "Logger.startOperation",
+        "type": "method",
+        "line": 420
+      },
+      {
+        "name": "correlationId",
+        "type": "variable",
+        "line": 421
+      },
+      {
+        "name": "Logger.endOperation",
+        "type": "method",
+        "line": 442
+      },
+      {
+        "name": "op",
+        "type": "variable",
+        "line": 443
+      },
+      {
+        "name": "Logger._sanitize",
+        "type": "method",
+        "line": 467
+      },
+      {
+        "name": "Logger._sanitizeObject",
+        "type": "method",
+        "line": 480
+      },
+      {
+        "name": "Logger._consoleOutput",
+        "type": "method",
+        "line": 508
+      },
+      {
+        "name": "styles",
+        "type": "variable",
+        "line": 512
+      },
+      {
+        "name": "Logger._notifyListeners",
+        "type": "method",
+        "line": 526
+      },
+      {
+        "name": "Logger.getLogs",
+        "type": "method",
+        "line": 539
+      },
+      {
+        "name": "Logger.export",
+        "type": "method",
+        "line": 579
+      },
+      {
+        "name": "Logger.downloadExport",
+        "type": "method",
+        "line": 592
+      },
+      {
+        "name": "byLevel",
+        "type": "variable",
+        "line": 614
+      },
+      {
+        "name": "byComponent",
+        "type": "variable",
+        "line": 615
+      },
+      {
+        "name": "Logger._persist",
+        "type": "method",
+        "line": 642
+      },
+      {
+        "name": "Logger._restore",
+        "type": "method",
+        "line": 661
+      },
+      {
+        "name": "Logger._startAutoPersist",
+        "type": "method",
+        "line": 684
+      },
+      {
+        "name": "Logger.destroy",
+        "type": "method",
+        "line": 692
+      }
+    ],
+    "memory/index.js": [
+      {
+        "name": "memLog",
+        "type": "function",
+        "line": 39
+      },
+      {
+        "name": "sessionMutexes",
+        "type": "variable",
+        "line": 72
+      },
+      {
+        "name": "analyzeSession",
+        "type": "function",
+        "line": 82
+      },
+      {
+        "name": "runPromise",
+        "type": "variable",
+        "line": 96
+      },
+      {
+        "name": "scraper",
+        "type": "variable",
+        "line": 131
+      },
+      {
+        "name": "scrapedData",
+        "type": "variable",
+        "line": 143
+      },
+      {
+        "name": "isSelectiveRebuild",
+        "type": "variable",
+        "line": 148
+      },
+      {
+        "name": "shouldIncrementGen",
+        "type": "variable",
+        "line": 149
+      },
+      {
+        "name": "newGen",
+        "type": "variable",
+        "line": 152
+      },
+      {
+        "name": "results",
+        "type": "variable",
+        "line": 164
+      },
+      {
+        "name": "enabledComponents",
         "type": "variable",
         "line": 177
       },
       {
-        "name": "timeout",
+        "name": "pinnedComponents",
         "type": "variable",
-        "line": 179
+        "line": 181
       },
       {
-        "name": "MemoryController._ensureCache",
-        "type": "method",
-        "line": 209
-      },
-      {
-        "name": "MemoryController.getComponent",
-        "type": "method",
-        "line": 270
-      },
-      {
-        "name": "MemoryController.setComponent",
-        "type": "method",
-        "line": 289
-      },
-      {
-        "name": "sanitizedData",
+        "name": "startTime",
         "type": "variable",
-        "line": 320
+        "line": 214
       },
       {
-        "name": "historyLength",
+        "name": "unifiedResults",
         "type": "variable",
-        "line": 339
+        "line": 215
       },
       {
-        "name": "MemoryController.incrementGeneration",
-        "type": "method",
-        "line": 382
-      },
-      {
-        "name": "MemoryController.getComponentGeneration",
-        "type": "method",
-        "line": 408
-      },
-      {
-        "name": "MemoryController.isComponentCurrent",
-        "type": "method",
-        "line": 419
-      },
-      {
-        "name": "MemoryController.isPersonaPinned",
-        "type": "method",
-        "line": 485
-      },
-      {
-        "name": "MemoryController.getEffectivePersona",
-        "type": "method",
-        "line": 494
-      },
-      {
-        "name": "MemoryController.updatePinnedPersona",
-        "type": "method",
-        "line": 512
-      },
-      {
-        "name": "MemoryController.isComponentPinned",
-        "type": "method",
-        "line": 594
-      },
-      {
-        "name": "MemoryController.getEffectiveComponent",
-        "type": "method",
-        "line": 605
-      },
-      {
-        "name": "MemoryController.getUnifiedContext",
-        "type": "method",
-        "line": 622
-      },
-      {
-        "name": "MemoryController.hasContext",
-        "type": "method",
-        "line": 648
-      },
-      {
-        "name": "MemoryController._getEmptyMemory",
-        "type": "method",
-        "line": 675
-      },
-      {
-        "name": "MemoryController._estimateSize",
-        "type": "method",
-        "line": 691
-      },
-      {
-        "name": "MemoryController._truncateString",
-        "type": "method",
-        "line": 706
-      },
-      {
-        "name": "encoder",
+        "name": "dimensionIds",
         "type": "variable",
-        "line": 709
+        "line": 226
       },
       {
-        "name": "bytes",
+        "name": "isLLMConfigured",
+        "type": "function",
+        "line": 308
+      },
+      {
+        "name": "getCurrentSessionId",
+        "type": "function",
+        "line": 317
+      },
+      {
+        "name": "sendBridgeResponse",
+        "type": "function",
+        "line": 349
+      },
+      {
+        "name": "SmartAutoRun",
         "type": "variable",
-        "line": 710
+        "line": 398
       },
       {
-        "name": "low",
+        "name": "isConfigured",
         "type": "variable",
-        "line": 715
+        "line": 417
       },
       {
-        "name": "high",
+        "name": "scraper",
         "type": "variable",
-        "line": 715
+        "line": 427
       },
       {
-        "name": "mid",
+        "name": "completeTurns",
         "type": "variable",
-        "line": 717
+        "line": 434
       },
       {
-        "name": "MemoryController._sanitizeComponentData",
-        "type": "method",
-        "line": 733
-      },
-      {
-        "name": "sanitized",
+        "name": "hasExistingMemory",
         "type": "variable",
-        "line": 742
+        "line": 451
       },
       {
-        "name": "MemoryController._isCharArray",
-        "type": "method",
-        "line": 779
-      },
-      {
-        "name": "keys",
+        "name": "chatContainer",
         "type": "variable",
-        "line": 783
+        "line": 467
       },
       {
-        "name": "isNumericKeys",
+        "name": "isModelResponse",
         "type": "variable",
-        "line": 787
+        "line": 495
       },
       {
-        "name": "MemoryController.getStorageUsage",
-        "type": "method",
-        "line": 799
-      },
-      {
-        "name": "total",
+        "name": "canRun",
         "type": "variable",
-        "line": 810
+        "line": 514
+      },
+      {
+        "name": "completeTurns",
+        "type": "variable",
+        "line": 514
+      },
+      {
+        "name": "enabledAnalyzers",
+        "type": "variable",
+        "line": 536
+      },
+      {
+        "name": "canRun",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "hasMemory",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "completeTurns",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "currentUrl",
+        "type": "variable",
+        "line": 592
+      },
+      {
+        "name": "newSessionId",
+        "type": "variable",
+        "line": 593
+      },
+      {
+        "name": "originalPushState",
+        "type": "variable",
+        "line": 630
+      },
+      {
+        "name": "originalReplaceState",
+        "type": "variable",
+        "line": 637
       }
     ],
     "model/model-manager.js": [
@@ -6417,54 +5985,9 @@
         "line": 708
       },
       {
-        "name": "ModelManager._bridgeRequestId",
-        "type": "property",
-        "line": 717
-      },
-      {
-        "name": "ModelManager._bridgeRequests",
-        "type": "property",
-        "line": 718
-      },
-      {
-        "name": "ModelManager._bridgeInitialized",
-        "type": "property",
-        "line": 719
-      },
-      {
-        "name": "ModelManager._initBridgeListener",
-        "type": "method",
-        "line": 724
-      },
-      {
-        "name": "requestId",
-        "type": "variable",
-        "line": 729
-      },
-      {
-        "name": "pending",
-        "type": "variable",
-        "line": 730
-      },
-      {
         "name": "changes",
         "type": "variable",
         "line": 743
-      },
-      {
-        "name": "ModelManager._makeBridgeRequest",
-        "type": "method",
-        "line": 766
-      },
-      {
-        "name": "requestId",
-        "type": "variable",
-        "line": 770
-      },
-      {
-        "name": "timeout",
-        "type": "variable",
-        "line": 772
       },
       {
         "name": "ModelManager._getFromStorage",
@@ -6495,350 +6018,6 @@
         "name": "getModelManager",
         "type": "function",
         "line": 917
-      }
-    ],
-    "memory/index.js": [
-      {
-        "name": "memLog",
-        "type": "function",
-        "line": 39
-      },
-      {
-        "name": "sessionMutexes",
-        "type": "variable",
-        "line": 72
-      },
-      {
-        "name": "analyzeSession",
-        "type": "function",
-        "line": 82
-      },
-      {
-        "name": "runPromise",
-        "type": "variable",
-        "line": 96
-      },
-      {
-        "name": "scraper",
-        "type": "variable",
-        "line": 131
-      },
-      {
-        "name": "scrapedData",
-        "type": "variable",
-        "line": 143
-      },
-      {
-        "name": "isSelectiveRebuild",
-        "type": "variable",
-        "line": 148
-      },
-      {
-        "name": "shouldIncrementGen",
-        "type": "variable",
-        "line": 149
-      },
-      {
-        "name": "newGen",
-        "type": "variable",
-        "line": 152
-      },
-      {
-        "name": "results",
-        "type": "variable",
-        "line": 164
-      },
-      {
-        "name": "enabledComponents",
-        "type": "variable",
-        "line": 177
-      },
-      {
-        "name": "pinnedComponents",
-        "type": "variable",
-        "line": 181
-      },
-      {
-        "name": "allDimensions",
-        "type": "variable",
-        "line": 182
-      },
-      {
-        "name": "startTime",
-        "type": "variable",
-        "line": 214
-      },
-      {
-        "name": "unifiedResults",
-        "type": "variable",
-        "line": 215
-      },
-      {
-        "name": "dimensionIds",
-        "type": "variable",
-        "line": 226
-      },
-      {
-        "name": "isLLMConfigured",
-        "type": "function",
-        "line": 308
-      },
-      {
-        "name": "getCurrentSessionId",
-        "type": "function",
-        "line": 317
-      },
-      {
-        "name": "requestId",
-        "type": "variable",
-        "line": 346
-      },
-      {
-        "name": "sendBridgeResponse",
-        "type": "function",
-        "line": 349
-      },
-      {
-        "name": "SmartAutoRun",
-        "type": "variable",
-        "line": 398
-      },
-      {
-        "name": "isConfigured",
-        "type": "variable",
-        "line": 417
-      },
-      {
-        "name": "scraper",
-        "type": "variable",
-        "line": 427
-      },
-      {
-        "name": "completeTurns",
-        "type": "variable",
-        "line": 434
-      },
-      {
-        "name": "hasExistingMemory",
-        "type": "variable",
-        "line": 451
-      },
-      {
-        "name": "chatContainer",
-        "type": "variable",
-        "line": 467
-      },
-      {
-        "name": "isModelResponse",
-        "type": "variable",
-        "line": 495
-      },
-      {
-        "name": "canRun",
-        "type": "variable",
-        "line": 514
-      },
-      {
-        "name": "completeTurns",
-        "type": "variable",
-        "line": 514
-      },
-      {
-        "name": "enabledAnalyzers",
-        "type": "variable",
-        "line": 536
-      },
-      {
-        "name": "canRun",
-        "type": "variable",
-        "line": 574
-      },
-      {
-        "name": "hasMemory",
-        "type": "variable",
-        "line": 574
-      },
-      {
-        "name": "completeTurns",
-        "type": "variable",
-        "line": 574
-      },
-      {
-        "name": "currentUrl",
-        "type": "variable",
-        "line": 592
-      },
-      {
-        "name": "newSessionId",
-        "type": "variable",
-        "line": 593
-      },
-      {
-        "name": "originalPushState",
-        "type": "variable",
-        "line": 630
-      },
-      {
-        "name": "originalReplaceState",
-        "type": "variable",
-        "line": 637
-      }
-    ],
-    "memory/analyzers/unified-analyzer.js": [
-      {
-        "name": "resp",
-        "type": "variable",
-        "line": 32
-      },
-      {
-        "name": "ratedCount",
-        "type": "variable",
-        "line": 48
-      },
-      {
-        "name": "avgRating",
-        "type": "variable",
-        "line": 51
-      },
-      {
-        "name": "conversationText",
-        "type": "variable",
-        "line": 88
-      },
-      {
-        "name": "ratingContext",
-        "type": "variable",
-        "line": 89
-      },
-      {
-        "name": "recentMessages",
-        "type": "variable",
-        "line": 90
-      },
-      {
-        "name": "recentText",
-        "type": "variable",
-        "line": 91
-      },
-      {
-        "name": "allDimensions",
-        "type": "variable",
-        "line": 94
-      },
-      {
-        "name": "dimensionList",
-        "type": "variable",
-        "line": 107
-      },
-      {
-        "name": "basePrompt",
-        "type": "variable",
-        "line": 109
-      },
-      {
-        "name": "enabledComponents",
-        "type": "variable",
-        "line": 211
-      },
-      {
-        "name": "dimensionCount",
-        "type": "variable",
-        "line": 212
-      },
-      {
-        "name": "startTime",
-        "type": "variable",
-        "line": 215
-      },
-      {
-        "name": "schema",
-        "type": "variable",
-        "line": 224
-      },
-      {
-        "name": "rawResult",
-        "type": "variable",
-        "line": 227
-      },
-      {
-        "name": "obj",
-        "type": "variable",
-        "line": 255
-      },
-      {
-        "name": "unwrappers",
-        "type": "variable",
-        "line": 270
-      },
-      {
-        "name": "normalizedResult",
-        "type": "variable",
-        "line": 279
-      },
-      {
-        "name": "keyAliases",
-        "type": "variable",
-        "line": 288
-      },
-      {
-        "name": "lowerAlias",
-        "type": "variable",
-        "line": 301
-      },
-      {
-        "name": "primaryText",
-        "type": "variable",
-        "line": 314
-      },
-      {
-        "name": "sectionRegex",
-        "type": "variable",
-        "line": 320
-      },
-      {
-        "name": "match",
-        "type": "variable",
-        "line": 321
-      },
-      {
-        "name": "rawHeading",
-        "type": "variable",
-        "line": 323
-      },
-      {
-        "name": "sectionContent",
-        "type": "variable",
-        "line": 324
-      },
-      {
-        "name": "expectedKeys",
-        "type": "variable",
-        "line": 340
-      },
-      {
-        "name": "hasAnyValidDimension",
-        "type": "variable",
-        "line": 351
-      },
-      {
-        "name": "textLines",
-        "type": "variable",
-        "line": 365
-      },
-      {
-        "name": "migrated",
-        "type": "variable",
-        "line": 381
-      },
-      {
-        "name": "defaultEmpty",
-        "type": "variable",
-        "line": 389
-      },
-      {
-        "name": "empty",
-        "type": "variable",
-        "line": 410
       }
     ],
     "supabase/supabase-client.js": [
@@ -6986,133 +6165,6 @@
         "name": "SupabaseClient.deleteSavedPrompt",
         "type": "method",
         "line": 634
-      }
-    ],
-    "rating/rating-manager.js": [
-      {
-        "name": "ratingLog",
-        "type": "function",
-        "line": 52
-      },
-      {
-        "name": "logFn",
-        "type": "variable",
-        "line": 56
-      },
-      {
-        "name": "RatingManager.hasDirectStorageAccess",
-        "type": "method",
-        "line": 148
-      },
-      {
-        "name": "RatingManager.extractSessionId",
-        "type": "method",
-        "line": 169
-      },
-      {
-        "name": "urlObj",
-        "type": "variable",
-        "line": 171
-      },
-      {
-        "name": "ratingCount",
-        "type": "variable",
-        "line": 215
-      },
-      {
-        "name": "RatingManager.backupToStorage",
-        "type": "method",
-        "line": 266
-      },
-      {
-        "name": "backupKey",
-        "type": "variable",
-        "line": 273
-      },
-      {
-        "name": "RatingManager.restoreFromStorage",
-        "type": "method",
-        "line": 305
-      },
-      {
-        "name": "backupKey",
-        "type": "variable",
-        "line": 312
-      },
-      {
-        "name": "backup",
-        "type": "variable",
-        "line": 314
-      },
-      {
-        "name": "ratingCount",
-        "type": "variable",
-        "line": 320
-      },
-      {
-        "name": "backupAge",
-        "type": "variable",
-        "line": 321
-      },
-      {
-        "name": "ageMinutes",
-        "type": "variable",
-        "line": 322
-      },
-      {
-        "name": "RatingManager.backupAllRatings",
-        "type": "method",
-        "line": 348
-      },
-      {
-        "name": "allBackups",
-        "type": "variable",
-        "line": 355
-      },
-      {
-        "name": "RatingManager.removeRating",
-        "type": "method",
-        "line": 464
-      },
-      {
-        "name": "RatingManager.getRatingsArray",
-        "type": "method",
-        "line": 517
-      },
-      {
-        "name": "ratings",
-        "type": "variable",
-        "line": 521
-      },
-      {
-        "name": "match",
-        "type": "variable",
-        "line": 526
-      },
-      {
-        "name": "RatingManager.hasRating",
-        "type": "method",
-        "line": 555
-      },
-      {
-        "name": "RatingManager.getRatedCount",
-        "type": "method",
-        "line": 567
-      },
-      {
-        "name": "RatingManager.clearAll",
-        "type": "method",
-        "line": 584
-      },
-      {
-        "name": "_currentRatingManager",
-        "type": "variable",
-        "line": 606
-      },
-      {
-        "name": "getCurrentRatingManager",
-        "type": "function",
-        "line": 625
       }
     ],
     "build.js": [
@@ -7359,116 +6411,228 @@
         "line": 568
       }
     ],
-    "memory/component-schemas.js": [
+    "rating/rating-manager.js": [
       {
-        "name": "ids",
-        "type": "variable",
-        "line": 338
+        "name": "ratingLog",
+        "type": "function",
+        "line": 52
       },
       {
-        "name": "properties",
+        "name": "logFn",
         "type": "variable",
-        "line": 342
+        "line": 56
       },
       {
-        "name": "required",
+        "name": "RatingManager.hasDirectStorageAccess",
+        "type": "method",
+        "line": 148
+      },
+      {
+        "name": "ratingCount",
         "type": "variable",
-        "line": 343
+        "line": 215
+      },
+      {
+        "name": "RatingManager.backupToStorage",
+        "type": "method",
+        "line": 266
+      },
+      {
+        "name": "backupKey",
+        "type": "variable",
+        "line": 273
+      },
+      {
+        "name": "RatingManager.restoreFromStorage",
+        "type": "method",
+        "line": 305
+      },
+      {
+        "name": "backupKey",
+        "type": "variable",
+        "line": 312
+      },
+      {
+        "name": "backup",
+        "type": "variable",
+        "line": 314
+      },
+      {
+        "name": "ratingCount",
+        "type": "variable",
+        "line": 320
+      },
+      {
+        "name": "backupAge",
+        "type": "variable",
+        "line": 321
+      },
+      {
+        "name": "ageMinutes",
+        "type": "variable",
+        "line": 322
+      },
+      {
+        "name": "RatingManager.backupAllRatings",
+        "type": "method",
+        "line": 348
+      },
+      {
+        "name": "allBackups",
+        "type": "variable",
+        "line": 355
+      },
+      {
+        "name": "RatingManager.removeRating",
+        "type": "method",
+        "line": 464
+      },
+      {
+        "name": "RatingManager.getRatingsArray",
+        "type": "method",
+        "line": 517
+      },
+      {
+        "name": "ratings",
+        "type": "variable",
+        "line": 521
+      },
+      {
+        "name": "match",
+        "type": "variable",
+        "line": 526
+      },
+      {
+        "name": "RatingManager.hasRating",
+        "type": "method",
+        "line": 555
+      },
+      {
+        "name": "RatingManager.getRatedCount",
+        "type": "method",
+        "line": 567
+      },
+      {
+        "name": "RatingManager.clearAll",
+        "type": "method",
+        "line": 584
+      },
+      {
+        "name": "_currentRatingManager",
+        "type": "variable",
+        "line": 606
+      },
+      {
+        "name": "getCurrentRatingManager",
+        "type": "function",
+        "line": 625
+      }
+    ],
+    "memory/analyzers/unified-analyzer.js": [
+      {
+        "name": "enabledComponents",
+        "type": "variable",
+        "line": 211
+      },
+      {
+        "name": "dimensionCount",
+        "type": "variable",
+        "line": 212
+      },
+      {
+        "name": "startTime",
+        "type": "variable",
+        "line": 215
       },
       {
         "name": "schema",
         "type": "variable",
-        "line": 371
+        "line": 224
       },
       {
-        "name": "errors",
+        "name": "rawResult",
         "type": "variable",
-        "line": 376
+        "line": 227
       },
       {
-        "name": "base",
+        "name": "obj",
         "type": "variable",
-        "line": 403
+        "line": 255
       },
       {
-        "name": "v4",
+        "name": "unwrappers",
         "type": "variable",
-        "line": 448
+        "line": 270
       },
       {
-        "name": "personaParts",
+        "name": "normalizedResult",
         "type": "variable",
-        "line": 457
+        "line": 279
       },
       {
-        "name": "contextParts",
+        "name": "keyAliases",
         "type": "variable",
-        "line": 468
+        "line": 288
       },
       {
-        "name": "terms",
+        "name": "lowerAlias",
         "type": "variable",
-        "line": 474
+        "line": 301
       },
       {
-        "name": "toneParts",
+        "name": "primaryText",
         "type": "variable",
-        "line": 485
+        "line": 314
       },
       {
-        "name": "fwParts",
+        "name": "sectionRegex",
         "type": "variable",
-        "line": 500
+        "line": 320
       },
       {
-        "name": "steps",
+        "name": "match",
         "type": "variable",
-        "line": 503
+        "line": 321
       },
       {
-        "name": "cParts",
+        "name": "rawHeading",
         "type": "variable",
-        "line": 516
+        "line": 323
       },
       {
-        "name": "rules",
+        "name": "sectionContent",
         "type": "variable",
-        "line": 518
+        "line": 324
       },
       {
-        "name": "reqs",
+        "name": "expectedKeys",
         "type": "variable",
-        "line": 524
+        "line": 340
       },
       {
-        "name": "limits",
+        "name": "hasAnyValidDimension",
         "type": "variable",
-        "line": 530
+        "line": 351
       },
       {
-        "name": "fmtParts",
+        "name": "textLines",
         "type": "variable",
-        "line": 544
+        "line": 365
       },
       {
-        "name": "prefs",
+        "name": "migrated",
         "type": "variable",
-        "line": 547
+        "line": 381
       },
       {
-        "name": "exParts",
+        "name": "defaultEmpty",
         "type": "variable",
-        "line": 564
+        "line": 389
       },
       {
-        "name": "ids",
+        "name": "empty",
         "type": "variable",
-        "line": 616
-      },
-      {
-        "name": "hints",
-        "type": "variable",
-        "line": 617
+        "line": 410
       }
     ],
     "extractor/extractor.js": [
@@ -7556,6 +6720,88 @@
         "name": "PersonaExtractor.importToMemoryLayer",
         "type": "method",
         "line": 543
+      }
+    ],
+    "memory/component-schemas.js": [
+      {
+        "name": "schema",
+        "type": "variable",
+        "line": 371
+      },
+      {
+        "name": "base",
+        "type": "variable",
+        "line": 403
+      },
+      {
+        "name": "personaParts",
+        "type": "variable",
+        "line": 457
+      },
+      {
+        "name": "contextParts",
+        "type": "variable",
+        "line": 468
+      },
+      {
+        "name": "terms",
+        "type": "variable",
+        "line": 474
+      },
+      {
+        "name": "toneParts",
+        "type": "variable",
+        "line": 485
+      },
+      {
+        "name": "fwParts",
+        "type": "variable",
+        "line": 500
+      },
+      {
+        "name": "steps",
+        "type": "variable",
+        "line": 503
+      },
+      {
+        "name": "cParts",
+        "type": "variable",
+        "line": 516
+      },
+      {
+        "name": "rules",
+        "type": "variable",
+        "line": 518
+      },
+      {
+        "name": "reqs",
+        "type": "variable",
+        "line": 524
+      },
+      {
+        "name": "limits",
+        "type": "variable",
+        "line": 530
+      },
+      {
+        "name": "fmtParts",
+        "type": "variable",
+        "line": 544
+      },
+      {
+        "name": "prefs",
+        "type": "variable",
+        "line": 547
+      },
+      {
+        "name": "exParts",
+        "type": "variable",
+        "line": 564
+      },
+      {
+        "name": "hints",
+        "type": "variable",
+        "line": 617
       }
     ],
     "theme/theme-controller.js": [
@@ -7759,31 +7005,73 @@
         "line": 244
       }
     ],
-    "memory/analyzer-registry.js": [
+    "memory/context-assembler.js": [
       {
-        "name": "arLog",
+        "name": "ctxLog",
         "type": "function",
-        "line": 57
+        "line": 15
       },
       {
-        "name": "logFn",
+        "name": "domainSection",
         "type": "variable",
-        "line": 61
+        "line": 435
       },
       {
-        "name": "AnalyzerRegistry",
+        "name": "terms",
         "type": "variable",
-        "line": 102
+        "line": 439
       },
       {
-        "name": "existed",
+        "name": "frameworkSection",
         "type": "variable",
-        "line": 170
+        "line": 468
       },
       {
-        "name": "deleted",
+        "name": "steps",
         "type": "variable",
-        "line": 171
+        "line": 473
+      },
+      {
+        "name": "reqs",
+        "type": "variable",
+        "line": 486
+      },
+      {
+        "name": "rules",
+        "type": "variable",
+        "line": 490
+      },
+      {
+        "name": "formatSection",
+        "type": "variable",
+        "line": 507
+      }
+    ],
+    "memory/memory-controller.js": [
+      {
+        "name": "memCtrlLog",
+        "type": "function",
+        "line": 69
+      },
+      {
+        "name": "historyLength",
+        "type": "variable",
+        "line": 339
+      },
+      {
+        "name": "low",
+        "type": "variable",
+        "line": 715
+      },
+      {
+        "name": "high",
+        "type": "variable",
+        "line": 715
+      },
+      {
+        "name": "mid",
+        "type": "variable",
+        "line": 717
       }
     ],
     "options/index.js": [
@@ -7811,50 +7099,6 @@
         "name": "container",
         "type": "variable",
         "line": 101
-      }
-    ],
-    "memory/analyzers/recent-focus.js": [
-      {
-        "name": "conversationText",
-        "type": "variable",
-        "line": 24
-      },
-      {
-        "name": "recentRatings",
-        "type": "variable",
-        "line": 36
-      },
-      {
-        "name": "ratingContext",
-        "type": "variable",
-        "line": 37
-      },
-      {
-        "name": "recentMessages",
-        "type": "variable",
-        "line": 90
-      }
-    ],
-    "model/model-registry.js": [
-      {
-        "name": "sanitized",
-        "type": "variable",
-        "line": 274
-      },
-      {
-        "name": "chatModels",
-        "type": "variable",
-        "line": 414
-      },
-      {
-        "name": "fetchOpenRouterModels",
-        "type": "function",
-        "line": 434
-      },
-      {
-        "name": "fetchModelsForProvider",
-        "type": "function",
-        "line": 478
       }
     ],
     "sidepanel/modules/dimension-view.js": [
@@ -7916,6 +7160,40 @@
         "name": "keepAliveInterval",
         "type": "variable",
         "line": 347
+      }
+    ],
+    "memory/analyzer-registry.js": [
+      {
+        "name": "arLog",
+        "type": "function",
+        "line": 57
+      },
+      {
+        "name": "logFn",
+        "type": "variable",
+        "line": 61
+      },
+      {
+        "name": "existed",
+        "type": "variable",
+        "line": 170
+      }
+    ],
+    "model/model-registry.js": [
+      {
+        "name": "chatModels",
+        "type": "variable",
+        "line": 414
+      },
+      {
+        "name": "fetchOpenRouterModels",
+        "type": "function",
+        "line": 434
+      },
+      {
+        "name": "fetchModelsForProvider",
+        "type": "function",
+        "line": 478
       }
     ],
     "sidepanel/modules/cloud-sync.js": [
@@ -8031,9 +7309,9 @@
     },
     "llm/llm-client.js": {
       "total": 91,
-      "ported": 44,
-      "missing": 47,
-      "pct": "48.4%"
+      "ported": 46,
+      "missing": 45,
+      "pct": "50.5%"
     },
     "llm/llm-config.js": {
       "total": 20,
@@ -8043,63 +7321,63 @@
     },
     "logging/logger.js": {
       "total": 92,
-      "ported": 42,
-      "missing": 50,
-      "pct": "45.7%"
+      "ported": 47,
+      "missing": 45,
+      "pct": "51.1%"
     },
     "memory/analyzer-registry.js": {
       "total": 6,
-      "ported": 1,
-      "missing": 5,
-      "pct": "16.7%"
+      "ported": 3,
+      "missing": 3,
+      "pct": "50.0%"
     },
     "memory/analyzers/recent-focus.js": {
       "total": 8,
-      "ported": 4,
-      "missing": 4,
-      "pct": "50.0%"
+      "ported": 8,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "memory/analyzers/unified-analyzer.js": {
       "total": 40,
-      "ported": 9,
-      "missing": 31,
-      "pct": "22.5%"
+      "ported": 19,
+      "missing": 21,
+      "pct": "47.5%"
     },
     "memory/component-schemas.js": {
       "total": 23,
-      "ported": 1,
-      "missing": 22,
-      "pct": "4.3%"
+      "ported": 7,
+      "missing": 16,
+      "pct": "30.4%"
     },
     "memory/context-assembler.js": {
       "total": 73,
-      "ported": 19,
-      "missing": 54,
-      "pct": "26.0%"
+      "ported": 65,
+      "missing": 8,
+      "pct": "89.0%"
     },
     "memory/index.js": {
       "total": 59,
-      "ported": 22,
-      "missing": 37,
-      "pct": "37.3%"
+      "ported": 24,
+      "missing": 35,
+      "pct": "40.7%"
     },
     "memory/memory-controller.js": {
       "total": 79,
-      "ported": 32,
-      "missing": 47,
-      "pct": "40.5%"
+      "ported": 74,
+      "missing": 5,
+      "pct": "93.7%"
     },
     "model/model-manager.js": {
       "total": 74,
-      "ported": 32,
-      "missing": 42,
-      "pct": "43.2%"
+      "ported": 41,
+      "missing": 33,
+      "pct": "55.4%"
     },
     "model/model-registry.js": {
       "total": 35,
-      "ported": 31,
-      "missing": 4,
-      "pct": "88.6%"
+      "ported": 32,
+      "missing": 3,
+      "pct": "91.4%"
     },
     "options/index.js": {
       "total": 5,
@@ -8121,9 +7399,9 @@
     },
     "rating/rating-manager.js": {
       "total": 43,
-      "ported": 18,
-      "missing": 25,
-      "pct": "41.9%"
+      "ported": 20,
+      "missing": 23,
+      "pct": "46.5%"
     },
     "rating/rating-ui.js": {
       "total": 15,
@@ -8151,9 +7429,9 @@
     },
     "sidepanel/sidepanel.js": {
       "total": 965,
-      "ported": 224,
-      "missing": 741,
-      "pct": "23.2%"
+      "ported": 237,
+      "missing": 728,
+      "pct": "24.6%"
     },
     "storage/storage-repository.js": {
       "total": 17,
