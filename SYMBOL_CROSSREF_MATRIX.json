@@ -1,12 +1,12 @@
 {
-  "generated": "2026-08-30T18:10:31.637Z",
+  "generated": "2026-08-30T18:27:21.730Z",
   "summary": {
     "totalLegacySymbols": 2509,
-    "ported": 671,
-    "missing": 1838,
-    "newInWxt": 452,
-    "portedPct": "26.7%",
-    "missingPct": "73.3%"
+    "ported": 933,
+    "missing": 1576,
+    "newInWxt": 480,
+    "portedPct": "37.2%",
+    "missingPct": "62.8%"
   },
   "missingByFile": {
     "sidepanel/sidepanel.js": [
@@ -366,16 +366,6 @@
         "line": 933
       },
       {
-        "name": "memoryData",
-        "type": "variable",
-        "line": 934
-      },
-      {
-        "name": "disabledFacts",
-        "type": "variable",
-        "line": 935
-      },
-      {
         "name": "themeToggleBtn",
         "type": "variable",
         "line": 949
@@ -399,11 +389,6 @@
         "name": "previousSessionId",
         "type": "variable",
         "line": 1040
-      },
-      {
-        "name": "tab",
-        "type": "variable",
-        "line": 1043
       },
       {
         "name": "handleTabUpdated",
@@ -496,11 +481,6 @@
         "line": 1250
       },
       {
-        "name": "pathParts",
-        "type": "variable",
-        "line": 1251
-      },
-      {
         "name": "loadMemoryData",
         "type": "function",
         "line": 1266
@@ -544,16 +524,6 @@
         "name": "activeModelData",
         "type": "variable",
         "line": 1318
-      },
-      {
-        "name": "activeModelId",
-        "type": "variable",
-        "line": 1319
-      },
-      {
-        "name": "activeModel",
-        "type": "variable",
-        "line": 1325
       },
       {
         "name": "modelName",
@@ -616,11 +586,6 @@
         "line": 1438
       },
       {
-        "name": "components",
-        "type": "variable",
-        "line": 1439
-      },
-      {
         "name": "getActiveCompData",
         "type": "function",
         "line": 1447
@@ -629,11 +594,6 @@
         "name": "personaComp",
         "type": "variable",
         "line": 1454
-      },
-      {
-        "name": "dimensions",
-        "type": "variable",
-        "line": 1459
       },
       {
         "name": "comp",
@@ -1206,11 +1166,6 @@
         "line": 2502
       },
       {
-        "name": "personaText",
-        "type": "variable",
-        "line": 2519
-      },
-      {
         "name": "parts",
         "type": "variable",
         "line": 2531
@@ -1314,11 +1269,6 @@
         "name": "v4Data",
         "type": "variable",
         "line": 2889
-      },
-      {
-        "name": "isFactDisabled",
-        "type": "function",
-        "line": 2923
       },
       {
         "name": "handleFactToggle",
@@ -1506,11 +1456,6 @@
         "line": 3346
       },
       {
-        "name": "sessionKey",
-        "type": "variable",
-        "line": 3350
-      },
-      {
         "name": "activeEl",
         "type": "variable",
         "line": 3355
@@ -1554,11 +1499,6 @@
         "name": "personaTab",
         "type": "variable",
         "line": 3406
-      },
-      {
-        "name": "tab",
-        "type": "variable",
-        "line": 3410
       },
       {
         "name": "navigateToPersonaPage",
@@ -1946,11 +1886,6 @@
         "line": 3982
       },
       {
-        "name": "modelConfig",
-        "type": "variable",
-        "line": 4017
-      },
-      {
         "name": "parseExtractionResult",
         "type": "function",
         "line": 4074
@@ -2056,11 +1991,6 @@
         "line": 4295
       },
       {
-        "name": "personaText",
-        "type": "variable",
-        "line": 4299
-      },
-      {
         "name": "parts",
         "type": "variable",
         "line": 4301
@@ -2084,11 +2014,6 @@
         "name": "contextContent",
         "type": "variable",
         "line": 4321
-      },
-      {
-        "name": "context",
-        "type": "variable",
-        "line": 4322
       },
       {
         "name": "toneContent",
@@ -2661,11 +2586,6 @@
         "line": 5472
       },
       {
-        "name": "synthesizedPersona",
-        "type": "variable",
-        "line": 5475
-      },
-      {
         "name": "injectedContext",
         "type": "variable",
         "line": 5479
@@ -2689,11 +2609,6 @@
         "name": "audience",
         "type": "variable",
         "line": 5485
-      },
-      {
-        "name": "personaData",
-        "type": "variable",
-        "line": 5500
       },
       {
         "name": "existingId",
@@ -2879,11 +2794,6 @@
         "name": "keywords",
         "type": "variable",
         "line": 5892
-      },
-      {
-        "name": "memoryLayer",
-        "type": "variable",
-        "line": 5893
       },
       {
         "name": "importCount",
@@ -3256,11 +3166,6 @@
         "line": 6842
       },
       {
-        "name": "modelConfig",
-        "type": "variable",
-        "line": 6857
-      },
-      {
         "name": "confirmed",
         "type": "variable",
         "line": 6896
@@ -3446,24 +3351,9 @@
         "line": 7300
       },
       {
-        "name": "personaName",
-        "type": "variable",
-        "line": 7318
-      },
-      {
         "name": "safeName",
         "type": "variable",
         "line": 7319
-      },
-      {
-        "name": "filename",
-        "type": "variable",
-        "line": 7320
-      },
-      {
-        "name": "jsonData",
-        "type": "variable",
-        "line": 7323
       },
       {
         "name": "handle",
@@ -3489,11 +3379,6 @@
         "name": "readAndSanitizeFile",
         "type": "function",
         "line": 7401
-      },
-      {
-        "name": "fileName",
-        "type": "variable",
-        "line": 7403
       },
       {
         "name": "extension",
@@ -3716,11 +3601,6 @@
         "line": 7881
       },
       {
-        "name": "sessionKey",
-        "type": "variable",
-        "line": 7886
-      },
-      {
         "name": "sessionData",
         "type": "variable",
         "line": 7888
@@ -3824,16 +3704,6 @@
         "name": "dialog",
         "type": "variable",
         "line": 8232
-      },
-      {
-        "name": "reason",
-        "type": "variable",
-        "line": 8288
-      },
-      {
-        "name": "details",
-        "type": "variable",
-        "line": 8289
       },
       {
         "name": "submitReport",
@@ -4018,16 +3888,6 @@
         "line": 456
       },
       {
-        "name": "activeModelId",
-        "type": "variable",
-        "line": 457
-      },
-      {
-        "name": "activeModel",
-        "type": "variable",
-        "line": 461
-      },
-      {
         "name": "api",
         "type": "variable",
         "line": 487
@@ -4156,11 +4016,6 @@
         "name": "diffViewEl",
         "type": "variable",
         "line": 598
-      },
-      {
-        "name": "tabs",
-        "type": "variable",
-        "line": 599
       },
       {
         "name": "panels",
@@ -4568,16 +4423,6 @@
         "line": 1453
       },
       {
-        "name": "context",
-        "type": "variable",
-        "line": 1463
-      },
-      {
-        "name": "previousPrompts",
-        "type": "variable",
-        "line": 1464
-      },
-      {
         "name": "expandedContainer",
         "type": "variable",
         "line": 1531
@@ -4803,16 +4648,6 @@
         "line": 2015
       },
       {
-        "name": "context",
-        "type": "variable",
-        "line": 2041
-      },
-      {
-        "name": "previousPrompts",
-        "type": "variable",
-        "line": 2048
-      },
-      {
         "name": "inputEl",
         "type": "variable",
         "line": 2114
@@ -4831,11 +4666,6 @@
         "name": "splitViewActive",
         "type": "variable",
         "line": 2136
-      },
-      {
-        "name": "toggleSplitView",
-        "type": "function",
-        "line": 2138
       },
       {
         "name": "existingFrame",
@@ -4861,660 +4691,6 @@
         "name": "observer",
         "type": "variable",
         "line": 2188
-      }
-    ],
-    "memory/context-assembler.js": [
-      {
-        "name": "ctxLog",
-        "type": "function",
-        "line": 15
-      },
-      {
-        "name": "filterByGeneration",
-        "type": "variable",
-        "line": 45
-      },
-      {
-        "name": "unifiedContext",
-        "type": "variable",
-        "line": 46
-      },
-      {
-        "name": "currentGeneration",
-        "type": "variable",
-        "line": 47
-      },
-      {
-        "name": "ContextAssembler._buildSummary",
-        "type": "method",
-        "line": 77
-      },
-      {
-        "name": "summary",
-        "type": "variable",
-        "line": 78
-      },
-      {
-        "name": "isCurrent",
-        "type": "variable",
-        "line": 86
-      },
-      {
-        "name": "ContextAssembler._isComponentCurrent",
-        "type": "method",
-        "line": 106
-      },
-      {
-        "name": "ContextAssembler._getComponent",
-        "type": "method",
-        "line": 120
-      },
-      {
-        "name": "ContextAssembler._getComponentData",
-        "type": "method",
-        "line": 129
-      },
-      {
-        "name": "ContextAssembler._extractV4Data",
-        "type": "method",
-        "line": 144
-      },
-      {
-        "name": "ContextAssembler._buildRefinementContext",
-        "type": "method",
-        "line": 173
-      },
-      {
-        "name": "context",
-        "type": "variable",
-        "line": 174
-      },
-      {
-        "name": "staleComponents",
-        "type": "variable",
-        "line": 175
-      },
-      {
-        "name": "includedComponents",
-        "type": "variable",
-        "line": 176
-      },
-      {
-        "name": "isFactDisabled",
-        "type": "function",
-        "line": 178
-      },
-      {
-        "name": "trackComponent",
-        "type": "function",
-        "line": 183
-      },
-      {
-        "name": "personaComp",
-        "type": "variable",
-        "line": 200
-      },
-      {
-        "name": "personaData",
-        "type": "variable",
-        "line": 201
-      },
-      {
-        "name": "personaIncluded",
-        "type": "variable",
-        "line": 202
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 206
-      },
-      {
-        "name": "contextComp",
-        "type": "variable",
-        "line": 226
-      },
-      {
-        "name": "contextData",
-        "type": "variable",
-        "line": 227
-      },
-      {
-        "name": "contextIncluded",
-        "type": "variable",
-        "line": 228
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 232
-      },
-      {
-        "name": "exemplarComp",
-        "type": "variable",
-        "line": 252
-      },
-      {
-        "name": "exemplarData",
-        "type": "variable",
-        "line": 253
-      },
-      {
-        "name": "exemplarIncluded",
-        "type": "variable",
-        "line": 254
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 258
-      },
-      {
-        "name": "formatComp",
-        "type": "variable",
-        "line": 273
-      },
-      {
-        "name": "formatData",
-        "type": "variable",
-        "line": 274
-      },
-      {
-        "name": "formatIncluded",
-        "type": "variable",
-        "line": 275
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 279
-      },
-      {
-        "name": "toneComp",
-        "type": "variable",
-        "line": 297
-      },
-      {
-        "name": "toneData",
-        "type": "variable",
-        "line": 298
-      },
-      {
-        "name": "toneIncluded",
-        "type": "variable",
-        "line": 299
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 303
-      },
-      {
-        "name": "frameworkComp",
-        "type": "variable",
-        "line": 326
-      },
-      {
-        "name": "frameworkData",
-        "type": "variable",
-        "line": 327
-      },
-      {
-        "name": "frameworkIncluded",
-        "type": "variable",
-        "line": 328
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 332
-      },
-      {
-        "name": "constraintsComp",
-        "type": "variable",
-        "line": 349
-      },
-      {
-        "name": "constraintsData",
-        "type": "variable",
-        "line": 350
-      },
-      {
-        "name": "constraintsIncluded",
-        "type": "variable",
-        "line": 351
-      },
-      {
-        "name": "v4",
-        "type": "variable",
-        "line": 355
-      },
-      {
-        "name": "recentFocusComp",
-        "type": "variable",
-        "line": 374
-      },
-      {
-        "name": "recentFocusData",
-        "type": "variable",
-        "line": 375
-      },
-      {
-        "name": "ContextAssembler.formatForRefinement",
-        "type": "method",
-        "line": 403
-      },
-      {
-        "name": "ctx",
-        "type": "variable",
-        "line": 408
-      },
-      {
-        "name": "personaSection",
-        "type": "variable",
-        "line": 420
-      },
-      {
-        "name": "scopeTags",
-        "type": "variable",
-        "line": 432
-      },
-      {
-        "name": "domainSection",
-        "type": "variable",
-        "line": 435
-      },
-      {
-        "name": "terms",
-        "type": "variable",
-        "line": 439
-      },
-      {
-        "name": "styleTags",
-        "type": "variable",
-        "line": 447
-      },
-      {
-        "name": "toneSection",
-        "type": "variable",
-        "line": 448
-      },
-      {
-        "name": "toneSection",
-        "type": "variable",
-        "line": 454
-      },
-      {
-        "name": "reasoningType",
-        "type": "variable",
-        "line": 465
-      },
-      {
-        "name": "frameworkSection",
-        "type": "variable",
-        "line": 468
-      },
-      {
-        "name": "steps",
-        "type": "variable",
-        "line": 473
-      },
-      {
-        "name": "constraintSection",
-        "type": "variable",
-        "line": 484
-      },
-      {
-        "name": "reqs",
-        "type": "variable",
-        "line": 486
-      },
-      {
-        "name": "rules",
-        "type": "variable",
-        "line": 490
-      },
-      {
-        "name": "outputType",
-        "type": "variable",
-        "line": 504
-      },
-      {
-        "name": "formatSection",
-        "type": "variable",
-        "line": 507
-      },
-      {
-        "name": "recentSection",
-        "type": "variable",
-        "line": 526
-      },
-      {
-        "name": "ContextAssembler.getContextJSON",
-        "type": "method",
-        "line": 540
-      },
-      {
-        "name": "ContextAssembler.hasContext",
-        "type": "method",
-        "line": 551
-      },
-      {
-        "name": "ContextAssembler.clearCache",
-        "type": "method",
-        "line": 558
-      }
-    ],
-    "background/services/memory-orchestrator.js": [
-      {
-        "name": "getCurrentTabSessionId",
-        "type": "function",
-        "line": 8
-      },
-      {
-        "name": "tab",
-        "type": "variable",
-        "line": 9
-      },
-      {
-        "name": "pathParts",
-        "type": "variable",
-        "line": 27
-      },
-      {
-        "name": "getSessionMemory",
-        "type": "function",
-        "line": 42
-      },
-      {
-        "name": "updateMemoryComponent",
-        "type": "function",
-        "line": 53
-      },
-      {
-        "name": "memory",
-        "type": "variable",
-        "line": 58
-      },
-      {
-        "name": "pinPersona",
-        "type": "function",
-        "line": 80
-      },
-      {
-        "name": "memory",
-        "type": "variable",
-        "line": 85
-      },
-      {
-        "name": "personaComponent",
-        "type": "variable",
-        "line": 98
-      },
-      {
-        "name": "unpinPersona",
-        "type": "function",
-        "line": 115
-      },
-      {
-        "name": "memory",
-        "type": "variable",
-        "line": 120
-      },
-      {
-        "name": "personaComponent",
-        "type": "variable",
-        "line": 123
-      },
-      {
-        "name": "pinComponent",
-        "type": "function",
-        "line": 148
-      },
-      {
-        "name": "memory",
-        "type": "variable",
-        "line": 154
-      },
-      {
-        "name": "unpinComponent",
-        "type": "function",
-        "line": 187
-      },
-      {
-        "name": "memory",
-        "type": "variable",
-        "line": 193
-      },
-      {
-        "name": "toggleFact",
-        "type": "function",
-        "line": 209
-      },
-      {
-        "name": "disabled",
-        "type": "variable",
-        "line": 214
-      },
-      {
-        "name": "buildV4RefinementContext",
-        "type": "function",
-        "line": 233
-      },
-      {
-        "name": "components",
-        "type": "variable",
-        "line": 236
-      },
-      {
-        "name": "dimensions",
-        "type": "variable",
-        "line": 237
-      },
-      {
-        "name": "isFactDisabled",
-        "type": "function",
-        "line": 240
-      },
-      {
-        "name": "getActiveData",
-        "type": "function",
-        "line": 245
-      },
-      {
-        "name": "personaLegacy",
-        "type": "variable",
-        "line": 258
-      },
-      {
-        "name": "personaData",
-        "type": "variable",
-        "line": 260
-      },
-      {
-        "name": "personaText",
-        "type": "variable",
-        "line": 261
-      },
-      {
-        "name": "contextV4",
-        "type": "variable",
-        "line": 279
-      },
-      {
-        "name": "contextLegacy",
-        "type": "variable",
-        "line": 280
-      },
-      {
-        "name": "contextData",
-        "type": "variable",
-        "line": 282
-      },
-      {
-        "name": "contextLegacyData",
-        "type": "variable",
-        "line": 283
-      },
-      {
-        "name": "scopeTags",
-        "type": "variable",
-        "line": 287
-      },
-      {
-        "name": "instruction",
-        "type": "variable",
-        "line": 288
-      },
-      {
-        "name": "toneV4",
-        "type": "variable",
-        "line": 312
-      },
-      {
-        "name": "toneLegacy",
-        "type": "variable",
-        "line": 313
-      },
-      {
-        "name": "toneData",
-        "type": "variable",
-        "line": 315
-      },
-      {
-        "name": "toneLegacyData",
-        "type": "variable",
-        "line": 316
-      },
-      {
-        "name": "styleTags",
-        "type": "variable",
-        "line": 319
-      },
-      {
-        "name": "bannedPhrases",
-        "type": "variable",
-        "line": 320
-      },
-      {
-        "name": "toneSection",
-        "type": "variable",
-        "line": 323
-      },
-      {
-        "name": "frameworkV4",
-        "type": "variable",
-        "line": 348
-      },
-      {
-        "name": "fw",
-        "type": "variable",
-        "line": 349
-      },
-      {
-        "name": "reasoningType",
-        "type": "variable",
-        "line": 352
-      },
-      {
-        "name": "constraintsV4",
-        "type": "variable",
-        "line": 365
-      },
-      {
-        "name": "c",
-        "type": "variable",
-        "line": 366
-      },
-      {
-        "name": "prohibitions",
-        "type": "variable",
-        "line": 369
-      },
-      {
-        "name": "requirements",
-        "type": "variable",
-        "line": 370
-      },
-      {
-        "name": "responseLength",
-        "type": "variable",
-        "line": 371
-      },
-      {
-        "name": "constraintSection",
-        "type": "variable",
-        "line": 374
-      },
-      {
-        "name": "formatV4",
-        "type": "variable",
-        "line": 393
-      },
-      {
-        "name": "fmt",
-        "type": "variable",
-        "line": 394
-      },
-      {
-        "name": "outputType",
-        "type": "variable",
-        "line": 397
-      },
-      {
-        "name": "exemplarV4",
-        "type": "variable",
-        "line": 410
-      },
-      {
-        "name": "ex",
-        "type": "variable",
-        "line": 411
-      },
-      {
-        "name": "recentFocus",
-        "type": "variable",
-        "line": 426
-      },
-      {
-        "name": "recentSection",
-        "type": "variable",
-        "line": 429
-      },
-      {
-        "name": "rebuildSessionMemory",
-        "type": "function",
-        "line": 453
-      },
-      {
-        "name": "targetTab",
-        "type": "variable",
-        "line": 468
-      },
-      {
-        "name": "matchingTabs",
-        "type": "variable",
-        "line": 469
-      },
-      {
-        "name": "_sessionLocks",
-        "type": "variable",
-        "line": 526
-      },
-      {
-        "name": "acquireSessionLock",
-        "type": "function",
-        "line": 534
-      },
-      {
-        "name": "existingLock",
-        "type": "variable",
-        "line": 537
-      },
-      {
-        "name": "releaseSessionLock",
-        "type": "function",
-        "line": 556
       }
     ],
     "content/scraper.js": [
@@ -5871,11 +5047,6 @@
         "line": 236
       },
       {
-        "name": "modelId",
-        "type": "variable",
-        "line": 242
-      },
-      {
         "name": "ModelManagerUI.setupModalEvents",
         "type": "method",
         "line": 286
@@ -6096,11 +5267,6 @@
         "line": 682
       },
       {
-        "name": "modelId",
-        "type": "variable",
-        "line": 685
-      },
-      {
         "name": "customModel",
         "type": "variable",
         "line": 686
@@ -6121,548 +5287,276 @@
         "line": 736
       }
     ],
-    "memory/memory-controller.js": [
+    "memory/context-assembler.js": [
       {
-        "name": "MEMORY_SCHEMA_VERSION",
-        "type": "constant",
-        "line": 43
-      },
-      {
-        "name": "DIMENSION_NAMES",
-        "type": "constant",
-        "line": 48
-      },
-      {
-        "name": "SESSION_KEY_PREFIX",
-        "type": "constant",
-        "line": 55
-      },
-      {
-        "name": "MEMORY_SIZE_LIMITS",
-        "type": "constant",
-        "line": 61
-      },
-      {
-        "name": "memCtrlLog",
+        "name": "ctxLog",
         "type": "function",
-        "line": 69
+        "line": 15
       },
       {
-        "name": "MemoryController.extractSessionId",
+        "name": "filterByGeneration",
+        "type": "variable",
+        "line": 45
+      },
+      {
+        "name": "unifiedContext",
+        "type": "variable",
+        "line": 46
+      },
+      {
+        "name": "currentGeneration",
+        "type": "variable",
+        "line": 47
+      },
+      {
+        "name": "ContextAssembler._buildSummary",
         "type": "method",
-        "line": 103
+        "line": 77
       },
       {
-        "name": "urlObj",
+        "name": "summary",
         "type": "variable",
-        "line": 105
+        "line": 78
       },
       {
-        "name": "pathParts",
+        "name": "isCurrent",
         "type": "variable",
+        "line": 86
+      },
+      {
+        "name": "ContextAssembler._isComponentCurrent",
+        "type": "method",
         "line": 106
       },
       {
-        "name": "MemoryController.isExtensionContext",
+        "name": "ContextAssembler._getComponent",
         "type": "method",
-        "line": 130
+        "line": 120
       },
       {
-        "name": "MemoryController._bridgeRequestId",
-        "type": "property",
-        "line": 139
-      },
-      {
-        "name": "MemoryController._bridgeRequests",
-        "type": "property",
-        "line": 140
-      },
-      {
-        "name": "MemoryController._bridgeInitialized",
-        "type": "property",
-        "line": 141
-      },
-      {
-        "name": "MemoryController._initBridgeListener",
+        "name": "ContextAssembler._getComponentData",
         "type": "method",
-        "line": 146
+        "line": 129
       },
       {
-        "name": "requestId",
-        "type": "variable",
-        "line": 151
+        "name": "ContextAssembler._extractV4Data",
+        "type": "method",
+        "line": 144
       },
       {
-        "name": "pending",
-        "type": "variable",
-        "line": 153
-      },
-      {
-        "name": "MemoryController._makeBridgeRequest",
+        "name": "ContextAssembler._buildRefinementContext",
         "type": "method",
         "line": 173
       },
       {
-        "name": "requestId",
+        "name": "staleComponents",
         "type": "variable",
-        "line": 177
+        "line": 175
       },
       {
-        "name": "timeout",
+        "name": "includedComponents",
         "type": "variable",
-        "line": 179
+        "line": 176
       },
       {
-        "name": "MemoryController._ensureCache",
-        "type": "method",
-        "line": 209
-      },
-      {
-        "name": "MemoryController.getComponent",
-        "type": "method",
-        "line": 270
-      },
-      {
-        "name": "MemoryController.setComponent",
-        "type": "method",
-        "line": 289
-      },
-      {
-        "name": "sanitizedData",
-        "type": "variable",
-        "line": 320
-      },
-      {
-        "name": "historyLength",
-        "type": "variable",
-        "line": 339
-      },
-      {
-        "name": "MemoryController.incrementGeneration",
-        "type": "method",
-        "line": 382
-      },
-      {
-        "name": "MemoryController.getComponentGeneration",
-        "type": "method",
-        "line": 408
-      },
-      {
-        "name": "MemoryController.isComponentCurrent",
-        "type": "method",
-        "line": 419
-      },
-      {
-        "name": "MemoryController.pinPersona",
-        "type": "method",
-        "line": 435
-      },
-      {
-        "name": "personaComponent",
-        "type": "variable",
-        "line": 438
-      },
-      {
-        "name": "MemoryController.unpinPersona",
-        "type": "method",
-        "line": 464
-      },
-      {
-        "name": "personaComponent",
-        "type": "variable",
-        "line": 467
-      },
-      {
-        "name": "MemoryController.isPersonaPinned",
-        "type": "method",
-        "line": 485
-      },
-      {
-        "name": "MemoryController.getEffectivePersona",
-        "type": "method",
-        "line": 494
-      },
-      {
-        "name": "personaComponent",
-        "type": "variable",
-        "line": 497
-      },
-      {
-        "name": "MemoryController.updatePinnedPersona",
-        "type": "method",
-        "line": 512
-      },
-      {
-        "name": "personaComponent",
-        "type": "variable",
-        "line": 515
-      },
-      {
-        "name": "MemoryController.pinComponent",
-        "type": "method",
-        "line": 545
-      },
-      {
-        "name": "MemoryController.unpinComponent",
-        "type": "method",
-        "line": 570
-      },
-      {
-        "name": "MemoryController.isComponentPinned",
-        "type": "method",
-        "line": 594
-      },
-      {
-        "name": "MemoryController.getEffectiveComponent",
-        "type": "method",
-        "line": 605
-      },
-      {
-        "name": "MemoryController.getUnifiedContext",
-        "type": "method",
-        "line": 622
-      },
-      {
-        "name": "context",
-        "type": "variable",
-        "line": 625
-      },
-      {
-        "name": "MemoryController.hasContext",
-        "type": "method",
-        "line": 648
-      },
-      {
-        "name": "MemoryController._getEmptyMemory",
-        "type": "method",
-        "line": 675
-      },
-      {
-        "name": "MemoryController._estimateSize",
-        "type": "method",
-        "line": 691
-      },
-      {
-        "name": "MemoryController._truncateString",
-        "type": "method",
-        "line": 706
-      },
-      {
-        "name": "encoder",
-        "type": "variable",
-        "line": 709
-      },
-      {
-        "name": "low",
-        "type": "variable",
-        "line": 715
-      },
-      {
-        "name": "high",
-        "type": "variable",
-        "line": 715
-      },
-      {
-        "name": "mid",
-        "type": "variable",
-        "line": 717
-      },
-      {
-        "name": "MemoryController._sanitizeComponentData",
-        "type": "method",
-        "line": 733
-      },
-      {
-        "name": "sanitized",
-        "type": "variable",
-        "line": 742
-      },
-      {
-        "name": "MemoryController._isCharArray",
-        "type": "method",
-        "line": 779
-      },
-      {
-        "name": "keys",
-        "type": "variable",
-        "line": 783
-      },
-      {
-        "name": "isNumericKeys",
-        "type": "variable",
-        "line": 787
-      },
-      {
-        "name": "MemoryController.getStorageUsage",
-        "type": "method",
-        "line": 799
-      },
-      {
-        "name": "total",
-        "type": "variable",
-        "line": 810
-      }
-    ],
-    "background/services/api-proxy.js": [
-      {
-        "name": "getUserFriendlyError",
+        "name": "trackComponent",
         "type": "function",
-        "line": 21
+        "line": 183
       },
       {
-        "name": "providerName",
+        "name": "personaComp",
         "type": "variable",
-        "line": 22
+        "line": 200
       },
       {
-        "name": "rawStr",
+        "name": "personaIncluded",
         "type": "variable",
-        "line": 30
+        "line": 202
       },
       {
-        "name": "REFINEMENT_SYSTEM_PROMPT",
-        "type": "constant",
-        "line": 66
-      },
-      {
-        "name": "MODEL_CONFIGS",
-        "type": "constant",
-        "line": 116
-      },
-      {
-        "name": "LLM_TRANSPORTS",
-        "type": "constant",
-        "line": 147
-      },
-      {
-        "name": "effective",
+        "name": "v4",
         "type": "variable",
-        "line": 151
+        "line": 206
       },
       {
-        "name": "RETRY_CONFIG_BG",
-        "type": "constant",
-        "line": 218
-      },
-      {
-        "name": "calculateRetryDelay",
-        "type": "function",
-        "line": 230
-      },
-      {
-        "name": "exponentialDelay",
+        "name": "contextComp",
         "type": "variable",
-        "line": 231
+        "line": 226
       },
       {
-        "name": "cappedDelay",
+        "name": "contextIncluded",
+        "type": "variable",
+        "line": 228
+      },
+      {
+        "name": "v4",
         "type": "variable",
         "line": 232
       },
       {
-        "name": "jitter",
+        "name": "exemplarComp",
         "type": "variable",
-        "line": 234
+        "line": 252
       },
       {
-        "name": "executeLlmRequest",
-        "type": "function",
-        "line": 241
-      },
-      {
-        "name": "timer",
+        "name": "exemplarData",
         "type": "variable",
-        "line": 280
+        "line": 253
       },
       {
-        "name": "rawModel",
+        "name": "exemplarIncluded",
         "type": "variable",
-        "line": 290
+        "line": 254
       },
       {
-        "name": "headers",
+        "name": "v4",
         "type": "variable",
-        "line": 302
+        "line": 258
       },
       {
-        "name": "rawError",
+        "name": "formatComp",
         "type": "variable",
-        "line": 315
+        "line": 273
       },
       {
-        "name": "errMsg",
+        "name": "formatData",
         "type": "variable",
-        "line": 318
+        "line": 274
       },
       {
-        "name": "callLLMForExtraction",
-        "type": "function",
+        "name": "formatIncluded",
+        "type": "variable",
+        "line": 275
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 279
+      },
+      {
+        "name": "toneComp",
+        "type": "variable",
+        "line": 297
+      },
+      {
+        "name": "toneIncluded",
+        "type": "variable",
+        "line": 299
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 303
+      },
+      {
+        "name": "frameworkComp",
+        "type": "variable",
+        "line": 326
+      },
+      {
+        "name": "frameworkData",
+        "type": "variable",
+        "line": 327
+      },
+      {
+        "name": "frameworkIncluded",
+        "type": "variable",
+        "line": 328
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 332
+      },
+      {
+        "name": "constraintsComp",
+        "type": "variable",
+        "line": 349
+      },
+      {
+        "name": "constraintsData",
+        "type": "variable",
+        "line": 350
+      },
+      {
+        "name": "constraintsIncluded",
+        "type": "variable",
+        "line": 351
+      },
+      {
+        "name": "v4",
+        "type": "variable",
+        "line": 355
+      },
+      {
+        "name": "recentFocusComp",
+        "type": "variable",
         "line": 374
       },
       {
-        "name": "safeConfig",
+        "name": "recentFocusData",
         "type": "variable",
         "line": 375
       },
       {
-        "name": "rawModel",
-        "type": "variable",
-        "line": 376
-      },
-      {
-        "name": "handleRefinement",
-        "type": "function",
-        "line": 390
-      },
-      {
-        "name": "abortController",
-        "type": "variable",
-        "line": 392
-      },
-      {
-        "name": "signal",
-        "type": "variable",
-        "line": 400
-      },
-      {
-        "name": "syncStorage",
-        "type": "variable",
+        "name": "ContextAssembler.formatForRefinement",
+        "type": "method",
         "line": 403
       },
       {
-        "name": "localStorage",
+        "name": "ctx",
         "type": "variable",
-        "line": 409
+        "line": 408
       },
       {
-        "name": "paModels",
+        "name": "domainSection",
         "type": "variable",
-        "line": 410
+        "line": 435
       },
       {
-        "name": "activeModelId",
+        "name": "terms",
         "type": "variable",
-        "line": 411
+        "line": 439
       },
       {
-        "name": "effectiveModelId",
+        "name": "frameworkSection",
         "type": "variable",
-        "line": 413
+        "line": 468
       },
       {
-        "name": "modelConfig",
+        "name": "steps",
         "type": "variable",
-        "line": 414
+        "line": 473
       },
       {
-        "name": "rawModel",
+        "name": "reqs",
         "type": "variable",
-        "line": 423
+        "line": 486
       },
       {
-        "name": "effectivePersona",
+        "name": "rules",
         "type": "variable",
-        "line": 438
+        "line": 490
       },
       {
-        "name": "memoryData",
+        "name": "formatSection",
         "type": "variable",
-        "line": 440
+        "line": 507
       },
       {
-        "name": "personaComponent",
-        "type": "variable",
-        "line": 448
+        "name": "ContextAssembler.getContextJSON",
+        "type": "method",
+        "line": 540
       },
       {
-        "name": "synthesizedPersona",
-        "type": "variable",
-        "line": 449
+        "name": "ContextAssembler.hasContext",
+        "type": "method",
+        "line": 551
       },
       {
-        "name": "counter",
-        "type": "variable",
-        "line": 478
-      },
-      {
-        "name": "processedText",
-        "type": "variable",
-        "line": 498
-      },
-      {
-        "name": "variables",
-        "type": "variable",
-        "line": 501
-      },
-      {
-        "name": "escapedKey",
-        "type": "variable",
-        "line": 503
-      },
-      {
-        "name": "regex",
-        "type": "variable",
-        "line": 504
-      },
-      {
-        "name": "contextStr",
-        "type": "variable",
-        "line": 514
-      },
-      {
-        "name": "previousPromptsStr",
-        "type": "variable",
-        "line": 520
-      },
-      {
-        "name": "ratingLabel",
-        "type": "variable",
-        "line": 526
-      },
-      {
-        "name": "disabledFacts",
-        "type": "variable",
-        "line": 536
-      },
-      {
-        "name": "disabledKey",
-        "type": "variable",
-        "line": 538
-      },
-      {
-        "name": "disabledResult",
-        "type": "variable",
-        "line": 539
-      },
-      {
-        "name": "v4Context",
-        "type": "variable",
-        "line": 546
-      },
-      {
-        "name": "isPersonaDisabled",
-        "type": "variable",
-        "line": 549
-      },
-      {
-        "name": "personaToUse",
-        "type": "variable",
-        "line": 552
-      },
-      {
-        "name": "personaSection",
-        "type": "variable",
-        "line": 557
-      },
-      {
-        "name": "promptText",
-        "type": "variable",
-        "line": 573
-      },
-      {
-        "name": "llmResponse",
-        "type": "variable",
-        "line": 599
+        "name": "ContextAssembler.clearCache",
+        "type": "method",
+        "line": 558
       }
     ],
     "logging/logger.js": [
@@ -6999,11 +5893,6 @@
         "line": 241
       },
       {
-        "name": "contentType",
-        "type": "variable",
-        "line": 247
-      },
-      {
         "name": "LLMClient.configure",
         "type": "method",
         "line": 271
@@ -7042,11 +5931,6 @@
         "name": "LLMClient._calculateBackoff",
         "type": "method",
         "line": 433
-      },
-      {
-        "name": "jitter",
-        "type": "variable",
-        "line": 439
       },
       {
         "name": "LLMClient._delay",
@@ -7164,448 +6048,241 @@
         "line": 820
       }
     ],
-    "background/index.js": [
+    "memory/memory-controller.js": [
       {
-        "name": "geminiApiKey",
-        "type": "variable",
-        "line": 53
-      },
-      {
-        "name": "openOptions",
-        "type": "variable",
-        "line": 64
-      },
-      {
-        "name": "openOptions",
-        "type": "variable",
-        "line": 100
-      },
-      {
-        "name": "hasEnabledModelWithKey",
-        "type": "variable",
-        "line": 122
-      },
-      {
-        "name": "jsonData",
-        "type": "variable",
-        "line": 147
-      },
-      {
-        "name": "filename",
-        "type": "variable",
-        "line": 147
-      },
-      {
-        "name": "filenameListener",
-        "type": "function",
-        "line": 152
-      },
-      {
-        "name": "base64Data",
-        "type": "variable",
-        "line": 158
-      },
-      {
-        "name": "dataUrl",
-        "type": "variable",
-        "line": 159
-      },
-      {
-        "name": "tabId",
-        "type": "variable",
-        "line": 204
-      },
-      {
-        "name": "disabledKey",
-        "type": "variable",
-        "line": 280
-      },
-      {
-        "name": "tabs",
-        "type": "variable",
-        "line": 298
-      },
-      {
-        "name": "sentCount",
-        "type": "variable",
-        "line": 300
-      },
-      {
-        "name": "skippedCount",
-        "type": "variable",
-        "line": 301
-      },
-      {
-        "name": "urlMatch",
-        "type": "variable",
-        "line": 307
-      },
-      {
-        "name": "sessionKey",
-        "type": "variable",
-        "line": 316
-      },
-      {
-        "name": "keepAliveInterval",
-        "type": "variable",
-        "line": 347
-      },
-      {
-        "name": "ALLOWED_PROXY_HOSTS",
+        "name": "MEMORY_SCHEMA_VERSION",
         "type": "constant",
-        "line": 349
+        "line": 43
       },
       {
-        "name": "targetUrl",
-        "type": "variable",
-        "line": 356
-      },
-      {
-        "name": "contentType",
-        "type": "variable",
-        "line": 376
-      },
-      {
-        "name": "activeModel",
-        "type": "variable",
-        "line": 415
-      },
-      {
-        "name": "enabledModel",
-        "type": "variable",
-        "line": 432
-      },
-      {
-        "name": "modelConfig",
-        "type": "variable",
-        "line": 462
-      },
-      {
-        "name": "abortController",
-        "type": "variable",
-        "line": 469
-      },
-      {
-        "name": "memoryLayer",
-        "type": "variable",
-        "line": 657
-      },
-      {
-        "name": "personaName",
-        "type": "variable",
-        "line": 657
-      },
-      {
-        "name": "memory",
-        "type": "variable",
-        "line": 671
-      },
-      {
-        "name": "dimensionNames",
-        "type": "variable",
-        "line": 677
-      },
-      {
-        "name": "memory",
-        "type": "variable",
-        "line": 819
-      },
-      {
-        "name": "ratingKey",
-        "type": "variable",
-        "line": 828
-      },
-      {
-        "name": "ratingResult",
-        "type": "variable",
-        "line": 829
-      },
-      {
-        "name": "exchangeCount",
-        "type": "variable",
-        "line": 836
-      },
-      {
-        "name": "MIN_EXCHANGES",
+        "name": "DIMENSION_NAMES",
         "type": "constant",
-        "line": 837
+        "line": 48
       },
       {
-        "name": "ratingKey",
-        "type": "variable",
-        "line": 877
+        "name": "SESSION_KEY_PREFIX",
+        "type": "constant",
+        "line": 55
       },
       {
-        "name": "personaName",
-        "type": "variable",
-        "line": 906
+        "name": "MEMORY_SIZE_LIMITS",
+        "type": "constant",
+        "line": 61
       },
       {
-        "name": "severeTerms",
-        "type": "variable",
-        "line": 911
-      },
-      {
-        "name": "warningTerms",
-        "type": "variable",
-        "line": 917
-      },
-      {
-        "name": "contentLower",
-        "type": "variable",
-        "line": 923
-      },
-      {
-        "name": "severeFound",
-        "type": "variable",
-        "line": 926
-      },
-      {
-        "name": "warningFound",
-        "type": "variable",
-        "line": 941
-      },
-      {
-        "name": "reason",
-        "type": "variable",
-        "line": 975
-      },
-      {
-        "name": "details",
-        "type": "variable",
-        "line": 975
-      },
-      {
-        "name": "reportKey",
-        "type": "variable",
-        "line": 980
-      },
-      {
-        "name": "reports",
-        "type": "variable",
-        "line": 993
-      }
-    ],
-    "memory/index.js": [
-      {
-        "name": "memLog",
+        "name": "memCtrlLog",
         "type": "function",
-        "line": 39
+        "line": 69
       },
       {
-        "name": "sessionMutexes",
+        "name": "MemoryController.extractSessionId",
+        "type": "method",
+        "line": 103
+      },
+      {
+        "name": "urlObj",
         "type": "variable",
-        "line": 72
+        "line": 105
       },
       {
-        "name": "analyzeSession",
-        "type": "function",
-        "line": 82
+        "name": "MemoryController.isExtensionContext",
+        "type": "method",
+        "line": 130
       },
       {
-        "name": "runPromise",
-        "type": "variable",
-        "line": 96
+        "name": "MemoryController._bridgeRequestId",
+        "type": "property",
+        "line": 139
       },
       {
-        "name": "memory",
-        "type": "variable",
-        "line": 101
+        "name": "MemoryController._bridgeRequests",
+        "type": "property",
+        "line": 140
       },
       {
-        "name": "scraper",
-        "type": "variable",
-        "line": 131
+        "name": "MemoryController._bridgeInitialized",
+        "type": "property",
+        "line": 141
       },
       {
-        "name": "scrapedData",
-        "type": "variable",
-        "line": 143
-      },
-      {
-        "name": "isSelectiveRebuild",
-        "type": "variable",
-        "line": 148
-      },
-      {
-        "name": "shouldIncrementGen",
-        "type": "variable",
-        "line": 149
-      },
-      {
-        "name": "newGen",
-        "type": "variable",
-        "line": 152
-      },
-      {
-        "name": "results",
-        "type": "variable",
-        "line": 164
-      },
-      {
-        "name": "enabledComponents",
-        "type": "variable",
-        "line": 177
-      },
-      {
-        "name": "pinnedComponents",
-        "type": "variable",
-        "line": 181
-      },
-      {
-        "name": "allDimensions",
-        "type": "variable",
-        "line": 182
-      },
-      {
-        "name": "startTime",
-        "type": "variable",
-        "line": 214
-      },
-      {
-        "name": "unifiedResults",
-        "type": "variable",
-        "line": 215
-      },
-      {
-        "name": "dimensionIds",
-        "type": "variable",
-        "line": 226
-      },
-      {
-        "name": "context",
-        "type": "variable",
-        "line": 287
-      },
-      {
-        "name": "isLLMConfigured",
-        "type": "function",
-        "line": 308
-      },
-      {
-        "name": "getCurrentSessionId",
-        "type": "function",
-        "line": 317
+        "name": "MemoryController._initBridgeListener",
+        "type": "method",
+        "line": 146
       },
       {
         "name": "requestId",
         "type": "variable",
-        "line": 346
+        "line": 151
       },
       {
-        "name": "sendBridgeResponse",
-        "type": "function",
-        "line": 349
-      },
-      {
-        "name": "SmartAutoRun",
+        "name": "pending",
         "type": "variable",
-        "line": 398
+        "line": 153
       },
       {
-        "name": "isConfigured",
-        "type": "variable",
-        "line": 417
+        "name": "MemoryController._makeBridgeRequest",
+        "type": "method",
+        "line": 173
       },
       {
-        "name": "scraper",
+        "name": "requestId",
         "type": "variable",
-        "line": 427
+        "line": 177
       },
       {
-        "name": "completeTurns",
+        "name": "timeout",
         "type": "variable",
-        "line": 434
+        "line": 179
       },
       {
-        "name": "memory",
-        "type": "variable",
-        "line": 449
+        "name": "MemoryController._ensureCache",
+        "type": "method",
+        "line": 209
       },
       {
-        "name": "hasExistingMemory",
-        "type": "variable",
-        "line": 451
+        "name": "MemoryController.getComponent",
+        "type": "method",
+        "line": 270
       },
       {
-        "name": "chatContainer",
-        "type": "variable",
-        "line": 467
+        "name": "MemoryController.setComponent",
+        "type": "method",
+        "line": 289
       },
       {
-        "name": "isModelResponse",
+        "name": "sanitizedData",
         "type": "variable",
-        "line": 495
+        "line": 320
       },
       {
-        "name": "canRun",
+        "name": "historyLength",
         "type": "variable",
-        "line": 514
+        "line": 339
       },
       {
-        "name": "completeTurns",
-        "type": "variable",
-        "line": 514
+        "name": "MemoryController.incrementGeneration",
+        "type": "method",
+        "line": 382
       },
       {
-        "name": "reason",
-        "type": "variable",
-        "line": 514
+        "name": "MemoryController.getComponentGeneration",
+        "type": "method",
+        "line": 408
       },
       {
-        "name": "enabledAnalyzers",
-        "type": "variable",
-        "line": 536
+        "name": "MemoryController.isComponentCurrent",
+        "type": "method",
+        "line": 419
       },
       {
-        "name": "disabledKey",
-        "type": "variable",
-        "line": 540
+        "name": "MemoryController.isPersonaPinned",
+        "type": "method",
+        "line": 485
       },
       {
-        "name": "disabledFacts",
-        "type": "variable",
-        "line": 541
+        "name": "MemoryController.getEffectivePersona",
+        "type": "method",
+        "line": 494
       },
       {
-        "name": "canRun",
-        "type": "variable",
-        "line": 574
+        "name": "MemoryController.updatePinnedPersona",
+        "type": "method",
+        "line": 512
       },
       {
-        "name": "reason",
-        "type": "variable",
-        "line": 574
+        "name": "MemoryController.isComponentPinned",
+        "type": "method",
+        "line": 594
       },
       {
-        "name": "hasMemory",
-        "type": "variable",
-        "line": 574
+        "name": "MemoryController.getEffectiveComponent",
+        "type": "method",
+        "line": 605
       },
       {
-        "name": "completeTurns",
-        "type": "variable",
-        "line": 574
+        "name": "MemoryController.getUnifiedContext",
+        "type": "method",
+        "line": 622
       },
       {
-        "name": "currentUrl",
-        "type": "variable",
-        "line": 592
+        "name": "MemoryController.hasContext",
+        "type": "method",
+        "line": 648
       },
       {
-        "name": "newSessionId",
-        "type": "variable",
-        "line": 593
+        "name": "MemoryController._getEmptyMemory",
+        "type": "method",
+        "line": 675
       },
       {
-        "name": "originalPushState",
-        "type": "variable",
-        "line": 630
+        "name": "MemoryController._estimateSize",
+        "type": "method",
+        "line": 691
       },
       {
-        "name": "originalReplaceState",
+        "name": "MemoryController._truncateString",
+        "type": "method",
+        "line": 706
+      },
+      {
+        "name": "encoder",
         "type": "variable",
-        "line": 637
+        "line": 709
+      },
+      {
+        "name": "bytes",
+        "type": "variable",
+        "line": 710
+      },
+      {
+        "name": "low",
+        "type": "variable",
+        "line": 715
+      },
+      {
+        "name": "high",
+        "type": "variable",
+        "line": 715
+      },
+      {
+        "name": "mid",
+        "type": "variable",
+        "line": 717
+      },
+      {
+        "name": "MemoryController._sanitizeComponentData",
+        "type": "method",
+        "line": 733
+      },
+      {
+        "name": "sanitized",
+        "type": "variable",
+        "line": 742
+      },
+      {
+        "name": "MemoryController._isCharArray",
+        "type": "method",
+        "line": 779
+      },
+      {
+        "name": "keys",
+        "type": "variable",
+        "line": 783
+      },
+      {
+        "name": "isNumericKeys",
+        "type": "variable",
+        "line": 787
+      },
+      {
+        "name": "MemoryController.getStorageUsage",
+        "type": "method",
+        "line": 799
+      },
+      {
+        "name": "total",
+        "type": "variable",
+        "line": 810
       }
     ],
     "model/model-manager.js": [
@@ -7820,6 +6497,193 @@
         "line": 917
       }
     ],
+    "memory/index.js": [
+      {
+        "name": "memLog",
+        "type": "function",
+        "line": 39
+      },
+      {
+        "name": "sessionMutexes",
+        "type": "variable",
+        "line": 72
+      },
+      {
+        "name": "analyzeSession",
+        "type": "function",
+        "line": 82
+      },
+      {
+        "name": "runPromise",
+        "type": "variable",
+        "line": 96
+      },
+      {
+        "name": "scraper",
+        "type": "variable",
+        "line": 131
+      },
+      {
+        "name": "scrapedData",
+        "type": "variable",
+        "line": 143
+      },
+      {
+        "name": "isSelectiveRebuild",
+        "type": "variable",
+        "line": 148
+      },
+      {
+        "name": "shouldIncrementGen",
+        "type": "variable",
+        "line": 149
+      },
+      {
+        "name": "newGen",
+        "type": "variable",
+        "line": 152
+      },
+      {
+        "name": "results",
+        "type": "variable",
+        "line": 164
+      },
+      {
+        "name": "enabledComponents",
+        "type": "variable",
+        "line": 177
+      },
+      {
+        "name": "pinnedComponents",
+        "type": "variable",
+        "line": 181
+      },
+      {
+        "name": "allDimensions",
+        "type": "variable",
+        "line": 182
+      },
+      {
+        "name": "startTime",
+        "type": "variable",
+        "line": 214
+      },
+      {
+        "name": "unifiedResults",
+        "type": "variable",
+        "line": 215
+      },
+      {
+        "name": "dimensionIds",
+        "type": "variable",
+        "line": 226
+      },
+      {
+        "name": "isLLMConfigured",
+        "type": "function",
+        "line": 308
+      },
+      {
+        "name": "getCurrentSessionId",
+        "type": "function",
+        "line": 317
+      },
+      {
+        "name": "requestId",
+        "type": "variable",
+        "line": 346
+      },
+      {
+        "name": "sendBridgeResponse",
+        "type": "function",
+        "line": 349
+      },
+      {
+        "name": "SmartAutoRun",
+        "type": "variable",
+        "line": 398
+      },
+      {
+        "name": "isConfigured",
+        "type": "variable",
+        "line": 417
+      },
+      {
+        "name": "scraper",
+        "type": "variable",
+        "line": 427
+      },
+      {
+        "name": "completeTurns",
+        "type": "variable",
+        "line": 434
+      },
+      {
+        "name": "hasExistingMemory",
+        "type": "variable",
+        "line": 451
+      },
+      {
+        "name": "chatContainer",
+        "type": "variable",
+        "line": 467
+      },
+      {
+        "name": "isModelResponse",
+        "type": "variable",
+        "line": 495
+      },
+      {
+        "name": "canRun",
+        "type": "variable",
+        "line": 514
+      },
+      {
+        "name": "completeTurns",
+        "type": "variable",
+        "line": 514
+      },
+      {
+        "name": "enabledAnalyzers",
+        "type": "variable",
+        "line": 536
+      },
+      {
+        "name": "canRun",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "hasMemory",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "completeTurns",
+        "type": "variable",
+        "line": 574
+      },
+      {
+        "name": "currentUrl",
+        "type": "variable",
+        "line": 592
+      },
+      {
+        "name": "newSessionId",
+        "type": "variable",
+        "line": 593
+      },
+      {
+        "name": "originalPushState",
+        "type": "variable",
+        "line": 630
+      },
+      {
+        "name": "originalReplaceState",
+        "type": "variable",
+        "line": 637
+      }
+    ],
     "memory/analyzers/unified-analyzer.js": [
       {
         "name": "resp",
@@ -7860,11 +6724,6 @@
         "name": "allDimensions",
         "type": "variable",
         "line": 94
-      },
-      {
-        "name": "dimensions",
-        "type": "variable",
-        "line": 103
       },
       {
         "name": "dimensionList",
@@ -8154,11 +7013,6 @@
         "name": "urlObj",
         "type": "variable",
         "line": 171
-      },
-      {
-        "name": "pathParts",
-        "type": "variable",
-        "line": 173
       },
       {
         "name": "ratingCount",
@@ -8644,11 +7498,6 @@
         "line": 247
       },
       {
-        "name": "modelConfig",
-        "type": "variable",
-        "line": 267
-      },
-      {
         "name": "PersonaExtractor.getModelConfig",
         "type": "method",
         "line": 313
@@ -8707,83 +7556,6 @@
         "name": "PersonaExtractor.importToMemoryLayer",
         "type": "method",
         "line": 543
-      }
-    ],
-    "llm/llm-config.js": [
-      {
-        "name": "LLMConfigManager",
-        "type": "class",
-        "line": 6
-      },
-      {
-        "name": "LLMConfigManager._getModelManager",
-        "type": "method",
-        "line": 11
-      },
-      {
-        "name": "manager",
-        "type": "variable",
-        "line": 23
-      },
-      {
-        "name": "activeModel",
-        "type": "variable",
-        "line": 29
-      },
-      {
-        "name": "LLMConfigManager.getApiKey",
-        "type": "method",
-        "line": 43
-      },
-      {
-        "name": "manager",
-        "type": "variable",
-        "line": 44
-      },
-      {
-        "name": "LLMConfigManager.getClient",
-        "type": "method",
-        "line": 53
-      },
-      {
-        "name": "manager",
-        "type": "variable",
-        "line": 54
-      },
-      {
-        "name": "activeModel",
-        "type": "variable",
-        "line": 64
-      },
-      {
-        "name": "LLMConfigManager.isConfigured",
-        "type": "method",
-        "line": 83
-      },
-      {
-        "name": "manager",
-        "type": "variable",
-        "line": 84
-      },
-      {
-        "name": "activeModel",
-        "type": "variable",
-        "line": 88
-      },
-      {
-        "name": "LLMConfigManager.getActiveModelConfig",
-        "type": "method",
-        "line": 92
-      },
-      {
-        "name": "manager",
-        "type": "variable",
-        "line": 93
-      },
-      {
-        "name": "llmConfigManager",
-        "type": "variable",
-        "line": 102
       }
     ],
     "theme/theme-controller.js": [
@@ -8863,76 +7635,66 @@
         "line": 267
       }
     ],
-    "background/services/sidepanel-manager.js": [
+    "llm/llm-config.js": [
       {
-        "name": "openSidepanelPorts",
-        "type": "variable",
-        "line": 8
+        "name": "LLMConfigManager",
+        "type": "class",
+        "line": 6
       },
       {
-        "name": "sidepanelWindowPorts",
-        "type": "variable",
-        "line": 9
-      },
-      {
-        "name": "handleSidepanelConnect",
-        "type": "function",
+        "name": "LLMConfigManager._getModelManager",
+        "type": "method",
         "line": 11
       },
       {
-        "name": "resolvedWindowId",
+        "name": "manager",
         "type": "variable",
-        "line": 14
+        "line": 23
       },
       {
-        "name": "registerWindow",
-        "type": "function",
-        "line": 16
+        "name": "LLMConfigManager.getApiKey",
+        "type": "method",
+        "line": 43
       },
       {
-        "name": "isSidepanelOpen",
-        "type": "function",
-        "line": 46
+        "name": "manager",
+        "type": "variable",
+        "line": 44
       },
       {
-        "name": "toggleSidepanel",
-        "type": "function",
+        "name": "LLMConfigManager.getClient",
+        "type": "method",
         "line": 53
       },
       {
-        "name": "tabId",
+        "name": "manager",
         "type": "variable",
         "line": 54
       },
       {
-        "name": "windowId",
-        "type": "variable",
-        "line": 55
+        "name": "LLMConfigManager.isConfigured",
+        "type": "method",
+        "line": 83
       },
       {
-        "name": "port",
+        "name": "manager",
         "type": "variable",
-        "line": 66
+        "line": 84
       },
       {
-        "name": "openOptions",
-        "type": "variable",
-        "line": 80
+        "name": "LLMConfigManager.getActiveModelConfig",
+        "type": "method",
+        "line": 92
       },
       {
-        "name": "toggleSplitView",
-        "type": "function",
-        "line": 95
+        "name": "manager",
+        "type": "variable",
+        "line": 93
       },
       {
-        "name": "tabId",
+        "name": "llmConfigManager",
         "type": "variable",
-        "line": 97
-      },
-      {
-        "name": "isFromIframe",
-        "type": "variable",
-        "line": 109
+        "line": 102
       }
     ],
     "rating/rating-ui.js": [
@@ -8997,80 +7759,6 @@
         "line": 244
       }
     ],
-    "background/services/crypto.js": [
-      {
-        "name": "cachedKey",
-        "type": "variable",
-        "line": 1
-      },
-      {
-        "name": "getEncryptionKey",
-        "type": "function",
-        "line": 3
-      },
-      {
-        "name": "extensionId",
-        "type": "variable",
-        "line": 6
-      },
-      {
-        "name": "encryptApiKey",
-        "type": "function",
-        "line": 32
-      },
-      {
-        "name": "base64",
-        "type": "variable",
-        "line": 46
-      },
-      {
-        "name": "decryptApiKey",
-        "type": "function",
-        "line": 54
-      },
-      {
-        "name": "rawBase64",
-        "type": "variable",
-        "line": 61
-      },
-      {
-        "name": "isEncrypted",
-        "type": "function",
-        "line": 81
-      }
-    ],
-    "background/services/session-state.js": [
-      {
-        "name": "activeRefinements",
-        "type": "variable",
-        "line": 6
-      },
-      {
-        "name": "activeExtractions",
-        "type": "variable",
-        "line": 7
-      },
-      {
-        "name": "RECENT_FOCUS_REFRESH_INTERVAL",
-        "type": "constant",
-        "line": 8
-      },
-      {
-        "name": "getRefinementCounter",
-        "type": "function",
-        "line": 10
-      },
-      {
-        "name": "incrementRefinementCounter",
-        "type": "function",
-        "line": 18
-      },
-      {
-        "name": "resetRefinementCounter",
-        "type": "function",
-        "line": 28
-      }
-    ],
     "memory/analyzer-registry.js": [
       {
         "name": "arLog",
@@ -9096,33 +7784,6 @@
         "name": "deleted",
         "type": "variable",
         "line": 171
-      }
-    ],
-    "memory/analyzers/recent-focus.js": [
-      {
-        "name": "RecentFocus",
-        "type": "variable",
-        "line": 15
-      },
-      {
-        "name": "conversationText",
-        "type": "variable",
-        "line": 24
-      },
-      {
-        "name": "recentRatings",
-        "type": "variable",
-        "line": 36
-      },
-      {
-        "name": "ratingContext",
-        "type": "variable",
-        "line": 37
-      },
-      {
-        "name": "recentMessages",
-        "type": "variable",
-        "line": 90
       }
     ],
     "options/index.js": [
@@ -9152,26 +7813,26 @@
         "line": 101
       }
     ],
-    "background/services/logger.js": [
+    "memory/analyzers/recent-focus.js": [
       {
-        "name": "sanitizeData",
-        "type": "function",
-        "line": 6
-      },
-      {
-        "name": "bgLog",
-        "type": "function",
-        "line": 27
-      },
-      {
-        "name": "cleanData",
+        "name": "conversationText",
         "type": "variable",
-        "line": 28
+        "line": 24
       },
       {
-        "name": "dataStr",
+        "name": "recentRatings",
         "type": "variable",
-        "line": 31
+        "line": 36
+      },
+      {
+        "name": "ratingContext",
+        "type": "variable",
+        "line": 37
+      },
+      {
+        "name": "recentMessages",
+        "type": "variable",
+        "line": 90
       }
     ],
     "model/model-registry.js": [
@@ -9240,6 +7901,23 @@
         "line": 89
       }
     ],
+    "background/index.js": [
+      {
+        "name": "sentCount",
+        "type": "variable",
+        "line": 300
+      },
+      {
+        "name": "skippedCount",
+        "type": "variable",
+        "line": 301
+      },
+      {
+        "name": "keepAliveInterval",
+        "type": "variable",
+        "line": 347
+      }
+    ],
     "sidepanel/modules/cloud-sync.js": [
       {
         "name": "isCloudSyncAvailable",
@@ -9275,45 +7953,45 @@
   "perFileCoverage": {
     "background/index.js": {
       "total": 70,
-      "ported": 26,
-      "missing": 44,
-      "pct": "37.1%"
+      "ported": 67,
+      "missing": 3,
+      "pct": "95.7%"
     },
     "background/services/api-proxy.js": {
       "total": 65,
-      "ported": 13,
-      "missing": 52,
-      "pct": "20.0%"
+      "ported": 65,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "background/services/crypto.js": {
       "total": 20,
-      "ported": 12,
-      "missing": 8,
-      "pct": "60.0%"
+      "ported": 20,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "background/services/logger.js": {
       "total": 7,
-      "ported": 3,
-      "missing": 4,
-      "pct": "42.9%"
+      "ported": 7,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "background/services/memory-orchestrator.js": {
       "total": 85,
-      "ported": 23,
-      "missing": 62,
-      "pct": "27.1%"
+      "ported": 85,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "background/services/session-state.js": {
       "total": 9,
-      "ported": 3,
-      "missing": 6,
-      "pct": "33.3%"
+      "ported": 9,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "background/services/sidepanel-manager.js": {
       "total": 15,
-      "ported": 1,
-      "missing": 14,
-      "pct": "6.7%"
+      "ported": 15,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "build.js": {
       "total": 27,
@@ -9329,9 +8007,9 @@
     },
     "content/observer.js": {
       "total": 226,
-      "ported": 23,
-      "missing": 203,
-      "pct": "10.2%"
+      "ported": 31,
+      "missing": 195,
+      "pct": "13.7%"
     },
     "content/scraper.js": {
       "total": 77,
@@ -9347,21 +8025,21 @@
     },
     "extractor/extractor.js": {
       "total": 34,
-      "ported": 16,
-      "missing": 18,
-      "pct": "47.1%"
+      "ported": 17,
+      "missing": 17,
+      "pct": "50.0%"
     },
     "llm/llm-client.js": {
       "total": 91,
-      "ported": 42,
-      "missing": 49,
-      "pct": "46.2%"
+      "ported": 44,
+      "missing": 47,
+      "pct": "48.4%"
     },
     "llm/llm-config.js": {
       "total": 20,
-      "ported": 5,
-      "missing": 15,
-      "pct": "25.0%"
+      "ported": 8,
+      "missing": 12,
+      "pct": "40.0%"
     },
     "logging/logger.js": {
       "total": 92,
@@ -9377,15 +8055,15 @@
     },
     "memory/analyzers/recent-focus.js": {
       "total": 8,
-      "ported": 3,
-      "missing": 5,
-      "pct": "37.5%"
+      "ported": 4,
+      "missing": 4,
+      "pct": "50.0%"
     },
     "memory/analyzers/unified-analyzer.js": {
       "total": 40,
-      "ported": 8,
-      "missing": 32,
-      "pct": "20.0%"
+      "ported": 9,
+      "missing": 31,
+      "pct": "22.5%"
     },
     "memory/component-schemas.js": {
       "total": 23,
@@ -9395,21 +8073,21 @@
     },
     "memory/context-assembler.js": {
       "total": 73,
-      "ported": 5,
-      "missing": 68,
-      "pct": "6.8%"
+      "ported": 19,
+      "missing": 54,
+      "pct": "26.0%"
     },
     "memory/index.js": {
       "total": 59,
-      "ported": 15,
-      "missing": 44,
-      "pct": "25.4%"
+      "ported": 22,
+      "missing": 37,
+      "pct": "37.3%"
     },
     "memory/memory-controller.js": {
       "total": 79,
-      "ported": 23,
-      "missing": 56,
-      "pct": "29.1%"
+      "ported": 32,
+      "missing": 47,
+      "pct": "40.5%"
     },
     "model/model-manager.js": {
       "total": 74,
@@ -9431,9 +8109,9 @@
     },
     "options/model-manager-ui.js": {
       "total": 83,
-      "ported": 24,
-      "missing": 59,
-      "pct": "28.9%"
+      "ported": 26,
+      "missing": 57,
+      "pct": "31.3%"
     },
     "rating/rating-injector.js": {
       "total": 26,
@@ -9443,9 +8121,9 @@
     },
     "rating/rating-manager.js": {
       "total": 43,
-      "ported": 17,
-      "missing": 26,
-      "pct": "39.5%"
+      "ported": 18,
+      "missing": 25,
+      "pct": "41.9%"
     },
     "rating/rating-ui.js": {
       "total": 15,
@@ -9473,9 +8151,9 @@
     },
     "sidepanel/sidepanel.js": {
       "total": 965,
-      "ported": 198,
-      "missing": 767,
-      "pct": "20.5%"
+      "ported": 224,
+      "missing": 741,
+      "pct": "23.2%"
     },
     "storage/storage-repository.js": {
       "total": 17,

@@ -1,6 +1,6 @@
 # Symbol-Level Cross-Reference Matrix
 
-**Generated**: 2026-08-30T18:10:31.597Z
+**Generated**: 2026-08-30T18:27:21.693Z
 **Method**: TypeScript Compiler API AST extraction with deterministic name-matching cross-reference. Zero guesswork.
 
 ---
@@ -10,9 +10,9 @@
 | Metric | Count | Percentage |
 |:---|:---|:---|
 | **Total Legacy Symbols** (excl. vendor `supabase.min.js`) | **2,509** | 100% |
-| **PORTED** (matched in WXT by name + type) | **671** | **26.7%** |
-| **MISSING** (no WXT counterpart found) | **1,838** | **73.3%** |
-| **NEW_IN_WXT** (WXT-only, no legacy origin) | **452** | — |
+| **PORTED** (matched in WXT by name + type) | **933** | **37.2%** |
+| **MISSING** (no WXT counterpart found) | **1,576** | **62.8%** |
+| **NEW_IN_WXT** (WXT-only, no legacy origin) | **480** | — |
 
 ---
 
@@ -20,40 +20,40 @@
 
 | Legacy File | Total Symbols | Ported | Missing | Coverage |
 |:---|:---|:---|:---|:---|
-| ❌ `background/index.js` | 70 | 26 | 44 | 37% |
-| ❌ `background/services/api-proxy.js` | 65 | 13 | 52 | 20% |
-| ❌ `background/services/crypto.js` | 20 | 12 | 8 | 60% |
-| ⚠️ `background/services/logger.js` | 7 | 3 | 4 | 43% |
-| ❌ `background/services/memory-orchestrator.js` | 85 | 23 | 62 | 27% |
-| ❌ `background/services/session-state.js` | 9 | 3 | 6 | 33% |
-| ❌ `background/services/sidepanel-manager.js` | 15 | 1 | 14 | 7% |
+| ⚠️ `background/index.js` | 70 | 67 | 3 | 96% |
+| ✅ `background/services/api-proxy.js` | 65 | 65 | 0 | 100% |
+| ✅ `background/services/crypto.js` | 20 | 20 | 0 | 100% |
+| ✅ `background/services/logger.js` | 7 | 7 | 0 | 100% |
+| ✅ `background/services/memory-orchestrator.js` | 85 | 85 | 0 | 100% |
+| ✅ `background/services/session-state.js` | 9 | 9 | 0 | 100% |
+| ✅ `background/services/sidepanel-manager.js` | 15 | 15 | 0 | 100% |
 | ❌ `build.js` | 27 | 2 | 25 | 7% |
 | ✅ `content/diff.js` | 15 | 15 | 0 | 100% |
-| ❌ `content/observer.js` | 226 | 23 | 203 | 10% |
+| ❌ `content/observer.js` | 226 | 31 | 195 | 14% |
 | ❌ `content/scraper.js` | 77 | 16 | 61 | 21% |
 | ⚠️ `content/templates.js` | 1 | 0 | 1 | 0% |
-| ❌ `extractor/extractor.js` | 34 | 16 | 18 | 47% |
-| ❌ `llm/llm-client.js` | 91 | 42 | 49 | 46% |
-| ❌ `llm/llm-config.js` | 20 | 5 | 15 | 25% |
+| ❌ `extractor/extractor.js` | 34 | 17 | 17 | 50% |
+| ❌ `llm/llm-client.js` | 91 | 44 | 47 | 48% |
+| ❌ `llm/llm-config.js` | 20 | 8 | 12 | 40% |
 | ❌ `logging/logger.js` | 92 | 42 | 50 | 46% |
 | ⚠️ `memory/analyzer-registry.js` | 6 | 1 | 5 | 17% |
-| ⚠️ `memory/analyzers/recent-focus.js` | 8 | 3 | 5 | 38% |
-| ❌ `memory/analyzers/unified-analyzer.js` | 40 | 8 | 32 | 20% |
+| ⚠️ `memory/analyzers/recent-focus.js` | 8 | 4 | 4 | 50% |
+| ❌ `memory/analyzers/unified-analyzer.js` | 40 | 9 | 31 | 23% |
 | ❌ `memory/component-schemas.js` | 23 | 1 | 22 | 4% |
-| ❌ `memory/context-assembler.js` | 73 | 5 | 68 | 7% |
-| ❌ `memory/index.js` | 59 | 15 | 44 | 25% |
-| ❌ `memory/memory-controller.js` | 79 | 23 | 56 | 29% |
+| ❌ `memory/context-assembler.js` | 73 | 19 | 54 | 26% |
+| ❌ `memory/index.js` | 59 | 22 | 37 | 37% |
+| ❌ `memory/memory-controller.js` | 79 | 32 | 47 | 41% |
 | ❌ `model/model-manager.js` | 74 | 32 | 42 | 43% |
 | ⚠️ `model/model-registry.js` | 35 | 31 | 4 | 89% |
 | ⚠️ `options/index.js` | 5 | 0 | 5 | 0% |
-| ❌ `options/model-manager-ui.js` | 83 | 24 | 59 | 29% |
+| ❌ `options/model-manager-ui.js` | 83 | 26 | 57 | 31% |
 | ❌ `rating/rating-injector.js` | 26 | 3 | 23 | 12% |
-| ❌ `rating/rating-manager.js` | 43 | 17 | 26 | 40% |
+| ❌ `rating/rating-manager.js` | 43 | 18 | 25 | 42% |
 | ❌ `rating/rating-ui.js` | 15 | 3 | 12 | 20% |
 | ⚠️ `sidepanel/modules/cloud-sync.js` | 2 | 0 | 2 | 0% |
 | ⚠️ `sidepanel/modules/dimension-view.js` | 4 | 0 | 4 | 0% |
 | ⚠️ `sidepanel/modules/persona-view.js` | 2 | 0 | 2 | 0% |
-| ❌ `sidepanel/sidepanel.js` | 965 | 198 | 767 | 21% |
+| ❌ `sidepanel/sidepanel.js` | 965 | 224 | 741 | 23% |
 | ⚠️ `storage/storage-repository.js` | 17 | 13 | 4 | 76% |
 | ❌ `supabase/supabase-client.js` | 64 | 35 | 29 | 55% |
 | ❌ `theme/theme-controller.js` | 32 | 17 | 15 | 53% |
@@ -64,7 +64,7 @@
 
 These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 
-### `sidepanel/sidepanel.js` (767 missing)
+### `sidepanel/sidepanel.js` (741 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
@@ -139,14 +139,11 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `hasLegacyPersona` | variable | L879 |
 | `suggestedName` | variable | L896 |
 | `currentSessionId` | variable | L933 |
-| `memoryData` | variable | L934 |
-| `disabledFacts` | variable | L935 |
 | `themeToggleBtn` | variable | L949 |
 | `sidepanelPort` | variable | L982 |
 | `handleCloseSidepanel` | function | L983 |
 | `handleTabActivated` | function | L1039 |
 | `previousSessionId` | variable | L1040 |
-| `tab` | variable | L1043 |
 | `handleTabUpdated` | function | L1052 |
 | `currentTab` | variable | L1055 |
 | `loadSessionFromTab` | function | L1070 |
@@ -165,7 +162,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `logsTabActive` | variable | L1237 |
 | `extractSessionId` | function | L1248 |
 | `urlObj` | variable | L1250 |
-| `pathParts` | variable | L1251 |
 | `loadMemoryData` | function | L1266 |
 | `lastUpdatedEl` | variable | L1284 |
 | `date` | variable | L1287 |
@@ -175,8 +171,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `iconEl` | variable | L1311 |
 | `textEl` | variable | L1312 |
 | `activeModelData` | variable | L1318 |
-| `activeModelId` | variable | L1319 |
-| `activeModel` | variable | L1325 |
 | `modelName` | variable | L1327 |
 | `restoreFormStateFromSplitView` | function | L1363 |
 | `isIframe` | variable | L1364 |
@@ -189,10 +183,8 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `verbatimToggle` | variable | L1419 |
 | `verbatimBadge` | variable | L1420 |
 | `renderAllComponents` | function | L1438 |
-| `components` | variable | L1439 |
 | `getActiveCompData` | function | L1447 |
 | `personaComp` | variable | L1454 |
-| `dimensions` | variable | L1459 |
 | `comp` | variable | L1461 |
 | `injectedContextInput` | variable | L1484 |
 | `ctx` | variable | L1488 |
@@ -307,7 +299,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `hasPersonaData` | variable | L2469 |
 | `displayText` | variable | L2476 |
 | `iconEl` | variable | L2502 |
-| `personaText` | variable | L2519 |
 | `parts` | variable | L2531 |
 | `renderContext` | function | L2566 |
 | `container` | variable | L2567 |
@@ -329,7 +320,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `renderExemplar` | function | L2861 |
 | `container` | variable | L2862 |
 | `v4Data` | variable | L2889 |
-| `isFactDisabled` | function | L2923 |
 | `handleFactToggle` | function | L2931 |
 | `toggleable` | variable | L2933 |
 | `path` | variable | L2934 |
@@ -367,7 +357,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `toast` | variable | L3333 |
 | `capitalizeFirst` | function | L3342 |
 | `handleStorageChange` | function | L3346 |
-| `sessionKey` | variable | L3350 |
 | `activeEl` | variable | L3355 |
 | `isUserEditing` | variable | L3356 |
 | `logRefreshInterval` | variable | L3373 |
@@ -377,7 +366,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `contextTab` | variable | L3404 |
 | `logsTab` | variable | L3405 |
 | `personaTab` | variable | L3406 |
-| `tab` | variable | L3410 |
 | `navigateToPersonaPage` | function | L3474 |
 | `pages` | variable | L3475 |
 | `targetPage` | variable | L3476 |
@@ -455,7 +443,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `promptInput` | variable | L3976 |
 | `extractBtn` | variable | L3977 |
 | `finishEdit` | variable | L3982 |
-| `modelConfig` | variable | L4017 |
 | `parseExtractionResult` | function | L4074 |
 | `_sectionBadgeState` | variable | L4103 |
 | `updateSectionBadge` | function | L4126 |
@@ -477,13 +464,11 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `group` | variable | L4282 |
 | `chip` | variable | L4285 |
 | `personaTextarea` | variable | L4295 |
-| `personaText` | variable | L4299 |
 | `parts` | variable | L4301 |
 | `roleEl` | variable | L4313 |
 | `purposeEl` | variable | L4314 |
 | `credentialsEl` | variable | L4315 |
 | `contextContent` | variable | L4321 |
-| `context` | variable | L4322 |
 | `toneContent` | variable | L4330 |
 | `tone` | variable | L4331 |
 | `frameworkContent` | variable | L4339 |
@@ -598,13 +583,11 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `authError` | variable | L5464 |
 | `publicBtn` | variable | L5471 |
 | `isPublic` | variable | L5472 |
-| `synthesizedPersona` | variable | L5475 |
 | `injectedContext` | variable | L5479 |
 | `keywords` | variable | L5481 |
 | `subdomains` | variable | L5482 |
 | `audienceEl` | variable | L5484 |
 | `audience` | variable | L5485 |
-| `personaData` | variable | L5500 |
 | `existingId` | variable | L5524 |
 | `isUpdate` | variable | L5525 |
 | `changeNotes` | variable | L5544 |
@@ -642,7 +625,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `showPersonaDetailModal` | function | L5887 |
 | `existingModal` | variable | L5888 |
 | `keywords` | variable | L5892 |
-| `memoryLayer` | variable | L5893 |
 | `importCount` | variable | L5894 |
 | `avgRating` | variable | L5895 |
 | `raterCount` | variable | L5896 |
@@ -717,7 +699,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `handleRebuildFromSource` | function | L6829 |
 | `sourcePrompt` | variable | L6830 |
 | `rebuildBtn` | variable | L6842 |
-| `modelConfig` | variable | L6857 |
 | `confirmed` | variable | L6896 |
 | `preserved` | variable | L6909 |
 | `cancelRebuild` | function | L6959 |
@@ -755,16 +736,12 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `restoredData` | variable | L7261 |
 | `exportPersonaJSON` | function | L7289 |
 | `exportData` | variable | L7300 |
-| `personaName` | variable | L7318 |
 | `safeName` | variable | L7319 |
-| `filename` | variable | L7320 |
-| `jsonData` | variable | L7323 |
 | `handle` | variable | L7330 |
 | `writable` | variable | L7338 |
 | `ALLOWED_IMPORT_EXTENSIONS` | constant | L7389 |
 | `MAX_IMPORT_FILE_SIZE` | constant | L7394 |
 | `readAndSanitizeFile` | function | L7401 |
-| `fileName` | variable | L7403 |
 | `extension` | variable | L7404 |
 | `allowedMimes` | variable | L7424 |
 | `rawText` | variable | L7435 |
@@ -809,7 +786,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `shouldPin` | variable | L7813 |
 | `autoSaveTimeout` | variable | L7847 |
 | `savePersonaToStorage` | function | L7881 |
-| `sessionKey` | variable | L7886 |
 | `sessionData` | variable | L7888 |
 | `setupExpandModal` | function | L7933 |
 | `btn` | variable | L7937 |
@@ -831,12 +807,10 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `showReportDialog` | function | L8228 |
 | `existingDialog` | variable | L8229 |
 | `dialog` | variable | L8232 |
-| `reason` | variable | L8288 |
-| `details` | variable | L8289 |
 | `submitReport` | function | L8306 |
 | `toast` | variable | L8318 |
 
-### `content/observer.js` (203 missing)
+### `content/observer.js` (195 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
@@ -874,8 +848,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `modelDot` | variable | L444 |
 | `updateModelIndicator` | function | L451 |
 | `activeModelData` | variable | L456 |
-| `activeModelId` | variable | L457 |
-| `activeModel` | variable | L461 |
 | `api` | variable | L487 |
 | `createRefineToggle` | function | L507 |
 | `wrapper` | variable | L508 |
@@ -902,7 +874,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `btnStop` | variable | L596 |
 | `charCount` | variable | L597 |
 | `diffViewEl` | variable | L598 |
-| `tabs` | variable | L599 |
 | `panels` | variable | L600 |
 | `navPrevOriginal` | variable | L603 |
 | `navNextOriginal` | variable | L604 |
@@ -984,8 +955,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `wasOnRefinedTab` | variable | L1414 |
 | `newPair` | variable | L1434 |
 | `canProceed` | variable | L1453 |
-| `context` | variable | L1463 |
-| `previousPrompts` | variable | L1464 |
 | `expandedContainer` | variable | L1531 |
 | `panel` | variable | L1534 |
 | `tabName` | variable | L1535 |
@@ -1031,158 +1000,15 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `sendBtn` | variable | L1966 |
 | `triggerRefinement` | function | L1987 |
 | `modal` | variable | L2015 |
-| `context` | variable | L2041 |
-| `previousPrompts` | variable | L2048 |
 | `inputEl` | variable | L2114 |
 | `toggleWrapper` | variable | L2115 |
 | `toggleApi` | variable | L2116 |
 | `splitViewActive` | variable | L2136 |
-| `toggleSplitView` | function | L2138 |
 | `existingFrame` | variable | L2139 |
 | `iframe` | variable | L2151 |
 | `injectDebounceTimer` | variable | L2179 |
 | `debouncedInject` | function | L2180 |
 | `observer` | variable | L2188 |
-
-### `memory/context-assembler.js` (68 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `ctxLog` | function | L15 |
-| `filterByGeneration` | variable | L45 |
-| `unifiedContext` | variable | L46 |
-| `currentGeneration` | variable | L47 |
-| `ContextAssembler._buildSummary` | method | L77 |
-| `summary` | variable | L78 |
-| `isCurrent` | variable | L86 |
-| `ContextAssembler._isComponentCurrent` | method | L106 |
-| `ContextAssembler._getComponent` | method | L120 |
-| `ContextAssembler._getComponentData` | method | L129 |
-| `ContextAssembler._extractV4Data` | method | L144 |
-| `ContextAssembler._buildRefinementContext` | method | L173 |
-| `context` | variable | L174 |
-| `staleComponents` | variable | L175 |
-| `includedComponents` | variable | L176 |
-| `isFactDisabled` | function | L178 |
-| `trackComponent` | function | L183 |
-| `personaComp` | variable | L200 |
-| `personaData` | variable | L201 |
-| `personaIncluded` | variable | L202 |
-| `v4` | variable | L206 |
-| `contextComp` | variable | L226 |
-| `contextData` | variable | L227 |
-| `contextIncluded` | variable | L228 |
-| `v4` | variable | L232 |
-| `exemplarComp` | variable | L252 |
-| `exemplarData` | variable | L253 |
-| `exemplarIncluded` | variable | L254 |
-| `v4` | variable | L258 |
-| `formatComp` | variable | L273 |
-| `formatData` | variable | L274 |
-| `formatIncluded` | variable | L275 |
-| `v4` | variable | L279 |
-| `toneComp` | variable | L297 |
-| `toneData` | variable | L298 |
-| `toneIncluded` | variable | L299 |
-| `v4` | variable | L303 |
-| `frameworkComp` | variable | L326 |
-| `frameworkData` | variable | L327 |
-| `frameworkIncluded` | variable | L328 |
-| `v4` | variable | L332 |
-| `constraintsComp` | variable | L349 |
-| `constraintsData` | variable | L350 |
-| `constraintsIncluded` | variable | L351 |
-| `v4` | variable | L355 |
-| `recentFocusComp` | variable | L374 |
-| `recentFocusData` | variable | L375 |
-| `ContextAssembler.formatForRefinement` | method | L403 |
-| `ctx` | variable | L408 |
-| `personaSection` | variable | L420 |
-| `scopeTags` | variable | L432 |
-| `domainSection` | variable | L435 |
-| `terms` | variable | L439 |
-| `styleTags` | variable | L447 |
-| `toneSection` | variable | L448 |
-| `toneSection` | variable | L454 |
-| `reasoningType` | variable | L465 |
-| `frameworkSection` | variable | L468 |
-| `steps` | variable | L473 |
-| `constraintSection` | variable | L484 |
-| `reqs` | variable | L486 |
-| `rules` | variable | L490 |
-| `outputType` | variable | L504 |
-| `formatSection` | variable | L507 |
-| `recentSection` | variable | L526 |
-| `ContextAssembler.getContextJSON` | method | L540 |
-| `ContextAssembler.hasContext` | method | L551 |
-| `ContextAssembler.clearCache` | method | L558 |
-
-### `background/services/memory-orchestrator.js` (62 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `getCurrentTabSessionId` | function | L8 |
-| `tab` | variable | L9 |
-| `pathParts` | variable | L27 |
-| `getSessionMemory` | function | L42 |
-| `updateMemoryComponent` | function | L53 |
-| `memory` | variable | L58 |
-| `pinPersona` | function | L80 |
-| `memory` | variable | L85 |
-| `personaComponent` | variable | L98 |
-| `unpinPersona` | function | L115 |
-| `memory` | variable | L120 |
-| `personaComponent` | variable | L123 |
-| `pinComponent` | function | L148 |
-| `memory` | variable | L154 |
-| `unpinComponent` | function | L187 |
-| `memory` | variable | L193 |
-| `toggleFact` | function | L209 |
-| `disabled` | variable | L214 |
-| `buildV4RefinementContext` | function | L233 |
-| `components` | variable | L236 |
-| `dimensions` | variable | L237 |
-| `isFactDisabled` | function | L240 |
-| `getActiveData` | function | L245 |
-| `personaLegacy` | variable | L258 |
-| `personaData` | variable | L260 |
-| `personaText` | variable | L261 |
-| `contextV4` | variable | L279 |
-| `contextLegacy` | variable | L280 |
-| `contextData` | variable | L282 |
-| `contextLegacyData` | variable | L283 |
-| `scopeTags` | variable | L287 |
-| `instruction` | variable | L288 |
-| `toneV4` | variable | L312 |
-| `toneLegacy` | variable | L313 |
-| `toneData` | variable | L315 |
-| `toneLegacyData` | variable | L316 |
-| `styleTags` | variable | L319 |
-| `bannedPhrases` | variable | L320 |
-| `toneSection` | variable | L323 |
-| `frameworkV4` | variable | L348 |
-| `fw` | variable | L349 |
-| `reasoningType` | variable | L352 |
-| `constraintsV4` | variable | L365 |
-| `c` | variable | L366 |
-| `prohibitions` | variable | L369 |
-| `requirements` | variable | L370 |
-| `responseLength` | variable | L371 |
-| `constraintSection` | variable | L374 |
-| `formatV4` | variable | L393 |
-| `fmt` | variable | L394 |
-| `outputType` | variable | L397 |
-| `exemplarV4` | variable | L410 |
-| `ex` | variable | L411 |
-| `recentFocus` | variable | L426 |
-| `recentSection` | variable | L429 |
-| `rebuildSessionMemory` | function | L453 |
-| `targetTab` | variable | L468 |
-| `matchingTabs` | variable | L469 |
-| `_sessionLocks` | variable | L526 |
-| `acquireSessionLock` | function | L534 |
-| `existingLock` | variable | L537 |
-| `releaseSessionLock` | function | L556 |
 
 ### `content/scraper.js` (61 missing)
 
@@ -1250,7 +1076,7 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `prompts` | variable | L700 |
 | `turnIndex` | variable | L705 |
 
-### `options/model-manager-ui.js` (59 missing)
+### `options/model-manager-ui.js` (57 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
@@ -1263,7 +1089,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `statusIcon` | variable | L105 |
 | `ModelManagerUI.renderModal` | method | L150 |
 | `ModelManagerUI.setupEventListeners` | method | L236 |
-| `modelId` | variable | L242 |
 | `ModelManagerUI.setupModalEvents` | method | L286 |
 | `providerSelect` | variable | L288 |
 | `ModelManagerUI.onProviderChange` | method | L311 |
@@ -1308,129 +1133,69 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `ModelManagerUI.getModalFormData` | method | L679 |
 | `modal` | variable | L680 |
 | `providerDef` | variable | L682 |
-| `modelId` | variable | L685 |
 | `customModel` | variable | L686 |
 | `container` | variable | L725 |
 | `toast` | variable | L732 |
 | `icons` | variable | L736 |
 
-### `memory/memory-controller.js` (56 missing)
+### `memory/context-assembler.js` (54 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
-| `MEMORY_SCHEMA_VERSION` | constant | L43 |
-| `DIMENSION_NAMES` | constant | L48 |
-| `SESSION_KEY_PREFIX` | constant | L55 |
-| `MEMORY_SIZE_LIMITS` | constant | L61 |
-| `memCtrlLog` | function | L69 |
-| `MemoryController.extractSessionId` | method | L103 |
-| `urlObj` | variable | L105 |
-| `pathParts` | variable | L106 |
-| `MemoryController.isExtensionContext` | method | L130 |
-| `MemoryController._bridgeRequestId` | property | L139 |
-| `MemoryController._bridgeRequests` | property | L140 |
-| `MemoryController._bridgeInitialized` | property | L141 |
-| `MemoryController._initBridgeListener` | method | L146 |
-| `requestId` | variable | L151 |
-| `pending` | variable | L153 |
-| `MemoryController._makeBridgeRequest` | method | L173 |
-| `requestId` | variable | L177 |
-| `timeout` | variable | L179 |
-| `MemoryController._ensureCache` | method | L209 |
-| `MemoryController.getComponent` | method | L270 |
-| `MemoryController.setComponent` | method | L289 |
-| `sanitizedData` | variable | L320 |
-| `historyLength` | variable | L339 |
-| `MemoryController.incrementGeneration` | method | L382 |
-| `MemoryController.getComponentGeneration` | method | L408 |
-| `MemoryController.isComponentCurrent` | method | L419 |
-| `MemoryController.pinPersona` | method | L435 |
-| `personaComponent` | variable | L438 |
-| `MemoryController.unpinPersona` | method | L464 |
-| `personaComponent` | variable | L467 |
-| `MemoryController.isPersonaPinned` | method | L485 |
-| `MemoryController.getEffectivePersona` | method | L494 |
-| `personaComponent` | variable | L497 |
-| `MemoryController.updatePinnedPersona` | method | L512 |
-| `personaComponent` | variable | L515 |
-| `MemoryController.pinComponent` | method | L545 |
-| `MemoryController.unpinComponent` | method | L570 |
-| `MemoryController.isComponentPinned` | method | L594 |
-| `MemoryController.getEffectiveComponent` | method | L605 |
-| `MemoryController.getUnifiedContext` | method | L622 |
-| `context` | variable | L625 |
-| `MemoryController.hasContext` | method | L648 |
-| `MemoryController._getEmptyMemory` | method | L675 |
-| `MemoryController._estimateSize` | method | L691 |
-| `MemoryController._truncateString` | method | L706 |
-| `encoder` | variable | L709 |
-| `low` | variable | L715 |
-| `high` | variable | L715 |
-| `mid` | variable | L717 |
-| `MemoryController._sanitizeComponentData` | method | L733 |
-| `sanitized` | variable | L742 |
-| `MemoryController._isCharArray` | method | L779 |
-| `keys` | variable | L783 |
-| `isNumericKeys` | variable | L787 |
-| `MemoryController.getStorageUsage` | method | L799 |
-| `total` | variable | L810 |
-
-### `background/services/api-proxy.js` (52 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `getUserFriendlyError` | function | L21 |
-| `providerName` | variable | L22 |
-| `rawStr` | variable | L30 |
-| `REFINEMENT_SYSTEM_PROMPT` | constant | L66 |
-| `MODEL_CONFIGS` | constant | L116 |
-| `LLM_TRANSPORTS` | constant | L147 |
-| `effective` | variable | L151 |
-| `RETRY_CONFIG_BG` | constant | L218 |
-| `calculateRetryDelay` | function | L230 |
-| `exponentialDelay` | variable | L231 |
-| `cappedDelay` | variable | L232 |
-| `jitter` | variable | L234 |
-| `executeLlmRequest` | function | L241 |
-| `timer` | variable | L280 |
-| `rawModel` | variable | L290 |
-| `headers` | variable | L302 |
-| `rawError` | variable | L315 |
-| `errMsg` | variable | L318 |
-| `callLLMForExtraction` | function | L374 |
-| `safeConfig` | variable | L375 |
-| `rawModel` | variable | L376 |
-| `handleRefinement` | function | L390 |
-| `abortController` | variable | L392 |
-| `signal` | variable | L400 |
-| `syncStorage` | variable | L403 |
-| `localStorage` | variable | L409 |
-| `paModels` | variable | L410 |
-| `activeModelId` | variable | L411 |
-| `effectiveModelId` | variable | L413 |
-| `modelConfig` | variable | L414 |
-| `rawModel` | variable | L423 |
-| `effectivePersona` | variable | L438 |
-| `memoryData` | variable | L440 |
-| `personaComponent` | variable | L448 |
-| `synthesizedPersona` | variable | L449 |
-| `counter` | variable | L478 |
-| `processedText` | variable | L498 |
-| `variables` | variable | L501 |
-| `escapedKey` | variable | L503 |
-| `regex` | variable | L504 |
-| `contextStr` | variable | L514 |
-| `previousPromptsStr` | variable | L520 |
-| `ratingLabel` | variable | L526 |
-| `disabledFacts` | variable | L536 |
-| `disabledKey` | variable | L538 |
-| `disabledResult` | variable | L539 |
-| `v4Context` | variable | L546 |
-| `isPersonaDisabled` | variable | L549 |
-| `personaToUse` | variable | L552 |
-| `personaSection` | variable | L557 |
-| `promptText` | variable | L573 |
-| `llmResponse` | variable | L599 |
+| `ctxLog` | function | L15 |
+| `filterByGeneration` | variable | L45 |
+| `unifiedContext` | variable | L46 |
+| `currentGeneration` | variable | L47 |
+| `ContextAssembler._buildSummary` | method | L77 |
+| `summary` | variable | L78 |
+| `isCurrent` | variable | L86 |
+| `ContextAssembler._isComponentCurrent` | method | L106 |
+| `ContextAssembler._getComponent` | method | L120 |
+| `ContextAssembler._getComponentData` | method | L129 |
+| `ContextAssembler._extractV4Data` | method | L144 |
+| `ContextAssembler._buildRefinementContext` | method | L173 |
+| `staleComponents` | variable | L175 |
+| `includedComponents` | variable | L176 |
+| `trackComponent` | function | L183 |
+| `personaComp` | variable | L200 |
+| `personaIncluded` | variable | L202 |
+| `v4` | variable | L206 |
+| `contextComp` | variable | L226 |
+| `contextIncluded` | variable | L228 |
+| `v4` | variable | L232 |
+| `exemplarComp` | variable | L252 |
+| `exemplarData` | variable | L253 |
+| `exemplarIncluded` | variable | L254 |
+| `v4` | variable | L258 |
+| `formatComp` | variable | L273 |
+| `formatData` | variable | L274 |
+| `formatIncluded` | variable | L275 |
+| `v4` | variable | L279 |
+| `toneComp` | variable | L297 |
+| `toneIncluded` | variable | L299 |
+| `v4` | variable | L303 |
+| `frameworkComp` | variable | L326 |
+| `frameworkData` | variable | L327 |
+| `frameworkIncluded` | variable | L328 |
+| `v4` | variable | L332 |
+| `constraintsComp` | variable | L349 |
+| `constraintsData` | variable | L350 |
+| `constraintsIncluded` | variable | L351 |
+| `v4` | variable | L355 |
+| `recentFocusComp` | variable | L374 |
+| `recentFocusData` | variable | L375 |
+| `ContextAssembler.formatForRefinement` | method | L403 |
+| `ctx` | variable | L408 |
+| `domainSection` | variable | L435 |
+| `terms` | variable | L439 |
+| `frameworkSection` | variable | L468 |
+| `steps` | variable | L473 |
+| `reqs` | variable | L486 |
+| `rules` | variable | L490 |
+| `formatSection` | variable | L507 |
+| `ContextAssembler.getContextJSON` | method | L540 |
+| `ContextAssembler.hasContext` | method | L551 |
+| `ContextAssembler.clearCache` | method | L558 |
 
 ### `logging/logger.js` (50 missing)
 
@@ -1487,7 +1252,7 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `Logger._startAutoPersist` | method | L684 |
 | `Logger.destroy` | method | L692 |
 
-### `llm/llm-client.js` (49 missing)
+### `llm/llm-client.js` (47 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
@@ -1507,7 +1272,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `cleanup` | function | L182 |
 | `handler` | function | L212 |
 | `fetchOptions` | variable | L241 |
-| `contentType` | variable | L247 |
 | `LLMClient.configure` | method | L271 |
 | `mergedOptions` | variable | L302 |
 | `LLMClient._callWithRetry` | method | L319 |
@@ -1516,7 +1280,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `LLMClient._classifyError` | method | L384 |
 | `status` | variable | L386 |
 | `LLMClient._calculateBackoff` | method | L433 |
-| `jitter` | variable | L439 |
 | `LLMClient._delay` | method | L446 |
 | `LLMClient._callGemini` | method | L456 |
 | `startTime` | variable | L492 |
@@ -1541,103 +1304,57 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `jsonMatch` | variable | L787 |
 | `LLMClient.getAvailableModels` | method | L820 |
 
-### `background/index.js` (44 missing)
+### `memory/memory-controller.js` (47 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
-| `geminiApiKey` | variable | L53 |
-| `openOptions` | variable | L64 |
-| `openOptions` | variable | L100 |
-| `hasEnabledModelWithKey` | variable | L122 |
-| `jsonData` | variable | L147 |
-| `filename` | variable | L147 |
-| `filenameListener` | function | L152 |
-| `base64Data` | variable | L158 |
-| `dataUrl` | variable | L159 |
-| `tabId` | variable | L204 |
-| `disabledKey` | variable | L280 |
-| `tabs` | variable | L298 |
-| `sentCount` | variable | L300 |
-| `skippedCount` | variable | L301 |
-| `urlMatch` | variable | L307 |
-| `sessionKey` | variable | L316 |
-| `keepAliveInterval` | variable | L347 |
-| `ALLOWED_PROXY_HOSTS` | constant | L349 |
-| `targetUrl` | variable | L356 |
-| `contentType` | variable | L376 |
-| `activeModel` | variable | L415 |
-| `enabledModel` | variable | L432 |
-| `modelConfig` | variable | L462 |
-| `abortController` | variable | L469 |
-| `memoryLayer` | variable | L657 |
-| `personaName` | variable | L657 |
-| `memory` | variable | L671 |
-| `dimensionNames` | variable | L677 |
-| `memory` | variable | L819 |
-| `ratingKey` | variable | L828 |
-| `ratingResult` | variable | L829 |
-| `exchangeCount` | variable | L836 |
-| `MIN_EXCHANGES` | constant | L837 |
-| `ratingKey` | variable | L877 |
-| `personaName` | variable | L906 |
-| `severeTerms` | variable | L911 |
-| `warningTerms` | variable | L917 |
-| `contentLower` | variable | L923 |
-| `severeFound` | variable | L926 |
-| `warningFound` | variable | L941 |
-| `reason` | variable | L975 |
-| `details` | variable | L975 |
-| `reportKey` | variable | L980 |
-| `reports` | variable | L993 |
-
-### `memory/index.js` (44 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `memLog` | function | L39 |
-| `sessionMutexes` | variable | L72 |
-| `analyzeSession` | function | L82 |
-| `runPromise` | variable | L96 |
-| `memory` | variable | L101 |
-| `scraper` | variable | L131 |
-| `scrapedData` | variable | L143 |
-| `isSelectiveRebuild` | variable | L148 |
-| `shouldIncrementGen` | variable | L149 |
-| `newGen` | variable | L152 |
-| `results` | variable | L164 |
-| `enabledComponents` | variable | L177 |
-| `pinnedComponents` | variable | L181 |
-| `allDimensions` | variable | L182 |
-| `startTime` | variable | L214 |
-| `unifiedResults` | variable | L215 |
-| `dimensionIds` | variable | L226 |
-| `context` | variable | L287 |
-| `isLLMConfigured` | function | L308 |
-| `getCurrentSessionId` | function | L317 |
-| `requestId` | variable | L346 |
-| `sendBridgeResponse` | function | L349 |
-| `SmartAutoRun` | variable | L398 |
-| `isConfigured` | variable | L417 |
-| `scraper` | variable | L427 |
-| `completeTurns` | variable | L434 |
-| `memory` | variable | L449 |
-| `hasExistingMemory` | variable | L451 |
-| `chatContainer` | variable | L467 |
-| `isModelResponse` | variable | L495 |
-| `canRun` | variable | L514 |
-| `completeTurns` | variable | L514 |
-| `reason` | variable | L514 |
-| `enabledAnalyzers` | variable | L536 |
-| `disabledKey` | variable | L540 |
-| `disabledFacts` | variable | L541 |
-| `canRun` | variable | L574 |
-| `reason` | variable | L574 |
-| `hasMemory` | variable | L574 |
-| `completeTurns` | variable | L574 |
-| `currentUrl` | variable | L592 |
-| `newSessionId` | variable | L593 |
-| `originalPushState` | variable | L630 |
-| `originalReplaceState` | variable | L637 |
+| `MEMORY_SCHEMA_VERSION` | constant | L43 |
+| `DIMENSION_NAMES` | constant | L48 |
+| `SESSION_KEY_PREFIX` | constant | L55 |
+| `MEMORY_SIZE_LIMITS` | constant | L61 |
+| `memCtrlLog` | function | L69 |
+| `MemoryController.extractSessionId` | method | L103 |
+| `urlObj` | variable | L105 |
+| `MemoryController.isExtensionContext` | method | L130 |
+| `MemoryController._bridgeRequestId` | property | L139 |
+| `MemoryController._bridgeRequests` | property | L140 |
+| `MemoryController._bridgeInitialized` | property | L141 |
+| `MemoryController._initBridgeListener` | method | L146 |
+| `requestId` | variable | L151 |
+| `pending` | variable | L153 |
+| `MemoryController._makeBridgeRequest` | method | L173 |
+| `requestId` | variable | L177 |
+| `timeout` | variable | L179 |
+| `MemoryController._ensureCache` | method | L209 |
+| `MemoryController.getComponent` | method | L270 |
+| `MemoryController.setComponent` | method | L289 |
+| `sanitizedData` | variable | L320 |
+| `historyLength` | variable | L339 |
+| `MemoryController.incrementGeneration` | method | L382 |
+| `MemoryController.getComponentGeneration` | method | L408 |
+| `MemoryController.isComponentCurrent` | method | L419 |
+| `MemoryController.isPersonaPinned` | method | L485 |
+| `MemoryController.getEffectivePersona` | method | L494 |
+| `MemoryController.updatePinnedPersona` | method | L512 |
+| `MemoryController.isComponentPinned` | method | L594 |
+| `MemoryController.getEffectiveComponent` | method | L605 |
+| `MemoryController.getUnifiedContext` | method | L622 |
+| `MemoryController.hasContext` | method | L648 |
+| `MemoryController._getEmptyMemory` | method | L675 |
+| `MemoryController._estimateSize` | method | L691 |
+| `MemoryController._truncateString` | method | L706 |
+| `encoder` | variable | L709 |
+| `bytes` | variable | L710 |
+| `low` | variable | L715 |
+| `high` | variable | L715 |
+| `mid` | variable | L717 |
+| `MemoryController._sanitizeComponentData` | method | L733 |
+| `sanitized` | variable | L742 |
+| `MemoryController._isCharArray` | method | L779 |
+| `keys` | variable | L783 |
+| `isNumericKeys` | variable | L787 |
+| `MemoryController.getStorageUsage` | method | L799 |
+| `total` | variable | L810 |
 
 ### `model/model-manager.js` (42 missing)
 
@@ -1686,7 +1403,49 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `_modelManagerInstance` | variable | L911 |
 | `getModelManager` | function | L917 |
 
-### `memory/analyzers/unified-analyzer.js` (32 missing)
+### `memory/index.js` (37 missing)
+
+| Symbol Name | Type | Line |
+|:---|:---|:---|
+| `memLog` | function | L39 |
+| `sessionMutexes` | variable | L72 |
+| `analyzeSession` | function | L82 |
+| `runPromise` | variable | L96 |
+| `scraper` | variable | L131 |
+| `scrapedData` | variable | L143 |
+| `isSelectiveRebuild` | variable | L148 |
+| `shouldIncrementGen` | variable | L149 |
+| `newGen` | variable | L152 |
+| `results` | variable | L164 |
+| `enabledComponents` | variable | L177 |
+| `pinnedComponents` | variable | L181 |
+| `allDimensions` | variable | L182 |
+| `startTime` | variable | L214 |
+| `unifiedResults` | variable | L215 |
+| `dimensionIds` | variable | L226 |
+| `isLLMConfigured` | function | L308 |
+| `getCurrentSessionId` | function | L317 |
+| `requestId` | variable | L346 |
+| `sendBridgeResponse` | function | L349 |
+| `SmartAutoRun` | variable | L398 |
+| `isConfigured` | variable | L417 |
+| `scraper` | variable | L427 |
+| `completeTurns` | variable | L434 |
+| `hasExistingMemory` | variable | L451 |
+| `chatContainer` | variable | L467 |
+| `isModelResponse` | variable | L495 |
+| `canRun` | variable | L514 |
+| `completeTurns` | variable | L514 |
+| `enabledAnalyzers` | variable | L536 |
+| `canRun` | variable | L574 |
+| `hasMemory` | variable | L574 |
+| `completeTurns` | variable | L574 |
+| `currentUrl` | variable | L592 |
+| `newSessionId` | variable | L593 |
+| `originalPushState` | variable | L630 |
+| `originalReplaceState` | variable | L637 |
+
+### `memory/analyzers/unified-analyzer.js` (31 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
@@ -1698,7 +1457,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `recentMessages` | variable | L90 |
 | `recentText` | variable | L91 |
 | `allDimensions` | variable | L94 |
-| `dimensions` | variable | L103 |
 | `dimensionList` | variable | L107 |
 | `basePrompt` | variable | L109 |
 | `enabledComponents` | variable | L211 |
@@ -1757,7 +1515,7 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `SupabaseClient.getMySavedPrompts` | method | L607 |
 | `SupabaseClient.deleteSavedPrompt` | method | L634 |
 
-### `rating/rating-manager.js` (26 missing)
+### `rating/rating-manager.js` (25 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
@@ -1766,7 +1524,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `RatingManager.hasDirectStorageAccess` | method | L148 |
 | `RatingManager.extractSessionId` | method | L169 |
 | `urlObj` | variable | L171 |
-| `pathParts` | variable | L173 |
 | `ratingCount` | variable | L215 |
 | `RatingManager.backupToStorage` | method | L266 |
 | `backupKey` | variable | L273 |
@@ -1873,7 +1630,7 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `ids` | variable | L616 |
 | `hints` | variable | L617 |
 
-### `extractor/extractor.js` (18 missing)
+### `extractor/extractor.js` (17 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
@@ -1882,7 +1639,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `EXTRACTION_PROMPT` | constant | L81 |
 | `PersonaExtractor.loadDrafts` | method | L234 |
 | `PersonaExtractor.saveDrafts` | method | L247 |
-| `modelConfig` | variable | L267 |
 | `PersonaExtractor.getModelConfig` | method | L313 |
 | `PersonaExtractor.callLLM` | method | L331 |
 | `match` | variable | L371 |
@@ -1895,26 +1651,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `draft` | variable | L486 |
 | `supabase` | variable | L494 |
 | `PersonaExtractor.importToMemoryLayer` | method | L543 |
-
-### `llm/llm-config.js` (15 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `LLMConfigManager` | class | L6 |
-| `LLMConfigManager._getModelManager` | method | L11 |
-| `manager` | variable | L23 |
-| `activeModel` | variable | L29 |
-| `LLMConfigManager.getApiKey` | method | L43 |
-| `manager` | variable | L44 |
-| `LLMConfigManager.getClient` | method | L53 |
-| `manager` | variable | L54 |
-| `activeModel` | variable | L64 |
-| `LLMConfigManager.isConfigured` | method | L83 |
-| `manager` | variable | L84 |
-| `activeModel` | variable | L88 |
-| `LLMConfigManager.getActiveModelConfig` | method | L92 |
-| `manager` | variable | L93 |
-| `llmConfigManager` | variable | L102 |
 
 ### `theme/theme-controller.js` (15 missing)
 
@@ -1936,24 +1672,22 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `ThemeController.#updateToggleIcons` | method | L266 |
 | `icon` | variable | L267 |
 
-### `background/services/sidepanel-manager.js` (14 missing)
+### `llm/llm-config.js` (12 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
-| `openSidepanelPorts` | variable | L8 |
-| `sidepanelWindowPorts` | variable | L9 |
-| `handleSidepanelConnect` | function | L11 |
-| `resolvedWindowId` | variable | L14 |
-| `registerWindow` | function | L16 |
-| `isSidepanelOpen` | function | L46 |
-| `toggleSidepanel` | function | L53 |
-| `tabId` | variable | L54 |
-| `windowId` | variable | L55 |
-| `port` | variable | L66 |
-| `openOptions` | variable | L80 |
-| `toggleSplitView` | function | L95 |
-| `tabId` | variable | L97 |
-| `isFromIframe` | variable | L109 |
+| `LLMConfigManager` | class | L6 |
+| `LLMConfigManager._getModelManager` | method | L11 |
+| `manager` | variable | L23 |
+| `LLMConfigManager.getApiKey` | method | L43 |
+| `manager` | variable | L44 |
+| `LLMConfigManager.getClient` | method | L53 |
+| `manager` | variable | L54 |
+| `LLMConfigManager.isConfigured` | method | L83 |
+| `manager` | variable | L84 |
+| `LLMConfigManager.getActiveModelConfig` | method | L92 |
+| `manager` | variable | L93 |
+| `llmConfigManager` | variable | L102 |
 
 ### `rating/rating-ui.js` (12 missing)
 
@@ -1972,30 +1706,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `updateRatingUI` | function | L243 |
 | `starsContainer` | variable | L244 |
 
-### `background/services/crypto.js` (8 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `cachedKey` | variable | L1 |
-| `getEncryptionKey` | function | L3 |
-| `extensionId` | variable | L6 |
-| `encryptApiKey` | function | L32 |
-| `base64` | variable | L46 |
-| `decryptApiKey` | function | L54 |
-| `rawBase64` | variable | L61 |
-| `isEncrypted` | function | L81 |
-
-### `background/services/session-state.js` (6 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `activeRefinements` | variable | L6 |
-| `activeExtractions` | variable | L7 |
-| `RECENT_FOCUS_REFRESH_INTERVAL` | constant | L8 |
-| `getRefinementCounter` | function | L10 |
-| `incrementRefinementCounter` | function | L18 |
-| `resetRefinementCounter` | function | L28 |
-
 ### `memory/analyzer-registry.js` (5 missing)
 
 | Symbol Name | Type | Line |
@@ -2005,16 +1715,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `AnalyzerRegistry` | variable | L102 |
 | `existed` | variable | L170 |
 | `deleted` | variable | L171 |
-
-### `memory/analyzers/recent-focus.js` (5 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `RecentFocus` | variable | L15 |
-| `conversationText` | variable | L24 |
-| `recentRatings` | variable | L36 |
-| `ratingContext` | variable | L37 |
-| `recentMessages` | variable | L90 |
 
 ### `options/index.js` (5 missing)
 
@@ -2026,14 +1726,14 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `modelManagerUI` | variable | L83 |
 | `container` | variable | L101 |
 
-### `background/services/logger.js` (4 missing)
+### `memory/analyzers/recent-focus.js` (4 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
-| `sanitizeData` | function | L6 |
-| `bgLog` | function | L27 |
-| `cleanData` | variable | L28 |
-| `dataStr` | variable | L31 |
+| `conversationText` | variable | L24 |
+| `recentRatings` | variable | L36 |
+| `ratingContext` | variable | L37 |
+| `recentMessages` | variable | L90 |
 
 ### `model/model-registry.js` (4 missing)
 
@@ -2062,6 +1762,14 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `StoragePartition.getMultiple` | method | L51 |
 | `StoragePartition.setMultiple` | method | L89 |
 
+### `background/index.js` (3 missing)
+
+| Symbol Name | Type | Line |
+|:---|:---|:---|
+| `sentCount` | variable | L300 |
+| `skippedCount` | variable | L301 |
+| `keepAliveInterval` | variable | L347 |
+
 ### `sidepanel/modules/cloud-sync.js` (2 missing)
 
 | Symbol Name | Type | Line |
@@ -2088,33 +1796,111 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 
 Showing cross-reference for files with ported symbols.
 
-### `sidepanel/sidepanel.js` (198 ported)
+### `sidepanel/sidepanel.js` (224 ported)
 
 | Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
 |:---|:---|:---|:---|:---|
 | `entry` | variable | L26 | `src/core/logging/logger.ts` | `entry` |
 | `showToast` | function | L38 | `entrypoints/options/App.tsx` | `showToast` |
 | `input` | variable | L394 | `src/adapters/chatbots/chatgpt.adapter.ts` | `input` |
-| `isOpen` | variable | L482 | `entrypoints/sidepanel/components/ExpandModal.tsx` | `ExpandModalProps.isOpen` |
+| `isOpen` | variable | L482 | `src/core/orchestration/sidepanel-manager.ts` | `isOpen` |
 | `value` | variable | L495 | `entrypoints/sidepanel/components/ExpandModal.tsx` | `ExpandModalProps.value` |
 | `parsed` | variable | L736 | `src/core/extractor/extractor.ts` | `parsed` |
 | `cleaned` | variable | L738 | `src/core/extractor/resilient-parser.ts` | `cleaned` |
-| `text` | variable | L762 | `src/core/llm/llm-client.ts` | `LLMResponsePayload.text` |
+| `text` | variable | L762 | `src/core/orchestration/api-proxy.ts` | `text` |
 | `value` | variable | L911 | `entrypoints/sidepanel/components/ExpandModal.tsx` | `ExpandModalProps.value` |
+| `memoryData` | variable | L934 | `src/core/orchestration/api-proxy.ts` | `memoryData` |
+| `disabledFacts` | variable | L935 | `src/core/orchestration/api-proxy.ts` | `disabledFacts` |
+| `tab` | variable | L1043 | `src/core/orchestration/memory-orchestrator.ts` | `tab` |
 | `enabled` | variable | L1115 | `src/core/model/model-manager.ts` | `enabled` |
-| `storageKey` | variable | L1269 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
+| `pathParts` | variable | L1251 | `src/core/orchestration/memory-orchestrator.ts` | `pathParts` |
+| `storageKey` | variable | L1269 | `src/core/orchestration/memory-orchestrator.ts` | `storageKey` |
 | `result` | variable | L1272 | `src/core/logging/logger.ts` | `result` |
 | `result` | variable | L1316 | `src/core/logging/logger.ts` | `result` |
+| `activeModelId` | variable | L1319 | `src/core/orchestration/api-proxy.ts` | `activeModelId` |
 | `models` | variable | L1320 | `src/core/model/model-registry.ts` | `models` |
-| `provider` | variable | L1326 | `src/core/llm/llm-client.ts` | `LLMClient.provider` |
-| `result` | variable | L1368 | `src/core/logging/logger.ts` | `result` |
-| `label` | variable | L1406 | `src/core/model/model-registry.ts` | `ModelParameterDef.label` |
-| `value` | variable | L1662 | `entrypoints/sidepanel/components/ExpandModal.tsx` | `ExpandModalProps.value` |
-| `storageKey` | variable | L1718 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| `target` | variable | L1855 | `src/core/theme/theme-controller.ts` | `target` |
-| *(+ 178 more)* | | | | |
+| `activeModel` | variable | L1325 | `entrypoints/background.ts` | `activeModel` |
+| *(+ 204 more)* | | | | |
 
-### `llm/llm-client.js` (42 ported)
+### `background/services/memory-orchestrator.js` (85 ported)
+
+| Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
+|:---|:---|:---|:---|:---|
+| `getCurrentTabSessionId` | function | L8 | `src/core/orchestration/memory-orchestrator.ts` | `getCurrentTabSessionId` |
+| `tab` | variable | L9 | `src/core/orchestration/memory-orchestrator.ts` | `tab` |
+| `url` | variable | L26 | `src/core/llm/llm-client.ts` | `url` |
+| `pathParts` | variable | L27 | `src/core/orchestration/memory-orchestrator.ts` | `pathParts` |
+| `getSessionMemory` | function | L42 | `src/core/orchestration/memory-orchestrator.ts` | `getSessionMemory` |
+| `storageKey` | variable | L45 | `src/core/orchestration/memory-orchestrator.ts` | `storageKey` |
+| `result` | variable | L46 | `src/core/logging/logger.ts` | `result` |
+| `updateMemoryComponent` | function | L53 | `src/core/orchestration/memory-orchestrator.ts` | `updateMemoryComponent` |
+| `storageKey` | variable | L56 | `src/core/orchestration/memory-orchestrator.ts` | `storageKey` |
+| `result` | variable | L57 | `src/core/logging/logger.ts` | `result` |
+| `memory` | variable | L58 | `src/core/orchestration/memory-orchestrator.ts` | `memory` |
+| `pinPersona` | function | L80 | `src/core/orchestration/memory-orchestrator.ts` | `pinPersona` |
+| `storageKey` | variable | L83 | `src/core/orchestration/memory-orchestrator.ts` | `storageKey` |
+| `result` | variable | L84 | `src/core/logging/logger.ts` | `result` |
+| `memory` | variable | L85 | `src/core/orchestration/memory-orchestrator.ts` | `memory` |
+| `personaComponent` | variable | L98 | `src/core/orchestration/api-proxy.ts` | `personaComponent` |
+| `unpinPersona` | function | L115 | `src/core/orchestration/memory-orchestrator.ts` | `unpinPersona` |
+| `storageKey` | variable | L118 | `src/core/orchestration/memory-orchestrator.ts` | `storageKey` |
+| `result` | variable | L119 | `src/core/logging/logger.ts` | `result` |
+| `memory` | variable | L120 | `src/core/orchestration/memory-orchestrator.ts` | `memory` |
+| *(+ 65 more)* | | | | |
+
+### `background/index.js` (67 ported)
+
+| Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
+|:---|:---|:---|:---|:---|
+| `geminiApiKey` | variable | L53 | `entrypoints/background.ts` | `geminiApiKey` |
+| `openOptions` | variable | L64 | `src/core/orchestration/sidepanel-manager.ts` | `openOptions` |
+| `key` | variable | L80 | `src/core/crypto/crypto-service.ts` | `key` |
+| `openOptions` | variable | L100 | `src/core/orchestration/sidepanel-manager.ts` | `openOptions` |
+| `result` | variable | L116 | `src/core/logging/logger.ts` | `result` |
+| `hasEnabledModelWithKey` | variable | L122 | `entrypoints/background.ts` | `hasEnabledModelWithKey` |
+| `jsonData` | variable | L147 | `entrypoints/background.ts` | `jsonData` |
+| `filename` | variable | L147 | `entrypoints/background.ts` | `filename` |
+| `filenameListener` | function | L152 | `entrypoints/background.ts` | `filenameListener` |
+| `base64Data` | variable | L158 | `entrypoints/background.ts` | `base64Data` |
+| `dataUrl` | variable | L159 | `entrypoints/background.ts` | `dataUrl` |
+| `tabId` | variable | L204 | `src/core/orchestration/sidepanel-manager.ts` | `tabId` |
+| `disabledKey` | variable | L280 | `src/core/orchestration/api-proxy.ts` | `disabledKey` |
+| `tabs` | variable | L298 | `entrypoints/background.ts` | `tabs` |
+| `urlMatch` | variable | L307 | `entrypoints/background.ts` | `urlMatch` |
+| `sessionId` | variable | L308 | `src/core/logging/logger.ts` | `Logger.sessionId` |
+| `sessionKey` | variable | L316 | `entrypoints/background.ts` | `sessionKey` |
+| `stored` | variable | L317 | `src/core/model/model-manager.ts` | `stored` |
+| `ALLOWED_PROXY_HOSTS` | constant | L349 | `entrypoints/background.ts` | `ALLOWED_PROXY_HOSTS` |
+| `targetUrl` | variable | L356 | `entrypoints/background.ts` | `targetUrl` |
+| *(+ 47 more)* | | | | |
+
+### `background/services/api-proxy.js` (65 ported)
+
+| Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
+|:---|:---|:---|:---|:---|
+| `getUserFriendlyError` | function | L21 | `src/core/orchestration/api-proxy.ts` | `getUserFriendlyError` |
+| `providerName` | variable | L22 | `src/core/orchestration/api-proxy.ts` | `providerName` |
+| `rawStr` | variable | L30 | `src/core/orchestration/api-proxy.ts` | `rawStr` |
+| `REFINEMENT_SYSTEM_PROMPT` | constant | L66 | `src/core/orchestration/api-proxy.ts` | `REFINEMENT_SYSTEM_PROMPT` |
+| `MODEL_CONFIGS` | constant | L116 | `src/core/orchestration/api-proxy.ts` | `MODEL_CONFIGS` |
+| `LLM_TRANSPORTS` | constant | L147 | `src/core/orchestration/api-proxy.ts` | `LLM_TRANSPORTS` |
+| `raw` | variable | L150 | `src/core/orchestration/api-proxy.ts` | `raw` |
+| `effective` | variable | L151 | `src/core/orchestration/api-proxy.ts` | `effective` |
+| `RETRY_CONFIG_BG` | constant | L218 | `src/core/orchestration/api-proxy.ts` | `RETRY_CONFIG_BG` |
+| `calculateRetryDelay` | function | L230 | `src/core/orchestration/api-proxy.ts` | `calculateRetryDelay` |
+| `exponentialDelay` | variable | L231 | `src/core/orchestration/api-proxy.ts` | `exponentialDelay` |
+| `cappedDelay` | variable | L232 | `src/core/orchestration/api-proxy.ts` | `cappedDelay` |
+| `jitter` | variable | L234 | `src/core/orchestration/api-proxy.ts` | `jitter` |
+| `executeLlmRequest` | function | L241 | `src/core/orchestration/api-proxy.ts` | `executeLlmRequest` |
+| `provider` | variable | L249 | `src/core/llm/llm-client.ts` | `LLMClient.provider` |
+| `adapter` | variable | L252 | `src/core/orchestration/api-proxy.ts` | `adapter` |
+| `apiKey` | variable | L257 | `src/adapters/storage/supabase-client.ts` | `SupabaseClientAdapter.apiKey` |
+| `lastError` | variable | L262 | `src/core/llm/llm-client.ts` | `lastError` |
+| `delay` | variable | L274 | `src/core/llm/llm-client.ts` | `delay` |
+| `timer` | variable | L280 | `src/core/orchestration/api-proxy.ts` | `timer` |
+| *(+ 45 more)* | | | | |
+
+### `llm/llm-client.js` (44 ported)
 
 | Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
 |:---|:---|:---|:---|:---|
@@ -2124,7 +1910,8 @@ Showing cross-reference for files with ported symbols.
 | `LLMClient.constructor` | method | L99 | `src/core/llm/llm-client.ts` | `LLMClient.constructor` |
 | `LLMClient.call` | method | L289 | `src/core/llm/llm-client.ts` | `LLMClient.call` |
 | `response` | variable | L246 | `src/core/extractor/extractor.ts` | `response` |
-| `data` | variable | L248 | `src/core/crypto/crypto-service.ts` | `data` |
+| `contentType` | variable | L247 | `entrypoints/background.ts` | `contentType` |
+| `data` | variable | L248 | `src/core/llm/llm-client.ts` | `data` |
 | `error` | variable | L291 | `src/core/model/model-registry.ts` | `error` |
 | `lastError` | variable | L320 | `src/core/llm/llm-client.ts` | `lastError` |
 | `delay` | variable | L326 | `src/core/llm/llm-client.ts` | `delay` |
@@ -2132,13 +1919,12 @@ Showing cross-reference for files with ported symbols.
 | `provider` | variable | L365 | `src/core/llm/llm-client.ts` | `LLMClient.provider` |
 | `message` | variable | L385 | `src/core/logging/logger.ts` | `LogEntry.message` |
 | `delay` | variable | L434 | `src/core/llm/llm-client.ts` | `delay` |
+| `jitter` | variable | L439 | `src/core/orchestration/api-proxy.ts` | `jitter` |
 | `url` | variable | L461 | `src/core/llm/llm-client.ts` | `url` |
 | `body` | variable | L466 | `src/core/llm/llm-client.ts` | `body` |
 | `error` | variable | L511 | `src/core/model/model-registry.ts` | `error` |
-| `data` | variable | L518 | `src/core/crypto/crypto-service.ts` | `data` |
-| `text` | variable | L519 | `src/core/llm/llm-client.ts` | `LLMResponsePayload.text` |
-| `url` | variable | L533 | `src/core/llm/llm-client.ts` | `url` |
-| *(+ 22 more)* | | | | |
+| `data` | variable | L518 | `src/core/llm/llm-client.ts` | `data` |
+| *(+ 24 more)* | | | | |
 
 ### `logging/logger.js` (42 ported)
 
@@ -2180,17 +1966,43 @@ Showing cross-reference for files with ported symbols.
 | `SupabaseClient.deletePersona` | method | L369 | `src/core/storage/repository.ts` | `StorageRepository.deletePersona` |
 | `SupabaseClient.getPersona` | method | L474 | `src/core/storage/repository.ts` | `StorageRepository.getPersona` |
 | `SupabaseClient.submitRating` | method | L511 | `src/adapters/storage/supabase-client.ts` | `SupabaseClientAdapter.submitRating` |
-| `data` | variable | L158 | `src/core/crypto/crypto-service.ts` | `data` |
+| `data` | variable | L158 | `src/core/llm/llm-client.ts` | `data` |
 | `error` | variable | L158 | `src/core/model/model-registry.ts` | `error` |
-| `data` | variable | L181 | `src/core/crypto/crypto-service.ts` | `data` |
+| `data` | variable | L181 | `src/core/llm/llm-client.ts` | `data` |
 | `error` | variable | L181 | `src/core/model/model-registry.ts` | `error` |
-| `data` | variable | L202 | `src/core/crypto/crypto-service.ts` | `data` |
+| `data` | variable | L202 | `src/core/llm/llm-client.ts` | `data` |
 | `error` | variable | L202 | `src/core/model/model-registry.ts` | `error` |
-| `data` | variable | L268 | `src/core/crypto/crypto-service.ts` | `data` |
+| `data` | variable | L268 | `src/core/llm/llm-client.ts` | `data` |
 | `error` | variable | L268 | `src/core/model/model-registry.ts` | `error` |
 | `current` | variable | L309 | `src/adapters/chatbots/claude.adapter.ts` | `current` |
-| `data` | variable | L341 | `src/core/crypto/crypto-service.ts` | `data` |
+| `data` | variable | L341 | `src/core/llm/llm-client.ts` | `data` |
 | *(+ 15 more)* | | | | |
+
+### `memory/memory-controller.js` (32 ported)
+
+| Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
+|:---|:---|:---|:---|:---|
+| `MemoryController` | class | L80 | `src/core/memory/memory-controller.ts` | `MemoryController` |
+| `MemoryController.constructor` | method | L84 | `src/core/memory/memory-controller.ts` | `MemoryController.constructor` |
+| `MemoryController.load` | method | L223 | `src/core/rating/rating-manager.ts` | `RatingManager.load` |
+| `MemoryController.save` | method | L250 | `src/core/rating/rating-manager.ts` | `RatingManager.save` |
+| `MemoryController.getCurrentGeneration` | method | L398 | `src/core/memory/memory-controller.ts` | `MemoryController.getCurrentGeneration` |
+| `MemoryController.pinPersona` | method | L435 | `src/core/orchestration/memory-orchestrator.ts` | `pinPersona` |
+| `MemoryController.unpinPersona` | method | L464 | `src/core/orchestration/memory-orchestrator.ts` | `unpinPersona` |
+| `MemoryController.pinComponent` | method | L545 | `src/core/orchestration/memory-orchestrator.ts` | `pinComponent` |
+| `MemoryController.unpinComponent` | method | L570 | `src/core/orchestration/memory-orchestrator.ts` | `unpinComponent` |
+| `MemoryController.clear` | method | L657 | `src/core/logging/logger.ts` | `RingBuffer.clear` |
+| `pathParts` | variable | L106 | `src/core/orchestration/memory-orchestrator.ts` | `pathParts` |
+| `success` | variable | L151 | `src/services/message-dispatcher.service.ts` | `success` |
+| `data` | variable | L151 | `src/core/llm/llm-client.ts` | `data` |
+| `error` | variable | L151 | `src/core/model/model-registry.ts` | `error` |
+| `result` | variable | L225 | `src/core/logging/logger.ts` | `result` |
+| `validation` | variable | L304 | `src/core/extractor/resilient-parser.ts` | `validation` |
+| `existing` | variable | L327 | `src/core/memory/memory-controller.ts` | `existing` |
+| `generation` | variable | L328 | `src/core/memory/memory-controller.ts` | `MemorySessionState.generation` |
+| `component` | variable | L410 | `src/core/orchestration/memory-orchestrator.ts` | `component` |
+| `component` | variable | L421 | `src/core/orchestration/memory-orchestrator.ts` | `component` |
+| *(+ 12 more)* | | | | |
 
 ### `model/model-manager.js` (32 ported)
 
@@ -2213,116 +2025,12 @@ Showing cross-reference for files with ported symbols.
 | `activeId` | variable | L325 | `src/core/model/model-manager.ts` | `activeId` |
 | `activeId` | variable | L388 | `src/core/model/model-manager.ts` | `activeId` |
 | `enabled` | variable | L390 | `src/core/model/model-manager.ts` | `enabled` |
-| `data` | variable | L417 | `src/core/crypto/crypto-service.ts` | `data` |
+| `data` | variable | L417 | `src/core/llm/llm-client.ts` | `data` |
 | `activeId` | variable | L426 | `src/core/model/model-manager.ts` | `activeId` |
 | `model` | variable | L434 | `src/core/llm/llm-client.ts` | `LLMClient.model` |
 | *(+ 12 more)* | | | | |
 
-### `model/model-registry.js` (31 ported)
-
-| Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
-|:---|:---|:---|:---|:---|
-| `MODEL_PROVIDERS` | constant | L15 | `src/core/model/model-registry.ts` | `MODEL_PROVIDERS` |
-| `DEFAULT_MODEL_CONFIGS` | constant | L205 | `src/core/model/model-registry.ts` | `DEFAULT_MODEL_CONFIGS` |
-| `sanitizeApiKey` | function | L270 | `src/core/model/model-registry.ts` | `sanitizeApiKey` |
-| `getProvider` | function | L286 | `src/core/model/model-registry.ts` | `getProvider` |
-| `getProviderIds` | function | L294 | `src/core/model/model-registry.ts` | `getProviderIds` |
-| `getModelsForProvider` | function | L303 | `src/core/model/model-registry.ts` | `getModelsForProvider` |
-| `provider` | variable | L304 | `src/core/llm/llm-client.ts` | `LLMClient.provider` |
-| `getDefaultModelForProvider` | function | L313 | `src/core/model/model-registry.ts` | `getDefaultModelForProvider` |
-| `models` | variable | L314 | `src/core/model/model-registry.ts` | `models` |
-| `defaultModel` | variable | L315 | `src/core/model/model-registry.ts` | `defaultModel` |
-| `getParametersForProvider` | function | L324 | `src/core/model/model-registry.ts` | `getParametersForProvider` |
-| `provider` | variable | L325 | `src/core/llm/llm-client.ts` | `LLMClient.provider` |
-| `getDefaultParameterValues` | function | L334 | `src/core/model/model-registry.ts` | `getDefaultParameterValues` |
-| `params` | variable | L335 | `src/core/model/model-registry.ts` | `params` |
-| `defaults` | variable | L336 | `src/core/model/model-registry.ts` | `defaults` |
-| `fetchGeminiModels` | function | L348 | `src/core/model/model-registry.ts` | `fetchGeminiModels` |
-| `cleanKey` | variable | L349 | `src/core/model/model-manager.ts` | `cleanKey` |
-| `response` | variable | L355 | `src/core/extractor/extractor.ts` | `response` |
-| `error` | variable | L365 | `src/core/model/model-registry.ts` | `error` |
-| `data` | variable | L369 | `src/core/crypto/crypto-service.ts` | `data` |
-| *(+ 11 more)* | | | | |
-
-### `background/index.js` (26 ported)
-
-| Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
-|:---|:---|:---|:---|:---|
-| `key` | variable | L80 | `src/core/crypto/crypto-service.ts` | `key` |
-| `result` | variable | L116 | `src/core/logging/logger.ts` | `result` |
-| `sessionId` | variable | L308 | `src/core/logging/logger.ts` | `Logger.sessionId` |
-| `stored` | variable | L317 | `src/core/model/model-manager.ts` | `stored` |
-| `response` | variable | L375 | `src/core/extractor/extractor.ts` | `response` |
-| `data` | variable | L378 | `src/core/crypto/crypto-service.ts` | `data` |
-| `result` | variable | L410 | `src/core/logging/logger.ts` | `result` |
-| `models` | variable | L411 | `src/core/model/model-registry.ts` | `models` |
-| `activeId` | variable | L412 | `src/core/model/model-manager.ts` | `activeId` |
-| `apiKey` | variable | L419 | `src/adapters/storage/supabase-client.ts` | `SupabaseClientAdapter.apiKey` |
-| `apiKey` | variable | L434 | `src/adapters/storage/supabase-client.ts` | `SupabaseClientAdapter.apiKey` |
-| `prompt` | variable | L462 | `src/core/memory/analyzers/unified-analyzer.ts` | `prompt` |
-| `extractionPrompt` | variable | L478 | `src/core/extractor/extractor.ts` | `extractionPrompt` |
-| `result` | variable | L638 | `src/core/logging/logger.ts` | `result` |
-| `personaId` | variable | L657 | `src/services/message-dispatcher.service.ts` | `personaId` |
-| `sessionId` | variable | L662 | `src/core/logging/logger.ts` | `Logger.sessionId` |
-| `storageKey` | variable | L669 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| `result` | variable | L670 | `src/core/logging/logger.ts` | `result` |
-| `sessionId` | variable | L811 | `src/core/logging/logger.ts` | `Logger.sessionId` |
-| `storageKey` | variable | L817 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| *(+ 6 more)* | | | | |
-
-### `options/model-manager-ui.js` (24 ported)
-
-| Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
-|:---|:---|:---|:---|:---|
-| `ModelManagerUI.constructor` | method | L15 | `src/adapters/storage/supabase-client.ts` | `SupabaseClientAdapter.constructor` |
-| `ModelManagerUI.init` | method | L29 | `src/core/model/model-manager.ts` | `ModelManager.init` |
-| `ModelManagerUI.escapeHtml` | method | L84 | `src/core/refiner/diff-engine.ts` | `escapeHtml` |
-| `ModelManagerUI.showToast` | method | L724 | `entrypoints/options/App.tsx` | `showToast` |
-| `models` | variable | L53 | `src/core/model/model-registry.ts` | `models` |
-| `activeId` | variable | L54 | `src/core/model/model-manager.ts` | `activeId` |
-| `provider` | variable | L100 | `src/core/llm/llm-client.ts` | `LLMClient.provider` |
-| `hasKey` | variable | L101 | `src/services/message-dispatcher.service.ts` | `hasKey` |
-| `action` | variable | L241 | `src/lib/storage/items.ts` | `SyncAction.action` |
-| `input` | variable | L295 | `src/adapters/chatbots/chatgpt.adapter.ts` | `input` |
-| `provider` | variable | L312 | `src/core/llm/llm-client.ts` | `LLMClient.provider` |
-| `params` | variable | L356 | `src/core/model/model-registry.ts` | `params` |
-| `model` | variable | L402 | `src/core/llm/llm-client.ts` | `LLMClient.model` |
-| `input` | variable | L432 | `src/adapters/chatbots/chatgpt.adapter.ts` | `input` |
-| `result` | variable | L473 | `src/core/logging/logger.ts` | `result` |
-| `provider` | variable | L528 | `src/core/llm/llm-client.ts` | `LLMClient.provider` |
-| `apiKey` | variable | L536 | `src/adapters/storage/supabase-client.ts` | `SupabaseClientAdapter.apiKey` |
-| `models` | variable | L561 | `src/core/model/model-registry.ts` | `models` |
-| `model` | variable | L595 | `src/core/llm/llm-client.ts` | `LLMClient.model` |
-| `model` | variable | L633 | `src/core/llm/llm-client.ts` | `LLMClient.model` |
-| *(+ 4 more)* | | | | |
-
-### `background/services/memory-orchestrator.js` (23 ported)
-
-| Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
-|:---|:---|:---|:---|:---|
-| `url` | variable | L26 | `src/core/llm/llm-client.ts` | `url` |
-| `storageKey` | variable | L45 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| `result` | variable | L46 | `src/core/logging/logger.ts` | `result` |
-| `storageKey` | variable | L56 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| `result` | variable | L57 | `src/core/logging/logger.ts` | `result` |
-| `storageKey` | variable | L83 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| `result` | variable | L84 | `src/core/logging/logger.ts` | `result` |
-| `storageKey` | variable | L118 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| `result` | variable | L119 | `src/core/logging/logger.ts` | `result` |
-| `storageKey` | variable | L152 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| `result` | variable | L153 | `src/core/logging/logger.ts` | `result` |
-| `component` | variable | L166 | `src/core/logging/logger.ts` | `LogEntry.component` |
-| `storageKey` | variable | L191 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| `result` | variable | L192 | `src/core/logging/logger.ts` | `result` |
-| `component` | variable | L195 | `src/core/logging/logger.ts` | `LogEntry.component` |
-| `storageKey` | variable | L212 | `src/core/rating/rating-manager.ts` | `RatingManager.storageKey` |
-| `result` | variable | L213 | `src/core/logging/logger.ts` | `result` |
-| `sections` | variable | L238 | `src/core/memory/context-assembler.ts` | `sections` |
-| `personaV4` | variable | L257 | `src/core/memory/schemas.ts` | `PersonaV4` |
-| `domain` | variable | L286 | `src/adapters/storage/supabase-client.ts` | `CommunityPersonaRecord.domain` |
-| *(+ 3 more)* | | | | |
-
-### `content/observer.js` (23 ported)
+### `content/observer.js` (31 ported)
 
 | Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
 |:---|:---|:---|:---|:---|
@@ -2332,21 +2040,21 @@ Showing cross-reference for files with ported symbols.
 | `input` | variable | L401 | `src/adapters/chatbots/chatgpt.adapter.ts` | `input` |
 | `current` | variable | L404 | `src/adapters/chatbots/claude.adapter.ts` | `current` |
 | `result` | variable | L455 | `src/core/logging/logger.ts` | `result` |
+| `activeModelId` | variable | L457 | `src/core/orchestration/api-proxy.ts` | `activeModelId` |
 | `models` | variable | L458 | `src/core/model/model-registry.ts` | `models` |
+| `activeModel` | variable | L461 | `entrypoints/background.ts` | `activeModel` |
 | `label` | variable | L511 | `src/core/model/model-registry.ts` | `ModelParameterDef.label` |
 | `body` | variable | L563 | `src/core/llm/llm-client.ts` | `body` |
+| `tabs` | variable | L599 | `entrypoints/background.ts` | `tabs` |
 | `state` | variable | L616 | `src/core/memory/memory-controller.ts` | `MemoryController.state` |
 | `start` | variable | L645 | `src/core/llm/llm-client.ts` | `start` |
 | `isExpanded` | variable | L989 | `entrypoints/sidepanel/components/ContextView.tsx` | `isExpanded` |
 | `isExpanded` | variable | L1036 | `entrypoints/sidepanel/components/ContextView.tsx` | `isExpanded` |
-| `text` | variable | L1360 | `src/core/llm/llm-client.ts` | `LLMResponsePayload.text` |
-| `text` | variable | L1388 | `src/core/llm/llm-client.ts` | `LLMResponsePayload.text` |
+| `text` | variable | L1360 | `src/core/orchestration/api-proxy.ts` | `text` |
+| `text` | variable | L1388 | `src/core/orchestration/api-proxy.ts` | `text` |
 | `persona` | variable | L1462 | `src/services/message-dispatcher.service.ts` | `persona` |
-| `isOpen` | variable | L1525 | `entrypoints/sidepanel/components/ExpandModal.tsx` | `ExpandModalProps.isOpen` |
-| `result` | variable | L1640 | `src/core/logging/logger.ts` | `result` |
-| `input` | variable | L1689 | `src/adapters/chatbots/chatgpt.adapter.ts` | `input` |
-| `text` | variable | L1830 | `src/core/llm/llm-client.ts` | `LLMResponsePayload.text` |
-| *(+ 3 more)* | | | | |
+| `context` | variable | L1463 | `src/core/orchestration/api-proxy.ts` | `context` |
+| *(+ 11 more)* | | | | |
 
 ---
 
@@ -2366,6 +2074,7 @@ These symbols exist only in the WXT codebase — they are new TypeScript types, 
 | `src/core/logging/logger.ts` | `LogEntry.id` | interface_prop | L18 |
 | `src/core/logging/logger.ts` | `LogEntry.isoTime` | interface_prop | L20 |
 | `src/core/logging/logger.ts` | `LogEntry.levelValue` | interface_prop | L22 |
+| `src/core/logging/logger.ts` | `LogEntry.component` | interface_prop | L23 |
 | `src/core/logging/logger.ts` | `LogEntry.data` | interface_prop | L25 |
 | `src/core/logging/logger.ts` | `LogEntry.error` | interface_prop | L26 |
 | `src/core/logging/logger.ts` | `LogEntry.sessionId` | interface_prop | L27 |
@@ -2374,6 +2083,7 @@ These symbols exist only in the WXT codebase — they are new TypeScript types, 
 | `src/core/logging/logger.ts` | `LoggerOptions.minLevel` | interface_prop | L32 |
 | `src/core/logging/logger.ts` | `LoggerOptions.maxEntries` | interface_prop | L33 |
 | `src/core/logging/logger.ts` | `LoggerOptions.enableConsole` | interface_prop | L34 |
+| `src/core/logging/logger.ts` | `LoggerOptions.component` | interface_prop | L35 |
 | `src/core/logging/logger.ts` | `RingBuffer.buffer` | property | L39 |
 | `src/core/logging/logger.ts` | `RingBuffer.head` | property | L40 |
 | `src/core/logging/logger.ts` | `RingBuffer.tail` | property | L41 |
@@ -2415,10 +2125,13 @@ These symbols exist only in the WXT codebase — they are new TypeScript types, 
 | `src/core/llm/llm-client.ts` | `LLMCallConfig.model` | interface_prop | L37 |
 | `src/core/llm/llm-client.ts` | `LLMCallConfig.temperature` | interface_prop | L38 |
 | `src/core/llm/llm-client.ts` | `LLMCallConfig.maxTokens` | interface_prop | L39 |
+| `src/core/llm/llm-client.ts` | `LLMCallConfig.json` | interface_prop | L40 |
 | `src/core/llm/llm-client.ts` | `LLMCallConfig.systemPrompt` | interface_prop | L41 |
 | `src/core/llm/llm-client.ts` | `LLMCallConfig.baseURL` | interface_prop | L42 |
 | `src/core/llm/llm-client.ts` | `LLMCallConfig.timeoutMs` | interface_prop | L43 |
 | `src/core/llm/llm-client.ts` | `LLMResponsePayload` | interface | L46 |
+| `src/core/llm/llm-client.ts` | `LLMResponsePayload.text` | interface_prop | L47 |
+| `src/core/llm/llm-client.ts` | `LLMResponsePayload.json` | interface_prop | L48 |
 | `src/core/llm/llm-client.ts` | `LLMResponsePayload.durationMs` | interface_prop | L54 |
 | `src/core/llm/llm-client.ts` | `LLMResponsePayload.model` | interface_prop | L55 |
 | `src/core/llm/llm-client.ts` | `LLMResponsePayload.provider` | interface_prop | L56 |
@@ -2496,6 +2209,7 @@ These symbols exist only in the WXT codebase — they are new TypeScript types, 
 | `src/core/storage/repository.ts` | `StorageRepository.clearSyncQueue` | method | L183 |
 | `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate` | interface | L5 |
 | `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate.id` | interface_prop | L6 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate.content` | interface_prop | L8 |
 | `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate.category` | interface_prop | L9 |
 | `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps` | interface | L12 |
 | `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.personas` | interface_prop | L13 |
@@ -2531,32 +2245,26 @@ These symbols exist only in the WXT codebase — they are new TypeScript types, 
 | `src/lib/storage/items.ts` | `UserSettings.cloudSyncEnabled` | interface_prop | L18 |
 | `src/lib/storage/items.ts` | `RatingRecord` | interface | L21 |
 | `src/lib/storage/items.ts` | `RatingRecord.id` | interface_prop | L22 |
+| `src/lib/storage/items.ts` | `RatingRecord.rating` | interface_prop | L23 |
 | `src/lib/storage/items.ts` | `RatingRecord.feedback` | interface_prop | L24 |
 | `src/lib/storage/items.ts` | `RatingRecord.personaId` | interface_prop | L25 |
 | `src/lib/storage/items.ts` | `SyncAction` | interface | L29 |
 | `src/lib/storage/items.ts` | `SyncAction.id` | interface_prop | L30 |
 | `src/lib/storage/items.ts` | `SyncAction.entity` | interface_prop | L32 |
 | `src/lib/storage/items.ts` | `DEFAULT_USER_SETTINGS` | constant | L37 |
-| `src/core/memory/memory-controller.ts` | `MemorySessionState` | interface | L10 |
-| `src/core/memory/memory-controller.ts` | `MemorySessionState.sessionId` | interface_prop | L11 |
-| `src/core/memory/memory-controller.ts` | `MemorySessionState.activePersona` | interface_prop | L13 |
-| `src/core/memory/memory-controller.ts` | `MemorySessionState.pinnedDimensions` | interface_prop | L14 |
-| `src/core/memory/memory-controller.ts` | `MemorySessionState.lastRebuiltAt` | interface_prop | L15 |
-| `src/core/memory/memory-controller.ts` | `MemoryController.getSessionId` | method | L31 |
-| `src/core/memory/memory-controller.ts` | `MemoryController.getActivePersona` | method | L39 |
-| `src/core/memory/memory-controller.ts` | `MemoryController.setActivePersona` | method | L43 |
-| `src/core/memory/memory-controller.ts` | `MemoryController.updateDimension` | method | L49 |
-| `src/core/memory/memory-controller.ts` | `MemoryController.pinDimension` | method | L59 |
-| `src/core/memory/memory-controller.ts` | `MemoryController.unpinDimension` | method | L67 |
-| `src/core/memory/memory-controller.ts` | `MemoryController.isDimensionPinned` | method | L75 |
-| `src/core/memory/memory-controller.ts` | `MemoryController.clearSession` | method | L79 |
-| `src/core/memory/memory-controller.ts` | `memoryController` | variable | L91 |
+| `src/core/rating/rating-manager.ts` | `RatingData.rating` | interface_prop | L9 |
 | `src/core/rating/rating-manager.ts` | `RatingData.ratedAt` | interface_prop | L10 |
 | `src/core/rating/rating-manager.ts` | `RatingData.feedback` | interface_prop | L11 |
 | `src/core/rating/rating-manager.ts` | `RatingStats` | interface | L14 |
 | `src/core/rating/rating-manager.ts` | `RatingStats.averageRating` | interface_prop | L15 |
 | `src/core/rating/rating-manager.ts` | `RatingStats.totalRated` | interface_prop | L16 |
-| *(truncated — 252 more NEW_IN_WXT symbols)* | | | |
+| `src/core/rating/rating-manager.ts` | `RatingStats.distribution` | interface_prop | L17 |
+| `src/core/rating/rating-manager.ts` | `RatingManager.cache` | property | L31 |
+| `src/core/rating/rating-manager.ts` | `RatingManager.getSessionId` | method | L41 |
+| `src/core/rating/rating-manager.ts` | `RatingManager.deleteRating` | method | L97 |
+| `src/core/rating/rating-manager.ts` | `distribution` | variable | L114 |
+| `src/core/rating/rating-manager.ts` | `sum` | variable | L120 |
+| *(truncated — 280 more NEW_IN_WXT symbols)* | | | |
 
 ---
 

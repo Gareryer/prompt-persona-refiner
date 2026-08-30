@@ -1,68 +1,96 @@
 /**
  * Web Crypto API AES-GCM Encryptor for API Keys
+ * Ported from background/services/crypto.js
+ * @module crypto/crypto-service
  */
-export class CryptoService {
-  private static readonly ALGORITHM = 'AES-GCM';
-  private static readonly KEY_LENGTH = 256;
 
-  private static async getDerivedKey(salt: Uint8Array): Promise<CryptoKey> {
-    const rawKey = new TextEncoder().encode('prompt-persona-refiner-v4-master-salt');
-    const keyMaterial = await crypto.subtle.importKey('raw', rawKey, { name: 'PBKDF2' }, false, ['deriveKey']);
-    return crypto.subtle.deriveKey(
-      {
-        name: 'PBKDF2',
-        salt: salt.buffer as ArrayBuffer,
-        iterations: 100000,
-        hash: 'SHA-256'
-      },
-      keyMaterial,
-      { name: this.ALGORITHM, length: this.KEY_LENGTH },
-      false,
-      ['encrypt', 'decrypt']
-    );
-  }
+let cachedKey: CryptoKey | null = null;
 
-  static async encrypt(plaintext: string): Promise<string> {
-    if (!plaintext) return '';
-    const salt = crypto.getRandomValues(new Uint8Array(16));
+export async function getEncryptionKey(): Promise<CryptoKey> {
+  if (cachedKey) return cachedKey;
+
+  const extensionId = typeof chrome !== 'undefined' && chrome?.runtime?.id ? chrome.runtime.id : 'prompt-persona-refiner-v4';
+  const salt = new TextEncoder().encode('prompt-assistant-api-key-salt-v1');
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(extensionId),
+    'PBKDF2',
+    false,
+    ['deriveBits', 'deriveKey']
+  );
+
+  cachedKey = await crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+
+  return cachedKey;
+}
+
+export async function encryptApiKey(plaintext: string): Promise<string> {
+  if (!plaintext) return '';
+  try {
+    const key = await getEncryptionKey();
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const key = await this.getDerivedKey(salt);
-
     const encoded = new TextEncoder().encode(plaintext);
-    const ciphertext = await crypto.subtle.encrypt(
-      { name: this.ALGORITHM, iv: iv.buffer as ArrayBuffer },
+    const encrypted = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv },
       key,
       encoded
     );
+    const combined = new Uint8Array(iv.length + encrypted.byteLength);
+    combined.set(iv, 0);
+    combined.set(new Uint8Array(encrypted), iv.length);
+    const base64 = btoa(String.fromCharCode(...combined));
+    return 'enc:v1:' + base64;
+  } catch (error) {
+    console.error('Encryption error:', error);
+    return plaintext;
+  }
+}
 
-    const combined = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
-    combined.set(salt, 0);
-    combined.set(iv, salt.length);
-    combined.set(new Uint8Array(ciphertext), salt.length + iv.length);
-
-    return btoa(String.fromCharCode(...combined));
+export async function decryptApiKey(encryptedData: string): Promise<string> {
+  if (!encryptedData) return '';
+  if (!isEncrypted(encryptedData)) {
+    return encryptedData; // Already plaintext
   }
 
-  static async decrypt(encryptedBase64: string): Promise<string> {
-    if (!encryptedBase64) return '';
-    try {
-      const binary = atob(encryptedBase64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  try {
+    const rawBase64 = encryptedData.replace(/^enc:v1:/, '');
+    const key = await getEncryptionKey();
+    const combined = Uint8Array.from(atob(rawBase64), c => c.charCodeAt(0));
 
-      const salt = bytes.slice(0, 16);
-      const iv = bytes.slice(16, 28);
-      const data = bytes.slice(28);
+    const iv = combined.slice(0, 12);
+    const encrypted = combined.slice(12);
 
-      const key = await this.getDerivedKey(salt);
-      const decrypted = await crypto.subtle.decrypt(
-        { name: this.ALGORITHM, iv: iv.buffer as ArrayBuffer },
-        key,
-        data.buffer as ArrayBuffer
-      );
-      return new TextDecoder().decode(decrypted);
-    } catch {
-      return encryptedBase64; // Fallback if plain
-    }
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: iv },
+      key,
+      encrypted
+    );
+
+    return new TextDecoder().decode(decrypted);
+  } catch (error) {
+    console.error('Decryption error:', error);
+    return '';
   }
+}
+
+export function isEncrypted(value: unknown): boolean {
+  return typeof value === 'string' && value.startsWith('enc:v1:');
+}
+
+export class CryptoService {
+  static getEncryptionKey = getEncryptionKey;
+  static encrypt = encryptApiKey;
+  static decrypt = decryptApiKey;
+  static isEncrypted = isEncrypted;
 }
