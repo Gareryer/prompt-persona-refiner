@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "tier": 1,
+  "project_name": "gemini-context-aware-extension",
+  "description": "Chrome Manifest V3 Extension for Gemini with intelligent prompt persona synthesis and refinement",
+  "topology": {
+    "root": ".",
+    "sandbox": [
+      "scratch/**",
+      "tests/scratch/**",
+      ".vibetecture/sandbox/**",
+      "tmp/**"
+    ],
+    "rules": [
+      {
+        "from": "content/**",
+        "disallow": [
+          "background/services/crypto.js",
+          "node:fs",
+          "node:path",
+          "pg",
+          "mysql2",
+          "@prisma/client",
+          "better-sqlite3"
+        ],
+        "reason": "Content scripts execute in isolated/web page DOM context and must communicate with background services exclusively via message passing and bridge protocols."
+      },
+      {
+        "from": "sidepanel/**",
+        "disallow": [
+          "node:fs",
+          "node:path",
+          "pg",
+          "mysql2",
+          "@prisma/client",
+          "better-sqlite3"
+        ],
+        "reason": "Sidepanel UI is a client-side renderer; server persistence and direct database connections are strictly forbidden."
+      },
+      {
+        "from": "options/**",
+        "disallow": [
+          "node:fs",
+          "node:path",
+          "pg",
+          "mysql2"
+        ],
+        "reason": "Options UI is a settings presentation layer and cannot execute direct server or filesystem calls."
+      },
+      {
+        "from": "bridge/**",
+        "disallow": [
+          "background/services/crypto.js",
+          "security/runtime-security.js"
+        ],
+        "reason": "Bridge protocols cross MAIN-world web page boundaries; sensitive keystores and crypto primitives must never be exposed across the bridge."
+      }
+    ]
+  },
+  "perimeters": {
+    "client_forbidden_env": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "GEMINI_API_KEY",
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "GROQ_API_KEY",
+      "DATABASE_URL",
+      "JWT_SECRET",
+      "AWS_SECRET_ACCESS_KEY"
+    ],
+    "public_endpoints": [
+      "https://generativelanguage.googleapis.com",
+      "https://api.openai.com",
+      "https://api.anthropic.com",
+      "https://api.groq.com"
+    ],
+    "storage_boundaries": {
+      "sensitive_keys": "chrome.storage.local (encrypted via AES-GCM)",
+      "session_state": "chrome.storage.session",
+      "shared_preferences": "chrome.storage.sync",
+      "ui_cache": "localStorage (strictly non-sensitive)"
+    }
+  },
+  "data_integrity": {
+    "multi_step_transactions_required": true,
+    "schema_standard": "v4_7_dimension",
+    "forbidden_direct_queries": [
+      "content/**",
+      "sidepanel/**",
+      "options/**"
+    ]
+  }
+}

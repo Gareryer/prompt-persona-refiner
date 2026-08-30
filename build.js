@@ -52,8 +52,12 @@ const unbundledJsFiles = [
     'memory/index.js',
     'extractor/extractor.js',
     'sidepanel/sidepanel.js',
+    'sidepanel/modules/persona-view.js',
+    'sidepanel/modules/dimension-view.js',
+    'sidepanel/modules/cloud-sync.js',
     'options/index.js',
     'options/model-manager-ui.js',
+    'storage/storage-repository.js',
     'supabase/supabase-client.js'
 ];
 
@@ -66,7 +70,19 @@ function ensureDir(filePath) {
 
 function cleanOutdir() {
     if (fs.existsSync(outdir)) {
-        fs.rmSync(outdir, { recursive: true });
+        try {
+            fs.rmSync(outdir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+        } catch (e) {
+            // On Windows, if a process/browser holds a folder handle, clean contents instead
+            try {
+                const entries = fs.readdirSync(outdir);
+                for (const entry of entries) {
+                    try {
+                        fs.rmSync(path.join(outdir, entry), { recursive: true, force: true });
+                    } catch (_) {}
+                }
+            } catch (_) {}
+        }
     }
     fs.mkdirSync(outdir, { recursive: true });
 }

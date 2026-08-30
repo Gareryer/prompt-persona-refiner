@@ -280,7 +280,7 @@ class GeminiConversationScraper {
         // Step 3: Extract turns
         scrapeLog('debug', '[scrape] Extracting turns');
         console.log('[Scraper] scrape: Extracting turns...');
-        const { turns, totalBytes, wasTruncated } = this._extractTurns(containers, config);
+        const { turns, totalBytes, wasTruncated, sliceOffset = 0, targetContainers = containers } = this._extractTurns(containers, config);
         scrapeLog('debug', '[scrape] Turns extracted', {
             turnCount: turns.length,
             totalBytes,
@@ -306,6 +306,9 @@ class GeminiConversationScraper {
         const messages = [];
         let pairId = 1;
 
+        // Calculate absolute pair offset for rating alignment when history is sliced
+        const skippedPairCount = containers.slice(0, sliceOffset).filter(c => c._scraperRole === 'user').length;
+
         for (let i = 0; i < turns.length; i++) {
             const turn = turns[i];
 
@@ -324,8 +327,8 @@ class GeminiConversationScraper {
                     i++; // Skip the next turn since we've paired it
                 }
 
-                // Add rating if available (turn index is 0-based, pair id is 1-based)
-                const turnIndex = pairId - 1;
+                // Add rating if available (turn index aligned with absolute thread position)
+                const turnIndex = skippedPairCount + (pairId - 1);
                 const ratingData = this._getRating(turnIndex);
                 if (ratingData) {
                     pair.rating.value = ratingData.rating;
@@ -334,14 +337,22 @@ class GeminiConversationScraper {
 
                 messages.push(pair);
                 pairId++;
-            } else if (turn.role === 'model' && messages.length === 0) {
-                // Model response without a preceding user prompt (edge case)
-                messages.push({
-                    id: pairId++,
-                    user: { prompt: null },
-                    model: { response: turn.content },
-                    rating: { value: null, ratedAt: null }
-                });
+            } else if (turn.role === 'model') {
+                if (messages.length === 0) {
+                    // Model response without a preceding user prompt (edge case)
+                    messages.push({
+                        id: pairId++,
+                        user: { prompt: null },
+                        model: { response: turn.content },
+                        rating: { value: null, ratedAt: null }
+                    });
+                } else {
+                    // Append subsequent model turn to the last message pair
+                    const lastPair = messages[messages.length - 1];
+                    lastPair.model.response = lastPair.model.response
+                        ? `${lastPair.model.response}\n\n${turn.content}`
+                        : turn.content;
+                }
             }
         }
 
@@ -439,6 +450,7 @@ class GeminiConversationScraper {
         // Apply turn limit
         const maxContainers = Math.min(containers.length, config.maxTurns);
         const targetContainers = containers.slice(-maxContainers);
+        const sliceOffset = containers.length - targetContainers.length;
 
         for (let i = 0; i < targetContainers.length; i++) {
             const container = targetContainers[i];
@@ -477,7 +489,7 @@ class GeminiConversationScraper {
             totalBytes += content.length;
         }
 
-        return { turns, totalBytes, wasTruncated };
+        return { turns, totalBytes, wasTruncated, sliceOffset, targetContainers };
     }
 
     /**
@@ -493,11 +505,17 @@ class GeminiConversationScraper {
         const hidden = clone.querySelectorAll('[hidden], [style*="display: none"], .sr-only');
         hidden.forEach(el => el.remove());
 
-        // Preserve code blocks formatting
-        const codeBlocks = clone.querySelectorAll('pre, code');
-        codeBlocks.forEach(block => {
-            if (block.tagName === 'PRE') {
-                block.textContent = '\n```\n' + block.textContent + '\n```\n';
+        // Preserve code blocks formatting: format <pre> blocks first
+        const preBlocks = clone.querySelectorAll('pre');
+        preBlocks.forEach(block => {
+            block.textContent = '\n```\n' + block.textContent + '\n```\n';
+        });
+
+        // Format standalone inline <code> blocks (that are not inside a <pre>)
+        const inlineCode = clone.querySelectorAll(':not(pre) > code');
+        inlineCode.forEach(block => {
+            if (!block.closest('pre')) {
+                block.textContent = '`' + block.textContent + '`';
             }
         });
 

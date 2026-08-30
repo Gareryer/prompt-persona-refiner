@@ -27,6 +27,8 @@ export function getUserFriendlyError(status, rawError, provider) {
     'anthropic': 'Anthropic'
   }[provider] || provider;
 
+  const rawStr = typeof rawError === 'string' ? rawError : (rawError?.message || (rawError ? JSON.stringify(rawError) : ''));
+
   // Handle specific HTTP status codes
   switch (status) {
     case 429:
@@ -35,8 +37,13 @@ export function getUserFriendlyError(status, rawError, provider) {
       return `Invalid API key. Please check your ${providerName} API key in Extension Options.`;
     case 403:
       return `Access denied. Your ${providerName} API key may not have permission for this model. Check your API access.`;
+    case 404:
+      return `Model not found (${rawStr || status}). Please check your selected model in Extension Options.`;
     case 400:
-      return `Invalid request. The prompt may be too long or contain unsupported content.`;
+      if (/API key not valid|API_KEY_INVALID|API key expired/i.test(rawStr)) {
+        return `Invalid API key. Please check your ${providerName} API key in Extension Options.`;
+      }
+      return `Invalid request (${rawStr || status}). The prompt may be too long or model parameters invalid.`;
     case 500:
     case 502:
     case 503:
@@ -47,8 +54,8 @@ export function getUserFriendlyError(status, rawError, provider) {
       return `Network error. Check your internet connection and try again.`;
     default:
       // Fall back to raw error with provider context
-      if (rawError) {
-        return `${providerName}: ${rawError}`;
+      if (rawStr) {
+        return `${providerName}: ${rawStr}`;
       }
       return `${providerName} API error (${status}). Please try again.`;
   }
@@ -139,7 +146,13 @@ export const MODEL_CONFIGS = {
 
 export const LLM_TRANSPORTS = {
   gemini: {
-    buildUrl: (model, apiKey, endpoint) => endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    buildUrl: (model, apiKey, endpoint) => {
+      const raw = (model || '').trim();
+      const effective = (!raw || raw.toLowerCase() === 'gemini' || raw.toLowerCase() === 'google')
+        ? 'gemini-2.0-flash'
+        : raw;
+      return endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${effective}:generateContent`;
+    },
     buildHeaders: (apiKey) => ({
       'Content-Type': 'application/json',
       'x-goog-api-key': apiKey
@@ -274,7 +287,17 @@ export async function executeLlmRequest(prompt, modelConfig, signal = null) {
         });
       }
 
-      const model = modelConfig.modelId || modelConfig.model;
+      let rawModel = (modelConfig.model || modelConfig.modelId || modelConfig.id || '').trim();
+      if (!rawModel || rawModel.toLowerCase() === 'gemini' || rawModel.toLowerCase() === 'google') {
+        rawModel = 'gemini-2.0-flash';
+      } else if (rawModel.toLowerCase() === 'openai') {
+        rawModel = 'gpt-4o-mini';
+      } else if (rawModel.toLowerCase() === 'anthropic') {
+        rawModel = 'claude-3-5-sonnet-20241022';
+      } else if (rawModel.toLowerCase() === 'openrouter') {
+        rawModel = 'google/gemini-2.0-flash-exp:free';
+      }
+      const model = rawModel;
       const url = adapter.buildUrl(model, apiKey, modelConfig.endpoint);
       const headers = adapter.buildHeaders(apiKey);
       const body = adapter.buildBody(prompt, modelConfig.parameters || {}, model);
@@ -289,20 +312,22 @@ export async function executeLlmRequest(prompt, modelConfig, signal = null) {
       const data = await response.json().catch(() => null);
 
       if (!response.ok || data?.error) {
-        const rawError = data?.error?.message || data?.error;
+        const rawError = typeof data?.error === 'string'
+          ? data.error
+          : (data?.error?.message || (data?.error ? JSON.stringify(data.error) : (data?.message || response.statusText)));
         const errMsg = getUserFriendlyError(response.status, rawError, provider);
 
         // Retry on transient errors
         if (RETRY_CONFIG_BG.retryableStatuses.includes(response.status) &&
             attempt < RETRY_CONFIG_BG.maxRetries) {
           bgLog('warn', `Transient ${provider} API error (${response.status}), will retry`, {
-            attempt, status: response.status
+            attempt, status: response.status, model, error: errMsg
           });
           lastError = { success: false, error: errMsg, status: response.status };
           continue; // Retry
         }
 
-        bgLog('error', `${provider} API error`, { status: response.status, error: errMsg, attempt });
+        bgLog('error', `${provider} API error (${response.status}): ${errMsg}`, { status: response.status, model, error: errMsg, rawError, attempt });
         return { success: false, error: errMsg, status: response.status };
       }
 
@@ -347,11 +372,18 @@ export async function executeLlmRequest(prompt, modelConfig, signal = null) {
  * @returns {Promise<{success: boolean, text?: string, error?: string}>}
  */
 export async function callLLMForExtraction(prompt, modelConfig, signal = null) {
+  const safeConfig = { ...modelConfig };
+  let rawModel = (safeConfig.model || safeConfig.modelId || safeConfig.id || '').trim();
+  if (!rawModel || rawModel.toLowerCase() === 'gemini' || rawModel.toLowerCase() === 'google') {
+    rawModel = 'gemini-2.0-flash';
+  }
+  safeConfig.model = rawModel;
+
   bgLog('info', 'callLLMForExtraction: Calling LLM', {
-    provider: modelConfig?.provider,
-    model: modelConfig?.model || modelConfig?.modelId
+    provider: safeConfig?.provider,
+    model: safeConfig?.model
   });
-  return await executeLlmRequest(prompt, modelConfig, signal);
+  return await executeLlmRequest(prompt, safeConfig, signal);
 }
 
 // AI Refinement Logic
@@ -386,8 +418,17 @@ export async function handleRefinement({ text, persona, context, previousPrompts
       modelConfig = MODEL_CONFIGS[effectiveModelId] || MODEL_CONFIGS['gemini-2.0-flash'];
     }
 
+    // Ensure cloned object with valid model name
+    modelConfig = { ...modelConfig };
+    let rawModel = (modelConfig.model || modelConfig.modelId || effectiveModelId || '').trim();
+    if (!rawModel || rawModel.toLowerCase() === 'gemini' || rawModel.toLowerCase() === 'google') {
+      rawModel = 'gemini-2.0-flash';
+    }
+    modelConfig.model = rawModel;
+
     bgLog('info', 'Refinement: Using model', {
       effectiveModelId,
+      model: modelConfig.model,
       hasModelConfig: !!modelConfig,
       hasApiKey: !!modelConfig?.apiKey,
       provider: modelConfig?.provider

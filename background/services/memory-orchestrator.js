@@ -520,6 +520,46 @@ export async function rebuildSessionMemory(sessionId, options = {}) {
 }
 
 // ============================================================================
+// Concurrency Control: Tab Session Mutex
+// ============================================================================
+
+const _sessionLocks = new Map();
+
+/**
+ * Acquire an exclusive session lock for a tab
+ * @param {string} sessionId
+ * @param {number} [timeoutMs=30000]
+ * @returns {Promise<boolean>}
+ */
+export async function acquireSessionLock(sessionId, timeoutMs = 30000) {
+  if (!sessionId) return false;
+  const now = Date.now();
+  const existingLock = _sessionLocks.get(sessionId);
+
+  if (existingLock && (now - existingLock.timestamp < existingLock.timeoutMs)) {
+    bgLog('warn', 'Session lock already held', { sessionId, holder: existingLock.holder });
+    return false;
+  }
+
+  _sessionLocks.set(sessionId, {
+    timestamp: now,
+    timeoutMs,
+    holder: `lock_${now}`
+  });
+  return true;
+}
+
+/**
+ * Release an exclusive session lock
+ * @param {string} sessionId
+ */
+export function releaseSessionLock(sessionId) {
+  if (sessionId) {
+    _sessionLocks.delete(sessionId);
+  }
+}
+
+// ============================================================================
 // B3 FIX: User-Friendly Error Messages for API Errors
 // ============================================================================
 

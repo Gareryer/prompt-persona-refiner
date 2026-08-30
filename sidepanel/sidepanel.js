@@ -31,6 +31,35 @@ const spLog = (level, msg, data = {}) => {
 };
 
 /**
+ * Toast / notification helper alias
+ * @param {string} msg - Message to display
+ * @param {'success'|'error'|'warning'|'info'} [type='info'] - Notification type
+ */
+const showToast = (msg, type = 'info') => {
+    if (typeof showNotification === 'function') {
+        showNotification(msg, type);
+    } else {
+        spLog(type === 'error' ? 'error' : 'info', msg);
+    }
+};
+if (typeof window !== 'undefined') {
+    window.showToast = showToast;
+}
+
+/**
+ * Current extraction state for Edit Persona modal
+ * @type {Object|null}
+ */
+let _currentExtraction = null;
+if (typeof window !== 'undefined') {
+    Object.defineProperty(window, '_currentExtraction', {
+        get() { return _currentExtraction; },
+        set(val) { _currentExtraction = val; },
+        configurable: true
+    });
+}
+
+/**
  * Get Supabase client instance
  * Wraps window.SupabaseClient for consistent access throughout the module
  * @returns {Promise<Object>} Supabase client instance
@@ -1928,19 +1957,12 @@ function renderV4Section(config) {
     textarea.readOnly = !isEditable;
     textarea.dataset.dimension = dimensionId;
 
-    // Expand button
+    // Expand button (handled via delegated setupExpandModal)
     const expandBtn = document.createElement('button');
     expandBtn.className = 'expand-btn';
     expandBtn.dataset.target = textarea.id;
     expandBtn.title = 'Expand';
     expandBtn.innerHTML = '<span class="material-symbols-outlined">expand_content</span>';
-    expandBtn.addEventListener('click', () => {
-        // Toggle fullscreen mode using existing infrastructure
-        const overlay = document.getElementById('textarea-overlay');
-        if (overlay && typeof openTextareaFullscreen === 'function') {
-            openTextareaFullscreen(textarea.id, dimensionId.charAt(0).toUpperCase() + dimensionId.slice(1));
-        }
-    });
 
     // === VERBATIM CONTROLS (Bottom-Right of Textarea) ===
     const compState = memoryData?.components?.[dimensionId];
@@ -2525,7 +2547,7 @@ function renderSynthesizedPersona(component) {
         insightsContainer.innerHTML = `
     <strong> Key Insights:</strong>
         <ul class="key-insights-list">
-            ${data.keyInsights.map(insight => `<li>${insight}</li>`).join('')}
+            ${data.keyInsights.map(insight => `<li>${escapeHtml(insight)}</li>`).join('')}
         </ul>
 `;
         insightsContainer.classList.remove('hidden');
@@ -4974,7 +4996,7 @@ function renderExtConstraints(container, data) {
     if (data?.hard_rules?.length) {
         const item = document.createElement('div');
         item.className = 'fact-item verbatim';
-        item.innerHTML = `<strong>Rules:</strong><ul>${data.hard_rules.map(r => `<li>${r}</li>`).join('')}</ul>`;
+        item.innerHTML = `<strong>Rules:</strong><ul>${data.hard_rules.map(r => `<li>${escapeHtml(r)}</li>`).join('')}</ul>`;
         container.appendChild(item);
     }
 }
@@ -5023,7 +5045,7 @@ function renderExtFormat(container, data) {
     if (data?.output_type) {
         const item = document.createElement('div');
         item.className = 'fact-item';
-        item.innerHTML = `<strong>Output Type:</strong> ${data.output_type}`;
+        item.innerHTML = `<strong>Output Type:</strong> ${escapeHtml(data.output_type)}`;
         container.appendChild(item);
     }
 }
@@ -5072,7 +5094,7 @@ function renderExtExemplar(container, data) {
     if (data?.prompt_patterns?.length) {
         const item = document.createElement('div');
         item.className = 'fact-item verbatim';
-        item.innerHTML = `<strong>Patterns:</strong><ul>${data.prompt_patterns.map(p => `<li>${p}</li>`).join('')}</ul>`;
+        item.innerHTML = `<strong>Patterns:</strong><ul>${data.prompt_patterns.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ul>`;
         container.appendChild(item);
     }
 }
@@ -6181,9 +6203,9 @@ function createPromptListItem(prompt) {
 
     item.innerHTML = `
         <div class="persona-item-info">
-            <div class="persona-item-name">${title}</div>
-            <div class="persona-item-meta">${preview}...</div>
-            <div class="persona-item-date">Saved ${date}</div>
+            <div class="persona-item-name">${escapeHtml(title)}</div>
+            <div class="persona-item-meta">${escapeHtml(preview)}...</div>
+            <div class="persona-item-date">Saved ${escapeHtml(date)}</div>
         </div>
         <div class="persona-item-actions">
             <button class="btn-icon extract-prompt-btn" title="Extract Persona" data-id="${prompt.id}">
@@ -7302,34 +7324,58 @@ async function exportPersonaJSON() {
 
     spLog('debug', 'Starting download with File System Access API', { filename });
 
+    // Check if File System Access API is supported and available (not in cross-origin iframe)
+    if (typeof window.showSaveFilePicker === 'function') {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: filename,
+                types: [{
+                    description: 'JSON File',
+                    accept: { 'application/json': ['.json'] }
+                }]
+            });
+
+            const writable = await handle.createWritable();
+            await writable.write(jsonData);
+            await writable.close();
+
+            spLog('info', 'Persona exported', {
+                name: persona.name,
+                filename: filename,
+                version: persona.version
+            });
+            showNotification('Persona exported!', 'success');
+            return;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                spLog('debug', 'Export cancelled by user');
+                return;
+            }
+            spLog('warn', 'showSaveFilePicker failed, falling back to Blob download:', error.message);
+        }
+    }
+
+    // Fallback Blob download (works in iframe / split-view mode)
     try {
-        // Use File System Access API for proper Save As dialog with filename control
-        const handle = await window.showSaveFilePicker({
-            suggestedName: filename,
-            types: [{
-                description: 'JSON File',
-                accept: { 'application/json': ['.json'] }
-            }]
-        });
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
-        const writable = await handle.createWritable();
-        await writable.write(jsonData);
-        await writable.close();
-
-        spLog('info', 'Persona exported', {
+        spLog('info', 'Persona exported via Blob download', {
             name: persona.name,
             filename: filename,
             version: persona.version
         });
         showNotification('Persona exported!', 'success');
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            // User cancelled the save dialog
-            spLog('debug', 'Export cancelled by user');
-            return;
-        }
-        spLog('error', 'Export failed', { error: error.message });
-        showNotification('Export failed: ' + error.message, 'error');
+    } catch (fallbackError) {
+        spLog('error', 'Export failed', { error: fallbackError.message });
+        showNotification('Export failed: ' + fallbackError.message, 'error');
     }
 }
 
@@ -8139,10 +8185,10 @@ function showModerationWarning(scanResult) {
                     </span>
                 </div>
                 <h3>${scanResult.severity === 'blocked' ? 'Content Blocked' : 'Content Warning'}</h3>
-                <p>${scanResult.message}</p>
+                <p>${escapeHtml(scanResult.message || '')}</p>
                 ${scanResult.flaggedTerms?.length ? `
                     <div class="flagged-terms">
-                        <strong>Flagged:</strong> ${scanResult.flaggedTerms.join(', ')}
+                        <strong>Flagged:</strong> ${scanResult.flaggedTerms.map(t => escapeHtml(t)).join(', ')}
                     </div>
                 ` : ''}
                 <div class="moderation-actions">

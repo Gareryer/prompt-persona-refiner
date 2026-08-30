@@ -148,10 +148,16 @@ class MemoryController {
         MemoryController._bridgeInitialized = true;
 
         window.addEventListener('pa-storage-response', (event) => {
-            const { requestId, success, data, error } = event.detail;
-            const pending = MemoryController._bridgeRequests.get(requestId);
+            const { requestId, success, data, error } = event.detail || {};
+            if (requestId === undefined || requestId === null) return;
+            const pending = MemoryController._bridgeRequests.get(requestId) ||
+                MemoryController._bridgeRequests.get(String(requestId)) ||
+                MemoryController._bridgeRequests.get(Number(requestId));
+
             if (pending) {
                 MemoryController._bridgeRequests.delete(requestId);
+                MemoryController._bridgeRequests.delete(String(requestId));
+                MemoryController._bridgeRequests.delete(Number(requestId));
                 if (success) {
                     pending.resolve(data);
                 } else {
@@ -168,7 +174,7 @@ class MemoryController {
         MemoryController._initBridgeListener();
 
         return new Promise((resolve, reject) => {
-            const requestId = ++MemoryController._bridgeRequestId;
+            const requestId = `mc_${Date.now()}_${++MemoryController._bridgeRequestId}`;
 
             const timeout = setTimeout(() => {
                 MemoryController._bridgeRequests.delete(requestId);
@@ -197,6 +203,20 @@ class MemoryController {
     // ========================================================================
 
     /**
+     * Ensure cache is initialized and valid
+     * @returns {Promise<SessionMemory>}
+     */
+    async _ensureCache() {
+        if (!this._cache || !this._cache.components) {
+            await this.load();
+        }
+        if (!this._cache || !this._cache.components) {
+            this._cache = this._getEmptyMemory();
+        }
+        return this._cache;
+    }
+
+    /**
      * Load session memory from storage (via bridge)
      * @returns {Promise<SessionMemory>}
      */
@@ -204,7 +224,7 @@ class MemoryController {
         try {
             const result = await MemoryController._makeBridgeRequest('get', this.storageKey);
 
-            if (result) {
+            if (result && typeof result === 'object' && result.components) {
                 this._cache = result;
                 console.log(`[MemoryController] Loaded session: ${this.sessionId}`);
                 return this._cache;
@@ -218,7 +238,8 @@ class MemoryController {
 
         } catch (e) {
             console.error('[MemoryController] Load failed:', e);
-            return this._getEmptyMemory();
+            this._cache = this._getEmptyMemory();
+            return this._cache;
         }
     }
 
@@ -247,11 +268,8 @@ class MemoryController {
      * @returns {Promise<ComponentData|null>}
      */
     async getComponent(analyzerId) {
-        if (!this._cache) {
-            await this.load();
-        }
-
-        return this._cache.components[analyzerId] || null;
+        await this._ensureCache();
+        return this._cache?.components?.[analyzerId] || null;
     }
 
     /**
@@ -276,11 +294,7 @@ class MemoryController {
         console.log(`[MemoryController] setComponent START: ${analyzerId}`);
 
         // Step 1: Cache check
-        if (!this._cache) {
-            memCtrlLog('debug', '[setComponent] Loading cache (was null)');
-            console.log(`[MemoryController] setComponent: Loading cache...`);
-            await this.load();
-        }
+        await this._ensureCache();
         memCtrlLog('debug', '[setComponent] Cache ready');
 
         // Step 2: Schema validation
@@ -366,9 +380,7 @@ class MemoryController {
      * @returns {Promise<number>} New generation number
      */
     async incrementGeneration() {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
 
         this._cache.currentGeneration = (this._cache.currentGeneration || 0) + 1;
         memCtrlLog('info', 'Generation incremented', {
@@ -384,9 +396,7 @@ class MemoryController {
      * @returns {Promise<number>}
      */
     async getCurrentGeneration() {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
         return this._cache.currentGeneration || 0;
     }
 
@@ -396,9 +406,7 @@ class MemoryController {
      * @returns {Promise<number|null>}
      */
     async getComponentGeneration(analyzerId) {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
         const component = this._cache.components[analyzerId];
         return component?.generation ?? null;
     }
@@ -409,9 +417,7 @@ class MemoryController {
      * @returns {Promise<boolean>}
      */
     async isComponentCurrent(analyzerId) {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
         const component = this._cache.components[analyzerId];
         if (!component) return false;
         return component.generation === this._cache.currentGeneration;
@@ -427,9 +433,7 @@ class MemoryController {
      * @returns {Promise<void>}
      */
     async pinPersona() {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
 
         const personaComponent = this._cache.components.persona;
         if (!personaComponent?.current) {
@@ -458,9 +462,7 @@ class MemoryController {
      * @returns {Promise<void>}
      */
     async unpinPersona() {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
 
         const personaComponent = this._cache.components.persona;
         if (personaComponent) {
@@ -481,9 +483,7 @@ class MemoryController {
      * @returns {Promise<boolean>}
      */
     async isPersonaPinned() {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
         return Boolean(this._cache.components?.persona?.pinned);
     }
 
@@ -492,9 +492,7 @@ class MemoryController {
      * @returns {Promise<Object|null>}
      */
     async getEffectivePersona() {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
 
         const personaComponent = this._cache.components.persona;
         if (!personaComponent) return null;
@@ -512,9 +510,7 @@ class MemoryController {
      * @returns {Promise<void>}
      */
     async updatePinnedPersona(data) {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
 
         const personaComponent = this._cache.components.persona;
         if (!personaComponent?.pinned) {
@@ -547,9 +543,7 @@ class MemoryController {
      * @returns {Promise<boolean>} True if successfully pinned
      */
     async pinComponent(componentId) {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
 
         const component = this._cache.components[componentId];
         if (!component?.current) {
@@ -574,9 +568,7 @@ class MemoryController {
      * @returns {Promise<boolean>} True if successfully unpinned
      */
     async unpinComponent(componentId) {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
 
         const component = this._cache.components[componentId];
         if (!component) {
@@ -600,9 +592,7 @@ class MemoryController {
      * @returns {Promise<boolean>} True if pinned
      */
     async isComponentPinned(componentId) {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
         return this._cache.components[componentId]?.pinned === true;
     }
 
@@ -613,9 +603,7 @@ class MemoryController {
      * @returns {Promise<Object|null>} Component data
      */
     async getEffectiveComponent(componentId) {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
 
         const component = this._cache.components[componentId];
         if (!component) return null;
@@ -632,9 +620,7 @@ class MemoryController {
      * @returns {Promise<UnifiedContext>}
      */
     async getUnifiedContext() {
-        if (!this._cache) {
-            await this.load();
-        }
+        await this._ensureCache();
 
         const context = {
             sessionId: this.sessionId,
@@ -660,10 +646,7 @@ class MemoryController {
      * @returns {Promise<boolean>}
      */
     async hasContext() {
-        if (!this._cache) {
-            await this.load();
-        }
-
+        await this._ensureCache();
         return Object.keys(this._cache.components).length > 0;
     }
 

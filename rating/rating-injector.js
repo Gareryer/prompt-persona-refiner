@@ -56,24 +56,34 @@ const RATING_SELECTORS = {
      */
     chatHistorySelectors: [
         'infinite-scroller.chat-history',  // Primary - infinite scroll component
-        '.chat-history',                    // Class-only variant
         'infinite-scroller',                // Generic infinite scroller
-        '[class*="chat-history"]',          // Partial class match
-        '[class*="conversation"]',          // Alternative naming
+        '.chat-history',                    // Class-only variant
+        'chat-window',                      // Modern Gemini chat window component
+        'ms-chat-session',                  // Multisession Gemini container
+        'ms-chat-history',                  // Modern history wrapper
+        'div[class*="chat-history"]',       // Partial class match
+        'div[class*="conversation-container"]', // Conversation wrapper
+        'div[class*="chat-window"]',        // Window wrapper
+        'div[class*="conversation"]',       // Alternative naming
+        'main[role="main"]',                // Main landmark
+        '[role="main"]',                    // Role selector
         'main'                              // Last resort - observe main content area
     ],
 
     /** Selector for individual conversation turn containers */
-    conversationTurn: '.conversation-turn',
+    conversationTurn: '.conversation-turn, div[class*="conversation-turn"], .turn-container',
 
     /**
      * Selectors for model response containers (AI responses)
      * Rating UI is injected into these
      */
     modelResponseContainers: [
-        '.model-response-container',        // Primary selector
-        '[class*="model-response"]',        // Partial class match
-        '.response-container'               // Alternative naming
+        '.model-response-container',        // Primary container
+        '.model-response-text',             // Primary text container
+        'div[class*="model-response"]',     // Partial class match
+        'div[class*="response-container"]', // Alternative container
+        '.model-turn',                      // Turn container
+        '[data-role="model"]'               // Data attribute
     ],
 
     /**
@@ -83,7 +93,8 @@ const RATING_SELECTORS = {
     responseActionsSelectors: [
         '.response-actions',                // Primary selector
         '[class*="response-action"]',       // Partial class match
-        '[class*="actions"]'                // Generic actions container
+        '[class*="actions"]',               // Generic actions container
+        '.action-buttons'
     ],
 
     /**
@@ -423,7 +434,7 @@ const RatingInjector = {
                 return;
             } else {
                 // Final fallback: observe entire body
-                console.warn('[RatingInjector] Using document.body as observer target (fallback)');
+                console.log('[RatingInjector] Using document.body as observer target (fallback)');
                 chatHistory = document.body;
             }
         }

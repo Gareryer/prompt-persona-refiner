@@ -38,6 +38,7 @@
 
     /* Status */
     --ext-color-success: #34a853;
+    --ext-color-warning: #f9ab00;
     --ext-color-error: #ea4335;
 }
 
@@ -69,6 +70,7 @@
 
         /* Status */
         --ext-color-success: #1e8e3e;
+        --ext-color-warning: #e37400;
         --ext-color-error: #d93025;
     }
 }
@@ -91,6 +93,7 @@ body[data-gemini-theme="light"] {
     --ext-color-outline: #747775;
     --ext-color-divider: #c4c7c5;
     --ext-color-success: #1e8e3e;
+    --ext-color-warning: #e37400;
     --ext-color-error: #d93025;
 }
 
@@ -1133,8 +1136,11 @@ body[data-gemini-theme="light"] {
 
 /* Content Panel - Container for each tab's content */
 .gemini-ext-content-panel {
-    display: block;
+    display: flex;
+    flex-direction: column;
     width: 100%;
+    height: 100%;
+    flex: 1;
 }
 
 /* Footer Layout - Main footer container */

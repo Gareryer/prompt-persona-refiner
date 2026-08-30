@@ -39,9 +39,13 @@
  * // ]
  */
 function diffWords(original, modified) {
+    // Defensive string normalization
+    const origStr = typeof original === 'string' ? original : (original != null ? String(original) : '');
+    const modStr = typeof modified === 'string' ? modified : (modified != null ? String(modified) : '');
+
     // Split by whitespace but preserve whitespace in output
-    const originalWords = original.split(/(\s+)/);
-    const modifiedWords = modified.split(/(\s+)/);
+    const originalWords = origStr.split(/(\s+)/);
+    const modifiedWords = modStr.split(/(\s+)/);
 
     const fragments = [];
     let i = 0, j = 0;

@@ -114,6 +114,12 @@ function showExtensionReloadNotification() {
     if (typeof injectDebounceTimer !== 'undefined' && injectDebounceTimer) {
       clearTimeout(injectDebounceTimer);
     }
+    if (window._geminiSettingsPositionHandler) {
+      window.removeEventListener('scroll', window._geminiSettingsPositionHandler);
+      window.removeEventListener('resize', window._geminiSettingsPositionHandler);
+      window._geminiSettingsPositionListener = false;
+      window._geminiSettingsPositionHandler = null;
+    }
     // Clean up injected UI elements to prevent dead controls
     document.querySelectorAll('.gemini-ext-settings-wrapper, .gemini-ext-toggle-wrapper, .gemini-ext-modal-overlay, #gemini-ext-split-view, .gemini-rating-wrapper, #gemini-rating-badge').forEach(el => el.remove());
   } catch (e) {
@@ -1360,12 +1366,19 @@ function createReviewModal() {
     }
   };
 
-  // Rollback: Go back to previous refined prompt
+  // Rollback: Go back to previous refined prompt pair
   btnRollback.onclick = () => {
-    if (state.historyIndex > 0) {
-      obsLog('info', 'Rollback to previous version', { historyIndex: state.historyIndex - 1 });
-      state.historyIndex--;
-      refinedTextarea.value = state.history[state.historyIndex];
+    if (state.pairIndex > 0) {
+      obsLog('info', 'Rollback to previous pair version', { pairIndex: state.pairIndex - 1 });
+      state.pairIndex--;
+      state.originalIndex = state.pairIndex;
+      state.refinedIndex = state.pairIndex;
+
+      const pair = state.pairs[state.pairIndex];
+      if (pair) {
+        originalTextarea.value = pair.rough || '';
+        refinedTextarea.value = pair.refined || '';
+      }
       updateUI();
     }
   };
@@ -1465,7 +1478,7 @@ function createReviewModal() {
         (response) => {
           if (chrome.runtime?.lastError) {
             obsLog('error', 'Refinement runtime error', { error: chrome.runtime.lastError.message });
-            modal.showError('Extension updated. Please refresh the page.');
+            api.showError('Extension updated. Please refresh the page.');
             btnSendFinal.disabled = false;
             btnReRefine.disabled = false;
             return;
@@ -1498,7 +1511,7 @@ function createReviewModal() {
         }
       });
     } catch (err) {
-      modal.showError('Extension updated. Please refresh the page.');
+      api.showError('Extension updated. Please refresh the page.');
       btnSendFinal.disabled = false;
       btnReRefine.disabled = false;
     }
@@ -1671,21 +1684,6 @@ function createReviewModal() {
   return api;
 }
 
-function triggerNativeSend(text) {
-  const input = findChatInput();
-  const sendBtn = findSendButton();
-  if (!input || !sendBtn) return;
-
-  input.focus();
-  document.execCommand('selectAll', false, null);
-  document.execCommand('insertText', false, text);
-
-  input.dispatchEvent(new Event('input', { bubbles: true }));
-
-  setTimeout(() => {
-    sendBtn.click();
-  }, 100);
-}
 
 function pasteToInput(text) {
   const input = findChatInput();
@@ -1743,6 +1741,7 @@ function injectInterface() {
 
   // Update on scroll/resize
   if (!window._geminiSettingsPositionListener) {
+    window._geminiSettingsPositionHandler = updateSettingsPosition;
     window.addEventListener('scroll', updateSettingsPosition, { passive: true });
     window.addEventListener('resize', updateSettingsPosition, { passive: true });
     window._geminiSettingsPositionListener = true;

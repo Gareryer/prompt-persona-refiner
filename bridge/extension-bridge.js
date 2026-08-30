@@ -109,8 +109,21 @@ function isProxyUrlAllowed(rawUrl) {
 }
 
 window.addEventListener('pa-storage-request', async (event) => {
+    // === EVENT PAYLOAD VALIDATION ===
+    if (!event.detail || typeof event.detail !== 'object') {
+        return;
+    }
+
     // Destructure request payload with default storage area
-    const { action, key, keys, data, requestId, area = 'local' } = event.detail || {};
+    const { action, key, keys, data, requestId, area = 'local' } = event.detail;
+
+    if (requestId === undefined || requestId === null) {
+        return;
+    }
+    const reqIdStr = String(requestId);
+    if (reqIdStr.length === 0 || reqIdStr.length > 128) {
+        return;
+    }
 
     // === EXTENSION CONTEXT VALIDATION ===
     if (!chrome.runtime?.id) {
@@ -121,6 +134,15 @@ window.addEventListener('pa-storage-request', async (event) => {
                 requestId,
                 error: 'Extension reloaded - please refresh the page'
             }
+        }));
+        return;
+    }
+
+    // === STORAGE AREA VALIDATION ===
+    if (!['local', 'sync', 'session'].includes(area)) {
+        console.error(`[ExtBridge] Unauthorized storage area: ${area}`);
+        window.dispatchEvent(new CustomEvent('pa-storage-response', {
+            detail: { success: false, requestId, error: `Invalid or unauthorized storage area: ${area}` }
         }));
         return;
     }
@@ -150,7 +172,6 @@ window.addEventListener('pa-storage-request', async (event) => {
     // Initialize response object with failure state (updated on success)
     let response = { success: false, requestId };
 
-    // === STORAGE AREA VALIDATION ===
     const storageArea = chrome.storage[area];
     if (!storageArea) {
         console.error(`[ExtBridge] Invalid storage area: ${area}`);
@@ -206,7 +227,20 @@ window.addEventListener('pa-storage-request', async (event) => {
 // ============================================================================
 
 window.addEventListener('pa-api-proxy-request', async (event) => {
-    const { url, options, requestId } = event.detail || {};
+    // === EVENT PAYLOAD VALIDATION ===
+    if (!event.detail || typeof event.detail !== 'object') {
+        return;
+    }
+
+    const { url, options, requestId } = event.detail;
+
+    if (requestId === undefined || requestId === null) {
+        return;
+    }
+    const reqIdStr = String(requestId);
+    if (reqIdStr.length === 0 || reqIdStr.length > 128) {
+        return;
+    }
 
     // === EXTENSION CONTEXT VALIDATION ===
     if (!chrome.runtime?.id) {

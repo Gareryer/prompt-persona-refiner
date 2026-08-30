@@ -293,7 +293,7 @@ const getReviewModalTemplate = () => `
         <!-- Stop button - shown during active refinement -->
         <button class="gemini-ext-btn gemini-ext-btn-stop" id="btn-stop-refine" style="display: none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="0" y="8" width="15" height="15" rx="15"/>
+            <rect x="5" y="5" width="14" height="14" rx="2"/>
           </svg>
           Stop
         </button>

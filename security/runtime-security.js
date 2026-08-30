@@ -38,15 +38,9 @@
         const _fingerprint = generateKey(8);
         const _timestamp = Date.now();
 
-        // Derive a combined key using non-commutative polynomial rolling hash (djb2)
+        // Derive a purpose-specific key using cryptographic key material
         const deriveKey = (purpose) => {
-            let hash = 5381;
-            for (let i = 0; i < purpose.length; i++) {
-                hash = ((hash << 5) + hash) + purpose.charCodeAt(i);
-                hash = hash & 0xffffffff;
-            }
-            const purposeHash = (hash >>> 0).toString(16).padStart(8, '0');
-            return _sessionKey.slice(0, 16) + purposeHash + _instanceKey.slice(0, 8);
+            return `${_sessionKey}:${purpose}:${_instanceKey}`;
         };
 
         return {
@@ -111,20 +105,38 @@
         // Check if running in authorized context
         isAuthorized: () => !window.__GEMINI_EXT_DISABLED__,
 
+        // Helper to derive AES-GCM CryptoKey via PBKDF2
+        _deriveCryptoKey: async (purpose, usages) => {
+            const keyStr = _keyStore.deriveKey(purpose);
+            const enc = new TextEncoder();
+            const salt = enc.encode(`gemini-ext-salt:${purpose}`);
+            const keyMaterial = await crypto.subtle.importKey(
+                'raw',
+                enc.encode(keyStr),
+                'PBKDF2',
+                false,
+                ['deriveKey']
+            );
+            return crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: 100000,
+                    hash: 'SHA-256'
+                },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                usages
+            );
+        },
+
         // Encrypt with derived key using AES-GCM (256-bit)
         encrypt: async (text, purpose = 'default') => {
             if (typeof text !== 'string') return '';
             try {
-                const keyStr = _keyStore.deriveKey(purpose);
+                const cryptoKey = await SecurityManager._deriveCryptoKey(purpose, ['encrypt']);
                 const enc = new TextEncoder();
-                const keyHash = await crypto.subtle.digest('SHA-256', enc.encode(keyStr));
-                const cryptoKey = await crypto.subtle.importKey(
-                    'raw',
-                    keyHash,
-                    { name: 'AES-GCM' },
-                    false,
-                    ['encrypt']
-                );
                 const iv = crypto.getRandomValues(new Uint8Array(12));
                 const cipher = await crypto.subtle.encrypt(
                     { name: 'AES-GCM', iv },
@@ -149,16 +161,7 @@
                 if (combined.length < 13) return '';
                 const iv = combined.slice(0, 12);
                 const cipher = combined.slice(12);
-                const keyStr = _keyStore.deriveKey(purpose);
-                const enc = new TextEncoder();
-                const keyHash = await crypto.subtle.digest('SHA-256', enc.encode(keyStr));
-                const cryptoKey = await crypto.subtle.importKey(
-                    'raw',
-                    keyHash,
-                    { name: 'AES-GCM' },
-                    false,
-                    ['decrypt']
-                );
+                const cryptoKey = await SecurityManager._deriveCryptoKey(purpose, ['decrypt']);
                 const decrypted = await crypto.subtle.decrypt(
                     { name: 'AES-GCM', iv },
                     cryptoKey,
