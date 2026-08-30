@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { PersonaV4 } from '../../src/core/memory/schemas';
+import { STARTER_PERSONAS } from '../../src/core/memory/presets';
 import { sendRpcMessage } from '../../src/lib/messaging/client';
 import { ContextView } from './components/ContextView';
 import { PersonaView } from './components/PersonaView';
@@ -9,23 +10,8 @@ import { ExpandModal } from './components/ExpandModal';
 export const SidepanelApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'context' | 'persona' | 'logs'>('context');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [personas, setPersonas] = useState<Record<string, PersonaV4>>({
-    default: {
-      persona: { instruction: 'Senior Full-Stack Architect & AI Pair Programmer' },
-      context: { instruction: 'Chrome Extension V3, React 19, TypeScript 5.9, WXT Framework' },
-      tone: { instruction: 'Technical, concise, structured, direct.' },
-      framework: { instruction: 'Strangler Fig Pattern, Bottom-Up Verification, TDD.' },
-      constraints: { instruction: 'Strict Typing, Zero CSS Bleed, Legacy Parity.' },
-      format: { instruction: 'Markdown format with clickable file links.' },
-      exemplar: { instruction: 'Given a bug: analyze crux, write surgical fix, verify.' },
-      metadata: {
-        suggested_name: 'Lead AI Architect',
-        suggested_title: 'Principal Engineer',
-        domain: 'tech'
-      }
-    }
-  });
-  const [activePersonaId, setActivePersonaId] = useState<string>('default');
+  const [personas, setPersonas] = useState<Record<string, PersonaV4>>(STARTER_PERSONAS);
+  const [activePersonaId, setActivePersonaId] = useState<string>('lead-architect');
   const [isRebuilding, setIsRebuilding] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('Just now');
   const [logs, setLogs] = useState<LogItem[]>([
@@ -71,7 +57,7 @@ export const SidepanelApp: React.FC = () => {
     setPersonas(prev => ({ ...prev, [id]: persona }));
     sendRpcMessage('SAVE_PERSONA', { id, persona });
     setLogs(prev => [
-      { level: 'INFO', msg: `Saved new persona: ${persona.metadata?.suggested_name || id}`, time: new Date().toLocaleTimeString() },
+      { level: 'INFO', msg: `Saved persona: ${persona.metadata?.suggested_name || id}`, time: new Date().toLocaleTimeString() },
       ...prev
     ]);
   };
@@ -103,7 +89,7 @@ export const SidepanelApp: React.FC = () => {
     }
   };
 
-  const activePersona = personas[activePersonaId] || null;
+  const activePersona = personas[activePersonaId] || personas['lead-architect'] || null;
 
   return (
     <div className="panel-container">

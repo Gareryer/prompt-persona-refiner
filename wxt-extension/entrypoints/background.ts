@@ -21,9 +21,22 @@ export default defineBackground(() => {
     return false;
   });
 
-  // 2. Action Click Listener (Sidepanel Router)
+  // 2. Action Click Listener (Universal Sidepanel / Options Router)
   browser.action.onClicked.addListener(async (tab) => {
-    if (tab.id && tab.url && (tab.url.includes('gemini.google.com') || tab.url.includes('chatgpt.com') || tab.url.includes('claude.ai'))) {
+    const isSupportedChatbot = Boolean(
+      tab.id &&
+      tab.url &&
+      (tab.url.includes('gemini.google.com') ||
+       tab.url.includes('chatgpt.com') ||
+       tab.url.includes('chat.openai.com') ||
+       tab.url.includes('claude.ai') ||
+       tab.url.includes('chat.deepseek.com') ||
+       tab.url.includes('grok.com') ||
+       tab.url.includes('x.com/i/grok') ||
+       tab.url.includes('meta.ai'))
+    );
+
+    if (isSupportedChatbot && tab.id) {
       try {
         await (chrome as any).sidePanel?.open({ tabId: tab.id });
       } catch (err) {
@@ -34,7 +47,7 @@ export default defineBackground(() => {
     }
   });
 
-  // 3. Command Listeners
+  // 3. Command Listeners (Keyboard Shortcuts)
   browser.commands.onCommand.addListener(async (command) => {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
     if (tab?.id) {
