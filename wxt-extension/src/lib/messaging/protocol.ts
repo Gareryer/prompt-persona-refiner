@@ -18,6 +18,10 @@ export interface ProtocolMap {
     request: { rawPrompt: string; personaId?: string; activeDimensions?: string[] };
     response: { success: boolean; refinedPrompt?: string; diffHtml?: string; error?: string };
   };
+  INJECT_PROMPT_TO_ACTIVE_TAB: {
+    request: { text: string };
+    response: { success: boolean; error?: string };
+  };
   GET_SETTINGS: {
     request: void;
     response: UserSettings;

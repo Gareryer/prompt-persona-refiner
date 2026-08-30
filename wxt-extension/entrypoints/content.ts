@@ -40,6 +40,12 @@ export default defineContentScript({
 
     // 1. Listen for background keyboard shortcut
     browser.runtime.onMessage.addListener(async (message) => {
+      if (message.type === 'SET_COMPOSER_TEXT') {
+        if (message.text) {
+          adapter.setInputText(message.text);
+        }
+      }
+
       if (message.type === 'TRIGGER_REFINE_SHORTCUT') {
         await executeRefinement();
       }

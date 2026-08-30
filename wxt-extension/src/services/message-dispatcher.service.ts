@@ -97,6 +97,17 @@ export class MessageDispatcherService {
         return { success: false, error: 'Could not parse valid persona from prompt' } as any;
       }
 
+      case 'INJECT_PROMPT_TO_ACTIVE_TAB': {
+        if (typeof chrome !== 'undefined' && chrome.tabs) {
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (tab?.id) {
+            chrome.tabs.sendMessage(tab.id, { type: 'SET_COMPOSER_TEXT', text: payload.text }).catch(() => {});
+            return { success: true } as any;
+          }
+        }
+        return { success: false, error: 'No active tab found' } as any;
+      }
+
       default:
         return { success: false, error: `Unknown message type: ${String(type)}` } as any;
     }
