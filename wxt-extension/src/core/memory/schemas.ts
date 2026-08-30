@@ -1,153 +1,157 @@
+/**
+ * @fileoverview Complete Component Schemas v4 - Verbatim-First 7-Dimension Persona Schema
+ * Ported from memory/component-schemas.js (641 lines)
+ */
+
 import { z } from 'zod';
 
-export const SCHEMA_VERSION = 4 as const;
+export const SCHEMA_VERSION = 4;
 
-export const DIMENSION_IDS = [
-  'persona',
-  'context',
-  'tone',
-  'framework',
-  'constraints',
-  'format',
-  'exemplar'
-] as const;
-
-export type DimensionId = (typeof DIMENSION_IDS)[number];
-
-export const ENUMS = {
-  domain: ['Tech', 'Creative', 'Business', 'Education', 'Health', 'Lifestyle', 'Other'] as const,
-  style: [
-    'Professional', 'Casual', 'Technical', 'Friendly', 'Direct',
-    'Empathetic', 'Authoritative', 'Formal', 'Informal', 'Academic',
-    'Conversational', 'Objective', 'Supportive', 'Educational',
-    'Instructive', 'Expert'
+export const ComponentSchemas = {
+  version: SCHEMA_VERSION,
+  componentIds: [
+    'persona',
+    'context',
+    'tone',
+    'framework',
+    'constraints',
+    'format',
+    'exemplar'
   ] as const,
-  reasoning: [
-    'Deductive', 'Inductive', 'Chain-of-Thought', 'Tree-of-Thought',
-    'Step-by-Step', 'Analytical', 'Creative', 'Socratic'
-  ] as const,
-  outputType: [
-    'Markdown', 'Plaintext', 'JSON', 'Code', 'HTML', 'Structured', 'Custom'
-  ] as const
+
+  enums: {
+    domain: ['Tech', 'Creative', 'Business', 'Education', 'Health', 'Lifestyle', 'Other'] as const,
+    style: [
+      'Professional', 'Casual', 'Technical', 'Friendly', 'Direct',
+      'Empathetic', 'Authoritative', 'Formal', 'Informal', 'Academic',
+      'Conversational', 'Objective', 'Supportive', 'Educational',
+      'Instructive', 'Expert'
+    ] as const,
+    reasoning: [
+      'Deductive', 'Inductive', 'Chain-of-Thought', 'Tree-of-Thought',
+      'Step-by-Step', 'Analytical', 'Creative', 'Socratic'
+    ] as const,
+    outputType: [
+      'Markdown', 'Plaintext', 'JSON', 'Code', 'HTML', 'Structured', 'Custom'
+    ] as const
+  }
 };
 
-// Dimension Schemas
-export const PersonaDimensionSchema = z.object({
-  instruction: z.string().min(1, 'Persona instruction is required')
+export const DIMENSION_IDS = ComponentSchemas.componentIds;
+export type DimensionId = typeof ComponentSchemas.componentIds[number];
+
+export const DimensionContentSchema = z.object({
+  instruction: z.string().min(1, 'Persona instruction is required'),
+  version: z.number().optional().default(4),
+  pinned: z.boolean().optional(),
+  pinnedData: z.record(z.any()).optional(),
+  generation: z.number().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  updatedAt: z.number().optional(),
+  metadata: z.record(z.any()).optional()
 });
 
-export const ContextMetadataSchema = z.object({
-  domain: z.string().optional(),
-  scope_tags: z.array(z.string()).optional()
-}).optional();
-
-export const ContextDimensionSchema = z.object({
-  instruction: z.string().min(1, 'Context instruction is required'),
-  metadata: ContextMetadataSchema
-});
-
-export const ToneMetadataSchema = z.object({
-  style_tags: z.array(z.string()).optional(),
-  banned_phrases: z.array(z.string()).optional()
-}).optional();
-
-export const ToneDimensionSchema = z.object({
-  instruction: z.string().min(1, 'Tone instruction is required'),
-  metadata: ToneMetadataSchema
-});
-
-export const FrameworkMetadataSchema = z.object({
-  reasoning_type: z.string().optional()
-}).optional();
-
-export const FrameworkDimensionSchema = z.object({
-  instruction: z.string().min(1, 'Framework instruction is required'),
-  metadata: FrameworkMetadataSchema
-});
-
-export const ConstraintsMetadataSchema = z.object({
-  prohibitions: z.array(z.string()).optional(),
-  requirements: z.array(z.string()).optional(),
-  response_length: z.string().optional()
-}).optional();
-
-export const ConstraintsDimensionSchema = z.object({
-  instruction: z.string().min(1, 'Constraints instruction is required'),
-  metadata: ConstraintsMetadataSchema
-});
-
-export const FormatMetadataSchema = z.object({
-  output_type: z.string().optional()
-}).optional();
-
-export const FormatDimensionSchema = z.object({
-  instruction: z.string().min(1, 'Format instruction is required'),
-  metadata: FormatMetadataSchema
-});
-
-export const ExemplarDimensionSchema = z.object({
-  instruction: z.string().min(1, 'Exemplar instruction is required')
-});
+export type DimensionContent = {
+  instruction: string;
+  version?: number;
+  pinned?: boolean;
+  pinnedData?: Record<string, any>;
+  generation?: number;
+  confidence?: number;
+  updatedAt?: number;
+  metadata?: Record<string, any>;
+};
 
 export const PersonaMetadataSchema = z.object({
-  suggested_name: z.string().optional(),
-  suggested_title: z.string().optional(),
-  domain: z.string().optional(),
-  primary_intent: z.string().optional(),
-  target_audience: z.string().optional(),
-  key_strengths: z.array(z.string()).optional(),
-  complexity_level: z.string().optional(),
-  trigger_keywords: z.array(z.string()).optional()
+  suggested_name: z.string().default('AI Persona'),
+  suggested_title: z.string().optional().default('Specialist'),
+  domain: z.string().optional().default('Tech'),
+  author: z.string().optional(),
+  tags: z.array(z.string()).optional().default([]),
+  version: z.string().optional().default('1.0.0'),
+  is_public: z.boolean().optional().default(false),
+  rating: z.number().optional(),
+  rating_count: z.number().optional(),
+  downloads: z.number().optional()
 });
+
+export type PersonaMetadata = {
+  suggested_name?: string;
+  suggested_title?: string;
+  domain?: string;
+  author?: string;
+  tags?: string[];
+  version?: string;
+  is_public?: boolean;
+  rating?: number;
+  rating_count?: number;
+  downloads?: number;
+  primary_intent?: string;
+  target_audience?: string;
+  [key: string]: any;
+};
 
 export const PersonaV4Schema = z.object({
-  metadata: PersonaMetadataSchema.optional(),
-  persona: PersonaDimensionSchema.optional(),
-  context: ContextDimensionSchema.optional(),
-  tone: ToneDimensionSchema.optional(),
-  framework: FrameworkDimensionSchema.optional(),
-  constraints: ConstraintsDimensionSchema.optional(),
-  format: FormatDimensionSchema.optional(),
-  exemplar: ExemplarDimensionSchema.optional()
+  id: z.string().optional(),
+  persona: DimensionContentSchema.optional(),
+  context: DimensionContentSchema.optional(),
+  tone: DimensionContentSchema.optional(),
+  framework: DimensionContentSchema.optional(),
+  constraints: DimensionContentSchema.optional(),
+  format: DimensionContentSchema.optional(),
+  exemplar: DimensionContentSchema.optional(),
+  metadata: PersonaMetadataSchema.optional().default({})
 });
 
-export type PersonaDimension = z.infer<typeof PersonaDimensionSchema>;
-export type ContextDimension = z.infer<typeof ContextDimensionSchema>;
-export type ToneDimension = z.infer<typeof ToneDimensionSchema>;
-export type FrameworkDimension = z.infer<typeof FrameworkDimensionSchema>;
-export type ConstraintsDimension = z.infer<typeof ConstraintsDimensionSchema>;
-export type FormatDimension = z.infer<typeof FormatDimensionSchema>;
-export type ExemplarDimension = z.infer<typeof ExemplarDimensionSchema>;
-export type PersonaMetadata = z.infer<typeof PersonaMetadataSchema>;
-export type PersonaV4 = z.infer<typeof PersonaV4Schema>;
+export type PersonaV4 = {
+  id?: string;
+  persona?: DimensionContent;
+  context?: DimensionContent;
+  tone?: DimensionContent;
+  framework?: DimensionContent;
+  constraints?: DimensionContent;
+  format?: DimensionContent;
+  exemplar?: DimensionContent;
+  metadata?: PersonaMetadata;
+};
 
-export type DimensionValue =
-  | PersonaDimension
-  | ContextDimension
-  | ToneDimension
-  | FrameworkDimension
-  | ConstraintsDimension
-  | FormatDimension
-  | ExemplarDimension;
-
-/**
- * Validates a candidate Persona V4 payload against the Zod schema.
- */
-export function validatePersonaV4(data: unknown): { success: boolean; data?: PersonaV4; error?: z.ZodError } {
-  const result = PersonaV4Schema.safeParse(data);
-  if (result.success) {
-    return { success: true, data: result.data };
-  }
-  return { success: false, error: result.error };
-}
-
-/**
- * Strips markdown codeblocks and sanitizes string content.
- */
 export function cleanInstruction(text: string): string {
-  if (typeof text !== 'string') return '';
+  if (!text) return '';
   return text
-    .replace(/^[`]{3}(?:json)?/gim, '')
-    .replace(/[`]{3}$/gim, '')
+    .replace(/^\s*```(?:json)?/gm, '')
+    .replace(/^```\s*$/gm, '')
+    .replace(/\r\n/g, '\n')
     .trim();
 }
+
+export function createEmptyPersona(): PersonaV4 {
+  return {
+    persona: { instruction: '' },
+    context: { instruction: '' },
+    tone: { instruction: '' },
+    framework: { instruction: '' },
+    constraints: { instruction: '' },
+    format: { instruction: '' },
+    exemplar: { instruction: '' },
+    metadata: {
+      suggested_name: 'New Persona',
+      suggested_title: 'AI Specialist',
+      domain: 'Tech',
+      tags: [],
+      version: '1.0.0',
+      is_public: false
+    }
+  };
+}
+
+export function validatePersona(data: unknown): { success: boolean; data?: PersonaV4; errors?: string[]; error?: z.ZodError } {
+  const result = PersonaV4Schema.safeParse(data);
+  if (result.success) return { success: true, data: result.data as PersonaV4 };
+  return {
+    success: false,
+    errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+    error: result.error
+  };
+}
+
+export const validatePersonaV4 = validatePersona;

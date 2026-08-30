@@ -17,12 +17,11 @@ export class UnifiedAnalyzer {
     const prompt = buildExtractionPrompt(formattedHistory);
 
     if (this.llmClient) {
-      const response = await this.llmClient.generate(prompt, { jsonMode: true });
+      const response = await this.llmClient.call(prompt, { json: true });
       const parsed = parseExtractionResponse(response.text);
       return parsed ? parsed.persona : null;
     }
 
-    // Fallback heuristic extraction
     return {
       persona: { instruction: `AI Assistant tailored from ${turns.length} turns` },
       context: { instruction: 'Extracted conversation context' },

@@ -90,7 +90,7 @@ export const OptionsApp: React.FC = () => {
                 {activeModel === m.id && <span className="badge">Active</span>}
               </div>
               <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '4px 0 0 0' }}>
-                Context: {m.contextWindow.toLocaleString()} tokens
+                Context: {(m.models[0]?.contextWindow || 128000).toLocaleString()} tokens
               </p>
             </div>
           ))}

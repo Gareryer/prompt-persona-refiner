@@ -13,21 +13,24 @@ export function parseExtractionResponse(rawText: string): ExtractionResult | nul
 
   let cleaned = cleanInstruction(rawText);
 
+  // Strip markdown fences
+  cleaned = cleaned.replace(/^```(?:json)?/gm, '').replace(/^```$/gm, '').trim();
+
   // Try direct parse first
   let parsedObj: any = null;
   try {
     parsedObj = JSON.parse(cleaned);
   } catch {
     // Attempt regex extraction of outermost JSON object
-    const match = cleaned.match(/\{[\s\S]*\}/);
-    if (match) {
+    const startIdx = cleaned.indexOf('{');
+    const endIdx = cleaned.lastIndexOf('}');
+    if (startIdx !== -1 && endIdx > startIdx) {
+      const jsonCandidate = cleaned.slice(startIdx, endIdx + 1);
       try {
-        parsedObj = JSON.parse(match[0]);
+        parsedObj = JSON.parse(jsonCandidate);
       } catch {
-        // Attempt minor syntax fixes (trailing commas, unbalanced quotes)
-        const repaired = match[0]
-          .replace(/,\s*([}\]])/g, '$1') // trailing commas
-          .replace(/([\r\n]+)/g, ' '); // unescaped newlines inside strings
+        // Attempt trailing comma repair
+        const repaired = jsonCandidate.replace(/,\s*([}\]])/g, '$1');
         try {
           parsedObj = JSON.parse(repaired);
         } catch {

@@ -1,38 +1,102 @@
-import type { PersonaV4, DimensionId } from './schemas';
+/**
+ * @fileoverview Complete Context Assembler v4 - Unified Context Builder
+ * Ported from memory/context-assembler.js (576 lines)
+ */
 
-export interface AssembledRefinementContext {
+import type { PersonaV4, DimensionId } from './schemas';
+import { logger } from '../logging/logger';
+
+export interface AssembledRefinement {
   systemPrompt: string;
+  userPrompt: string;
+  assembledAt: number;
   activeDimensions: DimensionId[];
-  formattedContext: string;
+  tokenEstimate: number;
 }
 
-/**
- * Assembles a structured prompt from active Persona V4 dimensions.
- */
-export function assembleRefinementContext(
-  persona: PersonaV4,
-  enabledDimensions: DimensionId[] = ['persona', 'context', 'tone', 'framework', 'constraints', 'format', 'exemplar']
-): AssembledRefinementContext {
-  const sections: string[] = [];
-  const active: DimensionId[] = [];
+export class ContextAssembler {
+  static assemble(persona: PersonaV4, activeDimensions?: DimensionId[]): AssembledRefinement {
+    const start = performance.now();
+    const dimensionsToInclude = activeDimensions || [
+      'persona',
+      'context',
+      'tone',
+      'framework',
+      'constraints',
+      'format',
+      'exemplar'
+    ];
 
-  for (const dimId of enabledDimensions) {
-    const dim = persona[dimId];
-    if (dim && dim.instruction) {
-      active.push(dimId);
-      const title = dimId.toUpperCase();
-      sections.push(`[${title}]\n${dim.instruction}`);
+    const sections: string[] = [];
+    const includedIds: DimensionId[] = [];
+
+    // 1. Header / Persona Identity
+    if (dimensionsToInclude.includes('persona') && persona.persona?.instruction?.trim()) {
+      sections.push(`[PERSONA]\n${persona.persona.instruction.trim()}`);
+      includedIds.push('persona');
     }
+
+    // 2. Domain Context
+    if (dimensionsToInclude.includes('context') && persona.context?.instruction?.trim()) {
+      sections.push(`[CONTEXT]\n${persona.context.instruction.trim()}`);
+      includedIds.push('context');
+    }
+
+    // 3. Tone & Style
+    if (dimensionsToInclude.includes('tone') && persona.tone?.instruction?.trim()) {
+      sections.push(`[TONE]\n${persona.tone.instruction.trim()}`);
+      includedIds.push('tone');
+    }
+
+    // 4. Framework & Methods
+    if (dimensionsToInclude.includes('framework') && persona.framework?.instruction?.trim()) {
+      sections.push(`[FRAMEWORK]\n${persona.framework.instruction.trim()}`);
+      includedIds.push('framework');
+    }
+
+    // 5. Constraints & Invariants
+    if (dimensionsToInclude.includes('constraints') && persona.constraints?.instruction?.trim()) {
+      sections.push(`[CONSTRAINTS]\n${persona.constraints.instruction.trim()}`);
+      includedIds.push('constraints');
+    }
+
+    // 6. Format Preferences
+    if (dimensionsToInclude.includes('format') && persona.format?.instruction?.trim()) {
+      sections.push(`[FORMAT]\n${persona.format.instruction.trim()}`);
+      includedIds.push('format');
+    }
+
+    // 7. Exemplars
+    if (dimensionsToInclude.includes('exemplar') && persona.exemplar?.instruction?.trim()) {
+      sections.push(`[EXEMPLAR]\n${persona.exemplar.instruction.trim()}`);
+      includedIds.push('exemplar');
+    }
+
+    const systemPrompt = sections.join('\n\n');
+    const tokenEstimate = Math.ceil(systemPrompt.length / 4);
+
+    logger.debug('Context assembled', {
+      durationMs: Math.round(performance.now() - start),
+      tokenEstimate,
+      includedCount: includedIds.length
+    });
+
+    return {
+      systemPrompt,
+      userPrompt: '',
+      assembledAt: Date.now(),
+      activeDimensions: includedIds,
+      tokenEstimate
+    };
   }
 
-  const formattedContext = sections.join('\n\n');
-  const systemPrompt = formattedContext.length > 0
-    ? `[SYSTEM PERSONA INSTRUCTIONS]\n${formattedContext}`
-    : '';
+  static buildRefinedPrompt(userPrompt: string, persona: PersonaV4, activeDimensions?: DimensionId[]): string {
+    const assembled = this.assemble(persona, activeDimensions);
+    if (!assembled.systemPrompt) return userPrompt;
+    return `${assembled.systemPrompt}\n\n[USER REQUEST]\n${userPrompt}`.trim();
+  }
+}
 
-  return {
-    systemPrompt,
-    activeDimensions: active,
-    formattedContext
-  };
+export function assembleRefinementContext(persona: PersonaV4, activeDimensions?: DimensionId[]) {
+  return ContextAssembler.assemble(persona, activeDimensions);
 }
