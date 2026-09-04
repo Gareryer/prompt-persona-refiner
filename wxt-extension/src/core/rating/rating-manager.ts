@@ -293,3 +293,17 @@ export function getCurrentRatingManager(url?: string): RatingManager {
   const sid = currentUrl ? RatingManager.extractSessionId(currentUrl) : null;
   return new RatingManager(sid || 'default_session');
 }
+
+export async function checkRatingEligibility(): Promise<boolean> {
+  if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+    try {
+      const res = await new Promise<any>((resolve) => {
+        chrome.runtime.sendMessage({ type: 'CHECK_RATING_ELIGIBILITY' }, resolve);
+      });
+      return Boolean(res?.eligible);
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}

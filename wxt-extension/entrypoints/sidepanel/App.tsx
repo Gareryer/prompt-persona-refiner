@@ -6,6 +6,7 @@ import { ContextView } from './components/ContextView';
 import { PersonaView } from './components/PersonaView';
 import { LogsView, type LogItem } from './components/LogsView';
 import { ExpandModal } from './components/ExpandModal';
+import { savePersonaToStorage } from '../../src/core/sidepanel/session-adapter';
 
 export const SidepanelApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'context' | 'persona' | 'logs'>('context');
@@ -33,6 +34,7 @@ export const SidepanelApp: React.FC = () => {
   });
 
   useEffect(() => {
+    // 1. Load initial personas
     sendRpcMessage('GET_PERSONAS', undefined).then((res: any) => {
       if (res && Object.keys(res).length > 0) {
         setPersonas(res);
@@ -40,6 +42,39 @@ export const SidepanelApp: React.FC = () => {
         setActivePersonaId(firstId);
       }
     });
+
+    // 2. MV3 Keep-Alive Port Pinning (Strangler Fig compliant)
+    let keepAlivePort: any = null;
+    if (typeof chrome !== 'undefined' && chrome.runtime?.connect) {
+      try {
+        keepAlivePort = chrome.runtime.connect({ name: 'keep-alive' });
+      } catch {}
+    }
+
+    // 3. Sync logs from chrome.storage.session (_logs, _bgLogs)
+    if (typeof chrome !== 'undefined' && chrome.storage?.session) {
+      chrome.storage.session.get(['_logs', '_bgLogs']).then((res: any) => {
+        const storedLogs: LogItem[] = [];
+        const contentLogs = res._logs || [];
+        const bgLogs = res._bgLogs || [];
+        [...contentLogs, ...bgLogs].forEach((l: any) => {
+          storedLogs.push({
+            time: new Date(l.timestamp || Date.now()).toLocaleTimeString(),
+            level: (l.level || 'INFO').toUpperCase() as any,
+            msg: l.msg || l.message || JSON.stringify(l)
+          });
+        });
+        if (storedLogs.length > 0) {
+          setLogs(prev => [...storedLogs, ...prev]);
+        }
+      }).catch(() => {});
+    }
+
+    return () => {
+      try {
+        keepAlivePort?.disconnect();
+      } catch {}
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -51,11 +86,17 @@ export const SidepanelApp: React.FC = () => {
   const handleUpdateActivePersona = (persona: PersonaV4) => {
     setPersonas(prev => ({ ...prev, [activePersonaId]: persona }));
     sendRpcMessage('SAVE_PERSONA', { id: activePersonaId, persona });
+    if (persona.persona?.instruction) {
+      savePersonaToStorage(persona.persona.instruction, activePersonaId, false);
+    }
   };
 
   const handleSaveNewPersona = (id: string, persona: PersonaV4) => {
     setPersonas(prev => ({ ...prev, [id]: persona }));
     sendRpcMessage('SAVE_PERSONA', { id, persona });
+    if (persona.persona?.instruction) {
+      savePersonaToStorage(persona.persona.instruction, id, false);
+    }
     setLogs(prev => [
       { level: 'INFO', msg: `Saved persona: ${persona.metadata?.suggested_name || id}`, time: new Date().toLocaleTimeString() },
       ...prev

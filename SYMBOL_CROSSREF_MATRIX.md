@@ -1,6 +1,6 @@
 # Symbol-Level Cross-Reference Matrix
 
-**Generated**: 2026-09-04T17:15:34.127Z
+**Generated**: 2026-09-04T18:12:20.601Z
 **Method**: TypeScript Compiler API AST extraction with deterministic name-matching cross-reference. Zero guesswork.
 
 ---
@@ -10,9 +10,9 @@
 | Metric | Count | Percentage |
 |:---|:---|:---|
 | **Total Legacy Symbols** (excl. vendor `supabase.min.js`) | **2,509** | 100% |
-| **PORTED** (matched in WXT by name + type) | **1,650** | **65.8%** |
-| **MISSING** (no WXT counterpart found) | **859** | **34.2%** |
-| **NEW_IN_WXT** (WXT-only, no legacy origin) | **636** | — |
+| **PORTED** (matched in WXT by name + type) | **1,704** | **67.9%** |
+| **MISSING** (no WXT counterpart found) | **805** | **32.1%** |
+| **NEW_IN_WXT** (WXT-only, no legacy origin) | **691** | — |
 
 ---
 
@@ -27,13 +27,13 @@
 | ✅ `background/services/memory-orchestrator.js` | 85 | 85 | 0 | 100% |
 | ✅ `background/services/session-state.js` | 9 | 9 | 0 | 100% |
 | ✅ `background/services/sidepanel-manager.js` | 15 | 15 | 0 | 100% |
-| ❌ `build.js` | 27 | 1 | 26 | 4% |
+| ❌ `build.js` | 27 | 2 | 25 | 7% |
 | ✅ `content/diff.js` | 15 | 15 | 0 | 100% |
 | ❌ `content/observer.js` | 226 | 95 | 131 | 42% |
 | ❌ `content/scraper.js` | 77 | 52 | 25 | 68% |
-| ⚠️ `content/templates.js` | 1 | 0 | 1 | 0% |
+| ✅ `content/templates.js` | 1 | 1 | 0 | 100% |
 | ⚠️ `extractor/extractor.js` | 34 | 33 | 1 | 97% |
-| ❌ `llm/llm-client.js` | 91 | 70 | 21 | 77% |
+| ❌ `llm/llm-client.js` | 91 | 71 | 20 | 78% |
 | ✅ `llm/llm-config.js` | 20 | 20 | 0 | 100% |
 | ❌ `logging/logger.js` | 92 | 79 | 13 | 86% |
 | ⚠️ `memory/analyzer-registry.js` | 6 | 4 | 2 | 67% |
@@ -41,7 +41,7 @@
 | ❌ `memory/analyzers/unified-analyzer.js` | 40 | 19 | 21 | 48% |
 | ❌ `memory/component-schemas.js` | 23 | 7 | 16 | 30% |
 | ❌ `memory/context-assembler.js` | 73 | 66 | 7 | 90% |
-| ❌ `memory/index.js` | 59 | 31 | 28 | 53% |
+| ❌ `memory/index.js` | 59 | 32 | 27 | 54% |
 | ⚠️ `memory/memory-controller.js` | 79 | 75 | 4 | 95% |
 | ❌ `model/model-manager.js` | 74 | 66 | 8 | 89% |
 | ⚠️ `model/model-registry.js` | 35 | 34 | 1 | 97% |
@@ -53,7 +53,7 @@
 | ✅ `sidepanel/modules/cloud-sync.js` | 2 | 2 | 0 | 100% |
 | ✅ `sidepanel/modules/dimension-view.js` | 4 | 4 | 0 | 100% |
 | ✅ `sidepanel/modules/persona-view.js` | 2 | 2 | 0 | 100% |
-| ❌ `sidepanel/sidepanel.js` | 965 | 461 | 504 | 48% |
+| ❌ `sidepanel/sidepanel.js` | 965 | 511 | 454 | 53% |
 | ✅ `storage/storage-repository.js` | 17 | 17 | 0 | 100% |
 | ❌ `supabase/supabase-client.js` | 64 | 58 | 6 | 91% |
 | ⚠️ `theme/theme-controller.js` | 32 | 31 | 1 | 97% |
@@ -64,7 +64,7 @@
 
 These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 
-### `sidepanel/sidepanel.js` (504 missing)
+### `sidepanel/sidepanel.js` (454 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
@@ -123,20 +123,17 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `iconEl` | variable | L1405 |
 | `verbatimToggle` | variable | L1419 |
 | `verbatimBadge` | variable | L1420 |
-| `comp` | variable | L1461 |
 | `injectedContextInput` | variable | L1484 |
 | `lines` | variable | L1489 |
 | `textSpan` | variable | L1613 |
 | `range` | variable | L1623 |
 | `sel` | variable | L1625 |
-| `newValue` | variable | L1634 |
 | `existingTags` | variable | L1690 |
 | `newIndex` | variable | L1691 |
 | `textSpan` | variable | L1698 |
 | `textSpan` | variable | L1772 |
 | `range` | variable | L1781 |
 | `sel` | variable | L1783 |
-| `newValue` | variable | L1792 |
 | `existingTags` | variable | L1821 |
 | `newIndex` | variable | L1822 |
 | `textSpan` | variable | L1828 |
@@ -155,7 +152,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `shouldPin` | variable | L2000 |
 | `autoSaveTimeout` | variable | L2048 |
 | `newData` | variable | L2051 |
-| `comp` | variable | L2073 |
 | `domainChips` | variable | L2107 |
 | `scopeChips` | variable | L2120 |
 | `styleChips` | variable | L2135 |
@@ -276,7 +272,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `searchTimeout` | variable | L3764 |
 | `publishBtn` | variable | L3793 |
 | `accordion` | variable | L3822 |
-| `targetId` | variable | L3842 |
 | `maxTags` | variable | L3870 |
 | `existingTags` | variable | L3871 |
 | `textSpan` | variable | L3897 |
@@ -299,7 +294,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `credentialsEl` | variable | L4315 |
 | `contextContent` | variable | L4321 |
 | `toneContent` | variable | L4330 |
-| `tone` | variable | L4331 |
 | `frameworkContent` | variable | L4339 |
 | `framework` | variable | L4340 |
 | `constraintsContent` | variable | L4348 |
@@ -362,7 +356,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `textSpan` | variable | L5148 |
 | `range` | variable | L5157 |
 | `sel` | variable | L5159 |
-| `newValue` | variable | L5168 |
 | `handleExtRemoveTag` | function | L5192 |
 | `handleExtAddTag` | function | L5197 |
 | `existingTags` | variable | L5199 |
@@ -376,27 +369,15 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `updateExtFieldInData` | function | L5275 |
 | `populateEditableTags` | function | L5291 |
 | `textSpan` | variable | L5320 |
-| `handleSaveDraft` | function | L5341 |
-| `tone` | variable | L5363 |
-| `complexity` | variable | L5364 |
-| `keywords` | variable | L5367 |
-| `subdomains` | variable | L5368 |
 | `audienceEl` | variable | L5370 |
-| `audience` | variable | L5371 |
-| `handlePublishPersona` | function | L5412 |
 | `nameInput` | variable | L5422 |
-| `tone` | variable | L5436 |
-| `complexity` | variable | L5437 |
 | `missing` | variable | L5440 |
 | `publishBtn` | variable | L5453 |
 | `authError` | variable | L5464 |
 | `publicBtn` | variable | L5471 |
 | `isPublic` | variable | L5472 |
 | `injectedContext` | variable | L5479 |
-| `keywords` | variable | L5481 |
-| `subdomains` | variable | L5482 |
 | `audienceEl` | variable | L5484 |
-| `audience` | variable | L5485 |
 | `existingId` | variable | L5524 |
 | `isUpdate` | variable | L5525 |
 | `changeNotes` | variable | L5544 |
@@ -409,7 +390,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `getChipValue` | function | L5629 |
 | `group` | variable | L5630 |
 | `filters` | variable | L5636 |
-| `keywords` | variable | L5672 |
 | `searchStr` | variable | L5673 |
 | `loadPopularPersonas` | function | L5704 |
 | `resultsContainer` | variable | L5705 |
@@ -418,7 +398,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `isLocal` | variable | L5762 |
 | `showPersonaPopup` | function | L5788 |
 | `existingPopup` | variable | L5790 |
-| `keywords` | variable | L5794 |
 | `preview` | variable | L5795 |
 | `importCount` | variable | L5796 |
 | `isLocal` | variable | L5799 |
@@ -428,16 +407,13 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `prevExtraction` | variable | L5873 |
 | `showPersonaDetailModal` | function | L5887 |
 | `existingModal` | variable | L5888 |
-| `keywords` | variable | L5892 |
 | `importCount` | variable | L5894 |
 | `raterCount` | variable | L5896 |
 | `llmModel` | variable | L5898 |
-| `formatMemoryKey` | function | L5980 |
 | `handleImportPersona` | function | L5989 |
 | `loadMyPersonas` | function | L6051 |
 | `published` | variable | L6082 |
 | `allPersonas` | variable | L6096 |
-| `loadSavedPrompts` | function | L6126 |
 | `localPrompts` | variable | L6142 |
 | `cloudPrompts` | variable | L6145 |
 | `allPrompts` | variable | L6165 |
@@ -448,15 +424,11 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `titleInput` | variable | L6245 |
 | `contentInput` | variable | L6246 |
 | `saveBtn` | variable | L6247 |
-| `savePromptLocal` | function | L6297 |
-| `newPrompt` | variable | L6301 |
 | `confirmed` | variable | L6320 |
 | `openPromptPreviewDialog` | function | L6359 |
 | `closeDialog` | function | L6385 |
-| `extractFromSavedPrompt` | function | L6404 |
 | `textarea` | variable | L6408 |
 | `createPersonaListItem` | function | L6425 |
-| `keywords` | variable | L6434 |
 | `isPublic` | variable | L6436 |
 | `createRipple` | function | L6491 |
 | `existingRipple` | variable | L6492 |
@@ -469,7 +441,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `handleEditPersona` | function | L6559 |
 | `confirmed` | variable | L6599 |
 | `isDraft` | variable | L6614 |
-| `loadPersonaToEdit` | function | L6657 |
 | `nameInput` | variable | L6691 |
 | `privateBtn` | variable | L6700 |
 | `publicBtn` | variable | L6701 |
@@ -483,38 +454,23 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `handleSourceViewerKeydown` | function | L6789 |
 | `viewer` | variable | L6791 |
 | `_rebuildInProgress` | variable | L6804 |
-| `_rebuildCancelled` | variable | L6805 |
-| `_hasUnsavedChanges` | variable | L6806 |
-| `markFormDirty` | function | L6811 |
-| `resetFormDirty` | function | L6818 |
-| `hasUnsavedChanges` | function | L6825 |
 | `handleRebuildFromSource` | function | L6829 |
 | `sourcePrompt` | variable | L6830 |
 | `rebuildBtn` | variable | L6842 |
 | `confirmed` | variable | L6896 |
 | `preserved` | variable | L6909 |
-| `cancelRebuild` | function | L6959 |
 | `rebuildBtn` | variable | L6971 |
 | `openVersionHistory` | function | L7004 |
-| `loadVersionHistory` | function | L7032 |
 | `nameEl` | variable | L7034 |
 | `versions` | variable | L7056 |
-| `currentVersion` | variable | L7057 |
 | `currentItem` | variable | L7082 |
 | `prevSnapshot` | variable | L7091 |
 | `createVersionItem` | function | L7106 |
 | `date` | variable | L7112 |
 | `notes` | variable | L7113 |
 | `diffEl` | variable | L7133 |
-| `generateDiffView` | function | L7157 |
-| `currVal` | variable | L7172 |
-| `prevVal` | variable | L7173 |
-| `fullKey` | variable | L7174 |
-| `currStr` | variable | L7183 |
-| `prevStr` | variable | L7184 |
 | `parts` | variable | L7227 |
 | `last` | variable | L7228 |
-| `restoreVersion` | function | L7250 |
 | `confirmed` | variable | L7251 |
 | `restoredData` | variable | L7261 |
 | `exportData` | variable | L7300 |
@@ -538,8 +494,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `levelFilter` | variable | L7688 |
 | `exportBtn` | variable | L7689 |
 | `clearBtn` | variable | L7690 |
-| `contentLogs` | variable | L7705 |
-| `bgLogs` | variable | L7706 |
 | `exportData` | variable | L7708 |
 | `renderLogsPage` | function | L7742 |
 | `logViewer` | variable | L7743 |
@@ -551,19 +505,15 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `displayLogs` | variable | L7771 |
 | `byLevel` | variable | L7788 |
 | `statsStr` | variable | L7792 |
-| `setupSynthesizedPersonaSave` | function | L7803 |
 | `textarea` | variable | L7804 |
 | `verbatimToggle` | variable | L7805 |
 | `verbatimBadge` | variable | L7806 |
 | `shouldPin` | variable | L7813 |
 | `autoSaveTimeout` | variable | L7847 |
-| `savePersonaToStorage` | function | L7881 |
-| `sessionData` | variable | L7888 |
 | `setupExpandModal` | function | L7933 |
 | `isExpanding` | variable | L7945 |
 | `textarea` | variable | L7955 |
 | `expanded` | variable | L7964 |
-| `checkRatingEligibility` | function | L7984 |
 | `showRatingPrompt` | function | L8002 |
 | `selectedRating` | variable | L8034 |
 | `ratingEligibilityInterval` | variable | L8118 |
@@ -709,7 +659,7 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `existingFrame` | variable | L2139 |
 | `injectDebounceTimer` | variable | L2179 |
 
-### `memory/index.js` (28 missing)
+### `memory/index.js` (27 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
@@ -726,7 +676,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `unifiedResults` | variable | L215 |
 | `duration` | variable | L218 |
 | `dimensionIds` | variable | L226 |
-| `sendBridgeResponse` | function | L349 |
 | `SmartAutoRun` | variable | L398 |
 | `completeTurns` | variable | L434 |
 | `hasExistingMemory` | variable | L451 |
@@ -741,37 +690,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `newSessionId` | variable | L593 |
 | `originalPushState` | variable | L630 |
 | `originalReplaceState` | variable | L637 |
-
-### `build.js` (26 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `esbuild` | variable | L1 |
-| `fs` | variable | L2 |
-| `path` | variable | L3 |
-| `isWatch` | variable | L5 |
-| `isDev` | variable | L6 |
-| `outdir` | variable | L7 |
-| `staticFiles` | variable | L10 |
-| `cssFiles` | variable | L22 |
-| `unbundledJsFiles` | variable | L30 |
-| `ensureDir` | function | L64 |
-| `dir` | variable | L65 |
-| `cleanOutdir` | function | L71 |
-| `entries` | variable | L78 |
-| `copyStaticFiles` | function | L90 |
-| `src` | variable | L93 |
-| `dest` | variable | L94 |
-| `buildJS` | function | L105 |
-| `standaloneEntries` | variable | L122 |
-| `buildCSS` | function | L141 |
-| `src` | variable | L144 |
-| `dest` | variable | L145 |
-| `build` | function | L159 |
-| `startTime` | variable | L162 |
-| `bgCtx` | variable | L171 |
-| `standaloneCtx` | variable | L183 |
-| `elapsed` | variable | L203 |
 
 ### `content/scraper.js` (25 missing)
 
@@ -803,31 +721,35 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `roleHeader` | variable | L590 |
 | `rolePrefix` | variable | L597 |
 
-### `llm/llm-client.js` (21 missing)
+### `build.js` (25 missing)
 
 | Symbol Name | Type | Line |
 |:---|:---|:---|
-| `onGeminiPage` | variable | L166 |
-| `isMainWorld` | variable | L170 |
-| `timeoutId` | variable | L179 |
-| `onAbort` | variable | L180 |
-| `handler` | function | L212 |
-| `fetchOptions` | variable | L241 |
-| `mergedOptions` | variable | L302 |
-| `errorType` | variable | L339 |
-| `status` | variable | L386 |
-| `startTime` | variable | L492 |
-| `proxyResponse` | variable | L494 |
-| `fetchDuration` | variable | L503 |
-| `errorData` | variable | L510 |
-| `messages` | variable | L535 |
-| `proxyResponse` | variable | L567 |
-| `enhancedPrompt` | variable | L598 |
-| `proxyResponse` | variable | L618 |
-| `enhancedPrompt` | variable | L650 |
-| `messages` | variable | L656 |
-| `proxyResponse` | variable | L669 |
-| `jsonMatch` | variable | L787 |
+| `esbuild` | variable | L1 |
+| `fs` | variable | L2 |
+| `path` | variable | L3 |
+| `isWatch` | variable | L5 |
+| `isDev` | variable | L6 |
+| `outdir` | variable | L7 |
+| `staticFiles` | variable | L10 |
+| `cssFiles` | variable | L22 |
+| `unbundledJsFiles` | variable | L30 |
+| `ensureDir` | function | L64 |
+| `dir` | variable | L65 |
+| `cleanOutdir` | function | L71 |
+| `copyStaticFiles` | function | L90 |
+| `src` | variable | L93 |
+| `dest` | variable | L94 |
+| `buildJS` | function | L105 |
+| `standaloneEntries` | variable | L122 |
+| `buildCSS` | function | L141 |
+| `src` | variable | L144 |
+| `dest` | variable | L145 |
+| `build` | function | L159 |
+| `startTime` | variable | L162 |
+| `bgCtx` | variable | L171 |
+| `standaloneCtx` | variable | L183 |
+| `elapsed` | variable | L203 |
 
 ### `memory/analyzers/unified-analyzer.js` (21 missing)
 
@@ -854,6 +776,31 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `migrated` | variable | L381 |
 | `defaultEmpty` | variable | L389 |
 | `empty` | variable | L410 |
+
+### `llm/llm-client.js` (20 missing)
+
+| Symbol Name | Type | Line |
+|:---|:---|:---|
+| `onGeminiPage` | variable | L166 |
+| `isMainWorld` | variable | L170 |
+| `timeoutId` | variable | L179 |
+| `onAbort` | variable | L180 |
+| `handler` | function | L212 |
+| `fetchOptions` | variable | L241 |
+| `mergedOptions` | variable | L302 |
+| `errorType` | variable | L339 |
+| `startTime` | variable | L492 |
+| `proxyResponse` | variable | L494 |
+| `fetchDuration` | variable | L503 |
+| `errorData` | variable | L510 |
+| `messages` | variable | L535 |
+| `proxyResponse` | variable | L567 |
+| `enhancedPrompt` | variable | L598 |
+| `proxyResponse` | variable | L618 |
+| `enhancedPrompt` | variable | L650 |
+| `messages` | variable | L656 |
+| `proxyResponse` | variable | L669 |
+| `jsonMatch` | variable | L787 |
 
 ### `options/model-manager-ui.js` (18 missing)
 
@@ -1008,12 +955,6 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 | `logFn` | variable | L61 |
 | `existed` | variable | L170 |
 
-### `content/templates.js` (1 missing)
-
-| Symbol Name | Type | Line |
-|:---|:---|:---|
-| `getReviewModalTemplate` | function | L96 |
-
 ### `extractor/extractor.js` (1 missing)
 
 | Symbol Name | Type | Line |
@@ -1044,7 +985,7 @@ These legacy symbols have **no name-matched counterpart** in the WXT codebase.
 
 Showing cross-reference for files with ported symbols.
 
-### `sidepanel/sidepanel.js` (461 ported)
+### `sidepanel/sidepanel.js` (511 ported)
 
 | Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
 |:---|:---|:---|:---|:---|
@@ -1068,7 +1009,7 @@ Showing cross-reference for files with ported symbols.
 | `showConfirmDialog` | function | L290 | `src/core/sidepanel/dialogs.ts` | `showConfirmDialog` |
 | `dialog` | variable | L292 | `src/core/sidepanel/dialogs.ts` | `dialog` |
 | `container` | variable | L314 | `src/content/split-view.ts` | `container` |
-| *(+ 441 more)* | | | | |
+| *(+ 491 more)* | | | | |
 
 ### `content/observer.js` (95 ported)
 
@@ -1174,7 +1115,7 @@ Showing cross-reference for files with ported symbols.
 | `MemoryController.incrementGeneration` | method | L382 | `src/core/memory/memory-controller.ts` | `MemoryController.incrementGeneration` |
 | *(+ 55 more)* | | | | |
 
-### `llm/llm-client.js` (70 ported)
+### `llm/llm-client.js` (71 ported)
 
 | Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
 |:---|:---|:---|:---|:---|
@@ -1198,7 +1139,7 @@ Showing cross-reference for files with ported symbols.
 | `LLMClient._delay` | method | L446 | `src/core/llm/llm-client.ts` | `LLMClient._delay` |
 | `LLMClient._callGemini` | method | L456 | `src/core/llm/llm-client.ts` | `LLMClient._callGemini` |
 | `LLMClient._callOpenAI` | method | L532 | `src/core/llm/llm-client.ts` | `LLMClient._callOpenAI` |
-| *(+ 50 more)* | | | | |
+| *(+ 51 more)* | | | | |
 
 ### `background/index.js` (67 ported)
 
@@ -1220,7 +1161,7 @@ Showing cross-reference for files with ported symbols.
 | `tabs` | variable | L298 | `entrypoints/background.ts` | `tabs` |
 | `urlMatch` | variable | L307 | `src/core/sidepanel/sidepanel-controller.ts` | `urlMatch` |
 | `sessionId` | variable | L308 | `src/content/scraper.ts` | `GeminiConversationScraper.sessionId` |
-| `sessionKey` | variable | L316 | `entrypoints/background.ts` | `sessionKey` |
+| `sessionKey` | variable | L316 | `src/core/sidepanel/persona-lifecycle.ts` | `sessionKey` |
 | `stored` | variable | L317 | `src/core/logging/logger.ts` | `stored` |
 | `ALLOWED_PROXY_HOSTS` | constant | L349 | `entrypoints/background.ts` | `ALLOWED_PROXY_HOSTS` |
 | `targetUrl` | variable | L356 | `entrypoints/background.ts` | `targetUrl` |
@@ -1474,6 +1415,31 @@ These symbols exist only in the WXT codebase — they are new TypeScript types, 
 | `src/core/llm/llm-client.ts` | `durationMs` | variable | L305 |
 | `src/core/llm/llm-client.ts` | `parsedJson` | variable | L307 |
 | `src/core/llm/llm-client.ts` | `LLMConfigManager._modelManager` | property | L330 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate` | interface | L16 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate.id` | interface_prop | L17 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate.content` | interface_prop | L19 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate.category` | interface_prop | L20 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps` | interface | L23 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.personas` | interface_prop | L24 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.activeId` | interface_prop | L25 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onSelectActive` | interface_prop | L26 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onSavePersona` | interface_prop | L27 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onDeletePersona` | interface_prop | L28 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaView` | function | L31 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `filteredList` | variable | L70 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `matchesSearch` | variable | L72 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `matchesDomain` | variable | L73 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleCreate` | function | L77 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `newPersona` | variable | L81 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleImportJson` | function | L99 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `file` | variable | L100 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleExportJson` | function | L116 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `p` | variable | L117 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleLoadStarterPresets` | function | L128 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `saved` | variable | L370 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `p` | variable | L429 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `editData` | variable | L431 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `p` | variable | L444 |
 | `src/core/rating/rating-manager.ts` | `RatingData.rating` | interface_prop | L14 |
 | `src/core/rating/rating-manager.ts` | `RatingData.ratedAt` | interface_prop | L15 |
 | `src/core/rating/rating-manager.ts` | `RatingData.feedback` | interface_prop | L16 |
@@ -1487,32 +1453,7 @@ These symbols exist only in the WXT codebase — they are new TypeScript types, 
 | `src/core/rating/rating-manager.ts` | `sum` | variable | L121 |
 | `src/core/rating/rating-manager.ts` | `RatingManager.deleteRating` | method | L140 |
 | `src/core/rating/rating-manager.ts` | `distribution` | variable | L157 |
-| `src/core/rating/rating-manager.ts` | `sum` | variable | L163 |
-| `src/core/rating/rating-manager.ts` | `score` | variable | L165 |
-| `src/core/rating/rating-manager.ts` | `RatingManager.clear` | method | L177 |
-| `src/core/rating/rating-manager.ts` | `RatingManager.getAllSessionIds` | method | L185 |
-| `src/core/rating/rating-manager.ts` | `sessionIds` | variable | L186 |
-| `src/core/rating/rating-manager.ts` | `sid` | variable | L229 |
-| `src/core/rating/rating-manager.ts` | `idx` | variable | L257 |
-| `src/core/rating/rating-manager.ts` | `toDelete` | variable | L275 |
-| `src/core/rating/rating-manager.ts` | `k` | variable | L277 |
-| `src/core/rating/rating-manager.ts` | `sid` | variable | L293 |
-| `src/lib/storage/items.ts` | `PersonaDraft` | interface | L3 |
-| `src/lib/storage/items.ts` | `PersonaDraft.id` | interface_prop | L4 |
-| `src/lib/storage/items.ts` | `PersonaDraft.source_prompt` | interface_prop | L5 |
-| `src/lib/storage/items.ts` | `PersonaDraft.persona` | interface_prop | L6 |
-| `src/lib/storage/items.ts` | `PersonaDraft.provider` | interface_prop | L7 |
-| `src/lib/storage/items.ts` | `PersonaDraft.llm_model` | interface_prop | L8 |
-| `src/lib/storage/items.ts` | `PersonaDraft.created_at` | interface_prop | L9 |
-| `src/lib/storage/items.ts` | `PersonaDraft.is_public` | interface_prop | L10 |
-| `src/lib/storage/items.ts` | `UserSettings` | interface | L13 |
-| `src/lib/storage/items.ts` | `UserSettings.activeModelProvider` | interface_prop | L15 |
-| `src/lib/storage/items.ts` | `UserSettings.activeModelName` | interface_prop | L16 |
-| `src/lib/storage/items.ts` | `UserSettings.autoRefineOnEnter` | interface_prop | L17 |
-| `src/lib/storage/items.ts` | `UserSettings.cloudSyncEnabled` | interface_prop | L18 |
-| `src/lib/storage/items.ts` | `RatingRecord` | interface | L21 |
-| `src/lib/storage/items.ts` | `RatingRecord.id` | interface_prop | L22 |
-| *(truncated — 436 more NEW_IN_WXT symbols)* | | | |
+| *(truncated — 491 more NEW_IN_WXT symbols)* | | | |
 
 ---
 

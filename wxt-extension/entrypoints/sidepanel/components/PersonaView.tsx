@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { PersonaV4 } from '../../../src/core/memory/schemas';
 import { STARTER_PERSONAS } from '../../../src/core/memory/presets';
+import {
+  loadSavedPrompts,
+  savePromptLocal,
+  deleteSavedPrompt,
+  loadPersonaToEdit,
+  markFormDirty,
+  resetFormDirty,
+  hasUnsavedChanges,
+  handlePublishPersona
+} from '../../../src/core/sidepanel/persona-lifecycle';
+import { readAndSanitizeFile } from '../../../src/core/sidepanel/import-export';
 
 export interface PromptTemplate {
   id: string;
@@ -31,6 +42,8 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [createdName, setCreatedName] = useState('');
   const [createdRole, setCreatedRole] = useState('');
+  const [editingPersonaId, setEditingPersonaId] = useState<string | null>(null);
+  const [publishStatus, setPublishStatus] = useState<string | null>(null);
 
   // Prompts Library State
   const [prompts, setPrompts] = useState<PromptTemplate[]>([
@@ -41,6 +54,19 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
   const [newPromptTitle, setNewPromptTitle] = useState('');
   const [newPromptContent, setNewPromptContent] = useState('');
 
+  useEffect(() => {
+    loadSavedPrompts().then(saved => {
+      if (saved && saved.length > 0) {
+        setPrompts(saved.map(s => ({
+          id: s.id,
+          title: s.title,
+          content: s.content,
+          category: s.category || 'General'
+        })));
+      }
+    }).catch(() => {});
+  }, []);
+
   const filteredList = Object.entries(personas).filter(([id, p]) => {
     const name = p.metadata?.suggested_name || id;
     const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -50,38 +76,41 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
 
   const handleCreate = () => {
     if (!createdName.trim()) return;
-    const newId = `persona_${Date.now()}`;
+    const targetId = editingPersonaId || `persona_${Date.now()}`;
+    const existing = editingPersonaId ? personas[editingPersonaId] : null;
     const newPersona: PersonaV4 = {
+      ...existing,
       persona: { instruction: createdRole || 'Custom AI Persona' },
       metadata: {
+        ...existing?.metadata,
         suggested_name: createdName,
-        suggested_title: 'AI Specialist',
-        domain: selectedDomain || 'tech'
+        suggested_title: existing?.metadata?.suggested_title || 'AI Specialist',
+        domain: selectedDomain || existing?.metadata?.domain || 'tech'
       }
     };
-    onSavePersona(newId, newPersona);
+    onSavePersona(targetId, newPersona);
     setCreatedName('');
     setCreatedRole('');
+    setEditingPersonaId(null);
+    resetFormDirty();
     setPage('browse');
   };
 
-  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportJson = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const parsed = JSON.parse(ev.target?.result as string);
-        if (parsed.persona || parsed.metadata) {
-          const id = `imported_${Date.now()}`;
-          onSavePersona(id, parsed);
-          setPage('browse');
-        }
-      } catch (err) {
-        alert('Invalid Persona JSON file format.');
-      }
-    };
-    reader.readAsText(file);
+    const { content, error } = await readAndSanitizeFile(file);
+    if (error) {
+      alert(`Import failed: ${error}`);
+      return;
+    }
+    if (content?.persona || content?.metadata || typeof content === 'object') {
+      const id = `imported_${Date.now()}`;
+      onSavePersona(id, content);
+      setPage('browse');
+    } else {
+      alert('Invalid persona file format.');
+    }
   };
 
   const handleExportJson = (id: string) => {
@@ -336,9 +365,19 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
               </div>
               <button
                 className="btn btn-primary btn-full"
-                onClick={() => {
-                  if (newPromptTitle && newPromptContent) {
-                    setPrompts(prev => [...prev, { id: `p_${Date.now()}`, title: newPromptTitle, content: newPromptContent, category: 'Custom' }]);
+                onClick={async () => {
+                  if (newPromptTitle.trim() && newPromptContent.trim()) {
+                    const saved = await savePromptLocal({
+                      title: newPromptTitle,
+                      content: newPromptContent,
+                      category: 'Custom'
+                    });
+                    setPrompts(prev => [{
+                      id: saved.id,
+                      title: saved.title,
+                      content: saved.content,
+                      category: saved.category || 'Custom'
+                    }, ...prev]);
                     setNewPromptTitle('');
                     setNewPromptContent('');
                     setPage('prompts');
@@ -383,6 +422,38 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 }}
               >
                 Set as Active Persona
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  const p = personas[selectedPersonaId];
+                  if (p) {
+                    const editData = loadPersonaToEdit(p);
+                    setCreatedName(editData.name || '');
+                    setCreatedRole(editData.memory_layer?.persona?.instruction || p.persona?.instruction || '');
+                    setEditingPersonaId(selectedPersonaId);
+                    setPage('create');
+                  }
+                }}
+              >
+                Edit Persona
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={async () => {
+                  const p = personas[selectedPersonaId];
+                  if (!p) return;
+                  setPublishStatus('Publishing...');
+                  const res = await handlePublishPersona({
+                    name: p.metadata?.suggested_name || selectedPersonaId,
+                    extractionData: p,
+                    domain: p.metadata?.domain
+                  });
+                  setPublishStatus(res.mode === 'cloud' ? 'Published to Community!' : 'Saved as Local Draft');
+                  setTimeout(() => setPublishStatus(null), 3000);
+                }}
+              >
+                {publishStatus || 'Publish to Community'}
               </button>
               <button
                 className="btn btn-secondary"

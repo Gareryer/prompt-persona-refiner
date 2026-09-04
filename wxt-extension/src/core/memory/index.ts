@@ -55,3 +55,13 @@ export async function analyzeSession(url: string, options: any = {}): Promise<{ 
     results: { success: [], failed: [], completedAt: Date.now() }
   };
 }
+
+export function sendBridgeResponse(requestId: string, result: any): void {
+  if (typeof window !== 'undefined' && typeof window.postMessage === 'function') {
+    window.postMessage({
+      source: 'ext-bridge-response',
+      requestId,
+      result
+    }, window.location.origin || '*');
+  }
+}

@@ -59,5 +59,29 @@ export const ContentTemplates = {
         </div>
       </div>
     `;
+  },
+
+  getReviewModalTemplate(): string {
+    return `
+      <div class="gemini-ext-modal">
+        <div class="gemini-ext-modal-header">
+          <div class="gemini-ext-modal-title-group">
+            <span class="gemini-ext-modal-icon">*</span>
+            <span class="gemini-ext-modal-title">Prompt Refinement</span>
+          </div>
+          <button class="gemini-ext-modal-close" aria-label="Close">✕</button>
+        </div>
+        <div class="gemini-ext-modal-tabs">
+          <button class="gemini-ext-tab" data-tab="original">Raw Prompt</button>
+          <button class="gemini-ext-tab" data-tab="refined">Refined Prompt</button>
+          <button class="gemini-ext-tab" data-tab="diff">Differences</button>
+        </div>
+        <div class="gemini-ext-modal-body">
+          <textarea class="gemini-ext-input-area" id="original-textarea" placeholder="Enter prompt..."></textarea>
+        </div>
+      </div>
+    `;
   }
 };
+
+export const getReviewModalTemplate = ContentTemplates.getReviewModalTemplate;

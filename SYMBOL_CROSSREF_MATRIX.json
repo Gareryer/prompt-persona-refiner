@@ -1,12 +1,12 @@
 {
-  "generated": "2026-09-04T17:15:34.171Z",
+  "generated": "2026-09-04T18:12:20.637Z",
   "summary": {
     "totalLegacySymbols": 2509,
-    "ported": 1650,
-    "missing": 859,
-    "newInWxt": 636,
-    "portedPct": "65.8%",
-    "missingPct": "34.2%"
+    "ported": 1704,
+    "missing": 805,
+    "newInWxt": 691,
+    "portedPct": "67.9%",
+    "missingPct": "32.1%"
   },
   "missingByFile": {
     "sidepanel/sidepanel.js": [
@@ -286,11 +286,6 @@
         "line": 1420
       },
       {
-        "name": "comp",
-        "type": "variable",
-        "line": 1461
-      },
-      {
         "name": "injectedContextInput",
         "type": "variable",
         "line": 1484
@@ -314,11 +309,6 @@
         "name": "sel",
         "type": "variable",
         "line": 1625
-      },
-      {
-        "name": "newValue",
-        "type": "variable",
-        "line": 1634
       },
       {
         "name": "existingTags",
@@ -349,11 +339,6 @@
         "name": "sel",
         "type": "variable",
         "line": 1783
-      },
-      {
-        "name": "newValue",
-        "type": "variable",
-        "line": 1792
       },
       {
         "name": "existingTags",
@@ -444,11 +429,6 @@
         "name": "newData",
         "type": "variable",
         "line": 2051
-      },
-      {
-        "name": "comp",
-        "type": "variable",
-        "line": 2073
       },
       {
         "name": "domainChips",
@@ -1051,11 +1031,6 @@
         "line": 3822
       },
       {
-        "name": "targetId",
-        "type": "variable",
-        "line": 3842
-      },
-      {
         "name": "maxTags",
         "type": "variable",
         "line": 3870
@@ -1164,11 +1139,6 @@
         "name": "toneContent",
         "type": "variable",
         "line": 4330
-      },
-      {
-        "name": "tone",
-        "type": "variable",
-        "line": 4331
       },
       {
         "name": "frameworkContent",
@@ -1481,11 +1451,6 @@
         "line": 5159
       },
       {
-        "name": "newValue",
-        "type": "variable",
-        "line": 5168
-      },
-      {
         "name": "handleExtRemoveTag",
         "type": "function",
         "line": 5192
@@ -1551,59 +1516,14 @@
         "line": 5320
       },
       {
-        "name": "handleSaveDraft",
-        "type": "function",
-        "line": 5341
-      },
-      {
-        "name": "tone",
-        "type": "variable",
-        "line": 5363
-      },
-      {
-        "name": "complexity",
-        "type": "variable",
-        "line": 5364
-      },
-      {
-        "name": "keywords",
-        "type": "variable",
-        "line": 5367
-      },
-      {
-        "name": "subdomains",
-        "type": "variable",
-        "line": 5368
-      },
-      {
         "name": "audienceEl",
         "type": "variable",
         "line": 5370
       },
       {
-        "name": "audience",
-        "type": "variable",
-        "line": 5371
-      },
-      {
-        "name": "handlePublishPersona",
-        "type": "function",
-        "line": 5412
-      },
-      {
         "name": "nameInput",
         "type": "variable",
         "line": 5422
-      },
-      {
-        "name": "tone",
-        "type": "variable",
-        "line": 5436
-      },
-      {
-        "name": "complexity",
-        "type": "variable",
-        "line": 5437
       },
       {
         "name": "missing",
@@ -1636,24 +1556,9 @@
         "line": 5479
       },
       {
-        "name": "keywords",
-        "type": "variable",
-        "line": 5481
-      },
-      {
-        "name": "subdomains",
-        "type": "variable",
-        "line": 5482
-      },
-      {
         "name": "audienceEl",
         "type": "variable",
         "line": 5484
-      },
-      {
-        "name": "audience",
-        "type": "variable",
-        "line": 5485
       },
       {
         "name": "existingId",
@@ -1716,11 +1621,6 @@
         "line": 5636
       },
       {
-        "name": "keywords",
-        "type": "variable",
-        "line": 5672
-      },
-      {
         "name": "searchStr",
         "type": "variable",
         "line": 5673
@@ -1759,11 +1659,6 @@
         "name": "existingPopup",
         "type": "variable",
         "line": 5790
-      },
-      {
-        "name": "keywords",
-        "type": "variable",
-        "line": 5794
       },
       {
         "name": "preview",
@@ -1811,11 +1706,6 @@
         "line": 5888
       },
       {
-        "name": "keywords",
-        "type": "variable",
-        "line": 5892
-      },
-      {
         "name": "importCount",
         "type": "variable",
         "line": 5894
@@ -1829,11 +1719,6 @@
         "name": "llmModel",
         "type": "variable",
         "line": 5898
-      },
-      {
-        "name": "formatMemoryKey",
-        "type": "function",
-        "line": 5980
       },
       {
         "name": "handleImportPersona",
@@ -1854,11 +1739,6 @@
         "name": "allPersonas",
         "type": "variable",
         "line": 6096
-      },
-      {
-        "name": "loadSavedPrompts",
-        "type": "function",
-        "line": 6126
       },
       {
         "name": "localPrompts",
@@ -1911,16 +1791,6 @@
         "line": 6247
       },
       {
-        "name": "savePromptLocal",
-        "type": "function",
-        "line": 6297
-      },
-      {
-        "name": "newPrompt",
-        "type": "variable",
-        "line": 6301
-      },
-      {
         "name": "confirmed",
         "type": "variable",
         "line": 6320
@@ -1936,11 +1806,6 @@
         "line": 6385
       },
       {
-        "name": "extractFromSavedPrompt",
-        "type": "function",
-        "line": 6404
-      },
-      {
         "name": "textarea",
         "type": "variable",
         "line": 6408
@@ -1949,11 +1814,6 @@
         "name": "createPersonaListItem",
         "type": "function",
         "line": 6425
-      },
-      {
-        "name": "keywords",
-        "type": "variable",
-        "line": 6434
       },
       {
         "name": "isPublic",
@@ -2014,11 +1874,6 @@
         "name": "isDraft",
         "type": "variable",
         "line": 6614
-      },
-      {
-        "name": "loadPersonaToEdit",
-        "type": "function",
-        "line": 6657
       },
       {
         "name": "nameInput",
@@ -2086,31 +1941,6 @@
         "line": 6804
       },
       {
-        "name": "_rebuildCancelled",
-        "type": "variable",
-        "line": 6805
-      },
-      {
-        "name": "_hasUnsavedChanges",
-        "type": "variable",
-        "line": 6806
-      },
-      {
-        "name": "markFormDirty",
-        "type": "function",
-        "line": 6811
-      },
-      {
-        "name": "resetFormDirty",
-        "type": "function",
-        "line": 6818
-      },
-      {
-        "name": "hasUnsavedChanges",
-        "type": "function",
-        "line": 6825
-      },
-      {
         "name": "handleRebuildFromSource",
         "type": "function",
         "line": 6829
@@ -2136,11 +1966,6 @@
         "line": 6909
       },
       {
-        "name": "cancelRebuild",
-        "type": "function",
-        "line": 6959
-      },
-      {
         "name": "rebuildBtn",
         "type": "variable",
         "line": 6971
@@ -2151,11 +1976,6 @@
         "line": 7004
       },
       {
-        "name": "loadVersionHistory",
-        "type": "function",
-        "line": 7032
-      },
-      {
         "name": "nameEl",
         "type": "variable",
         "line": 7034
@@ -2164,11 +1984,6 @@
         "name": "versions",
         "type": "variable",
         "line": 7056
-      },
-      {
-        "name": "currentVersion",
-        "type": "variable",
-        "line": 7057
       },
       {
         "name": "currentItem",
@@ -2201,36 +2016,6 @@
         "line": 7133
       },
       {
-        "name": "generateDiffView",
-        "type": "function",
-        "line": 7157
-      },
-      {
-        "name": "currVal",
-        "type": "variable",
-        "line": 7172
-      },
-      {
-        "name": "prevVal",
-        "type": "variable",
-        "line": 7173
-      },
-      {
-        "name": "fullKey",
-        "type": "variable",
-        "line": 7174
-      },
-      {
-        "name": "currStr",
-        "type": "variable",
-        "line": 7183
-      },
-      {
-        "name": "prevStr",
-        "type": "variable",
-        "line": 7184
-      },
-      {
         "name": "parts",
         "type": "variable",
         "line": 7227
@@ -2239,11 +2024,6 @@
         "name": "last",
         "type": "variable",
         "line": 7228
-      },
-      {
-        "name": "restoreVersion",
-        "type": "function",
-        "line": 7250
       },
       {
         "name": "confirmed",
@@ -2361,16 +2141,6 @@
         "line": 7690
       },
       {
-        "name": "contentLogs",
-        "type": "variable",
-        "line": 7705
-      },
-      {
-        "name": "bgLogs",
-        "type": "variable",
-        "line": 7706
-      },
-      {
         "name": "exportData",
         "type": "variable",
         "line": 7708
@@ -2426,11 +2196,6 @@
         "line": 7792
       },
       {
-        "name": "setupSynthesizedPersonaSave",
-        "type": "function",
-        "line": 7803
-      },
-      {
         "name": "textarea",
         "type": "variable",
         "line": 7804
@@ -2456,16 +2221,6 @@
         "line": 7847
       },
       {
-        "name": "savePersonaToStorage",
-        "type": "function",
-        "line": 7881
-      },
-      {
-        "name": "sessionData",
-        "type": "variable",
-        "line": 7888
-      },
-      {
         "name": "setupExpandModal",
         "type": "function",
         "line": 7933
@@ -2484,11 +2239,6 @@
         "name": "expanded",
         "type": "variable",
         "line": 7964
-      },
-      {
-        "name": "checkRatingEligibility",
-        "type": "function",
-        "line": 7984
       },
       {
         "name": "showRatingPrompt",
@@ -3255,11 +3005,6 @@
         "line": 226
       },
       {
-        "name": "sendBridgeResponse",
-        "type": "function",
-        "line": 349
-      },
-      {
         "name": "SmartAutoRun",
         "type": "variable",
         "line": 398
@@ -3328,138 +3073,6 @@
         "name": "originalReplaceState",
         "type": "variable",
         "line": 637
-      }
-    ],
-    "build.js": [
-      {
-        "name": "esbuild",
-        "type": "variable",
-        "line": 1
-      },
-      {
-        "name": "fs",
-        "type": "variable",
-        "line": 2
-      },
-      {
-        "name": "path",
-        "type": "variable",
-        "line": 3
-      },
-      {
-        "name": "isWatch",
-        "type": "variable",
-        "line": 5
-      },
-      {
-        "name": "isDev",
-        "type": "variable",
-        "line": 6
-      },
-      {
-        "name": "outdir",
-        "type": "variable",
-        "line": 7
-      },
-      {
-        "name": "staticFiles",
-        "type": "variable",
-        "line": 10
-      },
-      {
-        "name": "cssFiles",
-        "type": "variable",
-        "line": 22
-      },
-      {
-        "name": "unbundledJsFiles",
-        "type": "variable",
-        "line": 30
-      },
-      {
-        "name": "ensureDir",
-        "type": "function",
-        "line": 64
-      },
-      {
-        "name": "dir",
-        "type": "variable",
-        "line": 65
-      },
-      {
-        "name": "cleanOutdir",
-        "type": "function",
-        "line": 71
-      },
-      {
-        "name": "entries",
-        "type": "variable",
-        "line": 78
-      },
-      {
-        "name": "copyStaticFiles",
-        "type": "function",
-        "line": 90
-      },
-      {
-        "name": "src",
-        "type": "variable",
-        "line": 93
-      },
-      {
-        "name": "dest",
-        "type": "variable",
-        "line": 94
-      },
-      {
-        "name": "buildJS",
-        "type": "function",
-        "line": 105
-      },
-      {
-        "name": "standaloneEntries",
-        "type": "variable",
-        "line": 122
-      },
-      {
-        "name": "buildCSS",
-        "type": "function",
-        "line": 141
-      },
-      {
-        "name": "src",
-        "type": "variable",
-        "line": 144
-      },
-      {
-        "name": "dest",
-        "type": "variable",
-        "line": 145
-      },
-      {
-        "name": "build",
-        "type": "function",
-        "line": 159
-      },
-      {
-        "name": "startTime",
-        "type": "variable",
-        "line": 162
-      },
-      {
-        "name": "bgCtx",
-        "type": "variable",
-        "line": 171
-      },
-      {
-        "name": "standaloneCtx",
-        "type": "variable",
-        "line": 183
-      },
-      {
-        "name": "elapsed",
-        "type": "variable",
-        "line": 203
       }
     ],
     "content/scraper.js": [
@@ -3589,111 +3202,131 @@
         "line": 597
       }
     ],
-    "llm/llm-client.js": [
+    "build.js": [
       {
-        "name": "onGeminiPage",
+        "name": "esbuild",
         "type": "variable",
-        "line": 166
+        "line": 1
       },
       {
-        "name": "isMainWorld",
+        "name": "fs",
         "type": "variable",
-        "line": 170
+        "line": 2
       },
       {
-        "name": "timeoutId",
+        "name": "path",
         "type": "variable",
-        "line": 179
+        "line": 3
       },
       {
-        "name": "onAbort",
+        "name": "isWatch",
         "type": "variable",
-        "line": 180
+        "line": 5
       },
       {
-        "name": "handler",
+        "name": "isDev",
+        "type": "variable",
+        "line": 6
+      },
+      {
+        "name": "outdir",
+        "type": "variable",
+        "line": 7
+      },
+      {
+        "name": "staticFiles",
+        "type": "variable",
+        "line": 10
+      },
+      {
+        "name": "cssFiles",
+        "type": "variable",
+        "line": 22
+      },
+      {
+        "name": "unbundledJsFiles",
+        "type": "variable",
+        "line": 30
+      },
+      {
+        "name": "ensureDir",
         "type": "function",
-        "line": 212
+        "line": 64
       },
       {
-        "name": "fetchOptions",
+        "name": "dir",
         "type": "variable",
-        "line": 241
+        "line": 65
       },
       {
-        "name": "mergedOptions",
-        "type": "variable",
-        "line": 302
+        "name": "cleanOutdir",
+        "type": "function",
+        "line": 71
       },
       {
-        "name": "errorType",
-        "type": "variable",
-        "line": 339
+        "name": "copyStaticFiles",
+        "type": "function",
+        "line": 90
       },
       {
-        "name": "status",
+        "name": "src",
         "type": "variable",
-        "line": 386
+        "line": 93
+      },
+      {
+        "name": "dest",
+        "type": "variable",
+        "line": 94
+      },
+      {
+        "name": "buildJS",
+        "type": "function",
+        "line": 105
+      },
+      {
+        "name": "standaloneEntries",
+        "type": "variable",
+        "line": 122
+      },
+      {
+        "name": "buildCSS",
+        "type": "function",
+        "line": 141
+      },
+      {
+        "name": "src",
+        "type": "variable",
+        "line": 144
+      },
+      {
+        "name": "dest",
+        "type": "variable",
+        "line": 145
+      },
+      {
+        "name": "build",
+        "type": "function",
+        "line": 159
       },
       {
         "name": "startTime",
         "type": "variable",
-        "line": 492
+        "line": 162
       },
       {
-        "name": "proxyResponse",
+        "name": "bgCtx",
         "type": "variable",
-        "line": 494
+        "line": 171
       },
       {
-        "name": "fetchDuration",
+        "name": "standaloneCtx",
         "type": "variable",
-        "line": 503
+        "line": 183
       },
       {
-        "name": "errorData",
+        "name": "elapsed",
         "type": "variable",
-        "line": 510
-      },
-      {
-        "name": "messages",
-        "type": "variable",
-        "line": 535
-      },
-      {
-        "name": "proxyResponse",
-        "type": "variable",
-        "line": 567
-      },
-      {
-        "name": "enhancedPrompt",
-        "type": "variable",
-        "line": 598
-      },
-      {
-        "name": "proxyResponse",
-        "type": "variable",
-        "line": 618
-      },
-      {
-        "name": "enhancedPrompt",
-        "type": "variable",
-        "line": 650
-      },
-      {
-        "name": "messages",
-        "type": "variable",
-        "line": 656
-      },
-      {
-        "name": "proxyResponse",
-        "type": "variable",
-        "line": 669
-      },
-      {
-        "name": "jsonMatch",
-        "type": "variable",
-        "line": 787
+        "line": 203
       }
     ],
     "memory/analyzers/unified-analyzer.js": [
@@ -3801,6 +3434,108 @@
         "name": "empty",
         "type": "variable",
         "line": 410
+      }
+    ],
+    "llm/llm-client.js": [
+      {
+        "name": "onGeminiPage",
+        "type": "variable",
+        "line": 166
+      },
+      {
+        "name": "isMainWorld",
+        "type": "variable",
+        "line": 170
+      },
+      {
+        "name": "timeoutId",
+        "type": "variable",
+        "line": 179
+      },
+      {
+        "name": "onAbort",
+        "type": "variable",
+        "line": 180
+      },
+      {
+        "name": "handler",
+        "type": "function",
+        "line": 212
+      },
+      {
+        "name": "fetchOptions",
+        "type": "variable",
+        "line": 241
+      },
+      {
+        "name": "mergedOptions",
+        "type": "variable",
+        "line": 302
+      },
+      {
+        "name": "errorType",
+        "type": "variable",
+        "line": 339
+      },
+      {
+        "name": "startTime",
+        "type": "variable",
+        "line": 492
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 494
+      },
+      {
+        "name": "fetchDuration",
+        "type": "variable",
+        "line": 503
+      },
+      {
+        "name": "errorData",
+        "type": "variable",
+        "line": 510
+      },
+      {
+        "name": "messages",
+        "type": "variable",
+        "line": 535
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 567
+      },
+      {
+        "name": "enhancedPrompt",
+        "type": "variable",
+        "line": 598
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 618
+      },
+      {
+        "name": "enhancedPrompt",
+        "type": "variable",
+        "line": 650
+      },
+      {
+        "name": "messages",
+        "type": "variable",
+        "line": 656
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 669
+      },
+      {
+        "name": "jsonMatch",
+        "type": "variable",
+        "line": 787
       }
     ],
     "options/model-manager-ui.js": [
@@ -4315,13 +4050,6 @@
         "line": 170
       }
     ],
-    "content/templates.js": [
-      {
-        "name": "getReviewModalTemplate",
-        "type": "function",
-        "line": 96
-      }
-    ],
     "extractor/extractor.js": [
       {
         "name": "hasData",
@@ -4396,9 +4124,9 @@
     },
     "build.js": {
       "total": 27,
-      "ported": 1,
-      "missing": 26,
-      "pct": "3.7%"
+      "ported": 2,
+      "missing": 25,
+      "pct": "7.4%"
     },
     "content/diff.js": {
       "total": 15,
@@ -4420,9 +4148,9 @@
     },
     "content/templates.js": {
       "total": 1,
-      "ported": 0,
-      "missing": 1,
-      "pct": "0.0%"
+      "ported": 1,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "extractor/extractor.js": {
       "total": 34,
@@ -4432,9 +4160,9 @@
     },
     "llm/llm-client.js": {
       "total": 91,
-      "ported": 70,
-      "missing": 21,
-      "pct": "76.9%"
+      "ported": 71,
+      "missing": 20,
+      "pct": "78.0%"
     },
     "llm/llm-config.js": {
       "total": 20,
@@ -4480,9 +4208,9 @@
     },
     "memory/index.js": {
       "total": 59,
-      "ported": 31,
-      "missing": 28,
-      "pct": "52.5%"
+      "ported": 32,
+      "missing": 27,
+      "pct": "54.2%"
     },
     "memory/memory-controller.js": {
       "total": 79,
@@ -4552,9 +4280,9 @@
     },
     "sidepanel/sidepanel.js": {
       "total": 965,
-      "ported": 461,
-      "missing": 504,
-      "pct": "47.8%"
+      "ported": 511,
+      "missing": 454,
+      "pct": "53.0%"
     },
     "storage/storage-repository.js": {
       "total": 17,

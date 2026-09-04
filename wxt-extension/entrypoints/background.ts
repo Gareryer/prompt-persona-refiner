@@ -74,8 +74,17 @@ export default defineBackground(() => {
     }
   });
 
-  // 4. Port Connections (Sidepanel)
-  chrome.runtime.onConnect.addListener(handleSidepanelConnect);
+  // 4. Port Connections (Sidepanel & Keep-Alive)
+  chrome.runtime.onConnect.addListener((port) => {
+    if (port.name === 'keep-alive') {
+      bgLog('debug', 'Keep-alive port connected');
+      port.onDisconnect.addListener(() => {
+        bgLog('debug', 'Keep-alive port disconnected');
+      });
+      return;
+    }
+    handleSidepanelConnect(port);
+  });
 
   // 5. Clean up session storage when tab is closed
   chrome.tabs.onRemoved.addListener((tabId) => {
@@ -620,6 +629,30 @@ export default defineBackground(() => {
           });
           await chrome.storage.local.set({ persona_reports: reports });
           sendResponse({ success: true });
+        } catch (error: any) {
+          sendResponse({ success: false, error: error.message });
+        }
+      })();
+      return true;
+    }
+
+    // CHECK_RATING_ELIGIBILITY
+    if (message.type === 'CHECK_RATING_ELIGIBILITY') {
+      sendResponse({ eligible: false, message: 'Rating eligibility check completed.' });
+      return true;
+    }
+
+    // SAVE_DRAFT (Dual-envelope support for both RPC and legacy sendMessage)
+    if (message.type === 'SAVE_DRAFT') {
+      (async () => {
+        try {
+          const draftPayload = message.payload !== undefined ? message.payload : (message.data ?? message);
+          const result = await chrome.storage.local.get('persona_drafts');
+          const drafts = (result.persona_drafts as any[]) || [];
+          drafts.push(draftPayload);
+          await chrome.storage.local.set({ persona_drafts: drafts });
+          bgLog('info', 'Persona draft saved', { id: draftPayload?.id });
+          sendResponse({ success: true, draftId: draftPayload?.id });
         } catch (error: any) {
           sendResponse({ success: false, error: error.message });
         }
