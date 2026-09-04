@@ -46,6 +46,30 @@ export interface ProtocolMap {
     request: { id: string };
     response: { success: boolean; publicId?: string; error?: string };
   };
+  SET_THEME: {
+    request: { theme: 'dark' | 'light' };
+    response: { success: boolean };
+  };
+  PIN_COMPONENT: {
+    request: { sessionId: string; componentId: string };
+    response: { success: boolean };
+  };
+  UNPIN_COMPONENT: {
+    request: { sessionId: string; componentId: string };
+    response: { success: boolean };
+  };
+  REPORT_PERSONA: {
+    request: { personaId: string; reason: string; details?: string };
+    response: { success: boolean };
+  };
+  CHECK_RATING_ELIGIBILITY: {
+    request: void;
+    response: { eligible: boolean };
+  };
+  SAVE_DRAFT: {
+    request: { draft: any };
+    response: { success: boolean; draftId?: string };
+  };
 }
 
 export type MessageType = keyof ProtocolMap;

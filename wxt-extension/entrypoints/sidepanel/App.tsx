@@ -6,6 +6,7 @@ import { ContextView } from './components/ContextView';
 import { PersonaView } from './components/PersonaView';
 import { LogsView, type LogItem } from './components/LogsView';
 import { ExpandModal } from './components/ExpandModal';
+import { SourcePromptModal } from './components/SourcePromptModal';
 import { savePersonaToStorage } from '../../src/core/sidepanel/session-adapter';
 
 export const SidepanelApp: React.FC = () => {
@@ -33,6 +34,8 @@ export const SidepanelApp: React.FC = () => {
     onSave: () => {}
   });
 
+  const [sourceModalOpen, setSourceModalOpen] = useState(false);
+
   useEffect(() => {
     // 1. Load initial personas
     sendRpcMessage('GET_PERSONAS', undefined).then((res: any) => {
@@ -48,32 +51,34 @@ export const SidepanelApp: React.FC = () => {
     if (typeof chrome !== 'undefined' && chrome.runtime?.connect) {
       try {
         keepAlivePort = chrome.runtime.connect({ name: 'keep-alive' });
-      } catch {}
+        keepAlivePort.onDisconnect.addListener(() => {
+          keepAlivePort = null;
+        });
+      } catch {
+        // SW disconnected
+      }
     }
 
-    // 3. Sync logs from chrome.storage.session (_logs, _bgLogs)
+    // 3. Storage Session Sync for Diagnostics Logs
     if (typeof chrome !== 'undefined' && chrome.storage?.session) {
-      chrome.storage.session.get(['_logs', '_bgLogs']).then((res: any) => {
-        const storedLogs: LogItem[] = [];
-        const contentLogs = res._logs || [];
-        const bgLogs = res._bgLogs || [];
-        [...contentLogs, ...bgLogs].forEach((l: any) => {
-          storedLogs.push({
-            time: new Date(l.timestamp || Date.now()).toLocaleTimeString(),
-            level: (l.level || 'INFO').toUpperCase() as any,
-            msg: l.msg || l.message || JSON.stringify(l)
-          });
-        });
-        if (storedLogs.length > 0) {
-          setLogs(prev => [...storedLogs, ...prev]);
+      chrome.storage.session.get(['extension_logs']).then((res: any) => {
+        if (Array.isArray(res.extension_logs) && res.extension_logs.length > 0) {
+          setLogs(prev => [
+            ...res.extension_logs.map((l: any) => ({
+              level: (l.level || 'INFO').toUpperCase() as any,
+              msg: l.msg || l.message || JSON.stringify(l),
+              time: l.timestamp ? new Date(l.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString()
+            })),
+            ...prev
+          ]);
         }
       }).catch(() => {});
     }
 
     return () => {
-      try {
-        keepAlivePort?.disconnect();
-      } catch {}
+      if (keepAlivePort) {
+        try { keepAlivePort.disconnect(); } catch {}
+      }
     };
   }, []);
 
@@ -81,22 +86,32 @@ export const SidepanelApp: React.FC = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
     document.documentElement.setAttribute('data-theme', next);
+    sendRpcMessage('SET_THEME', { theme: next });
   };
 
-  const handleUpdateActivePersona = (persona: PersonaV4) => {
-    setPersonas(prev => ({ ...prev, [activePersonaId]: persona }));
-    sendRpcMessage('SAVE_PERSONA', { id: activePersonaId, persona });
-    if (persona.persona?.instruction) {
-      savePersonaToStorage(persona.persona.instruction, activePersonaId, false);
-    }
+  const handleUpdateActivePersona = (updated: PersonaV4) => {
+    setPersonas(prev => ({
+      ...prev,
+      [activePersonaId]: updated
+    }));
+
+    sendRpcMessage('SAVE_PERSONA', { id: activePersonaId, persona: updated });
+
+    savePersonaToStorage(updated, 'Tab-1').catch(err => {
+      console.warn('[SidepanelApp] Failed dual-saving to session storage:', err);
+    });
+
+    setLastUpdated(new Date().toLocaleTimeString());
   };
 
   const handleSaveNewPersona = (id: string, persona: PersonaV4) => {
-    setPersonas(prev => ({ ...prev, [id]: persona }));
+    setPersonas(prev => ({
+      ...prev,
+      [id]: persona
+    }));
+    setActivePersonaId(id);
     sendRpcMessage('SAVE_PERSONA', { id, persona });
-    if (persona.persona?.instruction) {
-      savePersonaToStorage(persona.persona.instruction, id, false);
-    }
+    savePersonaToStorage(persona, id).catch(() => {});
     setLogs(prev => [
       { level: 'INFO', msg: `Saved persona: ${persona.metadata?.suggested_name || id}`, time: new Date().toLocaleTimeString() },
       ...prev
@@ -199,6 +214,8 @@ export const SidepanelApp: React.FC = () => {
             isRebuilding={isRebuilding}
             lastUpdated={lastUpdated}
             onOpenExpand={(title, value, onSave) => setExpandModal({ isOpen: true, title, value, onSave })}
+            onOpenSourcePrompt={() => setSourceModalOpen(true)}
+            onPinComponent={(dimId, pinned) => sendRpcMessage(pinned ? 'PIN_COMPONENT' : 'UNPIN_COMPONENT', { sessionId: 'Tab-1', componentId: dimId })}
           />
         )}
 
@@ -209,6 +226,9 @@ export const SidepanelApp: React.FC = () => {
             onSelectActive={(id) => setActivePersonaId(id)}
             onSavePersona={handleSaveNewPersona}
             onDeletePersona={handleDeletePersona}
+            onReportPersona={async (personaId, reason, details) => {
+              sendRpcMessage('REPORT_PERSONA', { personaId, reason, details });
+            }}
           />
         )}
 
@@ -230,6 +250,18 @@ export const SidepanelApp: React.FC = () => {
           expandModal.onSave(expandModal.value);
           setExpandModal(prev => ({ ...prev, isOpen: false }));
         }}
+      />
+
+      {/* Source Conversation Prompt Modal */}
+      <SourcePromptModal
+        isOpen={sourceModalOpen}
+        sourcePrompt={
+          (activePersona as any)?.source_prompt ||
+          (activePersona?.metadata as any)?.source_prompt ||
+          `[Scraped Gemini Chat Turn #1]\nUser: Can you design a modular browser extension architecture using WXT and React 19?\nModel: To design a scalable, cross-browser extension using WXT (Web Extension Toolbox), we decompose into entrypoints, typed storage schemas, and Shadow DOM UI components...`
+        }
+        onClose={() => setSourceModalOpen(false)}
+        onRebuildFromSource={handleRebuild}
       />
     </div>
   );

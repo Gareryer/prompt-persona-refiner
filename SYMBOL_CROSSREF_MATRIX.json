@@ -1,12 +1,12 @@
 {
-  "generated": "2026-09-04T18:12:20.637Z",
+  "generated": "2026-09-04T18:48:16.837Z",
   "summary": {
     "totalLegacySymbols": 2509,
-    "ported": 1704,
-    "missing": 805,
-    "newInWxt": 691,
-    "portedPct": "67.9%",
-    "missingPct": "32.1%"
+    "ported": 1706,
+    "missing": 803,
+    "newInWxt": 779,
+    "portedPct": "68.0%",
+    "missingPct": "32.0%"
   },
   "missingByFile": {
     "sidepanel/sidepanel.js": [
@@ -981,11 +981,6 @@
         "line": 3706
       },
       {
-        "name": "query",
-        "type": "variable",
-        "line": 3707
-      },
-      {
         "name": "group",
         "type": "variable",
         "line": 3723
@@ -1711,11 +1706,6 @@
         "line": 5894
       },
       {
-        "name": "raterCount",
-        "type": "variable",
-        "line": 5896
-      },
-      {
         "name": "llmModel",
         "type": "variable",
         "line": 5898
@@ -1911,11 +1901,6 @@
         "line": 6743
       },
       {
-        "name": "sourcePrompt",
-        "type": "variable",
-        "line": 6747
-      },
-      {
         "name": "closeSourcePromptViewer",
         "type": "function",
         "line": 6777
@@ -1944,11 +1929,6 @@
         "name": "handleRebuildFromSource",
         "type": "function",
         "line": 6829
-      },
-      {
-        "name": "sourcePrompt",
-        "type": "variable",
-        "line": 6830
       },
       {
         "name": "rebuildBtn",
@@ -2139,6 +2119,16 @@
         "name": "clearBtn",
         "type": "variable",
         "line": 7690
+      },
+      {
+        "name": "contentLogs",
+        "type": "variable",
+        "line": 7705
+      },
+      {
+        "name": "bgLogs",
+        "type": "variable",
+        "line": 7706
       },
       {
         "name": "exportData",
@@ -4280,9 +4270,9 @@
     },
     "sidepanel/sidepanel.js": {
       "total": 965,
-      "ported": 511,
-      "missing": 454,
-      "pct": "53.0%"
+      "ported": 513,
+      "missing": 452,
+      "pct": "53.2%"
     },
     "storage/storage-repository.js": {
       "total": 17,

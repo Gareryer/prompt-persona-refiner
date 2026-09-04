@@ -90,7 +90,7 @@ export function legacyComponentsToPersonaV4(components: Record<string, any> = {}
  * Ported from sidepanel.js L7881-7923
  */
 export async function savePersonaToStorage(
-  personaText: string,
+  personaInput: string | PersonaV4,
   sessionId: string,
   showToast: boolean = false
 ): Promise<{ success: boolean; sessionKey: string }> {
@@ -98,6 +98,10 @@ export async function savePersonaToStorage(
     logger.warn('[SessionAdapter] savePersonaToStorage called with empty sessionId');
     return { success: false, sessionKey: '' };
   }
+
+  const personaText = typeof personaInput === 'string'
+    ? personaInput
+    : (personaInput.persona?.instruction || '');
 
   logger.info('[SessionAdapter] Saving persona to session storage', {
     sessionId,
@@ -119,22 +123,28 @@ export async function savePersonaToStorage(
     }
   }
 
-  if (!sessionData.components) sessionData.components = {};
-
-  if (!sessionData.components.persona) {
-    sessionData.components.persona = {
-      current: { instruction: personaText, version: 4, source: 'manual' },
-      history: [],
-      confidence: 1.0,
-      updatedAt: Date.now()
+  if (typeof personaInput === 'object' && personaInput !== null) {
+    sessionData.components = {
+      ...sessionData.components,
+      ...personaV4ToLegacyComponents(personaInput)
     };
   } else {
-    if (!sessionData.components.persona.current) {
-      sessionData.components.persona.current = {};
+    if (!sessionData.components) sessionData.components = {};
+    if (!sessionData.components.persona) {
+      sessionData.components.persona = {
+        current: { instruction: personaText, version: 4, source: 'manual' },
+        history: [],
+        confidence: 1.0,
+        updatedAt: Date.now()
+      };
+    } else {
+      if (!sessionData.components.persona.current) {
+        sessionData.components.persona.current = {};
+      }
+      sessionData.components.persona.current.instruction = personaText;
+      sessionData.components.persona.current.source = 'manual';
+      sessionData.components.persona.updatedAt = Date.now();
     }
-    sessionData.components.persona.current.instruction = personaText;
-    sessionData.components.persona.current.source = 'manual';
-    sessionData.components.persona.updatedAt = Date.now();
   }
 
   sessionData.updatedAt = Date.now();

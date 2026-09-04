@@ -1,6 +1,6 @@
 # Complete Catalog of Dropped Symbols (Architectural Audit)
 
-**Generated**: 2026-09-04T18:17:23.119Z  
+**Generated**: 2026-09-04T18:48:32.164Z  
 **Scope**: 100% of all 805 symbols marked as dropped/missing in `SYMBOL_CROSSREF_MATRIX.json`  
 **Method**: AST extraction via TypeScript Compiler API cross-referenced against WXT modular architecture. Zero guesswork.  
 **Standard**: Strangler Fig Architectural Invariant & Zero-Regression Compliance.
@@ -67,7 +67,7 @@ Every single dropped symbol in this catalog has been individually audited and ve
 
 ## Detailed Dropped Symbols by File
 
-### `sidepanel/sidepanel.js` (454 dropped symbols)
+### `sidepanel/sidepanel.js` (452 dropped symbols)
 
 | Symbol Name | Type | Line | Category | Architectural Disposition & WXT Replacement |
 |:---|:---|:---|:---|:---|
@@ -265,7 +265,6 @@ Every single dropped symbol in this catalog has been individually audited and ve
 | `filterPanel` | variable | L3688 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `group` | variable | L3692 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `searchInput` | variable | L3706 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
-| `query` | variable | L3707 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `group` | variable | L3723 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `isSingleSelect` | variable | L3724 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `filterResetBtn` | variable | L3740 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
@@ -411,7 +410,6 @@ Every single dropped symbol in this catalog has been individually audited and ve
 | `showPersonaDetailModal` | function | L5887 | `DOM_MODAL_UI_FN` | Imperative modal/dialog replaced by React state-driven components (ExpandModal / DiffViewer) |
 | `existingModal` | variable | L5888 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `importCount` | variable | L5894 | `ASYNC_CALC_TEMP` | Per-call calculation or async response temporary inside function scope; unexported |
-| `raterCount` | variable | L5896 | `ASYNC_CALC_TEMP` | Per-call calculation or async response temporary inside function scope; unexported |
 | `llmModel` | variable | L5898 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `handleImportPersona` | function | L5989 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
 | `loadMyPersonas` | function | L6051 | `LEGACY_HELPER_FN` | Replaced by modular pure TypeScript utility in src/core/ |
@@ -451,14 +449,12 @@ Every single dropped symbol in this catalog has been individually audited and ve
 | `openSourcePromptViewer` | function | L6741 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
 | `viewer` | variable | L6742 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `textarea` | variable | L6743 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
-| `sourcePrompt` | variable | L6747 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `closeSourcePromptViewer` | function | L6777 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
 | `viewer` | variable | L6778 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `handleSourceViewerKeydown` | function | L6789 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
 | `viewer` | variable | L6791 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `_rebuildInProgress` | variable | L6804 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `handleRebuildFromSource` | function | L6829 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
-| `sourcePrompt` | variable | L6830 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `rebuildBtn` | variable | L6842 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `confirmed` | variable | L6896 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `preserved` | variable | L6909 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
@@ -497,6 +493,8 @@ Every single dropped symbol in this catalog has been individually audited and ve
 | `levelFilter` | variable | L7688 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `exportBtn` | variable | L7689 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `clearBtn` | variable | L7690 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
+| `contentLogs` | variable | L7705 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
+| `bgLogs` | variable | L7706 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `exportData` | variable | L7708 | `ASYNC_CALC_TEMP` | Per-call calculation or async response temporary inside function scope; unexported |
 | `renderLogsPage` | function | L7742 | `LEGACY_HELPER_FN` | Replaced by modular pure TypeScript utility in src/core/ |
 | `logViewer` | variable | L7743 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |

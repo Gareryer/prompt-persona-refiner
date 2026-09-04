@@ -1,6 +1,6 @@
 # Symbol-Level Cross-Reference Matrix
 
-**Generated**: 2026-09-04T18:12:20.601Z
+**Generated**: 2026-09-04T18:48:16.783Z
 **Method**: TypeScript Compiler API AST extraction with deterministic name-matching cross-reference. Zero guesswork.
 
 ---
@@ -10,9 +10,9 @@
 | Metric | Count | Percentage |
 |:---|:---|:---|
 | **Total Legacy Symbols** (excl. vendor `supabase.min.js`) | **2,509** | 100% |
-| **PORTED** (matched in WXT by name + type) | **1,704** | **67.9%** |
-| **MISSING** (no WXT counterpart found) | **805** | **32.1%** |
-| **NEW_IN_WXT** (WXT-only, no legacy origin) | **691** | — |
+| **PORTED** (matched in WXT by name + type) | **1,706** | **68.0%** |
+| **MISSING** (no WXT counterpart found) | **803** | **32.0%** |
+| **NEW_IN_WXT** (WXT-only, no legacy origin) | **779** | — |
 
 ---
 
@@ -53,7 +53,7 @@
 | ✅ `sidepanel/modules/cloud-sync.js` | 2 | 2 | 0 | 100% |
 | ✅ `sidepanel/modules/dimension-view.js` | 4 | 4 | 0 | 100% |
 | ✅ `sidepanel/modules/persona-view.js` | 2 | 2 | 0 | 100% |
-| ❌ `sidepanel/sidepanel.js` | 965 | 511 | 454 | 53% |
+| ❌ `sidepanel/sidepanel.js` | 965 | 513 | 452 | 53% |
 | ✅ `storage/storage-repository.js` | 17 | 17 | 0 | 100% |
 | ❌ `supabase/supabase-client.js` | 64 | 58 | 6 | 91% |
 | ⚠️ `theme/theme-controller.js` | 32 | 31 | 1 | 97% |
@@ -64,7 +64,7 @@
 
 Every dropped symbol below has been verified through static AST analysis. Each entry represents an unexported local variable, an imperative DOM renderer, or a legacy build script whose function is superseded by the modular WXT architecture.
 
-### `sidepanel/sidepanel.js` (454 dropped symbols)
+### `sidepanel/sidepanel.js` (452 dropped symbols)
 
 | Symbol Name | Type | Line | Category | Architectural Disposition & WXT Replacement |
 |:---|:---|:---|:---|:---|
@@ -262,7 +262,6 @@ Every dropped symbol below has been verified through static AST analysis. Each e
 | `filterPanel` | variable | L3688 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `group` | variable | L3692 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `searchInput` | variable | L3706 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
-| `query` | variable | L3707 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `group` | variable | L3723 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `isSingleSelect` | variable | L3724 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `filterResetBtn` | variable | L3740 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
@@ -408,7 +407,6 @@ Every dropped symbol below has been verified through static AST analysis. Each e
 | `showPersonaDetailModal` | function | L5887 | `DOM_MODAL_UI_FN` | Imperative modal/dialog replaced by React state-driven components (ExpandModal / DiffViewer) |
 | `existingModal` | variable | L5888 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `importCount` | variable | L5894 | `ASYNC_CALC_TEMP` | Per-call calculation or async response temporary inside function scope; unexported |
-| `raterCount` | variable | L5896 | `ASYNC_CALC_TEMP` | Per-call calculation or async response temporary inside function scope; unexported |
 | `llmModel` | variable | L5898 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `handleImportPersona` | function | L5989 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
 | `loadMyPersonas` | function | L6051 | `LEGACY_HELPER_FN` | Replaced by modular pure TypeScript utility in src/core/ |
@@ -448,14 +446,12 @@ Every dropped symbol below has been verified through static AST analysis. Each e
 | `openSourcePromptViewer` | function | L6741 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
 | `viewer` | variable | L6742 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `textarea` | variable | L6743 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
-| `sourcePrompt` | variable | L6747 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `closeSourcePromptViewer` | function | L6777 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
 | `viewer` | variable | L6778 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `handleSourceViewerKeydown` | function | L6789 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
 | `viewer` | variable | L6791 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `_rebuildInProgress` | variable | L6804 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `handleRebuildFromSource` | function | L6829 | `UI_EVENT_HANDLER_FN` | Imperative event binding replaced by React event props and persona-lifecycle.ts |
-| `sourcePrompt` | variable | L6830 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `rebuildBtn` | variable | L6842 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `confirmed` | variable | L6896 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `preserved` | variable | L6909 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
@@ -494,6 +490,8 @@ Every dropped symbol below has been verified through static AST analysis. Each e
 | `levelFilter` | variable | L7688 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `exportBtn` | variable | L7689 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
 | `clearBtn` | variable | L7690 | `DOM_ELEMENT_REF` | Imperative DOM node reference replaced by React 19 JSX declarations & hooks |
+| `contentLogs` | variable | L7705 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
+| `bgLogs` | variable | L7706 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
 | `exportData` | variable | L7708 | `ASYNC_CALC_TEMP` | Per-call calculation or async response temporary inside function scope; unexported |
 | `renderLogsPage` | function | L7742 | `LEGACY_HELPER_FN` | Replaced by modular pure TypeScript utility in src/core/ |
 | `logViewer` | variable | L7743 | `LOCAL_FUNCTION_VAR` | Function-scoped intermediate variable replaced by modern TypeScript block scope |
@@ -1029,7 +1027,7 @@ Every dropped symbol below has been verified through static AST analysis. Each e
 
 Showing cross-reference for files with ported symbols.
 
-### `sidepanel/sidepanel.js` (511 ported)
+### `sidepanel/sidepanel.js` (513 ported)
 
 | Legacy Symbol | Type | L# | WXT Target File | WXT Symbol |
 |:---|:---|:---|:---|:---|
@@ -1053,7 +1051,7 @@ Showing cross-reference for files with ported symbols.
 | `showConfirmDialog` | function | L290 | `src/core/sidepanel/dialogs.ts` | `showConfirmDialog` |
 | `dialog` | variable | L292 | `src/core/sidepanel/dialogs.ts` | `dialog` |
 | `container` | variable | L314 | `src/content/split-view.ts` | `container` |
-| *(+ 491 more)* | | | | |
+| *(+ 493 more)* | | | | |
 
 ### `content/observer.js` (95 ported)
 
@@ -1351,6 +1349,48 @@ These symbols exist only in the WXT codebase — they are new TypeScript types, 
 | `src/core/logging/logger.ts` | `Logger.exportJson` | method | L381 |
 | `src/core/logging/logger.ts` | `rows` | variable | L391 |
 | `src/core/logging/logger.ts` | `logger` | variable | L429 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextViewProps` | interface | L6 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextViewProps.activePersona` | interface_prop | L7 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextViewProps.onUpdatePersona` | interface_prop | L8 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextViewProps.onRebuild` | interface_prop | L9 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextViewProps.isRebuilding` | interface_prop | L10 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextViewProps.lastUpdated` | interface_prop | L11 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextViewProps.onOpenExpand` | interface_prop | L12 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextViewProps.onOpenSourcePrompt` | interface_prop | L13 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextViewProps.onPinComponent` | interface_prop | L14 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `DIMENSION_DEFS` | constant | L17 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `ContextView` | function | L75 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `toggleExpand` | function | L111 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `toggleEnabled` | function | L115 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `handleTogglePin` | function | L120 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentDim` | variable | L123 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `nextPinned` | variable | L124 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `updated` | variable | L125 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `handleInstructionChange` | function | L139 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentDim` | variable | L141 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `shouldAutoPin` | variable | L142 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `updated` | variable | L143 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `handleMetadataChange` | function | L158 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentDim` | variable | L160 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentMeta` | variable | L161 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `updated` | variable | L162 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `handleAddCustomTag` | function | L175 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentDim` | variable | L178 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentList` | variable | L179 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `nextList` | variable | L180 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `handleRemoveCustomTag` | function | L185 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentDim` | variable | L187 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentList` | variable | L188 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `nextList` | variable | L189 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `handleToggleMultiSelect` | function | L193 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentDim` | variable | L195 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentList` | variable | L196 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `nextList` | variable | L197 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `currentDim` | variable | L236 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `isSelected` | variable | L320 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `isSelected` | variable | L381 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `isSelected` | variable | L442 |
+| `entrypoints/sidepanel/components/ContextView.tsx` | `isSelected` | variable | L556 |
 | `src/core/storage/repository.ts` | `IStorageBackend` | interface | L10 |
 | `src/core/storage/repository.ts` | `IStorageBackend.get` | interface_method | L11 |
 | `src/core/storage/repository.ts` | `IStorageBackend.set` | interface_method | L12 |
@@ -1425,79 +1465,37 @@ These symbols exist only in the WXT codebase — they are new TypeScript types, 
 | `src/core/model/model-registry.ts` | `StoredModelConfig.apiKey` | interface_prop | L47 |
 | `src/core/model/model-registry.ts` | `StoredModelConfig.baseURL` | interface_prop | L48 |
 | `src/core/model/model-registry.ts` | `MODEL_REGISTRY` | constant | L417 |
-| `src/core/llm/llm-client.ts` | `LLMErrorType` | enum | L60 |
-| `src/core/llm/llm-client.ts` | `LLMErrorType.RATE_LIMIT` | enum_member | L61 |
-| `src/core/llm/llm-client.ts` | `LLMErrorType.QUOTA_EXCEEDED` | enum_member | L62 |
-| `src/core/llm/llm-client.ts` | `LLMErrorType.NETWORK` | enum_member | L63 |
-| `src/core/llm/llm-client.ts` | `LLMErrorType.TOKEN_LIMIT` | enum_member | L64 |
-| `src/core/llm/llm-client.ts` | `LLMErrorType.AUTH` | enum_member | L65 |
-| `src/core/llm/llm-client.ts` | `LLMErrorType.MALFORMED_RESPONSE` | enum_member | L66 |
-| `src/core/llm/llm-client.ts` | `LLMErrorType.UNKNOWN` | enum_member | L67 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig` | interface | L70 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig.provider` | interface_prop | L71 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig.apiKey` | interface_prop | L72 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig.model` | interface_prop | L73 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig.temperature` | interface_prop | L74 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig.maxTokens` | interface_prop | L75 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig.json` | interface_prop | L76 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig.systemPrompt` | interface_prop | L77 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig.baseURL` | interface_prop | L78 |
-| `src/core/llm/llm-client.ts` | `LLMCallConfig.timeoutMs` | interface_prop | L79 |
-| `src/core/llm/llm-client.ts` | `LLMResponsePayload` | interface | L82 |
-| `src/core/llm/llm-client.ts` | `LLMResponsePayload.text` | interface_prop | L83 |
-| `src/core/llm/llm-client.ts` | `LLMResponsePayload.json` | interface_prop | L84 |
-| `src/core/llm/llm-client.ts` | `LLMResponsePayload.usage` | interface_prop | L85 |
-| `src/core/llm/llm-client.ts` | `LLMResponsePayload.durationMs` | interface_prop | L90 |
-| `src/core/llm/llm-client.ts` | `LLMResponsePayload.model` | interface_prop | L91 |
-| `src/core/llm/llm-client.ts` | `LLMResponsePayload.provider` | interface_prop | L92 |
-| `src/core/llm/llm-client.ts` | `LLMClient.temperature` | property | L99 |
-| `src/core/llm/llm-client.ts` | `LLMClient.maxTokens` | property | L100 |
-| `src/core/llm/llm-client.ts` | `LLMClient.baseURL` | property | L101 |
-| `src/core/llm/llm-client.ts` | `msg` | variable | L144 |
-| `src/core/llm/llm-client.ts` | `errType` | variable | L158 |
-| `src/core/llm/llm-client.ts` | `resultText` | variable | L304 |
-| `src/core/llm/llm-client.ts` | `durationMs` | variable | L305 |
-| `src/core/llm/llm-client.ts` | `parsedJson` | variable | L307 |
-| `src/core/llm/llm-client.ts` | `LLMConfigManager._modelManager` | property | L330 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate` | interface | L16 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate.id` | interface_prop | L17 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate.content` | interface_prop | L19 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PromptTemplate.category` | interface_prop | L20 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps` | interface | L23 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.personas` | interface_prop | L24 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.activeId` | interface_prop | L25 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onSelectActive` | interface_prop | L26 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onSavePersona` | interface_prop | L27 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onDeletePersona` | interface_prop | L28 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps` | interface | L22 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.personas` | interface_prop | L23 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.activeId` | interface_prop | L24 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onSelectActive` | interface_prop | L25 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onSavePersona` | interface_prop | L26 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onDeletePersona` | interface_prop | L27 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaViewProps.onReportPersona` | interface_prop | L28 |
 | `entrypoints/sidepanel/components/PersonaView.tsx` | `PersonaView` | function | L31 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `filteredList` | variable | L70 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `matchesSearch` | variable | L72 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `matchesDomain` | variable | L73 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleCreate` | function | L77 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `newPersona` | variable | L81 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleImportJson` | function | L99 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `file` | variable | L100 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleExportJson` | function | L116 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `p` | variable | L117 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleLoadStarterPresets` | function | L128 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `saved` | variable | L370 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `p` | variable | L429 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `editData` | variable | L431 |
-| `entrypoints/sidepanel/components/PersonaView.tsx` | `p` | variable | L444 |
-| `src/core/rating/rating-manager.ts` | `RatingData.rating` | interface_prop | L14 |
-| `src/core/rating/rating-manager.ts` | `RatingData.ratedAt` | interface_prop | L15 |
-| `src/core/rating/rating-manager.ts` | `RatingData.feedback` | interface_prop | L16 |
-| `src/core/rating/rating-manager.ts` | `RatingStats` | interface | L19 |
-| `src/core/rating/rating-manager.ts` | `RatingStats.averageRating` | interface_prop | L20 |
-| `src/core/rating/rating-manager.ts` | `RatingStats.totalRated` | interface_prop | L21 |
-| `src/core/rating/rating-manager.ts` | `RatingStats.distribution` | interface_prop | L22 |
-| `src/core/rating/rating-manager.ts` | `RatingManager._cache` | property | L36 |
-| `src/core/rating/rating-manager.ts` | `RatingManager.getSessionId` | method | L63 |
-| `src/core/rating/rating-manager.ts` | `RatingManager.getAverageRating` | method | L118 |
-| `src/core/rating/rating-manager.ts` | `sum` | variable | L121 |
-| `src/core/rating/rating-manager.ts` | `RatingManager.deleteRating` | method | L140 |
-| `src/core/rating/rating-manager.ts` | `distribution` | variable | L157 |
-| *(truncated — 491 more NEW_IN_WXT symbols)* | | | |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `filteredList` | variable | L86 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `matchesSearch` | variable | L88 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `matchesDomain` | variable | L89 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `filteredPrompts` | variable | L93 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleStartCreate` | function | L98 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleStartEdit` | function | L113 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `editData` | variable | L114 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `toneMeta` | variable | L118 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleCreate` | function | L129 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `newPersona` | variable | L133 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleAddTrait` | function | L176 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleRemoveTrait` | function | L182 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleImportJson` | function | L186 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `file` | variable | L187 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleImportPromptFile` | function | L203 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `file` | variable | L204 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `saved` | variable | L214 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `saved` | variable | L228 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `saved` | variable | L240 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleExportJson` | function | L254 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `p` | variable | L255 |
+| `entrypoints/sidepanel/components/PersonaView.tsx` | `handleLoadStarterPresets` | function | L266 |
+| *(truncated — 579 more NEW_IN_WXT symbols)* | | | |
 
 ---
 
