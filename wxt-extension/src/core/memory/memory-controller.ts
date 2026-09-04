@@ -1,3 +1,6 @@
+export function memCtrlLog(level: 'info' | 'warn' | 'error' | 'debug', msg: string, data?: any): void {
+  logger[level](`[MemoryController] ${msg}`, data);
+}
 /**
  * @fileoverview Complete Memory Controller - Session Memory & Lifecycle Management
  * Ported from memory/memory-controller.js (835 lines)

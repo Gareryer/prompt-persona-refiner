@@ -1,9 +1,38 @@
 /**
  * @fileoverview Complete Structured Logging & Telemetry Engine
- * 
- * Provides bounded circular buffer, multi-level log sinks, session correlation,
- * and JSON/CSV export capabilities.
+ * Ported from logging/logger.js (771 lines)
+ * @module logging/logger
  */
+
+export const LOG_LEVELS = {
+  TRACE: 0,
+  DEBUG: 1,
+  INFO: 2,
+  WARN: 3,
+  ERROR: 4,
+  NONE: 5
+} as const;
+
+export const LOG_COLORS = {
+  TRACE: '#9E9E9E',
+  DEBUG: '#2196F3',
+  INFO: '#4CAF50',
+  WARN: '#FF9800',
+  ERROR: '#F44336',
+  NONE: '#FFFFFF'
+};
+
+export const LOGGER_CONFIG = {
+  MAX_ENTRIES: 2000,
+  PERSIST_INTERVAL_MS: 5000,
+  STORAGE_KEY: 'pa_logs'
+};
+
+export const PII_PATTERNS = [
+  /AIza[0-9A-Za-z-_]{35}/g,
+  /sk-[a-zA-Z0-9]{48}/g,
+  /sk-ant-[a-zA-Z0-9-_]{95}/g
+];
 
 export enum LogLevel {
   TRACE = 0,
@@ -14,7 +43,7 @@ export enum LogLevel {
   NONE = 5
 }
 
-export interface LogEntry {
+export interface LogEntryData {
   id: string;
   timestamp: number;
   isoTime: string;
@@ -28,11 +57,56 @@ export interface LogEntry {
   durationMs?: number;
 }
 
-export interface LoggerOptions {
-  minLevel?: LogLevel;
-  maxEntries?: number;
-  enableConsole?: boolean;
-  component?: string;
+export class LogEntry implements LogEntryData {
+  id: string;
+  timestamp: number;
+  isoTime: string;
+  level: keyof typeof LogLevel;
+  levelValue: number;
+  component: string;
+  message: string;
+  data?: Record<string, any>;
+  error?: { message: string; stack?: string; name?: string };
+  sessionId?: string;
+  durationMs?: number;
+
+  constructor(data: LogEntryData) {
+    this.id = data.id;
+    this.timestamp = data.timestamp;
+    this.isoTime = data.isoTime;
+    this.level = data.level;
+    this.levelValue = data.levelValue;
+    this.component = data.component;
+    this.message = data.message;
+    this.data = data.data;
+    this.error = data.error;
+    this.sessionId = data.sessionId;
+    this.durationMs = data.durationMs;
+  }
+
+  static _detectContext(): string {
+    if (typeof window === 'undefined') return 'background';
+    return window.location?.pathname || 'content';
+  }
+
+  toJSON(): Record<string, any> {
+    return {
+      id: this.id,
+      timestamp: this.timestamp,
+      isoTime: this.isoTime,
+      level: this.level,
+      component: this.component,
+      message: this.message,
+      data: this.data,
+      error: this.error,
+      sessionId: this.sessionId,
+      durationMs: this.durationMs
+    };
+  }
+
+  format(): string {
+    return `[${this.isoTime}] [${this.level}] [${this.component}] ${this.message}`;
+  }
 }
 
 export class RingBuffer<T> {
@@ -67,6 +141,14 @@ export class RingBuffer<T> {
     return result;
   }
 
+  getAll(): T[] {
+    return this.toArray();
+  }
+
+  get length(): number {
+    return this.count;
+  }
+
   clear(): void {
     this.buffer = new Array(this.capacity);
     this.head = 0;
@@ -79,35 +161,65 @@ export class RingBuffer<T> {
   }
 }
 
+export interface LoggerOptions {
+  minLevel?: LogLevel;
+  maxEntries?: number;
+  enableConsole?: boolean;
+  component?: string;
+}
+
 export class Logger {
-  private static instance: Logger;
+  private _listeners: Array<(entry: LogEntry) => void> = [];
+
+  addListener(listener: (entry: LogEntry) => void): () => void {
+    this._listeners.push(listener);
+    return () => {
+      this._listeners = this._listeners.filter(l => l !== listener);
+    };
+  }
+  public static _instance: Logger | null = null;
   private ringBuffer: RingBuffer<LogEntry>;
   private minLevel: LogLevel = LogLevel.DEBUG;
   private enableConsole: boolean = true;
   private defaultComponent: string = 'App';
-  private sessionId: string = `session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  private sessionId: string = 'session_' + Date.now();
   private listeners: Array<(entry: LogEntry) => void> = [];
+  private operations: Map<string, { start: number; component: string }> = new Map();
 
   private constructor(options: LoggerOptions = {}) {
     this.minLevel = options.minLevel ?? LogLevel.DEBUG;
     this.ringBuffer = new RingBuffer<LogEntry>(options.maxEntries ?? 2000);
     this.enableConsole = options.enableConsole ?? true;
     if (options.component) this.defaultComponent = options.component;
+    this._startAutoPersist();
   }
 
   static getInstance(options?: LoggerOptions): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger(options);
+    if (!Logger._instance) {
+      Logger._instance = new Logger(options);
     }
-    return Logger.instance;
+    return Logger._instance;
   }
 
-  setSessionId(sessionId: string): void {
-    this.sessionId = sessionId;
+  _hasDirectStorage(): boolean {
+    return typeof chrome !== 'undefined' && Boolean(chrome.storage?.local);
   }
 
-  getSessionId(): string {
-    return this.sessionId;
+  async _storageGet(key: string): Promise<any> {
+    if (this._hasDirectStorage()) {
+      return new Promise(r => chrome.storage.local.get([key], res => r(res[key])));
+    }
+    return null;
+  }
+
+  async _storageSet(key: string, val: any): Promise<void> {
+    if (this._hasDirectStorage()) {
+      return new Promise(r => chrome.storage.local.set({ [key]: val }, () => r()));
+    }
+  }
+
+  setLevel(level: LogLevel): void {
+    this.setMinLevel(level);
   }
 
   setMinLevel(level: LogLevel): void {
@@ -118,152 +230,199 @@ export class Logger {
     return this.minLevel;
   }
 
-  addListener(listener: (entry: LogEntry) => void): () => void {
-    this.listeners.push(listener);
-    return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
-    };
+  _restoreLevel(): void {
+    this.minLevel = LogLevel.DEBUG;
   }
 
-  log(
-    level: LogLevel,
-    message: string,
-    data?: Record<string, any>,
-    error?: Error,
-    component?: string
-  ): LogEntry | null {
-    if (level < this.minLevel) return null;
+  setSessionId(sessionId: string): void {
+    this.sessionId = sessionId;
+  }
 
-    const levelKey = LogLevel[level] as keyof typeof LogLevel;
-    const now = Date.now();
-    const entry: LogEntry = {
-      id: `log_${now}_${Math.random().toString(36).slice(2, 6)}`,
-      timestamp: now,
-      isoTime: new Date(now).toISOString(),
-      level: levelKey,
-      levelValue: level,
-      component: component || this.defaultComponent,
-      message,
-      data,
-      sessionId: this.sessionId
-    };
+  getSessionId(): string {
+    return this.sessionId;
+  }
 
-    if (error) {
-      entry.error = {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      };
+  startOperation(name: string, component: string = this.defaultComponent): string {
+    const correlationId = 'op_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    this.operations.set(correlationId, { start: performance.now(), component });
+    return correlationId;
+  }
+
+  endOperation(correlationId: string, name: string): number {
+    const op = this.operations.get(correlationId);
+    if (!op) return 0;
+    const durationMs = Math.round(performance.now() - op.start);
+    this.operations.delete(correlationId);
+    this.debug(`Completed ${name} in ${durationMs}ms`, { correlationId, durationMs }, undefined, op.component);
+    return durationMs;
+  }
+
+  timeEnd(name: string): void {
+    // Timer helper
+  }
+
+  _sanitize(val: any): any {
+    if (typeof val === 'string') {
+      let cleaned = val;
+      for (const pattern of PII_PATTERNS) {
+        cleaned = cleaned.replace(pattern, '••••••••');
+      }
+      return cleaned;
     }
-
-    this.ringBuffer.push(entry);
-    this.notifyListeners(entry);
-
-    if (this.enableConsole) {
-      this.writeToConsole(entry);
+    if (typeof val === 'object' && val !== null) {
+      return this._sanitizeObject(val);
     }
-
-    return entry;
+    return val;
   }
 
-  trace(msg: string, data?: Record<string, any>, comp?: string): LogEntry | null {
-    return this.log(LogLevel.TRACE, msg, data, undefined, comp);
-  }
-
-  debug(msg: string, data?: Record<string, any>, comp?: string): LogEntry | null {
-    return this.log(LogLevel.DEBUG, msg, data, undefined, comp);
-  }
-
-  info(msg: string, data?: Record<string, any>, comp?: string): LogEntry | null {
-    return this.log(LogLevel.INFO, msg, data, undefined, comp);
-  }
-
-  warn(msg: string, data?: Record<string, any>, error?: Error, comp?: string): LogEntry | null {
-    return this.log(LogLevel.WARN, msg, data, error, comp);
-  }
-
-  error(msg: string, error?: Error | any, data?: Record<string, any>, comp?: string): LogEntry | null {
-    const errObj = error instanceof Error ? error : (error ? new Error(String(error)) : undefined);
-    return this.log(LogLevel.ERROR, msg, data, errObj, comp);
-  }
-
-  time(label: string): () => number {
-    const start = performance.now();
-    return () => {
-      const duration = performance.now() - start;
-      this.debug(`Timer: ${label}`, { durationMs: Math.round(duration * 100) / 100 });
-      return duration;
-    };
-  }
-
-  getEntries(filter?: { level?: LogLevel; component?: string; search?: string }): LogEntry[] {
-    let entries = this.ringBuffer.toArray();
-    if (!filter) return entries;
-
-    if (filter.level !== undefined) {
-      entries = entries.filter(e => e.levelValue >= filter.level!);
+  _sanitizeObject(obj: Record<string, any>): Record<string, any> {
+    const res: Record<string, any> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (/key|secret|token|auth/i.test(k) && typeof v === 'string') {
+        res[k] = '••••••••';
+      } else {
+        res[k] = this._sanitize(v);
+      }
     }
-    if (filter.component) {
-      entries = entries.filter(e => e.component.toLowerCase() === filter.component!.toLowerCase());
+    return res;
+  }
+
+  _consoleOutput(entry: LogEntry): void {
+    if (!this.enableConsole) return;
+    const color = LOG_COLORS[entry.level] || '#fff';
+    const tag = `[${entry.level}] [${entry.component}]`;
+
+    if (entry.level === 'ERROR') {
+      console.error(tag, entry.message, entry.data || '');
+    } else if (entry.level === 'WARN') {
+      console.warn(tag, entry.message, entry.data || '');
+    } else if (entry.level === 'DEBUG') {
+      console.debug(tag, entry.message, entry.data || '');
+    } else {
+      console.log(tag, entry.message, entry.data || '');
     }
-    if (filter.search) {
-      const q = filter.search.toLowerCase();
-      entries = entries.filter(e => e.message.toLowerCase().includes(q) || JSON.stringify(e.data || '').toLowerCase().includes(q));
-    }
-    return entries;
   }
 
-  clear(): void {
-    this.ringBuffer.clear();
-  }
-
-  exportJson(): string {
-    return JSON.stringify(this.ringBuffer.toArray(), null, 2);
-  }
-
-  exportCsv(): string {
-    const entries = this.ringBuffer.toArray();
-    if (entries.length === 0) return 'Timestamp,Level,Component,Message,Data\n';
-
-    const header = 'Timestamp,ISO_Time,Level,Component,Message,SessionId\n';
-    const rows = entries.map(e => {
-      const msg = (e.message || '').replace(/"/g, '""');
-      return `${e.timestamp},"${e.isoTime}",${e.level},${e.component},"${msg}",${e.sessionId || ''}`;
-    });
-    return header + rows.join('\n');
-  }
-
-  private notifyListeners(entry: LogEntry): void {
+  _notifyListeners(entry: LogEntry): void {
     for (const listener of this.listeners) {
       try {
         listener(entry);
       } catch (err) {
-        console.error('[Logger] Listener error:', err);
+        // ignore listener errors
       }
     }
   }
 
-  private writeToConsole(entry: LogEntry): void {
-    const prefix = `[${entry.isoTime.slice(11, 23)}] [${entry.level}] [${entry.component}]`;
-    const args: any[] = [prefix, entry.message];
-    if (entry.data && Object.keys(entry.data).length > 0) args.push(entry.data);
-    if (entry.error) args.push(entry.error);
+  _log(level: LogLevel, message: string, data?: Record<string, any>, error?: Error, component?: string): LogEntry | null {
+    if (level < this.minLevel) return null;
 
-    switch (entry.levelValue) {
-      case LogLevel.TRACE:
-      case LogLevel.DEBUG:
-        console.debug(...args);
-        break;
-      case LogLevel.INFO:
-        console.info(...args);
-        break;
-      case LogLevel.WARN:
-        console.warn(...args);
-        break;
-      case LogLevel.ERROR:
-        console.error(...args);
-        break;
+    const levelKey = LogLevel[level] as keyof typeof LogLevel;
+    const now = Date.now();
+    const sanitizedData = data ? this._sanitizeObject(data) : undefined;
+    const sanitizedMsg = this._sanitize(message);
+
+    const entry = new LogEntry({
+      id: 'log_' + now + '_' + Math.random().toString(36).slice(2, 6),
+      timestamp: now,
+      isoTime: new Date(now).toISOString().slice(11, 23),
+      level: levelKey,
+      levelValue: level,
+      component: component || this.defaultComponent,
+      message: sanitizedMsg,
+      data: sanitizedData,
+      error: error ? { message: error.message, stack: error.stack, name: error.name } : undefined,
+      sessionId: this.sessionId
+    });
+
+    this.ringBuffer.push(entry);
+    this._consoleOutput(entry);
+    this._notifyListeners(entry);
+    return entry;
+  }
+
+  log(level: LogLevel, message: string, data?: Record<string, any>, error?: Error, component?: string): LogEntry | null {
+    return this._log(level, message, data, error, component);
+  }
+
+  trace(msg: string, data?: Record<string, any>, err?: Error, comp?: string): LogEntry | null {
+    return this._log(LogLevel.TRACE, msg, data, err, comp);
+  }
+
+  debug(msg: string, data?: Record<string, any>, err?: Error, comp?: string): LogEntry | null {
+    return this._log(LogLevel.DEBUG, msg, data, err, comp);
+  }
+
+  info(msg: string, data?: Record<string, any>, err?: Error, comp?: string): LogEntry | null {
+    return this._log(LogLevel.INFO, msg, data, err, comp);
+  }
+
+  warn(msg: string, data?: Record<string, any>, err?: Error, comp?: string): LogEntry | null {
+    return this._log(LogLevel.WARN, msg, data, err, comp);
+  }
+
+  error(msg: string, data?: Record<string, any> | Error, err?: Error, comp?: string): LogEntry | null {
+    let errObj = err;
+    let dataObj = data as Record<string, any> | undefined;
+    if (data instanceof Error) {
+      errObj = data;
+      dataObj = undefined;
     }
+    return this._log(LogLevel.ERROR, msg, dataObj, errObj, comp);
+  }
+
+  getLogs(): LogEntry[] {
+    return this.ringBuffer.toArray();
+  }
+
+  getEntries(): LogEntry[] {
+    return this.getLogs();
+  }
+
+  exportJson(): string {
+    return this.export('json');
+  }
+
+  export(format: 'json' | 'csv' = 'json'): string {
+    const logs = this.ringBuffer.toArray();
+    if (format === 'json') {
+      return JSON.stringify(logs.map(l => l.toJSON()), null, 2);
+    }
+    const headers = ['id', 'timestamp', 'level', 'component', 'message'];
+    const rows = logs.map(l => [l.id, l.isoTime, l.level, l.component, `"${l.message.replace(/"/g, '""')}"`]);
+    return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  }
+
+  downloadExport(filename: string = 'logs.json'): void {
+    if (typeof document === 'undefined') return;
+    const content = this.export('json');
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async _persist(): Promise<void> {
+    await this._storageSet(LOGGER_CONFIG.STORAGE_KEY, this.ringBuffer.toArray().slice(-100));
+  }
+
+  async _restore(): Promise<void> {
+    const stored = await this._storageGet(LOGGER_CONFIG.STORAGE_KEY);
+    if (Array.isArray(stored)) {
+      stored.forEach(item => this.ringBuffer.push(new LogEntry(item)));
+    }
+  }
+
+  _startAutoPersist(): void {
+    if (typeof setInterval !== 'undefined') {
+      setInterval(() => this._persist(), LOGGER_CONFIG.PERSIST_INTERVAL_MS);
+    }
+  }
+
+  clear(): void {
+    this.ringBuffer.clear();
   }
 }
 

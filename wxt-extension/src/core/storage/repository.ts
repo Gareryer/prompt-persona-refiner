@@ -101,7 +101,100 @@ export class ExtensionStorageBackend implements IStorageBackend {
 /**
  * Main Persona & Settings Storage Repository
  */
+/**
+ * StoragePartition for multi-area browser storage operations.
+ * Ported from legacy storage/storage-repository.js
+ */
+export class StoragePartition {
+  constructor(public areaName: 'local' | 'session' | 'sync') {}
+
+  private get _area(): chrome.storage.StorageArea | null {
+    if (typeof chrome !== 'undefined' && chrome.storage && (chrome.storage as any)[this.areaName]) {
+      return (chrome.storage as any)[this.areaName];
+    }
+    return null;
+  }
+
+  async get<T = any>(key: string, defaultValue: T | null = null): Promise<T | null> {
+    if (!key || typeof key !== 'string') return defaultValue;
+    const area = this._area;
+    if (!area) return defaultValue;
+    return new Promise((resolve) => {
+      area.get(key, (result) => {
+        if (chrome.runtime.lastError || !result || result[key] === undefined) {
+          resolve(defaultValue);
+        } else {
+          resolve(result[key]);
+        }
+      });
+    });
+  }
+
+  async getMultiple(keys: string[]): Promise<Record<string, any>> {
+    if (!Array.isArray(keys) || keys.length === 0) return {};
+    const area = this._area;
+    if (!area) return {};
+    return new Promise((resolve) => {
+      area.get(keys, (result) => {
+        if (chrome.runtime.lastError || !result) {
+          resolve({});
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  async set(key: string, value: any): Promise<boolean> {
+    if (!key || typeof key !== 'string') return false;
+    const area = this._area;
+    if (!area) return false;
+    return new Promise((resolve) => {
+      area.set({ [key]: value }, () => {
+        resolve(!chrome.runtime.lastError);
+      });
+    });
+  }
+
+  async setMultiple(items: Record<string, any>): Promise<boolean> {
+    if (!items || typeof items !== 'object') return false;
+    const area = this._area;
+    if (!area) return false;
+    return new Promise((resolve) => {
+      area.set(items, () => {
+        resolve(!chrome.runtime.lastError);
+      });
+    });
+  }
+
+  async remove(keys: string | string[]): Promise<boolean> {
+    const area = this._area;
+    if (!area) return false;
+    return new Promise((resolve) => {
+      area.remove(keys as any, () => {
+        resolve(!chrome.runtime.lastError);
+      });
+    });
+  }
+
+  async clear(): Promise<boolean> {
+    const area = this._area;
+    if (!area) return false;
+    return new Promise((resolve) => {
+      area.clear(() => {
+        resolve(!chrome.runtime.lastError);
+      });
+    });
+  }
+}
+
+
+
+
 export class StorageRepository {
+  public static readonly local = new StoragePartition('local');
+  public static readonly session = new StoragePartition('session');
+  public static readonly sync = new StoragePartition('sync');
   constructor(private backend: IStorageBackend = new ExtensionStorageBackend()) {}
 
   // Personas CRUD
@@ -184,3 +277,5 @@ export class StorageRepository {
     return this.backend.set('sync_queue', []);
   }
 }
+
+

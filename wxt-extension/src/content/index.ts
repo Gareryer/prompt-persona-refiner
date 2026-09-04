@@ -8,3 +8,5 @@ export * from './split-view';
 export * from './context-invalidator';
 export * from './templates';
 export * from './observer';
+
+export * from './scraper';

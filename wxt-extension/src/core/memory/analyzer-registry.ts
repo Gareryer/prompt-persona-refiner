@@ -1,3 +1,6 @@
+export function arLog(level: 'info' | 'warn' | 'error' | 'debug', msg: string, data?: any): void {
+  logger[level](`[AnalyzerRegistry] ${msg}`, data);
+}
 /**
  * @fileoverview Analyzer Registry - LLM-Based Analyzer Management System
  * Ported from memory/analyzer-registry.js (292 lines)

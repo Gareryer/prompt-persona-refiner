@@ -1,3 +1,6 @@
+export function ctxLog(level: 'info' | 'warn' | 'error' | 'debug', msg: string, data?: any): void {
+  logger[level](`[ContextAssembler] ${msg}`, data);
+}
 /**
  * @fileoverview Complete Context Assembler v4 - Unified Context Builder
  * Ported from memory/context-assembler.js (576 lines)

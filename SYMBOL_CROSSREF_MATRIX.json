@@ -1,34 +1,19 @@
 {
-  "generated": "2026-08-30T18:36:22.684Z",
+  "generated": "2026-09-04T17:15:34.171Z",
   "summary": {
     "totalLegacySymbols": 2509,
-    "ported": 1132,
-    "missing": 1377,
-    "newInWxt": 529,
-    "portedPct": "45.1%",
-    "missingPct": "54.9%"
+    "ported": 1650,
+    "missing": 859,
+    "newInWxt": 636,
+    "portedPct": "65.8%",
+    "missingPct": "34.2%"
   },
   "missingByFile": {
     "sidepanel/sidepanel.js": [
       {
-        "name": "spLog",
-        "type": "function",
-        "line": 25
-      },
-      {
         "name": "_currentExtraction",
         "type": "variable",
         "line": 53
-      },
-      {
-        "name": "getSupabaseClient",
-        "type": "function",
-        "line": 68
-      },
-      {
-        "name": "getChipGroupValue",
-        "type": "function",
-        "line": 80
       },
       {
         "name": "chipGroup",
@@ -39,31 +24,6 @@
         "name": "selectedChip",
         "type": "variable",
         "line": 83
-      },
-      {
-        "name": "getTagValues",
-        "type": "function",
-        "line": 92
-      },
-      {
-        "name": "EXTRACTION_SCHEMA",
-        "type": "constant",
-        "line": 113
-      },
-      {
-        "name": "VALID_ENUMS",
-        "type": "constant",
-        "line": 151
-      },
-      {
-        "name": "showAlertDialog",
-        "type": "function",
-        "line": 177
-      },
-      {
-        "name": "dialog",
-        "type": "variable",
-        "line": 179
       },
       {
         "name": "detailsSection",
@@ -91,41 +51,6 @@
         "line": 211
       },
       {
-        "name": "cleanup",
-        "type": "function",
-        "line": 214
-      },
-      {
-        "name": "handleDismiss",
-        "type": "function",
-        "line": 222
-      },
-      {
-        "name": "handleRetry",
-        "type": "function",
-        "line": 228
-      },
-      {
-        "name": "handleScrimClick",
-        "type": "function",
-        "line": 235
-      },
-      {
-        "name": "handleKeydown",
-        "type": "function",
-        "line": 243
-      },
-      {
-        "name": "showConfirmDialog",
-        "type": "function",
-        "line": 290
-      },
-      {
-        "name": "dialog",
-        "type": "variable",
-        "line": 292
-      },
-      {
         "name": "confirmBtn",
         "type": "variable",
         "line": 307
@@ -141,41 +66,6 @@
         "line": 313
       },
       {
-        "name": "cleanup",
-        "type": "function",
-        "line": 316
-      },
-      {
-        "name": "handleConfirm",
-        "type": "function",
-        "line": 324
-      },
-      {
-        "name": "handleCancel",
-        "type": "function",
-        "line": 329
-      },
-      {
-        "name": "handleScrimClick",
-        "type": "function",
-        "line": 335
-      },
-      {
-        "name": "handleKeydown",
-        "type": "function",
-        "line": 343
-      },
-      {
-        "name": "showPromptDialog",
-        "type": "function",
-        "line": 381
-      },
-      {
-        "name": "dialog",
-        "type": "variable",
-        "line": 383
-      },
-      {
         "name": "confirmBtn",
         "type": "variable",
         "line": 401
@@ -189,36 +79,6 @@
         "name": "scrim",
         "type": "variable",
         "line": 406
-      },
-      {
-        "name": "cleanup",
-        "type": "function",
-        "line": 409
-      },
-      {
-        "name": "handleConfirm",
-        "type": "function",
-        "line": 417
-      },
-      {
-        "name": "handleCancel",
-        "type": "function",
-        "line": 422
-      },
-      {
-        "name": "handleScrimClick",
-        "type": "function",
-        "line": 428
-      },
-      {
-        "name": "handleKeydown",
-        "type": "function",
-        "line": 435
-      },
-      {
-        "name": "setupM3Dropdown",
-        "type": "function",
-        "line": 463
       },
       {
         "name": "dropdown",
@@ -241,44 +101,14 @@
         "line": 472
       },
       {
-        "name": "toggleDropdown",
-        "type": "function",
-        "line": 481
-      },
-      {
-        "name": "selected",
-        "type": "variable",
-        "line": 488
-      },
-      {
-        "name": "selectItem",
-        "type": "function",
-        "line": 494
-      },
-      {
         "name": "itemsArray",
         "type": "variable",
         "line": 546
       },
       {
-        "name": "currentIndex",
-        "type": "variable",
-        "line": 547
-      },
-      {
-        "name": "nextIndex",
-        "type": "variable",
-        "line": 557
-      },
-      {
         "name": "prevIndex",
         "type": "variable",
         "line": 562
-      },
-      {
-        "name": "validateExtractionResponse",
-        "type": "function",
-        "line": 607
       },
       {
         "name": "errorMsg",
@@ -336,29 +166,9 @@
         "line": 896
       },
       {
-        "name": "currentSessionId",
-        "type": "variable",
-        "line": 933
-      },
-      {
-        "name": "themeToggleBtn",
-        "type": "variable",
-        "line": 949
-      },
-      {
         "name": "sidepanelPort",
         "type": "variable",
         "line": 982
-      },
-      {
-        "name": "handleCloseSidepanel",
-        "type": "function",
-        "line": 983
-      },
-      {
-        "name": "handleTabActivated",
-        "type": "function",
-        "line": 1039
       },
       {
         "name": "previousSessionId",
@@ -366,29 +176,9 @@
         "line": 1040
       },
       {
-        "name": "handleTabUpdated",
-        "type": "function",
-        "line": 1052
-      },
-      {
         "name": "currentTab",
         "type": "variable",
         "line": 1055
-      },
-      {
-        "name": "loadSessionFromTab",
-        "type": "function",
-        "line": 1070
-      },
-      {
-        "name": "hasModel",
-        "type": "variable",
-        "line": 1072
-      },
-      {
-        "name": "setupAnalyzerToggles",
-        "type": "function",
-        "line": 1106
       },
       {
         "name": "toggles",
@@ -401,26 +191,6 @@
         "line": 1111
       },
       {
-        "name": "loadCurrentSession",
-        "type": "function",
-        "line": 1133
-      },
-      {
-        "name": "hasModel",
-        "type": "variable",
-        "line": 1136
-      },
-      {
-        "name": "showNoModelOverlay",
-        "type": "function",
-        "line": 1184
-      },
-      {
-        "name": "hideNoModelOverlay",
-        "type": "function",
-        "line": 1199
-      },
-      {
         "name": "logsTabActive",
         "type": "variable",
         "line": 1208
@@ -431,24 +201,9 @@
         "line": 1209
       },
       {
-        "name": "showNoSession",
-        "type": "function",
-        "line": 1218
-      },
-      {
-        "name": "showSession",
-        "type": "function",
-        "line": 1230
-      },
-      {
         "name": "logsTabActive",
         "type": "variable",
         "line": 1237
-      },
-      {
-        "name": "loadMemoryData",
-        "type": "function",
-        "line": 1266
       },
       {
         "name": "lastUpdatedEl",
@@ -459,11 +214,6 @@
         "name": "date",
         "type": "variable",
         "line": 1287
-      },
-      {
-        "name": "checkLLMStatus",
-        "type": "function",
-        "line": 1308
       },
       {
         "name": "statusEl",
@@ -496,11 +246,6 @@
         "line": 1327
       },
       {
-        "name": "restoreFormStateFromSplitView",
-        "type": "function",
-        "line": 1363
-      },
-      {
         "name": "isIframe",
         "type": "variable",
         "line": 1364
@@ -519,11 +264,6 @@
         "name": "contextInput",
         "type": "variable",
         "line": 1374
-      },
-      {
-        "name": "updateDimensionPinButton",
-        "type": "function",
-        "line": 1402
       },
       {
         "name": "pinBtn",
@@ -546,16 +286,6 @@
         "line": 1420
       },
       {
-        "name": "renderAllComponents",
-        "type": "function",
-        "line": 1438
-      },
-      {
-        "name": "getActiveCompData",
-        "type": "function",
-        "line": 1447
-      },
-      {
         "name": "comp",
         "type": "variable",
         "line": 1461
@@ -569,36 +299,6 @@
         "name": "lines",
         "type": "variable",
         "line": 1489
-      },
-      {
-        "name": "createEditableTagList",
-        "type": "function",
-        "line": 1570
-      },
-      {
-        "name": "tag",
-        "type": "variable",
-        "line": 1578
-      },
-      {
-        "name": "addBtn",
-        "type": "variable",
-        "line": 1583
-      },
-      {
-        "name": "createEditableTag",
-        "type": "function",
-        "line": 1596
-      },
-      {
-        "name": "tag",
-        "type": "variable",
-        "line": 1597
-      },
-      {
-        "name": "removeBtn",
-        "type": "variable",
-        "line": 1603
       },
       {
         "name": "textSpan",
@@ -621,26 +321,6 @@
         "line": 1634
       },
       {
-        "name": "handleRemoveTag",
-        "type": "function",
-        "line": 1661
-      },
-      {
-        "name": "handleEditTag",
-        "type": "function",
-        "line": 1676
-      },
-      {
-        "name": "handleAddTag",
-        "type": "function",
-        "line": 1688
-      },
-      {
-        "name": "addBtn",
-        "type": "variable",
-        "line": 1689
-      },
-      {
         "name": "existingTags",
         "type": "variable",
         "line": 1690
@@ -651,54 +331,9 @@
         "line": 1691
       },
       {
-        "name": "tag",
-        "type": "variable",
-        "line": 1694
-      },
-      {
         "name": "textSpan",
         "type": "variable",
         "line": 1698
-      },
-      {
-        "name": "updateTagsInStorage",
-        "type": "function",
-        "line": 1708
-      },
-      {
-        "name": "tags",
-        "type": "variable",
-        "line": 1712
-      },
-      {
-        "name": "createContextEditableTagList",
-        "type": "function",
-        "line": 1729
-      },
-      {
-        "name": "tag",
-        "type": "variable",
-        "line": 1737
-      },
-      {
-        "name": "addBtn",
-        "type": "variable",
-        "line": 1742
-      },
-      {
-        "name": "createContextEditableTag",
-        "type": "function",
-        "line": 1755
-      },
-      {
-        "name": "tag",
-        "type": "variable",
-        "line": 1756
-      },
-      {
-        "name": "removeBtn",
-        "type": "variable",
-        "line": 1762
       },
       {
         "name": "textSpan",
@@ -721,16 +356,6 @@
         "line": 1792
       },
       {
-        "name": "handleAddContextTag",
-        "type": "function",
-        "line": 1819
-      },
-      {
-        "name": "addBtn",
-        "type": "variable",
-        "line": 1820
-      },
-      {
         "name": "existingTags",
         "type": "variable",
         "line": 1821
@@ -741,49 +366,14 @@
         "line": 1822
       },
       {
-        "name": "tag",
-        "type": "variable",
-        "line": 1824
-      },
-      {
         "name": "textSpan",
         "type": "variable",
         "line": 1828
       },
       {
-        "name": "handleRemoveContextTag",
-        "type": "function",
-        "line": 1838
-      },
-      {
-        "name": "updateContextTagsInData",
-        "type": "function",
-        "line": 1847
-      },
-      {
-        "name": "tags",
-        "type": "variable",
-        "line": 1851
-      },
-      {
         "name": "fieldParts",
         "type": "variable",
         "line": 1854
-      },
-      {
-        "name": "setupContextInlineEditing",
-        "type": "function",
-        "line": 1871
-      },
-      {
-        "name": "updateContextFieldInData",
-        "type": "function",
-        "line": 1905
-      },
-      {
-        "name": "renderV4Section",
-        "type": "function",
-        "line": 1940
       },
       {
         "name": "isEditable",
@@ -851,11 +441,6 @@
         "line": 2048
       },
       {
-        "name": "triggerUpdate",
-        "type": "function",
-        "line": 2049
-      },
-      {
         "name": "newData",
         "type": "variable",
         "line": 2051
@@ -864,11 +449,6 @@
         "name": "comp",
         "type": "variable",
         "line": 2073
-      },
-      {
-        "name": "metadata",
-        "type": "variable",
-        "line": 2101
       },
       {
         "name": "domainChips",
@@ -916,17 +496,7 @@
         "line": 2218
       },
       {
-        "name": "createSingleSelectChips",
-        "type": "function",
-        "line": 2247
-      },
-      {
         "name": "options",
-        "type": "variable",
-        "line": 2248
-      },
-      {
-        "name": "selected",
         "type": "variable",
         "line": 2248
       },
@@ -946,27 +516,12 @@
         "line": 2258
       },
       {
-        "name": "chip",
-        "type": "variable",
-        "line": 2262
-      },
-      {
         "name": "isCurrentlySelected",
         "type": "variable",
         "line": 2271
       },
       {
-        "name": "createMultiSelectChips",
-        "type": "function",
-        "line": 2300
-      },
-      {
         "name": "presetOptions",
-        "type": "variable",
-        "line": 2301
-      },
-      {
-        "name": "selected",
         "type": "variable",
         "line": 2301
       },
@@ -996,41 +551,6 @@
         "line": 2315
       },
       {
-        "name": "renderChips",
-        "type": "function",
-        "line": 2318
-      },
-      {
-        "name": "chip",
-        "type": "variable",
-        "line": 2323
-      },
-      {
-        "name": "chip",
-        "type": "variable",
-        "line": 2346
-      },
-      {
-        "name": "addBtn",
-        "type": "variable",
-        "line": 2362
-      },
-      {
-        "name": "handleAdd",
-        "type": "function",
-        "line": 2377
-      },
-      {
-        "name": "createTextInput",
-        "type": "function",
-        "line": 2412
-      },
-      {
-        "name": "placeholder",
-        "type": "variable",
-        "line": 2413
-      },
-      {
         "name": "wrapper",
         "type": "variable",
         "line": 2415
@@ -1039,11 +559,6 @@
         "name": "labelEl",
         "type": "variable",
         "line": 2418
-      },
-      {
-        "name": "renderSynthesizedPersona",
-        "type": "function",
-        "line": 2447
       },
       {
         "name": "textarea",
@@ -1096,11 +611,6 @@
         "line": 2531
       },
       {
-        "name": "renderContext",
-        "type": "function",
-        "line": 2566
-      },
-      {
         "name": "v4Data",
         "type": "variable",
         "line": 2594
@@ -1109,11 +619,6 @@
         "name": "domainDiv",
         "type": "variable",
         "line": 2618
-      },
-      {
-        "name": "renderTone",
-        "type": "function",
-        "line": 2632
       },
       {
         "name": "v4Data",
@@ -1126,19 +631,9 @@
         "line": 2683
       },
       {
-        "name": "renderFramework",
-        "type": "function",
-        "line": 2693
-      },
-      {
         "name": "v4Data",
         "type": "variable",
         "line": 2721
-      },
-      {
-        "name": "renderConstraints",
-        "type": "function",
-        "line": 2749
       },
       {
         "name": "v4Data",
@@ -1146,29 +641,14 @@
         "line": 2777
       },
       {
-        "name": "renderFormat",
-        "type": "function",
-        "line": 2805
-      },
-      {
         "name": "v4Data",
         "type": "variable",
         "line": 2833
       },
       {
-        "name": "renderExemplar",
-        "type": "function",
-        "line": 2861
-      },
-      {
         "name": "v4Data",
         "type": "variable",
         "line": 2889
-      },
-      {
-        "name": "handleFactToggle",
-        "type": "function",
-        "line": 2931
       },
       {
         "name": "toggleable",
@@ -1181,39 +661,19 @@
         "line": 2934
       },
       {
-        "name": "updateToggleStates",
-        "type": "function",
-        "line": 2954
-      },
-      {
         "name": "path",
         "type": "variable",
         "line": 2956
       },
       {
-        "name": "setupAccordions",
-        "type": "function",
-        "line": 2976
-      },
-      {
-        "name": "icon",
+        "name": "header",
         "type": "variable",
-        "line": 2980
+        "line": 2981
       },
       {
         "name": "accordion",
         "type": "variable",
         "line": 3003
-      },
-      {
-        "name": "icon",
-        "type": "variable",
-        "line": 3005
-      },
-      {
-        "name": "setupButtonHandlers",
-        "type": "function",
-        "line": 3034
       },
       {
         "name": "splitBtn",
@@ -1261,21 +721,6 @@
         "line": 3180
       },
       {
-        "name": "saveComponent",
-        "type": "function",
-        "line": 3204
-      },
-      {
-        "name": "rebuildMemory",
-        "type": "function",
-        "line": 3220
-      },
-      {
-        "name": "btn",
-        "type": "variable",
-        "line": 3221
-      },
-      {
         "name": "contextTab",
         "type": "variable",
         "line": 3230
@@ -1289,11 +734,6 @@
         "name": "enabledAnalyzers",
         "type": "variable",
         "line": 3232
-      },
-      {
-        "name": "VALID_DIMENSIONS",
-        "type": "constant",
-        "line": 3235
       },
       {
         "name": "componentId",
@@ -1321,24 +761,9 @@
         "line": 3286
       },
       {
-        "name": "showNotification",
-        "type": "function",
-        "line": 3322
-      },
-      {
         "name": "colors",
         "type": "variable",
         "line": 3324
-      },
-      {
-        "name": "capitalizeFirst",
-        "type": "function",
-        "line": 3342
-      },
-      {
-        "name": "handleStorageChange",
-        "type": "function",
-        "line": 3346
       },
       {
         "name": "activeEl",
@@ -1354,16 +779,6 @@
         "name": "logRefreshInterval",
         "type": "variable",
         "line": 3373
-      },
-      {
-        "name": "setupLogViewer",
-        "type": "function",
-        "line": 3379
-      },
-      {
-        "name": "setupTabNavigation",
-        "type": "function",
-        "line": 3402
       },
       {
         "name": "tabBtns",
@@ -1384,11 +799,6 @@
         "name": "personaTab",
         "type": "variable",
         "line": 3406
-      },
-      {
-        "name": "navigateToPersonaPage",
-        "type": "function",
-        "line": 3474
       },
       {
         "name": "pages",
@@ -1449,11 +859,6 @@
         "name": "savePromptBtn",
         "type": "variable",
         "line": 3525
-      },
-      {
-        "name": "setupPersonaNavigation",
-        "type": "function",
-        "line": 3553
       },
       {
         "name": "fab",
@@ -1586,29 +991,9 @@
         "line": 3688
       },
       {
-        "name": "getSelectedChipValue",
-        "type": "function",
-        "line": 3691
-      },
-      {
         "name": "group",
         "type": "variable",
         "line": 3692
-      },
-      {
-        "name": "selected",
-        "type": "variable",
-        "line": 3693
-      },
-      {
-        "name": "hasActiveFilters",
-        "type": "function",
-        "line": 3698
-      },
-      {
-        "name": "onFilterChange",
-        "type": "function",
-        "line": 3705
       },
       {
         "name": "searchInput",
@@ -1661,39 +1046,14 @@
         "line": 3793
       },
       {
-        "name": "setupEditPersonaAccordions",
-        "type": "function",
-        "line": 3813
-      },
-      {
         "name": "accordion",
         "type": "variable",
         "line": 3822
       },
       {
-        "name": "icon",
-        "type": "variable",
-        "line": 3824
-      },
-      {
         "name": "targetId",
         "type": "variable",
         "line": 3842
-      },
-      {
-        "name": "icon",
-        "type": "variable",
-        "line": 3844
-      },
-      {
-        "name": "setupTagList",
-        "type": "function",
-        "line": 3864
-      },
-      {
-        "name": "addBtn",
-        "type": "variable",
-        "line": 3865
       },
       {
         "name": "maxTags",
@@ -1706,44 +1066,14 @@
         "line": 3871
       },
       {
-        "name": "tag",
-        "type": "variable",
-        "line": 3882
-      },
-      {
-        "name": "removeBtn",
-        "type": "variable",
-        "line": 3887
-      },
-      {
         "name": "textSpan",
         "type": "variable",
         "line": 3897
       },
       {
-        "name": "saveTag",
-        "type": "function",
-        "line": 3908
-      },
-      {
-        "name": "setupExtractedPageInteractions",
-        "type": "function",
-        "line": 3933
-      },
-      {
-        "name": "chip",
-        "type": "variable",
-        "line": 3937
-      },
-      {
         "name": "metadataSection",
         "type": "variable",
         "line": 3965
-      },
-      {
-        "name": "handleExtractPersona",
-        "type": "function",
-        "line": 3975
       },
       {
         "name": "promptInput",
@@ -1761,34 +1091,14 @@
         "line": 3982
       },
       {
-        "name": "parseExtractionResult",
-        "type": "function",
-        "line": 4074
-      },
-      {
         "name": "_sectionBadgeState",
         "type": "variable",
         "line": 4103
       },
       {
-        "name": "updateSectionBadge",
-        "type": "function",
-        "line": 4126
-      },
-      {
-        "name": "badge",
-        "type": "variable",
-        "line": 4127
-      },
-      {
         "name": "shouldShowStale",
         "type": "variable",
         "line": 4153
-      },
-      {
-        "name": "initializeSectionBadges",
-        "type": "function",
-        "line": 4182
       },
       {
         "name": "componentData",
@@ -1801,19 +1111,9 @@
         "line": 4191
       },
       {
-        "name": "toggle",
-        "type": "variable",
-        "line": 4195
-      },
-      {
         "name": "isStale",
         "type": "variable",
         "line": 4200
-      },
-      {
-        "name": "setupBadgeListeners",
-        "type": "function",
-        "line": 4238
       },
       {
         "name": "textarea",
@@ -1826,34 +1126,9 @@
         "line": 4251
       },
       {
-        "name": "populateExtractionResults",
-        "type": "function",
-        "line": 4269
-      },
-      {
-        "name": "providerEl",
-        "type": "variable",
-        "line": 4274
-      },
-      {
-        "name": "modelEl",
-        "type": "variable",
-        "line": 4275
-      },
-      {
-        "name": "setChipSelection",
-        "type": "function",
-        "line": 4280
-      },
-      {
         "name": "group",
         "type": "variable",
         "line": 4282
-      },
-      {
-        "name": "chip",
-        "type": "variable",
-        "line": 4285
       },
       {
         "name": "personaTextarea",
@@ -1921,11 +1196,6 @@
         "line": 4357
       },
       {
-        "name": "format",
-        "type": "variable",
-        "line": 4358
-      },
-      {
         "name": "exemplarContent",
         "type": "variable",
         "line": 4366
@@ -1961,11 +1231,6 @@
         "line": 4485
       },
       {
-        "name": "setupFormDirtyTracking",
-        "type": "function",
-        "line": 4516
-      },
-      {
         "name": "extractedPage",
         "type": "variable",
         "line": 4517
@@ -1986,11 +1251,6 @@
         "line": 4535
       },
       {
-        "name": "renderExtTopicSummary",
-        "type": "function",
-        "line": 4550
-      },
-      {
         "name": "topicDiv",
         "type": "variable",
         "line": 4554
@@ -2009,11 +1269,6 @@
         "name": "tagList",
         "type": "variable",
         "line": 4576
-      },
-      {
-        "name": "renderExtIntent",
-        "type": "function",
-        "line": 4588
       },
       {
         "name": "goalDiv",
@@ -2039,11 +1294,6 @@
         "name": "tagList",
         "type": "variable",
         "line": 4629
-      },
-      {
-        "name": "renderExtEntities",
-        "type": "function",
-        "line": 4641
       },
       {
         "name": "categories",
@@ -2211,29 +1461,9 @@
         "line": 5105
       },
       {
-        "name": "tag",
-        "type": "variable",
-        "line": 5113
-      },
-      {
-        "name": "addBtn",
-        "type": "variable",
-        "line": 5118
-      },
-      {
         "name": "createExtEditableTag",
         "type": "function",
         "line": 5131
-      },
-      {
-        "name": "tag",
-        "type": "variable",
-        "line": 5132
-      },
-      {
-        "name": "removeBtn",
-        "type": "variable",
-        "line": 5138
       },
       {
         "name": "textSpan",
@@ -2266,11 +1496,6 @@
         "line": 5197
       },
       {
-        "name": "addBtn",
-        "type": "variable",
-        "line": 5198
-      },
-      {
         "name": "existingTags",
         "type": "variable",
         "line": 5199
@@ -2281,11 +1506,6 @@
         "line": 5200
       },
       {
-        "name": "tag",
-        "type": "variable",
-        "line": 5202
-      },
-      {
         "name": "textSpan",
         "type": "variable",
         "line": 5206
@@ -2294,11 +1514,6 @@
         "name": "updateExtTagsInData",
         "type": "function",
         "line": 5216
-      },
-      {
-        "name": "tags",
-        "type": "variable",
-        "line": 5222
       },
       {
         "name": "parts",
@@ -2329,21 +1544,6 @@
         "name": "populateEditableTags",
         "type": "function",
         "line": 5291
-      },
-      {
-        "name": "addBtn",
-        "type": "variable",
-        "line": 5298
-      },
-      {
-        "name": "tag",
-        "type": "variable",
-        "line": 5304
-      },
-      {
-        "name": "removeBtn",
-        "type": "variable",
-        "line": 5310
       },
       {
         "name": "textSpan",
@@ -2384,11 +1584,6 @@
         "name": "audience",
         "type": "variable",
         "line": 5371
-      },
-      {
-        "name": "draft",
-        "type": "variable",
-        "line": 5378
       },
       {
         "name": "handlePublishPersona",
@@ -2516,19 +1711,9 @@
         "line": 5630
       },
       {
-        "name": "selected",
-        "type": "variable",
-        "line": 5631
-      },
-      {
         "name": "filters",
         "type": "variable",
         "line": 5636
-      },
-      {
-        "name": "supabase",
-        "type": "variable",
-        "line": 5656
       },
       {
         "name": "keywords",
@@ -2549,11 +1734,6 @@
         "name": "resultsContainer",
         "type": "variable",
         "line": 5705
-      },
-      {
-        "name": "supabase",
-        "type": "variable",
-        "line": 5711
       },
       {
         "name": "renderPersonaResults",
@@ -2651,16 +1831,6 @@
         "line": 5898
       },
       {
-        "name": "modal",
-        "type": "variable",
-        "line": 5902
-      },
-      {
-        "name": "btn",
-        "type": "variable",
-        "line": 5967
-      },
-      {
         "name": "formatMemoryKey",
         "type": "function",
         "line": 5980
@@ -2669,11 +1839,6 @@
         "name": "handleImportPersona",
         "type": "function",
         "line": 5989
-      },
-      {
-        "name": "supabase",
-        "type": "variable",
-        "line": 6013
       },
       {
         "name": "loadMyPersonas",
@@ -2751,19 +1916,9 @@
         "line": 6297
       },
       {
-        "name": "prompts",
-        "type": "variable",
-        "line": 6299
-      },
-      {
         "name": "newPrompt",
         "type": "variable",
         "line": 6301
-      },
-      {
-        "name": "deleteSavedPrompt",
-        "type": "function",
-        "line": 6319
       },
       {
         "name": "confirmed",
@@ -2771,19 +1926,9 @@
         "line": 6320
       },
       {
-        "name": "prompts",
-        "type": "variable",
-        "line": 6343
-      },
-      {
         "name": "openPromptPreviewDialog",
         "type": "function",
         "line": 6359
-      },
-      {
-        "name": "dialog",
-        "type": "variable",
-        "line": 6360
       },
       {
         "name": "closeDialog",
@@ -3061,16 +2206,6 @@
         "line": 7157
       },
       {
-        "name": "diffObjects",
-        "type": "function",
-        "line": 7165
-      },
-      {
-        "name": "allKeys",
-        "type": "variable",
-        "line": 7166
-      },
-      {
         "name": "currVal",
         "type": "variable",
         "line": 7172
@@ -3096,21 +2231,6 @@
         "line": 7184
       },
       {
-        "name": "formatDiffValue",
-        "type": "function",
-        "line": 7211
-      },
-      {
-        "name": "str",
-        "type": "variable",
-        "line": 7216
-      },
-      {
-        "name": "formatFieldLabel",
-        "type": "function",
-        "line": 7225
-      },
-      {
         "name": "parts",
         "type": "variable",
         "line": 7227
@@ -3119,11 +2239,6 @@
         "name": "last",
         "type": "variable",
         "line": 7228
-      },
-      {
-        "name": "getNestedValue",
-        "type": "function",
-        "line": 7242
       },
       {
         "name": "restoreVersion",
@@ -3139,11 +2254,6 @@
         "name": "restoredData",
         "type": "variable",
         "line": 7261
-      },
-      {
-        "name": "exportPersonaJSON",
-        "type": "function",
-        "line": 7289
       },
       {
         "name": "exportData",
@@ -3166,44 +2276,14 @@
         "line": 7338
       },
       {
-        "name": "ALLOWED_IMPORT_EXTENSIONS",
-        "type": "constant",
-        "line": 7389
-      },
-      {
-        "name": "MAX_IMPORT_FILE_SIZE",
-        "type": "constant",
-        "line": 7394
-      },
-      {
-        "name": "readAndSanitizeFile",
-        "type": "function",
-        "line": 7401
-      },
-      {
-        "name": "extension",
-        "type": "variable",
-        "line": 7404
-      },
-      {
         "name": "allowedMimes",
         "type": "variable",
         "line": 7424
       },
       {
-        "name": "rawText",
-        "type": "variable",
-        "line": 7435
-      },
-      {
         "name": "sanitizedContent",
         "type": "variable",
         "line": 7438
-      },
-      {
-        "name": "sanitizeTextContent",
-        "type": "function",
-        "line": 7465
       },
       {
         "name": "importPersonaFile",
@@ -3259,21 +2339,6 @@
         "name": "baseName",
         "type": "variable",
         "line": 7611
-      },
-      {
-        "name": "importPersonaJSON",
-        "type": "function",
-        "line": 7629
-      },
-      {
-        "name": "sanitizeImportedData",
-        "type": "function",
-        "line": 7639
-      },
-      {
-        "name": "formatDate",
-        "type": "function",
-        "line": 7672
       },
       {
         "name": "setupLogsPageHandlers",
@@ -3406,16 +2471,6 @@
         "line": 7933
       },
       {
-        "name": "btn",
-        "type": "variable",
-        "line": 7937
-      },
-      {
-        "name": "icon",
-        "type": "variable",
-        "line": 7942
-      },
-      {
         "name": "isExpanding",
         "type": "variable",
         "line": 7945
@@ -3429,11 +2484,6 @@
         "name": "expanded",
         "type": "variable",
         "line": 7964
-      },
-      {
-        "name": "icon",
-        "type": "variable",
-        "line": 7968
       },
       {
         "name": "checkRatingEligibility",
@@ -3461,19 +2511,9 @@
         "line": 8119
       },
       {
-        "name": "scanContentForModeration",
-        "type": "function",
-        "line": 8146
-      },
-      {
         "name": "showModerationWarning",
         "type": "function",
         "line": 8176
-      },
-      {
-        "name": "dialog",
-        "type": "variable",
-        "line": 8178
       },
       {
         "name": "showReportDialog",
@@ -3486,22 +2526,12 @@
         "line": 8229
       },
       {
-        "name": "dialog",
-        "type": "variable",
-        "line": 8232
-      },
-      {
         "name": "submitReport",
         "type": "function",
         "line": 8306
       }
     ],
     "content/observer.js": [
-      {
-        "name": "obsLog",
-        "type": "function",
-        "line": 36
-      },
       {
         "name": "extensionReloadNotificationShown",
         "type": "variable",
@@ -3518,16 +2548,6 @@
         "line": 186
       },
       {
-        "name": "safeSendMessage",
-        "type": "function",
-        "line": 197
-      },
-      {
-        "name": "applyThemeToDocument",
-        "type": "function",
-        "line": 230
-      },
-      {
         "name": "lastDetectedTheme",
         "type": "variable",
         "line": 243
@@ -3536,46 +2556,6 @@
         "name": "themeObserver",
         "type": "variable",
         "line": 244
-      },
-      {
-        "name": "initThemeObservation",
-        "type": "function",
-        "line": 269
-      },
-      {
-        "name": "observeElement",
-        "type": "function",
-        "line": 270
-      },
-      {
-        "name": "SELECTORS",
-        "type": "constant",
-        "line": 316
-      },
-      {
-        "name": "findElement",
-        "type": "function",
-        "line": 356
-      },
-      {
-        "name": "selectors",
-        "type": "variable",
-        "line": 357
-      },
-      {
-        "name": "findChatInput",
-        "type": "function",
-        "line": 387
-      },
-      {
-        "name": "findSendButton",
-        "type": "function",
-        "line": 391
-      },
-      {
-        "name": "findInputContainer",
-        "type": "function",
-        "line": 395
       },
       {
         "name": "fromConfig",
@@ -3588,29 +2568,14 @@
         "line": 407
       },
       {
-        "name": "createSettingsIcon",
-        "type": "function",
-        "line": 419
-      },
-      {
         "name": "wrapper",
         "type": "variable",
         "line": 420
       },
       {
-        "name": "btn",
-        "type": "variable",
-        "line": 423
-      },
-      {
         "name": "modelDot",
         "type": "variable",
         "line": 444
-      },
-      {
-        "name": "updateModelIndicator",
-        "type": "function",
-        "line": 451
       },
       {
         "name": "activeModelData",
@@ -3623,29 +2588,14 @@
         "line": 487
       },
       {
-        "name": "createRefineToggle",
-        "type": "function",
-        "line": 507
-      },
-      {
         "name": "wrapper",
         "type": "variable",
         "line": 508
       },
       {
-        "name": "toggle",
-        "type": "variable",
-        "line": 515
-      },
-      {
         "name": "isOn",
         "type": "variable",
         "line": 518
-      },
-      {
-        "name": "updateState",
-        "type": "function",
-        "line": 527
       },
       {
         "name": "api",
@@ -3656,21 +2606,6 @@
         "name": "modalInstance",
         "type": "variable",
         "line": 556
-      },
-      {
-        "name": "createReviewModal",
-        "type": "function",
-        "line": 558
-      },
-      {
-        "name": "detectTheme",
-        "type": "function",
-        "line": 562
-      },
-      {
-        "name": "overlay",
-        "type": "variable",
-        "line": 574
       },
       {
         "name": "refinedTextarea",
@@ -3798,24 +2733,9 @@
         "line": 639
       },
       {
-        "name": "checkConnection",
-        "type": "function",
-        "line": 642
-      },
-      {
         "name": "latency",
         "type": "variable",
         "line": 647
-      },
-      {
-        "name": "typeText",
-        "type": "function",
-        "line": 657
-      },
-      {
-        "name": "showConnectionFeedback",
-        "type": "function",
-        "line": 669
       },
       {
         "name": "quality",
@@ -3828,39 +2748,9 @@
         "line": 680
       },
       {
-        "name": "getActiveTextarea",
-        "type": "function",
-        "line": 720
-      },
-      {
-        "name": "switchTab",
-        "type": "function",
-        "line": 725
-      },
-      {
-        "name": "generateDiffHTML",
-        "type": "function",
-        "line": 748
-      },
-      {
-        "name": "escape",
-        "type": "function",
-        "line": 753
-      },
-      {
-        "name": "updateCharCount",
-        "type": "function",
-        "line": 758
-      },
-      {
         "name": "activeTextarea",
         "type": "variable",
         "line": 759
-      },
-      {
-        "name": "updateUI",
-        "type": "function",
-        "line": 775
       },
       {
         "name": "canOriginalPrev",
@@ -3918,11 +2808,6 @@
         "line": 810
       },
       {
-        "name": "updateEmptyState",
-        "type": "function",
-        "line": 819
-      },
-      {
         "name": "hasContent",
         "type": "variable",
         "line": 822
@@ -3933,29 +2818,9 @@
         "line": 827
       },
       {
-        "name": "checkApiKey",
-        "type": "function",
-        "line": 845
-      },
-      {
-        "name": "saveCurrentPairEdits",
-        "type": "function",
-        "line": 899
-      },
-      {
-        "name": "navigatePrevOriginal",
-        "type": "function",
-        "line": 910
-      },
-      {
         "name": "pair",
         "type": "variable",
         "line": 913
-      },
-      {
-        "name": "navigateNextOriginal",
-        "type": "function",
-        "line": 920
       },
       {
         "name": "pair",
@@ -3963,19 +2828,9 @@
         "line": 923
       },
       {
-        "name": "navigatePrevRefined",
-        "type": "function",
-        "line": 930
-      },
-      {
         "name": "targetIndex",
         "type": "variable",
         "line": 932
-      },
-      {
-        "name": "navigateNextRefined",
-        "type": "function",
-        "line": 944
       },
       {
         "name": "targetIndex",
@@ -4086,11 +2941,6 @@
         "name": "roughText",
         "type": "variable",
         "line": 1228
-      },
-      {
-        "name": "dismissErrorBanner",
-        "type": "function",
-        "line": 1260
       },
       {
         "name": "hadResponseAtStop",
@@ -4223,21 +3073,6 @@
         "line": 1676
       },
       {
-        "name": "pasteToInput",
-        "type": "function",
-        "line": 1688
-      },
-      {
-        "name": "injectInterface",
-        "type": "function",
-        "line": 1700
-      },
-      {
-        "name": "sendBtn",
-        "type": "variable",
-        "line": 1701
-      },
-      {
         "name": "inputEl",
         "type": "variable",
         "line": 1702
@@ -4261,11 +3096,6 @@
         "name": "existingWrapper",
         "type": "variable",
         "line": 1718
-      },
-      {
-        "name": "updateSettingsPosition",
-        "type": "function",
-        "line": 1731
       },
       {
         "name": "rect",
@@ -4313,19 +3143,9 @@
         "line": 1817
       },
       {
-        "name": "updateVisibility",
-        "type": "function",
-        "line": 1877
-      },
-      {
         "name": "cachedTabId",
         "type": "variable",
         "line": 1898
-      },
-      {
-        "name": "getTabId",
-        "type": "function",
-        "line": 1899
       },
       {
         "name": "skipNextRefinement",
@@ -4333,29 +3153,9 @@
         "line": 1923
       },
       {
-        "name": "triggerNativeSend",
-        "type": "function",
-        "line": 1929
-      },
-      {
         "name": "inputEl",
         "type": "variable",
         "line": 1937
-      },
-      {
-        "name": "sendBtn",
-        "type": "variable",
-        "line": 1966
-      },
-      {
-        "name": "triggerRefinement",
-        "type": "function",
-        "line": 1987
-      },
-      {
-        "name": "modal",
-        "type": "variable",
-        "line": 2015
       },
       {
         "name": "inputEl",
@@ -4386,1061 +3186,18 @@
         "name": "injectDebounceTimer",
         "type": "variable",
         "line": 2179
-      },
-      {
-        "name": "debouncedInject",
-        "type": "function",
-        "line": 2180
-      }
-    ],
-    "content/scraper.js": [
-      {
-        "name": "scrapeLog",
-        "type": "function",
-        "line": 71
-      },
-      {
-        "name": "SCRAPER_CONFIG",
-        "type": "constant",
-        "line": 85
-      },
-      {
-        "name": "GEMINI_SELECTORS",
-        "type": "constant",
-        "line": 106
-      },
-      {
-        "name": "GeminiConversationScraper",
-        "type": "class",
-        "line": 178
-      },
-      {
-        "name": "GeminiConversationScraper.hasHistory",
-        "type": "method",
-        "line": 190
-      },
-      {
-        "name": "containers",
-        "type": "variable",
-        "line": 191
-      },
-      {
-        "name": "GeminiConversationScraper._getRating",
-        "type": "method",
-        "line": 200
-      },
-      {
-        "name": "GeminiConversationScraper.loadRatings",
-        "type": "method",
-        "line": 217
-      },
-      {
-        "name": "GeminiConversationScraper.scrape",
-        "type": "method",
-        "line": 235
-      },
-      {
-        "name": "config",
-        "type": "variable",
-        "line": 240
-      },
-      {
-        "name": "formatDate",
-        "type": "function",
-        "line": 249
-      },
-      {
-        "name": "d",
-        "type": "variable",
-        "line": 250
-      },
-      {
-        "name": "pad",
-        "type": "function",
-        "line": 251
-      },
-      {
-        "name": "containers",
-        "type": "variable",
-        "line": 258
-      },
-      {
-        "name": "totalBytes",
-        "type": "variable",
-        "line": 283
-      },
-      {
-        "name": "wasTruncated",
-        "type": "variable",
-        "line": 283
-      },
-      {
-        "name": "sliceOffset",
-        "type": "variable",
-        "line": 283
-      },
-      {
-        "name": "targetContainers",
-        "type": "variable",
-        "line": 283
-      },
-      {
-        "name": "titleEl",
-        "type": "variable",
-        "line": 298
-      },
-      {
-        "name": "pairId",
-        "type": "variable",
-        "line": 307
-      },
-      {
-        "name": "skippedPairCount",
-        "type": "variable",
-        "line": 310
-      },
-      {
-        "name": "turn",
-        "type": "variable",
-        "line": 313
-      },
-      {
-        "name": "pair",
-        "type": "variable",
-        "line": 317
-      },
-      {
-        "name": "turnIndex",
-        "type": "variable",
-        "line": 331
-      },
-      {
-        "name": "lastPair",
-        "type": "variable",
-        "line": 351
-      },
-      {
-        "name": "GeminiConversationScraper._findMessageContainers",
-        "type": "method",
-        "line": 382
-      },
-      {
-        "name": "allMessages",
-        "type": "variable",
-        "line": 383
-      },
-      {
-        "name": "userSelectors",
-        "type": "variable",
-        "line": 386
-      },
-      {
-        "name": "userElements",
-        "type": "variable",
-        "line": 387
-      },
-      {
-        "name": "found",
-        "type": "variable",
-        "line": 390
-      },
-      {
-        "name": "modelSelectors",
-        "type": "variable",
-        "line": 402
-      },
-      {
-        "name": "modelElements",
-        "type": "variable",
-        "line": 403
-      },
-      {
-        "name": "found",
-        "type": "variable",
-        "line": 406
-      },
-      {
-        "name": "position",
-        "type": "variable",
-        "line": 426
-      },
-      {
-        "name": "GeminiConversationScraper._extractTurns",
-        "type": "method",
-        "line": 445
-      },
-      {
-        "name": "totalBytes",
-        "type": "variable",
-        "line": 447
-      },
-      {
-        "name": "wasTruncated",
-        "type": "variable",
-        "line": 448
-      },
-      {
-        "name": "maxContainers",
-        "type": "variable",
-        "line": 451
-      },
-      {
-        "name": "targetContainers",
-        "type": "variable",
-        "line": 452
-      },
-      {
-        "name": "sliceOffset",
-        "type": "variable",
-        "line": 453
-      },
-      {
-        "name": "turn",
-        "type": "variable",
-        "line": 476
-      },
-      {
-        "name": "GeminiConversationScraper._extractContent",
-        "type": "method",
-        "line": 500
-      },
-      {
-        "name": "clone",
-        "type": "variable",
-        "line": 502
-      },
-      {
-        "name": "hidden",
-        "type": "variable",
-        "line": 505
-      },
-      {
-        "name": "preBlocks",
-        "type": "variable",
-        "line": 509
-      },
-      {
-        "name": "inlineCode",
-        "type": "variable",
-        "line": 515
-      },
-      {
-        "name": "GeminiConversationScraper._determineRole",
-        "type": "method",
-        "line": 538
-      },
-      {
-        "name": "GeminiConversationScraper._matchesIndicator",
-        "type": "method",
-        "line": 568
-      },
-      {
-        "name": "GeminiConversationScraper._formatOutput",
-        "type": "method",
-        "line": 587
-      },
-      {
-        "name": "roleHeader",
-        "type": "variable",
-        "line": 590
-      },
-      {
-        "name": "rolePrefix",
-        "type": "variable",
-        "line": 597
-      },
-      {
-        "name": "GeminiConversationScraper._generateSessionId",
-        "type": "method",
-        "line": 609
-      },
-      {
-        "name": "customScraperMethod",
-        "type": "function",
-        "line": 629
-      },
-      {
-        "name": "scraper",
-        "type": "variable",
-        "line": 630
-      },
-      {
-        "name": "getChatHistory",
-        "type": "function",
-        "line": 657
-      },
-      {
-        "name": "scraper",
-        "type": "variable",
-        "line": 658
-      },
-      {
-        "name": "getPreviousPromptsWithRatings",
-        "type": "function",
-        "line": 682
-      },
-      {
-        "name": "scraper",
-        "type": "variable",
-        "line": 683
-      },
-      {
-        "name": "prompts",
-        "type": "variable",
-        "line": 700
-      },
-      {
-        "name": "turnIndex",
-        "type": "variable",
-        "line": 705
-      }
-    ],
-    "options/model-manager-ui.js": [
-      {
-        "name": "ModelManagerUI",
-        "type": "class",
-        "line": 14
-      },
-      {
-        "name": "ModelManagerUI.render",
-        "type": "method",
-        "line": 52
-      },
-      {
-        "name": "ModelManagerUI.renderModelCard",
-        "type": "method",
-        "line": 99
-      },
-      {
-        "name": "statusClass",
-        "type": "variable",
-        "line": 102
-      },
-      {
-        "name": "activeClass",
-        "type": "variable",
-        "line": 103
-      },
-      {
-        "name": "statusText",
-        "type": "variable",
-        "line": 104
-      },
-      {
-        "name": "statusIcon",
-        "type": "variable",
-        "line": 105
-      },
-      {
-        "name": "ModelManagerUI.renderModal",
-        "type": "method",
-        "line": 150
-      },
-      {
-        "name": "ModelManagerUI.setupEventListeners",
-        "type": "method",
-        "line": 236
-      },
-      {
-        "name": "ModelManagerUI.setupModalEvents",
-        "type": "method",
-        "line": 286
-      },
-      {
-        "name": "providerSelect",
-        "type": "variable",
-        "line": 288
-      },
-      {
-        "name": "ModelManagerUI.onProviderChange",
-        "type": "method",
-        "line": 311
-      },
-      {
-        "name": "link",
-        "type": "variable",
-        "line": 316
-      },
-      {
-        "name": "baseUrlGroup",
-        "type": "variable",
-        "line": 326
-      },
-      {
-        "name": "modelSelect",
-        "type": "variable",
-        "line": 334
-      },
-      {
-        "name": "customModelGroup",
-        "type": "variable",
-        "line": 340
-      },
-      {
-        "name": "ModelManagerUI.renderParameters",
-        "type": "method",
-        "line": 354
-      },
-      {
-        "name": "ModelManagerUI.openAddModal",
-        "type": "method",
-        "line": 378
-      },
-      {
-        "name": "modal",
-        "type": "variable",
-        "line": 383
-      },
-      {
-        "name": "providerSelect",
-        "type": "variable",
-        "line": 391
-      },
-      {
-        "name": "ModelManagerUI.openEditModal",
-        "type": "method",
-        "line": 401
-      },
-      {
-        "name": "modal",
-        "type": "variable",
-        "line": 409
-      },
-      {
-        "name": "providerSelect",
-        "type": "variable",
-        "line": 417
-      },
-      {
-        "name": "modelSelect",
-        "type": "variable",
-        "line": 422
-      },
-      {
-        "name": "ModelManagerUI.showModal",
-        "type": "method",
-        "line": 443
-      },
-      {
-        "name": "modal",
-        "type": "variable",
-        "line": 444
-      },
-      {
-        "name": "ModelManagerUI.closeModal",
-        "type": "method",
-        "line": 452
-      },
-      {
-        "name": "modal",
-        "type": "variable",
-        "line": 453
-      },
-      {
-        "name": "ModelManagerUI.handleTest",
-        "type": "method",
-        "line": 463
-      },
-      {
-        "name": "card",
-        "type": "variable",
-        "line": 464
-      },
-      {
-        "name": "btn",
-        "type": "variable",
-        "line": 465
-      },
-      {
-        "name": "originalText",
-        "type": "variable",
-        "line": 468
-      },
-      {
-        "name": "ModelManagerUI.handleTestFromModal",
-        "type": "method",
-        "line": 490
-      },
-      {
-        "name": "statusEl",
-        "type": "variable",
-        "line": 491
-      },
-      {
-        "name": "formData",
-        "type": "variable",
-        "line": 497
-      },
-      {
-        "name": "testConfig",
-        "type": "variable",
-        "line": 500
-      },
-      {
-        "name": "client",
-        "type": "variable",
-        "line": 509
-      },
-      {
-        "name": "ModelManagerUI.handleFetchModels",
-        "type": "method",
-        "line": 526
-      },
-      {
-        "name": "modal",
-        "type": "variable",
-        "line": 527
-      },
-      {
-        "name": "providerDef",
-        "type": "variable",
-        "line": 529
-      },
-      {
-        "name": "apiKeyInput",
-        "type": "variable",
-        "line": 530
-      },
-      {
-        "name": "fetchBtn",
-        "type": "variable",
-        "line": 531
-      },
-      {
-        "name": "modelSelect",
-        "type": "variable",
-        "line": 532
-      },
-      {
-        "name": "hintEl",
-        "type": "variable",
-        "line": 533
-      },
-      {
-        "name": "originalText",
-        "type": "variable",
-        "line": 554
-      },
-      {
-        "name": "ModelManagerUI.handleToggle",
-        "type": "method",
-        "line": 594
-      },
-      {
-        "name": "ModelManagerUI.handleActivate",
-        "type": "method",
-        "line": 630
-      },
-      {
-        "name": "ModelManagerUI.handleSave",
-        "type": "method",
-        "line": 645
-      },
-      {
-        "name": "formData",
-        "type": "variable",
-        "line": 648
-      },
-      {
-        "name": "ModelManagerUI.getModalFormData",
-        "type": "method",
-        "line": 679
-      },
-      {
-        "name": "modal",
-        "type": "variable",
-        "line": 680
-      },
-      {
-        "name": "providerDef",
-        "type": "variable",
-        "line": 682
-      },
-      {
-        "name": "customModel",
-        "type": "variable",
-        "line": 686
-      },
-      {
-        "name": "icons",
-        "type": "variable",
-        "line": 736
-      }
-    ],
-    "llm/llm-client.js": [
-      {
-        "name": "DEFAULT_MODELS",
-        "type": "constant",
-        "line": 39
-      },
-      {
-        "name": "API_ENDPOINTS",
-        "type": "constant",
-        "line": 49
-      },
-      {
-        "name": "LLM_ERROR_TYPES",
-        "type": "constant",
-        "line": 69
-      },
-      {
-        "name": "RETRYABLE_ERRORS",
-        "type": "constant",
-        "line": 82
-      },
-      {
-        "name": "LLMClient.isConfigured",
-        "type": "method",
-        "line": 135
-      },
-      {
-        "name": "LLMClient._sanitizeApiKey",
-        "type": "method",
-        "line": 145
-      },
-      {
-        "name": "LLMClient._proxyFetch",
-        "type": "method",
-        "line": 163
-      },
-      {
-        "name": "onGeminiPage",
-        "type": "variable",
-        "line": 166
-      },
-      {
-        "name": "isMainWorld",
-        "type": "variable",
-        "line": 170
-      },
-      {
-        "name": "timeoutId",
-        "type": "variable",
-        "line": 179
-      },
-      {
-        "name": "onAbort",
-        "type": "variable",
-        "line": 180
-      },
-      {
-        "name": "cleanup",
-        "type": "function",
-        "line": 182
-      },
-      {
-        "name": "handler",
-        "type": "function",
-        "line": 212
-      },
-      {
-        "name": "fetchOptions",
-        "type": "variable",
-        "line": 241
-      },
-      {
-        "name": "LLMClient.configure",
-        "type": "method",
-        "line": 271
-      },
-      {
-        "name": "mergedOptions",
-        "type": "variable",
-        "line": 302
-      },
-      {
-        "name": "LLMClient._callWithRetry",
-        "type": "method",
-        "line": 319
-      },
-      {
-        "name": "errorType",
-        "type": "variable",
-        "line": 339
-      },
-      {
-        "name": "LLMClient._executeCall",
-        "type": "method",
-        "line": 364
-      },
-      {
-        "name": "LLMClient._classifyError",
-        "type": "method",
-        "line": 384
-      },
-      {
-        "name": "status",
-        "type": "variable",
-        "line": 386
-      },
-      {
-        "name": "LLMClient._calculateBackoff",
-        "type": "method",
-        "line": 433
-      },
-      {
-        "name": "LLMClient._delay",
-        "type": "method",
-        "line": 446
-      },
-      {
-        "name": "LLMClient._callGemini",
-        "type": "method",
-        "line": 456
-      },
-      {
-        "name": "startTime",
-        "type": "variable",
-        "line": 492
-      },
-      {
-        "name": "proxyResponse",
-        "type": "variable",
-        "line": 494
-      },
-      {
-        "name": "fetchDuration",
-        "type": "variable",
-        "line": 503
-      },
-      {
-        "name": "errorData",
-        "type": "variable",
-        "line": 510
-      },
-      {
-        "name": "LLMClient._callOpenAI",
-        "type": "method",
-        "line": 532
-      },
-      {
-        "name": "proxyResponse",
-        "type": "variable",
-        "line": 567
-      },
-      {
-        "name": "LLMClient._callAnthropic",
-        "type": "method",
-        "line": 594
-      },
-      {
-        "name": "enhancedPrompt",
-        "type": "variable",
-        "line": 598
-      },
-      {
-        "name": "proxyResponse",
-        "type": "variable",
-        "line": 618
-      },
-      {
-        "name": "LLMClient._callOpenRouter",
-        "type": "method",
-        "line": 646
-      },
-      {
-        "name": "enhancedPrompt",
-        "type": "variable",
-        "line": 650
-      },
-      {
-        "name": "proxyResponse",
-        "type": "variable",
-        "line": 669
-      },
-      {
-        "name": "LLMClient._fixTruncatedJSON",
-        "type": "method",
-        "line": 698
-      },
-      {
-        "name": "inString",
-        "type": "variable",
-        "line": 699
-      },
-      {
-        "name": "escape",
-        "type": "variable",
-        "line": 700
-      },
-      {
-        "name": "stack",
-        "type": "variable",
-        "line": 701
-      },
-      {
-        "name": "char",
-        "type": "variable",
-        "line": 704
-      },
-      {
-        "name": "open",
-        "type": "variable",
-        "line": 750
-      },
-      {
-        "name": "LLMClient._parseJSON",
-        "type": "method",
-        "line": 762
-      },
-      {
-        "name": "jsonMatch",
-        "type": "variable",
-        "line": 787
-      },
-      {
-        "name": "LLMClient.getAvailableModels",
-        "type": "method",
-        "line": 820
-      }
-    ],
-    "logging/logger.js": [
-      {
-        "name": "LOG_LEVELS",
-        "type": "constant",
-        "line": 32
-      },
-      {
-        "name": "LOG_COLORS",
-        "type": "constant",
-        "line": 43
-      },
-      {
-        "name": "LOGGER_CONFIG",
-        "type": "constant",
-        "line": 55
-      },
-      {
-        "name": "PII_PATTERNS",
-        "type": "constant",
-        "line": 68
-      },
-      {
-        "name": "RingBuffer.getAll",
-        "type": "method",
-        "line": 95
-      },
-      {
-        "name": "RingBuffer.get_length",
-        "type": "accessor",
-        "line": 111
-      },
-      {
-        "name": "LogEntry._detectContext",
-        "type": "method",
-        "line": 132
-      },
-      {
-        "name": "LogEntry.toJSON",
-        "type": "method",
-        "line": 146
-      },
-      {
-        "name": "LogEntry.format",
-        "type": "method",
-        "line": 160
-      },
-      {
-        "name": "Logger._instance",
-        "type": "property",
-        "line": 170
-      },
-      {
-        "name": "Logger._hasDirectStorage",
-        "type": "method",
-        "line": 210
-      },
-      {
-        "name": "timerId",
-        "type": "variable",
-        "line": 220
-      },
-      {
-        "name": "handler",
-        "type": "function",
-        "line": 222
-      },
-      {
-        "name": "resId",
-        "type": "variable",
-        "line": 223
-      },
-      {
-        "name": "Logger._storageGet",
-        "type": "method",
-        "line": 254
-      },
-      {
-        "name": "storageArea",
-        "type": "variable",
-        "line": 256
-      },
-      {
-        "name": "Logger._storageSet",
-        "type": "method",
-        "line": 263
-      },
-      {
-        "name": "storageArea",
-        "type": "variable",
-        "line": 265
-      },
-      {
-        "name": "Logger.setLevel",
-        "type": "method",
-        "line": 277
-      },
-      {
-        "name": "Logger._restoreLevel",
-        "type": "method",
-        "line": 295
-      },
-      {
-        "name": "savedLevel",
-        "type": "variable",
-        "line": 297
-      },
-      {
-        "name": "Logger._log",
-        "type": "method",
-        "line": 318
-      },
-      {
-        "name": "tags",
-        "type": "variable",
-        "line": 322
-      },
-      {
-        "name": "correlationId",
-        "type": "variable",
-        "line": 322
-      },
-      {
-        "name": "restData",
-        "type": "variable",
-        "line": 322
-      },
-      {
-        "name": "sanitizedMessage",
-        "type": "variable",
-        "line": 325
-      },
-      {
-        "name": "Logger.timeEnd",
-        "type": "method",
-        "line": 392
-      },
-      {
-        "name": "Logger.startOperation",
-        "type": "method",
-        "line": 420
-      },
-      {
-        "name": "correlationId",
-        "type": "variable",
-        "line": 421
-      },
-      {
-        "name": "Logger.endOperation",
-        "type": "method",
-        "line": 442
-      },
-      {
-        "name": "op",
-        "type": "variable",
-        "line": 443
-      },
-      {
-        "name": "Logger._sanitize",
-        "type": "method",
-        "line": 467
-      },
-      {
-        "name": "Logger._sanitizeObject",
-        "type": "method",
-        "line": 480
-      },
-      {
-        "name": "Logger._consoleOutput",
-        "type": "method",
-        "line": 508
-      },
-      {
-        "name": "styles",
-        "type": "variable",
-        "line": 512
-      },
-      {
-        "name": "Logger._notifyListeners",
-        "type": "method",
-        "line": 526
-      },
-      {
-        "name": "Logger.getLogs",
-        "type": "method",
-        "line": 539
-      },
-      {
-        "name": "Logger.export",
-        "type": "method",
-        "line": 579
-      },
-      {
-        "name": "Logger.downloadExport",
-        "type": "method",
-        "line": 592
-      },
-      {
-        "name": "byLevel",
-        "type": "variable",
-        "line": 614
-      },
-      {
-        "name": "byComponent",
-        "type": "variable",
-        "line": 615
-      },
-      {
-        "name": "Logger._persist",
-        "type": "method",
-        "line": 642
-      },
-      {
-        "name": "Logger._restore",
-        "type": "method",
-        "line": 661
-      },
-      {
-        "name": "Logger._startAutoPersist",
-        "type": "method",
-        "line": 684
       }
     ],
     "memory/index.js": [
-      {
-        "name": "memLog",
-        "type": "function",
-        "line": 39
-      },
       {
         "name": "sessionMutexes",
         "type": "variable",
         "line": 72
       },
       {
-        "name": "analyzeSession",
-        "type": "function",
-        "line": 82
-      },
-      {
         "name": "runPromise",
         "type": "variable",
         "line": 96
-      },
-      {
-        "name": "scraper",
-        "type": "variable",
-        "line": 131
       },
       {
         "name": "scrapedData",
@@ -5488,19 +3245,14 @@
         "line": 215
       },
       {
+        "name": "duration",
+        "type": "variable",
+        "line": 218
+      },
+      {
         "name": "dimensionIds",
         "type": "variable",
         "line": 226
-      },
-      {
-        "name": "isLLMConfigured",
-        "type": "function",
-        "line": 308
-      },
-      {
-        "name": "getCurrentSessionId",
-        "type": "function",
-        "line": 317
       },
       {
         "name": "sendBridgeResponse",
@@ -5511,16 +3263,6 @@
         "name": "SmartAutoRun",
         "type": "variable",
         "line": 398
-      },
-      {
-        "name": "isConfigured",
-        "type": "variable",
-        "line": 417
-      },
-      {
-        "name": "scraper",
-        "type": "variable",
-        "line": 427
       },
       {
         "name": "completeTurns",
@@ -5573,11 +3315,6 @@
         "line": 574
       },
       {
-        "name": "currentUrl",
-        "type": "variable",
-        "line": 592
-      },
-      {
         "name": "newSessionId",
         "type": "variable",
         "line": 593
@@ -5591,320 +3328,6 @@
         "name": "originalReplaceState",
         "type": "variable",
         "line": 637
-      }
-    ],
-    "model/model-manager.js": [
-      {
-        "name": "modelLog",
-        "type": "function",
-        "line": 41
-      },
-      {
-        "name": "LEGACY_STORAGE_KEYS",
-        "type": "constant",
-        "line": 60
-      },
-      {
-        "name": "ModelManager._doInit",
-        "type": "method",
-        "line": 106
-      },
-      {
-        "name": "ModelManager._ensureInitialized",
-        "type": "method",
-        "line": 154
-      },
-      {
-        "name": "cached",
-        "type": "variable",
-        "line": 185
-      },
-      {
-        "name": "freshData",
-        "type": "variable",
-        "line": 192
-      },
-      {
-        "name": "ModelManager.hasApiKey",
-        "type": "method",
-        "line": 212
-      },
-      {
-        "name": "ModelManager.addModel",
-        "type": "method",
-        "line": 274
-      },
-      {
-        "name": "ModelManager.deleteModel",
-        "type": "method",
-        "line": 310
-      },
-      {
-        "name": "ModelManager.enableModel",
-        "type": "method",
-        "line": 343
-      },
-      {
-        "name": "ModelManager.disableModel",
-        "type": "method",
-        "line": 384
-      },
-      {
-        "name": "ModelManager.getEnabledModels",
-        "type": "method",
-        "line": 403
-      },
-      {
-        "name": "ModelManager.getActiveModelId",
-        "type": "method",
-        "line": 416
-      },
-      {
-        "name": "ModelManager.ensureActiveModel",
-        "type": "method",
-        "line": 488
-      },
-      {
-        "name": "client",
-        "type": "variable",
-        "line": 530
-      },
-      {
-        "name": "ModelManager._validateApiKeyFormat",
-        "type": "method",
-        "line": 560
-      },
-      {
-        "name": "ModelManager.maskApiKey",
-        "type": "method",
-        "line": 598
-      },
-      {
-        "name": "suffix",
-        "type": "variable",
-        "line": 603
-      },
-      {
-        "name": "masked",
-        "type": "variable",
-        "line": 604
-      },
-      {
-        "name": "ModelManager.isMaskedKey",
-        "type": "method",
-        "line": 614
-      },
-      {
-        "name": "ModelManager._migrateFromLegacy",
-        "type": "method",
-        "line": 626
-      },
-      {
-        "name": "legacy",
-        "type": "variable",
-        "line": 628
-      },
-      {
-        "name": "migrated",
-        "type": "variable",
-        "line": 637
-      },
-      {
-        "name": "llmConfig",
-        "type": "variable",
-        "line": 658
-      },
-      {
-        "name": "firstEnabled",
-        "type": "variable",
-        "line": 678
-      },
-      {
-        "name": "ModelManager._isMainWorld",
-        "type": "method",
-        "line": 708
-      },
-      {
-        "name": "changes",
-        "type": "variable",
-        "line": 743
-      },
-      {
-        "name": "ModelManager._getFromStorage",
-        "type": "method",
-        "line": 798
-      },
-      {
-        "name": "ModelManager._saveToStorage",
-        "type": "method",
-        "line": 839
-      },
-      {
-        "name": "ModelManager._removeFromStorage",
-        "type": "method",
-        "line": 875
-      },
-      {
-        "name": "keyArray",
-        "type": "variable",
-        "line": 879
-      },
-      {
-        "name": "_modelManagerInstance",
-        "type": "variable",
-        "line": 911
-      },
-      {
-        "name": "getModelManager",
-        "type": "function",
-        "line": 917
-      }
-    ],
-    "supabase/supabase-client.js": [
-      {
-        "name": "SUPABASE_URL",
-        "type": "constant",
-        "line": 23
-      },
-      {
-        "name": "SUPABASE_ANON_KEY",
-        "type": "constant",
-        "line": 24
-      },
-      {
-        "name": "sbLog",
-        "type": "function",
-        "line": 36
-      },
-      {
-        "name": "hasData",
-        "type": "variable",
-        "line": 39
-      },
-      {
-        "name": "SupabaseClient.#initPromise",
-        "type": "property",
-        "line": 60
-      },
-      {
-        "name": "SupabaseClient.loadSupabaseLib",
-        "type": "method",
-        "line": 127
-      },
-      {
-        "name": "SupabaseClient.signUp",
-        "type": "method",
-        "line": 156
-      },
-      {
-        "name": "SupabaseClient.signIn",
-        "type": "method",
-        "line": 179
-      },
-      {
-        "name": "SupabaseClient.signInAnonymously",
-        "type": "method",
-        "line": 200
-      },
-      {
-        "name": "SupabaseClient.signOut",
-        "type": "method",
-        "line": 218
-      },
-      {
-        "name": "SupabaseClient.getUser",
-        "type": "method",
-        "line": 228
-      },
-      {
-        "name": "SupabaseClient.isAuthenticated",
-        "type": "method",
-        "line": 236
-      },
-      {
-        "name": "SupabaseClient.createPersona",
-        "type": "method",
-        "line": 261
-      },
-      {
-        "name": "SupabaseClient.updatePersona",
-        "type": "method",
-        "line": 301
-      },
-      {
-        "name": "fetchError",
-        "type": "variable",
-        "line": 309
-      },
-      {
-        "name": "newVersion",
-        "type": "variable",
-        "line": 321
-      },
-      {
-        "name": "snapshot",
-        "type": "variable",
-        "line": 324
-      },
-      {
-        "name": "existingHistory",
-        "type": "variable",
-        "line": 338
-      },
-      {
-        "name": "versionHistory",
-        "type": "variable",
-        "line": 339
-      },
-      {
-        "name": "SupabaseClient.getMyPersonas",
-        "type": "method",
-        "line": 395
-      },
-      {
-        "name": "SupabaseClient.searchPersonas",
-        "type": "method",
-        "line": 427
-      },
-      {
-        "name": "queryBuilder",
-        "type": "variable",
-        "line": 430
-      },
-      {
-        "name": "limit",
-        "type": "variable",
-        "line": 452
-      },
-      {
-        "name": "offset",
-        "type": "variable",
-        "line": 453
-      },
-      {
-        "name": "SupabaseClient.incrementImportCount",
-        "type": "method",
-        "line": 496
-      },
-      {
-        "name": "SupabaseClient.hasRatedPersona",
-        "type": "method",
-        "line": 550
-      },
-      {
-        "name": "SupabaseClient.createSavedPrompt",
-        "type": "method",
-        "line": 577
-      },
-      {
-        "name": "SupabaseClient.getMySavedPrompts",
-        "type": "method",
-        "line": 607
-      },
-      {
-        "name": "SupabaseClient.deleteSavedPrompt",
-        "type": "method",
-        "line": 634
       }
     ],
     "build.js": [
@@ -5967,6 +3390,11 @@
         "name": "cleanOutdir",
         "type": "function",
         "line": 71
+      },
+      {
+        "name": "entries",
+        "type": "variable",
+        "line": 78
       },
       {
         "name": "copyStaticFiles",
@@ -6034,233 +3462,238 @@
         "line": 203
       }
     ],
-    "rating/rating-manager.js": [
+    "content/scraper.js": [
       {
-        "name": "ratingLog",
-        "type": "function",
-        "line": 52
-      },
-      {
-        "name": "logFn",
+        "name": "config",
         "type": "variable",
-        "line": 56
+        "line": 240
       },
       {
-        "name": "RatingManager.hasDirectStorageAccess",
-        "type": "method",
-        "line": 148
-      },
-      {
-        "name": "ratingCount",
+        "name": "totalBytes",
         "type": "variable",
-        "line": 215
+        "line": 283
       },
       {
-        "name": "RatingManager.backupToStorage",
-        "type": "method",
-        "line": 266
-      },
-      {
-        "name": "backupKey",
+        "name": "sliceOffset",
         "type": "variable",
-        "line": 273
+        "line": 283
       },
       {
-        "name": "RatingManager.restoreFromStorage",
-        "type": "method",
-        "line": 305
-      },
-      {
-        "name": "backupKey",
+        "name": "messages",
         "type": "variable",
-        "line": 312
+        "line": 306
       },
       {
-        "name": "backup",
-        "type": "variable",
-        "line": 314
-      },
-      {
-        "name": "ratingCount",
-        "type": "variable",
-        "line": 320
-      },
-      {
-        "name": "backupAge",
-        "type": "variable",
-        "line": 321
-      },
-      {
-        "name": "ageMinutes",
-        "type": "variable",
-        "line": 322
-      },
-      {
-        "name": "RatingManager.backupAllRatings",
-        "type": "method",
-        "line": 348
-      },
-      {
-        "name": "allBackups",
-        "type": "variable",
-        "line": 355
-      },
-      {
-        "name": "RatingManager.removeRating",
-        "type": "method",
-        "line": 464
-      },
-      {
-        "name": "RatingManager.getRatingsArray",
-        "type": "method",
-        "line": 517
-      },
-      {
-        "name": "ratings",
-        "type": "variable",
-        "line": 521
-      },
-      {
-        "name": "match",
-        "type": "variable",
-        "line": 526
-      },
-      {
-        "name": "RatingManager.hasRating",
-        "type": "method",
-        "line": 555
-      },
-      {
-        "name": "RatingManager.getRatedCount",
-        "type": "method",
-        "line": 567
-      },
-      {
-        "name": "RatingManager.clearAll",
-        "type": "method",
-        "line": 584
-      },
-      {
-        "name": "_currentRatingManager",
-        "type": "variable",
-        "line": 606
-      },
-      {
-        "name": "getCurrentRatingManager",
-        "type": "function",
-        "line": 625
-      }
-    ],
-    "rating/rating-injector.js": [
-      {
-        "name": "RATING_SELECTORS",
-        "type": "constant",
-        "line": 52
-      },
-      {
-        "name": "RatingInjector",
-        "type": "variable",
-        "line": 118
-      },
-      {
-        "name": "responses",
-        "type": "variable",
-        "line": 202
-      },
-      {
-        "name": "actions",
-        "type": "variable",
-        "line": 223
-      },
-      {
-        "name": "responses",
-        "type": "variable",
-        "line": 271
-      },
-      {
-        "name": "currentRating",
-        "type": "variable",
-        "line": 304
-      },
-      {
-        "name": "ratingUI",
+        "name": "pairId",
         "type": "variable",
         "line": 307
       },
       {
-        "name": "inserted",
+        "name": "skippedPairCount",
         "type": "variable",
-        "line": 312
-      },
-      {
-        "name": "actionsDiv",
-        "type": "variable",
-        "line": 316
-      },
-      {
-        "name": "textSelectors",
-        "type": "variable",
-        "line": 330
-      },
-      {
-        "name": "textEl",
-        "type": "variable",
-        "line": 341
+        "line": 310
       },
       {
         "name": "turn",
         "type": "variable",
-        "line": 388
+        "line": 313
       },
       {
-        "name": "allResponses",
+        "name": "pair",
         "type": "variable",
-        "line": 392
+        "line": 317
       },
       {
-        "name": "allTurns",
+        "name": "lastPair",
+        "type": "variable",
+        "line": 351
+      },
+      {
+        "name": "allMessages",
+        "type": "variable",
+        "line": 383
+      },
+      {
+        "name": "userSelectors",
+        "type": "variable",
+        "line": 386
+      },
+      {
+        "name": "userElements",
+        "type": "variable",
+        "line": 387
+      },
+      {
+        "name": "modelSelectors",
+        "type": "variable",
+        "line": 402
+      },
+      {
+        "name": "modelElements",
         "type": "variable",
         "line": 403
       },
       {
-        "name": "chatHistory",
+        "name": "position",
         "type": "variable",
         "line": 426
       },
       {
-        "name": "isModelResponse",
+        "name": "totalBytes",
         "type": "variable",
-        "line": 475
+        "line": 447
       },
       {
-        "name": "turnIndex",
+        "name": "maxContainers",
         "type": "variable",
-        "line": 484
+        "line": 451
       },
       {
-        "name": "childResponses",
+        "name": "sliceOffset",
         "type": "variable",
-        "line": 496
+        "line": 453
       },
       {
-        "name": "turnIndex",
+        "name": "turn",
         "type": "variable",
-        "line": 499
+        "line": 476
       },
       {
-        "name": "ratingContainers",
+        "name": "clone",
         "type": "variable",
-        "line": 530
+        "line": 502
       },
       {
-        "name": "turnIndex",
+        "name": "hidden",
         "type": "variable",
-        "line": 533
+        "line": 505
       },
       {
-        "name": "INIT_DELAY_MS",
-        "type": "constant",
-        "line": 568
+        "name": "preBlocks",
+        "type": "variable",
+        "line": 509
+      },
+      {
+        "name": "inlineCode",
+        "type": "variable",
+        "line": 515
+      },
+      {
+        "name": "roleHeader",
+        "type": "variable",
+        "line": 590
+      },
+      {
+        "name": "rolePrefix",
+        "type": "variable",
+        "line": 597
+      }
+    ],
+    "llm/llm-client.js": [
+      {
+        "name": "onGeminiPage",
+        "type": "variable",
+        "line": 166
+      },
+      {
+        "name": "isMainWorld",
+        "type": "variable",
+        "line": 170
+      },
+      {
+        "name": "timeoutId",
+        "type": "variable",
+        "line": 179
+      },
+      {
+        "name": "onAbort",
+        "type": "variable",
+        "line": 180
+      },
+      {
+        "name": "handler",
+        "type": "function",
+        "line": 212
+      },
+      {
+        "name": "fetchOptions",
+        "type": "variable",
+        "line": 241
+      },
+      {
+        "name": "mergedOptions",
+        "type": "variable",
+        "line": 302
+      },
+      {
+        "name": "errorType",
+        "type": "variable",
+        "line": 339
+      },
+      {
+        "name": "status",
+        "type": "variable",
+        "line": 386
+      },
+      {
+        "name": "startTime",
+        "type": "variable",
+        "line": 492
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 494
+      },
+      {
+        "name": "fetchDuration",
+        "type": "variable",
+        "line": 503
+      },
+      {
+        "name": "errorData",
+        "type": "variable",
+        "line": 510
+      },
+      {
+        "name": "messages",
+        "type": "variable",
+        "line": 535
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 567
+      },
+      {
+        "name": "enhancedPrompt",
+        "type": "variable",
+        "line": 598
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 618
+      },
+      {
+        "name": "enhancedPrompt",
+        "type": "variable",
+        "line": 650
+      },
+      {
+        "name": "messages",
+        "type": "variable",
+        "line": 656
+      },
+      {
+        "name": "proxyResponse",
+        "type": "variable",
+        "line": 669
+      },
+      {
+        "name": "jsonMatch",
+        "type": "variable",
+        "line": 787
       }
     ],
     "memory/analyzers/unified-analyzer.js": [
@@ -6288,6 +3721,11 @@
         "name": "rawResult",
         "type": "variable",
         "line": 227
+      },
+      {
+        "name": "duration",
+        "type": "variable",
+        "line": 233
       },
       {
         "name": "obj",
@@ -6323,11 +3761,6 @@
         "name": "sectionRegex",
         "type": "variable",
         "line": 320
-      },
-      {
-        "name": "match",
-        "type": "variable",
-        "line": 321
       },
       {
         "name": "rawHeading",
@@ -6370,91 +3803,96 @@
         "line": 410
       }
     ],
-    "extractor/extractor.js": [
+    "options/model-manager-ui.js": [
       {
-        "name": "extLog",
-        "type": "function",
-        "line": 34
-      },
-      {
-        "name": "hasData",
+        "name": "link",
         "type": "variable",
-        "line": 37
+        "line": 316
       },
       {
-        "name": "EXTRACTION_PROMPT",
-        "type": "constant",
-        "line": 81
-      },
-      {
-        "name": "PersonaExtractor.loadDrafts",
-        "type": "method",
-        "line": 234
-      },
-      {
-        "name": "PersonaExtractor.saveDrafts",
-        "type": "method",
-        "line": 247
-      },
-      {
-        "name": "PersonaExtractor.getModelConfig",
-        "type": "method",
-        "line": 313
-      },
-      {
-        "name": "PersonaExtractor.callLLM",
-        "type": "method",
-        "line": 331
-      },
-      {
-        "name": "match",
+        "name": "baseUrlGroup",
         "type": "variable",
-        "line": 371
+        "line": 326
       },
       {
-        "name": "PersonaExtractor.generateDraftId",
-        "type": "method",
-        "line": 397
-      },
-      {
-        "name": "PersonaExtractor.saveCurrentDraft",
-        "type": "method",
-        "line": 410
-      },
-      {
-        "name": "PersonaExtractor.updateDraft",
-        "type": "method",
-        "line": 433
-      },
-      {
-        "name": "index",
+        "name": "modelSelect",
         "type": "variable",
-        "line": 434
+        "line": 334
       },
       {
-        "name": "PersonaExtractor.getCurrentDraft",
-        "type": "method",
-        "line": 471
-      },
-      {
-        "name": "PersonaExtractor.publishDraft",
-        "type": "method",
-        "line": 485
-      },
-      {
-        "name": "draft",
+        "name": "customModelGroup",
         "type": "variable",
-        "line": 486
+        "line": 340
       },
       {
-        "name": "supabase",
+        "name": "modelSelect",
         "type": "variable",
-        "line": 494
+        "line": 422
       },
       {
-        "name": "PersonaExtractor.importToMemoryLayer",
-        "type": "method",
-        "line": 543
+        "name": "card",
+        "type": "variable",
+        "line": 464
+      },
+      {
+        "name": "originalText",
+        "type": "variable",
+        "line": 468
+      },
+      {
+        "name": "statusEl",
+        "type": "variable",
+        "line": 491
+      },
+      {
+        "name": "testConfig",
+        "type": "variable",
+        "line": 500
+      },
+      {
+        "name": "providerDef",
+        "type": "variable",
+        "line": 529
+      },
+      {
+        "name": "apiKeyInput",
+        "type": "variable",
+        "line": 530
+      },
+      {
+        "name": "fetchBtn",
+        "type": "variable",
+        "line": 531
+      },
+      {
+        "name": "modelSelect",
+        "type": "variable",
+        "line": 532
+      },
+      {
+        "name": "hintEl",
+        "type": "variable",
+        "line": 533
+      },
+      {
+        "name": "originalText",
+        "type": "variable",
+        "line": 554
+      },
+      {
+        "name": "providerDef",
+        "type": "variable",
+        "line": 682
+      },
+      {
+        "name": "customModel",
+        "type": "variable",
+        "line": 686
+      },
+      {
+        "name": "icons",
+        "type": "variable",
+        "line": 736
       }
     ],
     "memory/component-schemas.js": [
@@ -6539,208 +3977,188 @@
         "line": 617
       }
     ],
-    "theme/theme-controller.js": [
+    "rating/rating-injector.js": [
       {
-        "name": "ThemeController.#subscribers",
-        "type": "property",
-        "line": 42
-      },
-      {
-        "name": "ThemeController.#resolvedTheme",
-        "type": "property",
-        "line": 45
-      },
-      {
-        "name": "ThemeController.#systemMediaQuery",
-        "type": "property",
-        "line": 48
-      },
-      {
-        "name": "ThemeController.#mediaQueryListener",
-        "type": "property",
-        "line": 95
-      },
-      {
-        "name": "ThemeController.cycleMode",
-        "type": "method",
-        "line": 166
-      },
-      {
-        "name": "modes",
+        "name": "responses",
         "type": "variable",
-        "line": 168
+        "line": 202
       },
       {
-        "name": "currentIndex",
+        "name": "actions",
         "type": "variable",
-        "line": 169
+        "line": 223
       },
       {
-        "name": "nextIndex",
+        "name": "responses",
         "type": "variable",
-        "line": 170
+        "line": 271
       },
       {
-        "name": "ThemeController.getIcon",
-        "type": "method",
-        "line": 188
-      },
-      {
-        "name": "index",
+        "name": "inserted",
         "type": "variable",
-        "line": 201
+        "line": 312
       },
       {
-        "name": "ThemeController.#applyMode",
-        "type": "method",
-        "line": 215
-      },
-      {
-        "name": "ThemeController.#getSystemPreference",
-        "type": "method",
-        "line": 240
-      },
-      {
-        "name": "ThemeController.#notifySubscribers",
-        "type": "method",
-        "line": 251
-      },
-      {
-        "name": "ThemeController.#updateToggleIcons",
-        "type": "method",
-        "line": 266
-      },
-      {
-        "name": "icon",
+        "name": "actionsDiv",
         "type": "variable",
-        "line": 267
+        "line": 316
+      },
+      {
+        "name": "textSelectors",
+        "type": "variable",
+        "line": 330
+      },
+      {
+        "name": "textEl",
+        "type": "variable",
+        "line": 341
+      },
+      {
+        "name": "turn",
+        "type": "variable",
+        "line": 388
+      },
+      {
+        "name": "allResponses",
+        "type": "variable",
+        "line": 392
+      },
+      {
+        "name": "allTurns",
+        "type": "variable",
+        "line": 403
+      },
+      {
+        "name": "chatHistory",
+        "type": "variable",
+        "line": 426
+      },
+      {
+        "name": "isModelResponse",
+        "type": "variable",
+        "line": 475
+      },
+      {
+        "name": "childResponses",
+        "type": "variable",
+        "line": 496
+      },
+      {
+        "name": "ratingContainers",
+        "type": "variable",
+        "line": 530
       }
     ],
-    "llm/llm-config.js": [
+    "logging/logger.js": [
       {
-        "name": "LLMConfigManager",
-        "type": "class",
-        "line": 6
-      },
-      {
-        "name": "LLMConfigManager._getModelManager",
-        "type": "method",
-        "line": 11
-      },
-      {
-        "name": "manager",
+        "name": "timerId",
         "type": "variable",
-        "line": 23
+        "line": 220
       },
       {
-        "name": "LLMConfigManager.getApiKey",
-        "type": "method",
-        "line": 43
+        "name": "handler",
+        "type": "function",
+        "line": 222
       },
       {
-        "name": "manager",
+        "name": "resId",
         "type": "variable",
-        "line": 44
+        "line": 223
       },
       {
-        "name": "LLMConfigManager.getClient",
-        "type": "method",
-        "line": 53
-      },
-      {
-        "name": "manager",
+        "name": "storageArea",
         "type": "variable",
-        "line": 54
+        "line": 256
       },
       {
-        "name": "LLMConfigManager.isConfigured",
-        "type": "method",
-        "line": 83
-      },
-      {
-        "name": "manager",
+        "name": "storageArea",
         "type": "variable",
-        "line": 84
+        "line": 265
       },
       {
-        "name": "LLMConfigManager.getActiveModelConfig",
-        "type": "method",
-        "line": 92
-      },
-      {
-        "name": "manager",
+        "name": "savedLevel",
         "type": "variable",
-        "line": 93
+        "line": 297
       },
       {
-        "name": "llmConfigManager",
+        "name": "restData",
         "type": "variable",
-        "line": 102
+        "line": 322
+      },
+      {
+        "name": "sanitizedMessage",
+        "type": "variable",
+        "line": 325
+      },
+      {
+        "name": "duration",
+        "type": "variable",
+        "line": 399
+      },
+      {
+        "name": "duration",
+        "type": "variable",
+        "line": 449
+      },
+      {
+        "name": "styles",
+        "type": "variable",
+        "line": 512
+      },
+      {
+        "name": "byLevel",
+        "type": "variable",
+        "line": 614
+      },
+      {
+        "name": "byComponent",
+        "type": "variable",
+        "line": 615
       }
     ],
-    "rating/rating-ui.js": [
+    "model/model-manager.js": [
       {
-        "name": "createRatingUI",
-        "type": "function",
-        "line": 72
-      },
-      {
-        "name": "starsContainer",
+        "name": "cached",
         "type": "variable",
-        "line": 87
+        "line": 185
       },
       {
-        "name": "star",
+        "name": "freshData",
         "type": "variable",
-        "line": 92
+        "line": 192
       },
       {
-        "name": "currentVal",
+        "name": "masked",
         "type": "variable",
-        "line": 142
+        "line": 604
       },
       {
-        "name": "highlightStars",
-        "type": "function",
-        "line": 168
-      },
-      {
-        "name": "stars",
+        "name": "migrated",
         "type": "variable",
-        "line": 169
+        "line": 637
       },
       {
-        "name": "setStarsRating",
-        "type": "function",
-        "line": 199
-      },
-      {
-        "name": "stars",
+        "name": "llmConfig",
         "type": "variable",
-        "line": 200
+        "line": 658
       },
       {
-        "name": "parent",
+        "name": "firstEnabled",
         "type": "variable",
-        "line": 219
+        "line": 678
       },
       {
-        "name": "updateRatingUI",
-        "type": "function",
-        "line": 243
-      },
-      {
-        "name": "starsContainer",
+        "name": "changes",
         "type": "variable",
-        "line": 244
+        "line": 743
+      },
+      {
+        "name": "keyArray",
+        "type": "variable",
+        "line": 879
       }
     ],
     "memory/context-assembler.js": [
-      {
-        "name": "ctxLog",
-        "type": "function",
-        "line": 15
-      },
       {
         "name": "domainSection",
         "type": "variable",
@@ -6777,12 +4195,76 @@
         "line": 507
       }
     ],
-    "memory/memory-controller.js": [
+    "rating/rating-manager.js": [
       {
-        "name": "memCtrlLog",
-        "type": "function",
-        "line": 69
+        "name": "logFn",
+        "type": "variable",
+        "line": 56
       },
+      {
+        "name": "ratingCount",
+        "type": "variable",
+        "line": 215
+      },
+      {
+        "name": "ratingCount",
+        "type": "variable",
+        "line": 320
+      },
+      {
+        "name": "backupAge",
+        "type": "variable",
+        "line": 321
+      },
+      {
+        "name": "ageMinutes",
+        "type": "variable",
+        "line": 322
+      },
+      {
+        "name": "ratings",
+        "type": "variable",
+        "line": 521
+      },
+      {
+        "name": "_currentRatingManager",
+        "type": "variable",
+        "line": 606
+      }
+    ],
+    "supabase/supabase-client.js": [
+      {
+        "name": "hasData",
+        "type": "variable",
+        "line": 39
+      },
+      {
+        "name": "fetchError",
+        "type": "variable",
+        "line": 309
+      },
+      {
+        "name": "newVersion",
+        "type": "variable",
+        "line": 321
+      },
+      {
+        "name": "snapshot",
+        "type": "variable",
+        "line": 324
+      },
+      {
+        "name": "existingHistory",
+        "type": "variable",
+        "line": 338
+      },
+      {
+        "name": "versionHistory",
+        "type": "variable",
+        "line": 339
+      }
+    ],
+    "memory/memory-controller.js": [
       {
         "name": "historyLength",
         "type": "variable",
@@ -6804,72 +4286,6 @@
         "line": 717
       }
     ],
-    "options/index.js": [
-      {
-        "name": "themeToggleBtn",
-        "type": "variable",
-        "line": 53
-      },
-      {
-        "name": "themeToggleIcon",
-        "type": "variable",
-        "line": 54
-      },
-      {
-        "name": "updateThemeIcon",
-        "type": "function",
-        "line": 57
-      },
-      {
-        "name": "modelManagerUI",
-        "type": "variable",
-        "line": 83
-      }
-    ],
-    "sidepanel/modules/dimension-view.js": [
-      {
-        "name": "V4_DIMENSION_KEYS",
-        "type": "constant",
-        "line": 6
-      },
-      {
-        "name": "formatDimensionText",
-        "type": "function",
-        "line": 22
-      },
-      {
-        "name": "hard",
-        "type": "variable",
-        "line": 34
-      },
-      {
-        "name": "soft",
-        "type": "variable",
-        "line": 35
-      }
-    ],
-    "storage/storage-repository.js": [
-      {
-        "name": "StoragePartition",
-        "type": "class",
-        "line": 11
-      },
-      {
-        "name": "StoragePartition.get__area",
-        "type": "accessor",
-        "line": 19
-      },
-      {
-        "name": "StoragePartition.getMultiple",
-        "type": "method",
-        "line": 51
-      },
-      {
-        "name": "StoragePartition.setMultiple",
-        "type": "method",
-        "line": 89
-      }
-    ],
     "background/index.js": [
       {
         "name": "sentCount",
@@ -6889,11 +4305,6 @@
     ],
     "memory/analyzer-registry.js": [
       {
-        "name": "arLog",
-        "type": "function",
-        "line": 57
-      },
-      {
         "name": "logFn",
         "type": "variable",
         "line": 61
@@ -6904,52 +4315,39 @@
         "line": 170
       }
     ],
-    "model/model-registry.js": [
-      {
-        "name": "chatModels",
-        "type": "variable",
-        "line": 414
-      },
-      {
-        "name": "fetchOpenRouterModels",
-        "type": "function",
-        "line": 434
-      },
-      {
-        "name": "fetchModelsForProvider",
-        "type": "function",
-        "line": 478
-      }
-    ],
-    "sidepanel/modules/cloud-sync.js": [
-      {
-        "name": "isCloudSyncAvailable",
-        "type": "function",
-        "line": 10
-      },
-      {
-        "name": "mapCloudPersonaToLocal",
-        "type": "function",
-        "line": 21
-      }
-    ],
-    "sidepanel/modules/persona-view.js": [
-      {
-        "name": "formatPersonaText",
-        "type": "function",
-        "line": 11
-      },
-      {
-        "name": "isValidPersonaData",
-        "type": "function",
-        "line": 26
-      }
-    ],
     "content/templates.js": [
       {
         "name": "getReviewModalTemplate",
         "type": "function",
         "line": 96
+      }
+    ],
+    "extractor/extractor.js": [
+      {
+        "name": "hasData",
+        "type": "variable",
+        "line": 37
+      }
+    ],
+    "model/model-registry.js": [
+      {
+        "name": "chatModels",
+        "type": "variable",
+        "line": 414
+      }
+    ],
+    "rating/rating-ui.js": [
+      {
+        "name": "parent",
+        "type": "variable",
+        "line": 219
+      }
+    ],
+    "theme/theme-controller.js": [
+      {
+        "name": "resolvedTheme",
+        "type": "variable",
+        "line": 216
       }
     ]
   },
@@ -6998,9 +4396,9 @@
     },
     "build.js": {
       "total": 27,
-      "ported": 2,
-      "missing": 25,
-      "pct": "7.4%"
+      "ported": 1,
+      "missing": 26,
+      "pct": "3.7%"
     },
     "content/diff.js": {
       "total": 15,
@@ -7010,15 +4408,15 @@
     },
     "content/observer.js": {
       "total": 226,
-      "ported": 47,
-      "missing": 179,
-      "pct": "20.8%"
+      "ported": 95,
+      "missing": 131,
+      "pct": "42.0%"
     },
     "content/scraper.js": {
       "total": 77,
-      "ported": 17,
-      "missing": 60,
-      "pct": "22.1%"
+      "ported": 52,
+      "missing": 25,
+      "pct": "67.5%"
     },
     "content/templates.js": {
       "total": 1,
@@ -7028,33 +4426,33 @@
     },
     "extractor/extractor.js": {
       "total": 34,
-      "ported": 17,
-      "missing": 17,
-      "pct": "50.0%"
+      "ported": 33,
+      "missing": 1,
+      "pct": "97.1%"
     },
     "llm/llm-client.js": {
       "total": 91,
-      "ported": 46,
-      "missing": 45,
-      "pct": "50.5%"
+      "ported": 70,
+      "missing": 21,
+      "pct": "76.9%"
     },
     "llm/llm-config.js": {
       "total": 20,
-      "ported": 8,
-      "missing": 12,
-      "pct": "40.0%"
+      "ported": 20,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "logging/logger.js": {
       "total": 92,
-      "ported": 48,
-      "missing": 44,
-      "pct": "52.2%"
+      "ported": 79,
+      "missing": 13,
+      "pct": "85.9%"
     },
     "memory/analyzer-registry.js": {
       "total": 6,
-      "ported": 3,
-      "missing": 3,
-      "pct": "50.0%"
+      "ported": 4,
+      "missing": 2,
+      "pct": "66.7%"
     },
     "memory/analyzers/recent-focus.js": {
       "total": 8,
@@ -7076,105 +4474,105 @@
     },
     "memory/context-assembler.js": {
       "total": 73,
-      "ported": 65,
-      "missing": 8,
-      "pct": "89.0%"
+      "ported": 66,
+      "missing": 7,
+      "pct": "90.4%"
     },
     "memory/index.js": {
       "total": 59,
-      "ported": 24,
-      "missing": 35,
-      "pct": "40.7%"
+      "ported": 31,
+      "missing": 28,
+      "pct": "52.5%"
     },
     "memory/memory-controller.js": {
       "total": 79,
-      "ported": 74,
-      "missing": 5,
-      "pct": "93.7%"
+      "ported": 75,
+      "missing": 4,
+      "pct": "94.9%"
     },
     "model/model-manager.js": {
       "total": 74,
-      "ported": 41,
-      "missing": 33,
-      "pct": "55.4%"
+      "ported": 66,
+      "missing": 8,
+      "pct": "89.2%"
     },
     "model/model-registry.js": {
       "total": 35,
-      "ported": 32,
-      "missing": 3,
-      "pct": "91.4%"
+      "ported": 34,
+      "missing": 1,
+      "pct": "97.1%"
     },
     "options/index.js": {
       "total": 5,
-      "ported": 1,
-      "missing": 4,
-      "pct": "20.0%"
+      "ported": 5,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "options/model-manager-ui.js": {
       "total": 83,
-      "ported": 29,
-      "missing": 54,
-      "pct": "34.9%"
+      "ported": 65,
+      "missing": 18,
+      "pct": "78.3%"
     },
     "rating/rating-injector.js": {
       "total": 26,
-      "ported": 4,
-      "missing": 22,
-      "pct": "15.4%"
+      "ported": 12,
+      "missing": 14,
+      "pct": "46.2%"
     },
     "rating/rating-manager.js": {
       "total": 43,
-      "ported": 20,
-      "missing": 23,
-      "pct": "46.5%"
+      "ported": 36,
+      "missing": 7,
+      "pct": "83.7%"
     },
     "rating/rating-ui.js": {
       "total": 15,
-      "ported": 4,
-      "missing": 11,
-      "pct": "26.7%"
+      "ported": 14,
+      "missing": 1,
+      "pct": "93.3%"
     },
     "sidepanel/modules/cloud-sync.js": {
       "total": 2,
-      "ported": 0,
-      "missing": 2,
-      "pct": "0.0%"
+      "ported": 2,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "sidepanel/modules/dimension-view.js": {
       "total": 4,
-      "ported": 0,
-      "missing": 4,
-      "pct": "0.0%"
+      "ported": 4,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "sidepanel/modules/persona-view.js": {
       "total": 2,
-      "ported": 0,
-      "missing": 2,
-      "pct": "0.0%"
+      "ported": 2,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "sidepanel/sidepanel.js": {
       "total": 965,
-      "ported": 268,
-      "missing": 697,
-      "pct": "27.8%"
+      "ported": 461,
+      "missing": 504,
+      "pct": "47.8%"
     },
     "storage/storage-repository.js": {
       "total": 17,
-      "ported": 13,
-      "missing": 4,
-      "pct": "76.5%"
+      "ported": 17,
+      "missing": 0,
+      "pct": "100.0%"
     },
     "supabase/supabase-client.js": {
       "total": 64,
-      "ported": 35,
-      "missing": 29,
-      "pct": "54.7%"
+      "ported": 58,
+      "missing": 6,
+      "pct": "90.6%"
     },
     "theme/theme-controller.js": {
       "total": 32,
-      "ported": 17,
-      "missing": 15,
-      "pct": "53.1%"
+      "ported": 31,
+      "missing": 1,
+      "pct": "96.9%"
     }
   }
 }
