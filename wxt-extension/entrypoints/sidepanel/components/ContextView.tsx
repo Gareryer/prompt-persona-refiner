@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { PersonaV4, DimensionId } from '../../../src/core/memory/schemas';
 import { ComponentSchemas } from '../../../src/core/memory/component-schemas';
 import { handleAddTag, handleRemoveTag } from '../../../src/core/sidepanel/tag-editor';
+import { ExpandableTextarea } from './ExpandableTextarea';
 
 export interface ContextViewProps {
   activePersona: PersonaV4 | null;
@@ -9,7 +10,7 @@ export interface ContextViewProps {
   onRebuild: () => Promise<void>;
   isRebuilding: boolean;
   lastUpdated: string;
-  onOpenExpand: (title: string, value: string, onSave: (val: string) => void) => void;
+  onOpenExpand?: (title: string, value: string, onSave: (val: string) => void) => void;
   onOpenSourcePrompt?: () => void;
   onPinComponent?: (componentId: string, pinned: boolean) => void;
 }
@@ -269,24 +270,16 @@ export const ContextView: React.FC<ContextViewProps> = ({
 
               {isExpanded && (
                 <div className="accordion-content">
-                  {/* Textarea Container */}
-                  <div className="textarea-container">
-                    <textarea
-                      id={`v4-${dim.id}-textarea`}
-                      className="persona-textarea"
-                      placeholder={dim.placeholder}
-                      rows={3}
-                      value={val}
-                      onChange={e => handleInstructionChange(dim.id, e.target.value)}
-                    />
-                    <button
-                      className="expand-btn"
-                      title="Expand Fullscreen"
-                      onClick={() => onOpenExpand(dim.title, val, (newVal) => handleInstructionChange(dim.id, newVal))}
-                    >
-                      <span className="material-symbols-outlined">expand_content</span>
-                    </button>
-                  </div>
+                  {/* Textarea Container with In-Place Fullscreen */}
+                  <ExpandableTextarea
+                    id={`v4-${dim.id}-textarea`}
+                    className="persona-textarea"
+                    placeholder={dim.placeholder}
+                    rows={3}
+                    value={val}
+                    onChange={e => handleInstructionChange(dim.id, e.target.value)}
+                    title={`Expand ${dim.title}`}
+                  />
 
                   {/* Verbatim In-Section Controls */}
                   <div className="verbatim-controls">
@@ -591,22 +584,14 @@ export const ContextView: React.FC<ContextViewProps> = ({
               <p className="help-text" style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>
                 Inject session-specific parameters, active project paths, or execution instructions:
               </p>
-              <div className="textarea-container">
-                <textarea
-                  className="context-textarea"
-                  placeholder="e.g. 'Never write comments explaining obvious syntax. Always run 4-gate verification.'"
-                  rows={3}
-                  value={injectedText}
-                  onChange={e => setInjectedText(e.target.value)}
-                />
-                <button
-                  className="expand-btn"
-                  title="Expand Fullscreen"
-                  onClick={() => onOpenExpand('Custom Injected Context', injectedText, setInjectedText)}
-                >
-                  <span className="material-symbols-outlined">expand_content</span>
-                </button>
-              </div>
+              <ExpandableTextarea
+                className="context-textarea"
+                placeholder="e.g. 'Never write comments explaining obvious syntax. Always run 4-gate verification.'"
+                rows={3}
+                value={injectedText}
+                onChange={e => setInjectedText(e.target.value)}
+                title="Expand Custom Injected Context"
+              />
             </div>
           )}
         </section>
@@ -623,6 +608,12 @@ export const ContextView: React.FC<ContextViewProps> = ({
           <span className="btn-content">
             <span className="material-symbols-outlined">auto_awesome</span>
             <span>{isRebuilding ? 'Rebuilding Memory...' : 'Rebuild Memory'}</span>
+          </span>
+          <span className="btn-spinner">
+            <svg className="spinner-svg" viewBox="0 0 50 50">
+              <circle className="spinner-track" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
+              <circle className="spinner-progress" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
+            </svg>
           </span>
         </button>
         <div className="footer-info">

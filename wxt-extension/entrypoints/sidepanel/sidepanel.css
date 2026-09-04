@@ -507,8 +507,18 @@ body {
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
+    border-radius: 12px;
+    transition: background 0.2s ease, border-radius 0.2s ease;
+}
+
+.accordion.expanded .accordion-header,
+.accordion-header[aria-expanded="true"] {
     border-radius: 24px;
-    transition: background 0.2s;
+    background: var(--color-active, rgba(227, 227, 227, 0.12));
+}
+
+.accordion:not(.expanded) .accordion-header {
+    border-radius: 12px;
 }
 
 /* Static (non-collapsible) accordion styling */
@@ -2289,6 +2299,16 @@ body {
         transform: scale(2.5);
         opacity: 0;
     }
+}
+
+.persona-item .chevron {
+    color: var(--color-text-tertiary);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.persona-item:hover .chevron {
+    transform: translateX(4px);
+    color: var(--color-text-primary);
 }
 
 

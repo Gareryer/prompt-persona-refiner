@@ -16,6 +16,7 @@ import { handleAddTag, handleRemoveTag } from '../../../src/core/sidepanel/tag-e
 import { PromptPreviewModal, type PromptTemplate } from './PromptPreviewModal';
 import { ReportModal } from './ReportModal';
 import { PersonaDetailModal } from './PersonaDetailModal';
+import { ExpandableTextarea } from './ExpandableTextarea';
 
 export { type PromptTemplate };
 
@@ -269,6 +270,23 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     });
   };
 
+  const handleCardClick = (id: string, e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const circle = document.createElement('span');
+    circle.className = 'ripple';
+    const size = Math.max(rect.width, rect.height);
+    circle.style.width = `${size}px`;
+    circle.style.height = `${size}px`;
+    circle.style.left = `${e.clientX - rect.left - size / 2}px`;
+    circle.style.top = `${e.clientY - rect.top - size / 2}px`;
+    card.appendChild(circle);
+    setTimeout(() => circle.remove(), 600);
+
+    setSelectedPersonaId(id);
+    setPage('detail');
+  };
+
   const handleSubmitReport = async (reason: string, details: string) => {
     if (!reportModalData) return;
     if (onReportPersona) {
@@ -304,7 +322,8 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 )}
               </div>
               <button
-                className={`btn btn-icon ${showFilters || selectedDomain ? 'has-filters' : ''}`}
+                id="search-filters-btn"
+                className={`btn btn-icon ${selectedDomain ? 'has-filters' : ''}`}
                 onClick={() => setShowFilters(!showFilters)}
                 title="Filter Domains"
               >
@@ -378,10 +397,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                   <div
                     key={id}
                     className={`persona-item browse-item ${activeId === id ? 'active-persona' : ''}`}
-                    onClick={() => {
-                      setSelectedPersonaId(id);
-                      setPage('detail');
-                    }}
+                    onClick={(e) => handleCardClick(id, e)}
                   >
                     <div className="persona-item-info">
                       <div className="persona-item-name">{p.metadata?.suggested_name || id}</div>
@@ -454,7 +470,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 {/* Role & Instruction */}
                 <div className="form-group">
                   <label className="form-label">Role & Identity <span className="required">*</span></label>
-                  <textarea
+                  <ExpandableTextarea
                     className="persona-textarea"
                     placeholder="Describe the persona's role, background, and operational purpose..."
                     rows={3}
@@ -463,13 +479,14 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                       setCreatedRole(e.target.value);
                       markFormDirty();
                     }}
+                    title="Expand Role & Identity"
                   />
                 </div>
 
                 {/* Domain Context */}
                 <div className="form-group">
                   <label className="form-label">Domain Knowledge & Scope</label>
-                  <textarea
+                  <ExpandableTextarea
                     className="persona-textarea"
                     placeholder="Technical background, specialized terminology, libraries..."
                     rows={2}
@@ -478,6 +495,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                       setCreatedContext(e.target.value);
                       markFormDirty();
                     }}
+                    title="Expand Domain Knowledge"
                   />
                 </div>
 
@@ -691,12 +709,13 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 </div>
                 <div className="form-group">
                   <label className="form-label">Prompt Content <span className="required">*</span></label>
-                  <textarea
+                  <ExpandableTextarea
                     className="persona-textarea"
                     placeholder="Enter prompt instructions with {variables}..."
                     rows={6}
                     value={newPromptContent}
                     onChange={e => setNewPromptContent(e.target.value)}
+                    title="Expand Prompt Content"
                   />
                 </div>
                 <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>

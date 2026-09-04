@@ -5,7 +5,6 @@ import { sendRpcMessage } from '../../src/lib/messaging/client';
 import { ContextView } from './components/ContextView';
 import { PersonaView } from './components/PersonaView';
 import { LogsView, type LogItem } from './components/LogsView';
-import { ExpandModal } from './components/ExpandModal';
 import { SourcePromptModal } from './components/SourcePromptModal';
 import { savePersonaToStorage } from '../../src/core/sidepanel/session-adapter';
 
@@ -20,19 +19,6 @@ export const SidepanelApp: React.FC = () => {
     { level: 'INFO', msg: 'Prompt Assistant initialized successfully (V4 Engine)', time: new Date().toLocaleTimeString() },
     { level: 'DEBUG', msg: 'Multi-chatbot adapter listening on active tab', time: new Date().toLocaleTimeString() }
   ]);
-
-  // Modal State
-  const [expandModal, setExpandModal] = useState<{
-    isOpen: boolean;
-    title: string;
-    value: string;
-    onSave: (val: string) => void;
-  }>({
-    isOpen: false,
-    title: '',
-    value: '',
-    onSave: () => {}
-  });
 
   const [sourceModalOpen, setSourceModalOpen] = useState(false);
 
@@ -213,7 +199,6 @@ export const SidepanelApp: React.FC = () => {
             onRebuild={handleRebuild}
             isRebuilding={isRebuilding}
             lastUpdated={lastUpdated}
-            onOpenExpand={(title, value, onSave) => setExpandModal({ isOpen: true, title, value, onSave })}
             onOpenSourcePrompt={() => setSourceModalOpen(true)}
             onPinComponent={(dimId, pinned) => sendRpcMessage(pinned ? 'PIN_COMPONENT' : 'UNPIN_COMPONENT', { sessionId: 'Tab-1', componentId: dimId })}
           />
@@ -239,18 +224,6 @@ export const SidepanelApp: React.FC = () => {
           />
         )}
       </main>
-
-      {/* Expand Textarea Modal */}
-      <ExpandModal
-        isOpen={expandModal.isOpen}
-        title={expandModal.title}
-        value={expandModal.value}
-        onChange={(val) => setExpandModal(prev => ({ ...prev, value: val }))}
-        onClose={() => {
-          expandModal.onSave(expandModal.value);
-          setExpandModal(prev => ({ ...prev, isOpen: false }));
-        }}
-      />
 
       {/* Source Conversation Prompt Modal */}
       <SourcePromptModal
