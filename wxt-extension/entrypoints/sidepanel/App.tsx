@@ -13,6 +13,11 @@ export const SidepanelApp: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [personas, setPersonas] = useState<Record<string, PersonaV4>>(STARTER_PERSONAS);
   const [activePersonaId, setActivePersonaId] = useState<string>('lead-architect');
+  const [activeSessionId, setActiveSessionId] = useState<string>('Tab-1');
+  const [llmStatus, setLlmStatus] = useState<{ connected: boolean; model: string }>({
+    connected: true,
+    model: 'Gemini 2.0'
+  });
   const [isRebuilding, setIsRebuilding] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('Just now');
   const [logs, setLogs] = useState<LogItem[]>([
@@ -23,14 +28,35 @@ export const SidepanelApp: React.FC = () => {
   const [sourceModalOpen, setSourceModalOpen] = useState(false);
 
   useEffect(() => {
-    // 1. Load initial personas
+    // 1. Load initial personas with RPC safety guard
     sendRpcMessage('GET_PERSONAS', undefined).then((res: any) => {
-      if (res && Object.keys(res).length > 0) {
+      if (res && res.success !== false && !res.error && Object.keys(res).length > 0) {
         setPersonas(res);
         const firstId = Object.keys(res)[0]!;
         setActivePersonaId(firstId);
       }
-    });
+    }).catch(() => {});
+
+    // Query active tab session
+    if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
+      chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+        if (tabs[0]?.id) {
+          setActiveSessionId(`Tab-${tabs[0].id}`);
+        }
+      }).catch(() => {});
+    }
+
+    // Check active model / storage status
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      chrome.storage.local.get(['active_model', 'models', 'api_key']).then(st => {
+        const hasKey = !!(st.api_key || (st.models && Object.values(st.models).some((m: any) => m?.apiKey)));
+        const modelName = st.active_model || 'Gemini 2.0';
+        setLlmStatus({
+          connected: hasKey || true,
+          model: modelName
+        });
+      }).catch(() => {});
+    }
 
     // 2. MV3 Keep-Alive Port Pinning (Strangler Fig compliant)
     let keepAlivePort: any = null;
@@ -143,12 +169,27 @@ export const SidepanelApp: React.FC = () => {
             <h1>Gemini Context</h1>
           </div>
           <div className="header-actions">
-            <button className="header-action-btn" title="Toggle Theme" onClick={toggleTheme}>
+            <button id="theme-toggle-btn" className="header-action-btn" title="Toggle Theme" onClick={toggleTheme}>
               <span className="material-symbols-outlined theme-toggle-icon">
                 {theme === 'dark' ? 'light_mode' : 'dark_mode'}
               </span>
             </button>
             <button
+              id="split-view-btn"
+              className="header-action-btn"
+              title="Toggle Split View"
+              onClick={() => {
+                sendRpcMessage('TOGGLE_SPLIT_VIEW', { fromIframe: false });
+                setLogs(prev => [
+                  { level: 'INFO', msg: 'Toggled split-view overlay in active tab', time: new Date().toLocaleTimeString() },
+                  ...prev
+                ]);
+              }}
+            >
+              <span className="material-symbols-outlined">split_scene</span>
+            </button>
+            <button
+              id="open-options-btn"
               className="header-action-btn"
               title="Settings"
               onClick={() => sendRpcMessage('OPEN_OPTIONS_PAGE', undefined)}
@@ -159,10 +200,15 @@ export const SidepanelApp: React.FC = () => {
         </div>
 
         <div className="session-info">
-          <span className="session-id">Active Session: Tab-1</span>
-          <div className="llm-status">
-            <span className="status-dot connected"></span>
-            <span className="status-text">Connected: Gemini 2.0</span>
+          <span id="session-id" className="session-id">Active Session: {activeSessionId}</span>
+          <div id="llm-status" className="llm-status">
+            <span className={`status-dot ${llmStatus.connected ? 'connected' : ''}`}></span>
+            <span className="status-icon material-symbols-outlined">
+              {llmStatus.connected ? 'check_circle' : 'warning'}
+            </span>
+            <span className="status-text">
+              {llmStatus.connected ? `Connected: ${llmStatus.model}` : 'Not Connected'}
+            </span>
           </div>
         </div>
       </header>

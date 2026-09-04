@@ -282,6 +282,37 @@ export default defineBackground(() => {
       return true;
     }
 
+    if (message.type === 'TOGGLE_SPLIT_VIEW') {
+      (async () => {
+        try {
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (tab?.id) {
+            await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_SPLIT_VIEW', fromIframe: message.fromIframe });
+          }
+          sendResponse({ success: true });
+        } catch (err: any) {
+          sendResponse({ success: false, error: err.message });
+        }
+      })();
+      return true;
+    }
+
+    if (message.type === 'SAVE_INJECTED_CONTEXT') {
+      (async () => {
+        try {
+          if (chrome.storage?.session) {
+            await chrome.storage.session.set({
+              user_injected_context: { text: message.text, injectedAt: Date.now() }
+            });
+          }
+          sendResponse({ success: true });
+        } catch (err: any) {
+          sendResponse({ success: false, error: err.message });
+        }
+      })();
+      return true;
+    }
+
     if (message.type === 'GET_DISABLED_FACTS') {
       const disabledKey = `session_${message.sessionId}_disabled`;
       chrome.storage.local.get(disabledKey).then(result => {

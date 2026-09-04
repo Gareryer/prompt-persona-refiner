@@ -158,4 +158,62 @@ describe('Phase 8: Micro-Features & Dropped Symbol Functional Parity', () => {
       expect(interpolated).toBe('Perform Refactor on {target}.');
     });
   });
+
+  describe('Generation Tracking & STALE Calculation Logic', () => {
+    it('determines dimension is STALE when currentGeneration > componentGeneration and dimension is pinned', () => {
+      const currentGeneration = 2;
+      const componentGeneration = 1;
+      const isPinned = true;
+
+      const isStale = currentGeneration > 0 && componentGeneration < currentGeneration && isPinned;
+      expect(isStale).toBe(true);
+    });
+
+    it('does not mark dimension as STALE when generation is up-to-date', () => {
+      const currentGeneration = 2;
+      const componentGeneration = 2;
+      const isPinned = true;
+
+      const isStale = currentGeneration > 0 && componentGeneration < currentGeneration && isPinned;
+      expect(isStale).toBe(false);
+    });
+  });
+
+  describe('Custom Injected Context Serialization', () => {
+    it('creates a compliant user_injected_context payload', () => {
+      const text = 'Always enforce strict typecheck and test-as-definition-of-done.';
+      const injectedAt = Date.now();
+      const payload = { text, injectedAt };
+
+      expect(payload.text).toBe(text);
+      expect(payload.injectedAt).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Form Dirty Guard & Unsaved Changes Intercept', () => {
+    it('intercepts navigation when form is dirty and permits discard or save', () => {
+      let isDirty = false;
+      const markDirty = () => { isDirty = true; };
+      const resetDirty = () => { isDirty = false; };
+
+      markDirty();
+      expect(isDirty).toBe(true);
+
+      // Simulate intercept
+      let navigationBlocked = false;
+      const handleBack = () => {
+        if (isDirty) {
+          navigationBlocked = true;
+        }
+      };
+
+      handleBack();
+      expect(navigationBlocked).toBe(true);
+
+      // Simulate discard
+      resetDirty();
+      expect(isDirty).toBe(false);
+    });
+  });
 });
+

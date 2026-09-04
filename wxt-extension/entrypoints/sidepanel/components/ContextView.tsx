@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { PersonaV4, DimensionId } from '../../../src/core/memory/schemas';
 import { ComponentSchemas } from '../../../src/core/memory/component-schemas';
 import { handleAddTag, handleRemoveTag } from '../../../src/core/sidepanel/tag-editor';
 import { ExpandableTextarea } from './ExpandableTextarea';
+import { sendRpcMessage } from '../../../src/lib/messaging/client';
 
 export interface ContextViewProps {
   activePersona: PersonaV4 | null;
@@ -31,17 +32,17 @@ const DIMENSION_DEFS: Array<{
   },
   {
     id: 'context',
-    title: 'Domain Context',
-    icon: 'domain',
-    placeholder: 'Technical background, library versions, constraints...',
-    emptyText: 'No domain context yet.'
+    title: 'Context',
+    icon: 'menu_book',
+    placeholder: 'Domain background, operational scope, and dependencies...',
+    emptyText: 'No context synthesized yet.'
   },
   {
     id: 'tone',
     title: 'Tone & Style',
     icon: 'record_voice_over',
-    placeholder: 'Communication style, conciseness, formatting preferences...',
-    emptyText: 'No tone profile yet.'
+    placeholder: 'Stylistic voice, directness, and prohibited phrases...',
+    emptyText: 'No tone parameters set.'
   },
   {
     id: 'framework',
@@ -105,6 +106,36 @@ export const ContextView: React.FC<ContextViewProps> = ({
   });
 
   const [injectedText, setInjectedText] = useState('');
+  const [injectedSaved, setInjectedSaved] = useState(false);
+  const [currentGeneration, setCurrentGeneration] = useState(0);
+
+  // Load custom injected context from session storage on mount
+  useEffect(() => {
+    if (typeof chrome !== 'undefined' && chrome.storage?.session) {
+      chrome.storage.session.get(['user_injected_context']).then((res: any) => {
+        if (res?.user_injected_context?.text) {
+          setInjectedText(res.user_injected_context.text);
+        }
+      }).catch(() => {});
+    }
+  }, []);
+
+  const handleSaveInjectedContext = async () => {
+    const text = injectedText.trim();
+    if (typeof chrome !== 'undefined' && chrome.storage?.session) {
+      await chrome.storage.session.set({
+        user_injected_context: { text, injectedAt: Date.now() }
+      }).catch(() => {});
+    }
+    sendRpcMessage('SAVE_INJECTED_CONTEXT', { text, sessionId: 'Tab-1' }).catch(() => {});
+    setInjectedSaved(true);
+    setTimeout(() => setInjectedSaved(false), 2500);
+  };
+
+  const handleRebuildClick = async () => {
+    setCurrentGeneration(prev => prev + 1);
+    await onRebuild();
+  };
 
   // Local inputs for custom tag fields
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
@@ -292,6 +323,14 @@ export const ContextView: React.FC<ContextViewProps> = ({
                       <span className="material-symbols-outlined badge-pin-icon">push_pin</span>
                       VERBATIM
                     </span>
+                    {isPinned && currentGeneration > 0 && (
+                      <span
+                        className="badge stale"
+                        title="Preserved from earlier generation"
+                      >
+                        STALE
+                      </span>
+                    )}
                     <label className="toggle-switch verbatim-switch" title="Toggle verbatim protection">
                       <input
                         type="checkbox"
@@ -577,7 +616,7 @@ export const ContextView: React.FC<ContextViewProps> = ({
             >
               chevron_right
             </span>
-            <span className="accordion-title">Custom Injected Context</span>
+            <span className="accordion-title">Custom Context</span>
           </button>
           {expandedMap['injected_context'] && (
             <div className="accordion-content">
@@ -585,13 +624,42 @@ export const ContextView: React.FC<ContextViewProps> = ({
                 Inject session-specific parameters, active project paths, or execution instructions:
               </p>
               <ExpandableTextarea
+                id="injected-context-input"
                 className="context-textarea"
                 placeholder="e.g. 'Never write comments explaining obvious syntax. Always run 4-gate verification.'"
                 rows={3}
                 value={injectedText}
-                onChange={e => setInjectedText(e.target.value)}
+                onChange={e => {
+                  setInjectedText(e.target.value);
+                  setInjectedSaved(false);
+                }}
                 title="Expand Custom Injected Context"
               />
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <button
+                  id="save-injected-context"
+                  className="btn btn-secondary btn-full"
+                  onClick={handleSaveInjectedContext}
+                  style={{ flex: 1 }}
+                >
+                  {injectedSaved ? '✓ Saved Extensions' : 'Save Extensions'}
+                </button>
+                {injectedText && (
+                  <button
+                    className="btn btn-secondary btn-small"
+                    title="Clear Context"
+                    onClick={() => {
+                      setInjectedText('');
+                      if (typeof chrome !== 'undefined' && chrome.storage?.session) {
+                        chrome.storage.session.remove(['user_injected_context']).catch(() => {});
+                      }
+                      sendRpcMessage('SAVE_INJECTED_CONTEXT', { text: '', sessionId: 'Tab-1' }).catch(() => {});
+                    }}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </section>
@@ -602,7 +670,7 @@ export const ContextView: React.FC<ContextViewProps> = ({
         <button
           id="rebuild-memory"
           className={`btn btn-primary btn-large btn-with-spinner ${isRebuilding ? 'loading' : ''}`}
-          onClick={onRebuild}
+          onClick={handleRebuildClick}
           disabled={isRebuilding}
         >
           <span className="btn-content">

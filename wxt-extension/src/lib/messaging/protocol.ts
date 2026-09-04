@@ -70,6 +70,14 @@ export interface ProtocolMap {
     request: { draft: any };
     response: { success: boolean; draftId?: string };
   };
+  TOGGLE_SPLIT_VIEW: {
+    request: { fromIframe?: boolean };
+    response: { success: boolean; isOpen?: boolean };
+  };
+  SAVE_INJECTED_CONTEXT: {
+    request: { text: string; sessionId: string };
+    response: { success: boolean };
+  };
 }
 
 export type MessageType = keyof ProtocolMap;

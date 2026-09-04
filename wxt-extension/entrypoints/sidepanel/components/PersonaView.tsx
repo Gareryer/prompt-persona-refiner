@@ -42,6 +42,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const [selectedTone, setSelectedTone] = useState<string | null>(null);
   const [editingPersonaId, setEditingPersonaId] = useState<string | null>(null);
   const [publishStatus, setPublishStatus] = useState<string | null>(null);
 
@@ -60,6 +61,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
   const [previewPrompt, setPreviewPrompt] = useState<PromptTemplate | null>(null);
   const [reportModalData, setReportModalData] = useState<{ id: string; name: string } | null>(null);
   const [detailModalPersonaId, setDetailModalPersonaId] = useState<string | null>(null);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
 
   // Prompts Library State
   const [prompts, setPrompts] = useState<PromptTemplate[]>([
@@ -88,8 +90,19 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     const name = p.metadata?.suggested_name || id;
     const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDomain = !selectedDomain || p.metadata?.domain?.toLowerCase() === selectedDomain.toLowerCase();
-    return matchesSearch && matchesDomain;
+    const toneMeta = p.tone?.metadata || {};
+    const traits = ((toneMeta.traits as string[]) || (toneMeta.style_tags as string[]) || []).map(t => t.toLowerCase());
+    const matchesTone = !selectedTone || traits.includes(selectedTone.toLowerCase());
+    return matchesSearch && matchesDomain && matchesTone;
   });
+
+  const handleBackFromCreate = () => {
+    if (hasUnsavedChanges()) {
+      setShowUnsavedModal(true);
+    } else {
+      setPage('browse');
+    }
+  };
 
   const filteredPrompts = prompts.filter(p => {
     const query = promptSearch.toLowerCase();
@@ -323,15 +336,15 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
               </div>
               <button
                 id="search-filters-btn"
-                className={`btn btn-icon ${selectedDomain ? 'has-filters' : ''}`}
+                className={`btn btn-icon ${selectedDomain || selectedTone ? 'has-filters' : ''}`}
                 onClick={() => setShowFilters(!showFilters)}
-                title="Filter Domains"
+                title="Filter Personas"
               >
                 <span className="material-symbols-outlined">tune</span>
               </button>
 
               {/* Filter Panel (M3 Floating Dropdown) */}
-              <div className={`filter-panel ${showFilters ? '' : 'hidden'}`}>
+              <div id="search-filters" className={`filter-panel ${showFilters ? '' : 'hidden'}`}>
                 <div className="filter-chip-group" data-filter="domain">
                   <span className="chip-group-label">
                     <span className="material-symbols-outlined">category</span> Domain
@@ -356,17 +369,45 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                     })}
                   </div>
                 </div>
-                {selectedDomain && (
-                  <div className="filter-reset-row">
+
+                <div className="filter-chip-group" data-filter="tone" style={{ marginTop: 8 }}>
+                  <span className="chip-group-label">
+                    <span className="material-symbols-outlined">record_voice_over</span> Tone
+                  </span>
+                  <div className="chip-row">
+                    {['All', 'Analytical', 'Technical', 'Precise', 'Casual'].map(t => {
+                      const isAll = t === 'All';
+                      const isSelected = isAll ? !selectedTone : selectedTone?.toLowerCase() === t.toLowerCase();
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          className={`filter-chip ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            setSelectedTone(isAll ? null : t);
+                            setShowFilters(false);
+                          }}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {(selectedDomain || selectedTone) && (
+                  <div className="filter-reset-row" style={{ marginTop: 10 }}>
                     <button
+                      id="filter-reset-btn"
                       className="filter-reset"
                       title="Reset Filters"
                       onClick={() => {
                         setSelectedDomain(null);
+                        setSelectedTone(null);
                         setShowFilters(false);
                       }}
                     >
-                      ✕
+                      Reset All Filters ✕
                     </button>
                   </div>
                 )}
@@ -437,6 +478,16 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 </div>
               )}
             </div>
+
+            {/* FAB - Create button matching legacy #persona-fab */}
+            <button
+              id="persona-fab"
+              className="fab"
+              title="Create Persona"
+              onClick={handleStartCreate}
+            >
+              <span className="material-symbols-outlined">add</span>
+            </button>
           </div>
         )}
 
@@ -444,10 +495,26 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
         {page === 'create' && (
           <div className="persona-page active">
             <div className="page-header">
-              <button className="back-nav-btn" onClick={() => setPage('browse')} title="Back">
+              <button className="back-nav-btn" onClick={handleBackFromCreate} title="Back">
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
-              <h3>{editingPersonaId ? 'Edit Persona' : 'Create Persona'}</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'space-between' }}>
+                <h3>{editingPersonaId ? 'Edit Persona' : 'Create Persona'}</h3>
+                {editingPersonaId && (
+                  <button
+                    id="btn-version-history"
+                    className="btn btn-secondary btn-small"
+                    title="Version History"
+                    onClick={() => {
+                      const p = personas[editingPersonaId];
+                      alert(`Version Snapshot for ${p?.metadata?.suggested_name || editingPersonaId}:\nVersion: v${(p?.metadata as any)?.version || '1.0.0'}\nStatus: Active\nDomain: ${p?.metadata?.domain || 'Tech'}`);
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>history</span>
+                    <span>v{(personas[editingPersonaId]?.metadata as any)?.version || '1.0.0'}</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="create-page-content" style={{ padding: '16px 0' }}>
@@ -465,6 +532,28 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                       markFormDirty();
                     }}
                   />
+                </div>
+
+                {/* Domain Area Selector Chips */}
+                <div className="form-group">
+                  <label className="form-label">Domain Area</label>
+                  <div className="v4-chip-group single-select">
+                    <div className="chips-container" style={{ flexWrap: 'wrap', gap: 6 }}>
+                      {['Tech', 'Creative', 'Business', 'Education', 'Health', 'Lifestyle', 'Other'].map(dom => (
+                        <button
+                          key={dom}
+                          type="button"
+                          className={`v4-chip preset ${selectedDomain === dom ? 'selected' : ''}`}
+                          onClick={() => {
+                            setSelectedDomain(dom);
+                            markFormDirty();
+                          }}
+                        >
+                          {dom}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Role & Instruction */}
@@ -900,6 +989,51 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
           onReport={(id, name) => setReportModalData({ id, name })}
           onExport={(id) => handleExportJson(id)}
         />
+      )}
+
+      {/* Unsaved Changes Confirmation Dialog */}
+      {showUnsavedModal && (
+        <div className="dialog-overlay" style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="dialog-container" style={{ background: 'var(--color-surface, #1e1f20)', borderRadius: 16, padding: 24, maxWidth: 360, width: '90%', border: '1px solid var(--color-outline)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span className="material-symbols-outlined" style={{ color: '#F9A825', fontSize: 28 }}>warning</span>
+              <h3 style={{ margin: 0, fontSize: 18, color: 'var(--color-text-primary)' }}>Unsaved Changes</h3>
+            </div>
+            <p style={{ margin: '0 0 20px 0', fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
+              You have unsaved changes in this persona. What would you like to do?
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button
+                id="btn-unsaved-save"
+                className="btn btn-primary"
+                onClick={() => {
+                  handleCreate();
+                  setShowUnsavedModal(false);
+                }}
+              >
+                Save & Leave
+              </button>
+              <button
+                id="btn-unsaved-discard"
+                className="btn btn-secondary"
+                onClick={() => {
+                  resetFormDirty();
+                  setShowUnsavedModal(false);
+                  setPage('browse');
+                }}
+              >
+                Discard Changes
+              </button>
+              <button
+                id="btn-unsaved-cancel"
+                className="btn btn-secondary"
+                onClick={() => setShowUnsavedModal(false)}
+              >
+                Keep Editing
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
