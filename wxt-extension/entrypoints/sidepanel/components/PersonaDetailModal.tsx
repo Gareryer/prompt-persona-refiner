@@ -32,64 +32,35 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
   const targetModel = metadata.target_model || 'Gemini 2.0 Flash / Pro';
 
   return (
-    <div
-      className="modal-scrim active"
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0, 0, 0, 0.65)',
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 16
-      }}
-    >
-      <div
-        className="modal-dialog"
-        onClick={e => e.stopPropagation()}
-        style={{
-          background: 'var(--color-surface, #1e1e1e)',
-          color: 'var(--color-text-primary, #ffffff)',
-          borderRadius: 12,
-          maxWidth: 520,
-          width: '100%',
-          maxHeight: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--color-outline, #333)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="material-symbols-outlined" style={{ color: 'var(--color-accent, #8ab4f8)' }}>badge</span>
-            <div>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{name}</h3>
-              <div style={{ fontSize: 11, color: 'var(--color-text-secondary, #aaa)' }}>By {author} · ID: {personaId}</div>
-            </div>
-          </div>
-          <button className="btn-icon" onClick={onClose} title="Close">
-            <span className="material-symbols-outlined">close</span>
-          </button>
+    <div className="persona-modal" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose} title="Close">
+          <span className="material-symbols-outlined">close</span>
+        </button>
+
+        <h2>{name}</h2>
+        <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: -12, marginBottom: 16 }}>
+          By {author} · ID: {personaId}
         </div>
 
         {/* Content */}
-        <div style={{ padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ padding: '0 0 16px 0', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Stats Bar */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, background: 'var(--color-surface-container, #282828)', padding: 10, borderRadius: 8 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
-              <span className="material-symbols-outlined" style={{ color: '#fbbc04', fontSize: 16 }}>star</span>
-              <span style={{ fontWeight: 600 }}>{rating}</span>
-              <span style={{ color: 'var(--color-text-secondary, #aaa)', fontSize: 11 }}>({raterCount})</span>
+          <div className="modal-stats">
+            <div className="stat">
+              <div className="stat-value">
+                {rating} <span className="material-symbols-outlined">star</span>
+              </div>
+              <div className="stat-label">{raterCount} ratings</div>
             </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, marginLeft: 12 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'var(--color-text-secondary, #aaa)' }}>download</span>
-              <span>{downloads} imports</span>
+            <div className="stat">
+              <div className="stat-value">{downloads}</div>
+              <div className="stat-label">Imports</div>
             </div>
-            <span className="badge" style={{ marginLeft: 'auto', fontSize: 11 }}>{domain.toUpperCase()}</span>
+            <div className="stat">
+              <div className="stat-value">v{metadata.version || '1.0'}</div>
+              <div className="stat-label">{domain.toUpperCase()}</div>
+            </div>
           </div>
 
           <div style={{ fontSize: 12, color: 'var(--color-text-secondary, #aaa)' }}>

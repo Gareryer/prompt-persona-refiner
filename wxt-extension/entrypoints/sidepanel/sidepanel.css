@@ -175,14 +175,25 @@
     overflow: hidden;
 }
 
+html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+}
+
 body {
     font-family: "Google Sans Flex", "Google Sans", "Helvetica Neue", sans-serif;
     background-color: var(--color-bg);
     color: var(--color-text-primary);
     font-size: 14px;
     line-height: 20px;
-    height: 100vh;
-    overflow: hidden;
 }
 
 /* Material Symbols Icon Styling */
@@ -451,6 +462,7 @@ body {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 /* Tab Content - Fill container */
@@ -2216,6 +2228,11 @@ body {
     /* For ripple containment */
 }
 
+.persona-item.active-persona {
+    border: 1.5px solid var(--color-accent);
+    background: var(--color-surface-container-high);
+}
+
 /* M3 State Layer (pseudo-element overlay) */
 .persona-item::after {
     content: '';
@@ -3577,11 +3594,10 @@ body {
 
 .create-page-content {
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 16px 0px 16px 0px;
     min-height: 0;
-    max-height: 100%;
-    /* Deduct panel-footer height */
     display: flex;
     flex-direction: column;
     gap: 16px;

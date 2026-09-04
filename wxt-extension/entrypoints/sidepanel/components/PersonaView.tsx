@@ -290,26 +290,72 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
         {page === 'browse' && (
           <div className="persona-page active">
             <div className="search-container">
-              <div className="search-box">
-                <span className="search-icon material-symbols-outlined">search</span>
+              <div className="search-input-wrapper">
+                <span className="material-symbols-outlined search-icon">search</span>
                 <input
                   type="text"
-                  placeholder="Search personas..."
+                  className="search-input"
+                  placeholder="Search personas by keyword, intent..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                 />
+                {searchQuery && (
+                  <button className="search-clear" onClick={() => setSearchQuery('')} title="Clear">✕</button>
+                )}
               </div>
               <button
-                className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
+                className={`btn btn-icon ${showFilters || selectedDomain ? 'has-filters' : ''}`}
                 onClick={() => setShowFilters(!showFilters)}
                 title="Filter Domains"
               >
                 <span className="material-symbols-outlined">tune</span>
               </button>
+
+              {/* Filter Panel (M3 Floating Dropdown) */}
+              <div className={`filter-panel ${showFilters ? '' : 'hidden'}`}>
+                <div className="filter-chip-group" data-filter="domain">
+                  <span className="chip-group-label">
+                    <span className="material-symbols-outlined">category</span> Domain
+                  </span>
+                  <div className="chip-row">
+                    {['All', 'Tech', 'Creative', 'Business', 'Education', 'Health', 'Lifestyle'].map(d => {
+                      const isAll = d === 'All';
+                      const isSelected = isAll ? !selectedDomain : selectedDomain?.toLowerCase() === d.toLowerCase();
+                      return (
+                        <button
+                          key={d}
+                          type="button"
+                          className={`filter-chip ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            setSelectedDomain(isAll ? null : d);
+                            setShowFilters(false);
+                          }}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                {selectedDomain && (
+                  <div className="filter-reset-row">
+                    <button
+                      className="filter-reset"
+                      title="Reset Filters"
+                      onClick={() => {
+                        setSelectedDomain(null);
+                        setShowFilters(false);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Quick Action Navigation Bar */}
-            <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+            <div style={{ display: 'flex', gap: 6, margin: '12px 0' }}>
               <button className="btn btn-primary btn-small" onClick={handleStartCreate} style={{ flex: 1 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
                 <span>Create</span>
@@ -318,87 +364,56 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>bookmark</span>
                 <span>Prompts ({prompts.length})</span>
               </button>
-              <label className="btn btn-secondary btn-small" style={{ cursor: 'pointer', margin: 0 }}>
+              <label className="btn btn-secondary btn-small" style={{ cursor: 'pointer', margin: 0, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload_file</span>
                 <span>Import</span>
                 <input type="file" accept=".json" onChange={handleImportJson} style={{ display: 'none' }} />
               </label>
             </div>
 
-            {/* Domain Filter Bar */}
-            {showFilters && (
-              <div className="filter-chips-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-                {['All', 'Tech', 'Creative', 'Business', 'Education'].map(d => {
-                  const isAll = d === 'All';
-                  const isSelected = isAll ? !selectedDomain : selectedDomain === d;
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      className={`v4-chip preset ${isSelected ? 'selected' : ''}`}
-                      onClick={() => setSelectedDomain(isAll ? null : d)}
-                    >
-                      {d}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
             {/* Persona Cards List */}
-            <div className="persona-cards-container" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div id="persona-results" className="persona-list">
               {filteredList.length > 0 ? (
                 filteredList.map(([id, p]) => (
                   <div
                     key={id}
-                    className={`persona-card ${activeId === id ? 'active-persona' : ''}`}
-                    style={{
-                      padding: 12,
-                      borderRadius: 8,
-                      border: '1px solid',
-                      borderColor: activeId === id ? 'var(--color-accent)' : 'var(--color-outline)',
-                      background: 'var(--color-surface-container)',
-                      cursor: 'pointer'
-                    }}
+                    className={`persona-item browse-item ${activeId === id ? 'active-persona' : ''}`}
                     onClick={() => {
                       setSelectedPersonaId(id);
                       setPage('detail');
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, fontSize: 14 }}>
-                        {p.metadata?.suggested_name || id}
-                      </span>
-                      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                        <button
-                          className="btn-icon"
-                          title="Quick Inspect"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDetailModalPersonaId(id);
-                          }}
-                        >
-                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span>
-                        </button>
-                        <span className="badge" style={{ fontSize: 10 }}>
-                          {p.metadata?.domain?.toUpperCase() || 'TECH'}
-                        </span>
+                    <div className="persona-item-info">
+                      <div className="persona-item-name">{p.metadata?.suggested_name || id}</div>
+                      <div className="persona-item-meta">
+                        <span className="status-chip private">{p.metadata?.domain?.toUpperCase() || 'TECH'}</span>
+                        <span className="version-badge">v{p.metadata?.version || '1.0.0'}</span>
+                        <span className="keywords-text">{p.persona?.instruction || ''}</span>
                       </div>
                     </div>
-                    <p style={{ margin: '0 0 8px 0', fontSize: 12, opacity: 0.8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {p.persona?.instruction || 'No description.'}
-                    </p>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11, opacity: 0.7 }}>
-                      <span>Version: {p.metadata?.version || '1.0.0'}</span>
-                      <span style={{ color: activeId === id ? 'var(--color-accent)' : 'inherit', fontWeight: activeId === id ? 600 : 400 }}>
-                        {activeId === id ? '● Active Persona' : 'Click to inspect'}
-                      </span>
+                    <div className="persona-item-actions">
+                      <button
+                        className="btn-icon"
+                        title="Quick Inspect"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDetailModalPersonaId(id);
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span>
+                      </button>
+                      {activeId === id && (
+                        <span className="material-symbols-outlined" style={{ color: 'var(--color-accent)', fontSize: 20 }}>
+                          check_circle
+                        </span>
+                      )}
                     </div>
+                    <span className="material-symbols-outlined chevron">chevron_right</span>
                   </div>
                 ))
               ) : (
-                <div className="empty-state" style={{ textAlign: 'center', padding: '32px 0' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 40, opacity: 0.5 }}>search</span>
+                <div className="empty-state">
+                  <span className="material-symbols-outlined">search</span>
                   <p>No personas found.</p>
                   <button className="btn btn-secondary btn-small" onClick={handleLoadStarterPresets} style={{ marginTop: 8 }}>
                     Load Starter Presets
@@ -412,77 +427,73 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
         {/* Create / Edit Form Page with Granular Controls */}
         {page === 'create' && (
           <div className="persona-page active">
-            <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <button className="btn-icon" onClick={() => setPage('browse')}>
+            <div className="page-header">
+              <button className="back-nav-btn" onClick={() => setPage('browse')} title="Back">
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
-              <h3 style={{ margin: 0, fontSize: 16 }}>
-                {editingPersonaId ? 'Edit Persona' : 'Create Persona'}
-              </h3>
+              <h3>{editingPersonaId ? 'Edit Persona' : 'Create Persona'}</h3>
             </div>
 
-            <div className="create-form" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {/* Persona Name & Domain */}
-              <div className="form-group">
-                <label className="form-label" style={{ display: 'block', marginBottom: 4, fontWeight: 600, fontSize: 13 }}>Persona Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Senior Frontend Architect"
-                  value={createdName}
-                  onChange={e => {
-                    setCreatedName(e.target.value);
-                    markFormDirty();
-                  }}
-                  style={{ width: '100%', padding: 8, borderRadius: 6, background: 'var(--color-surface-container)', color: 'var(--color-text-primary)', border: '1px solid var(--color-outline)' }}
-                />
-              </div>
-
-              {/* Role & Instruction */}
-              <div className="form-group">
-                <label className="form-label" style={{ display: 'block', marginBottom: 4, fontWeight: 600, fontSize: 13 }}>Role & Identity</label>
-                <textarea
-                  className="persona-textarea"
-                  placeholder="Describe the persona's role, background, and operational purpose..."
-                  rows={3}
-                  value={createdRole}
-                  onChange={e => {
-                    setCreatedRole(e.target.value);
-                    markFormDirty();
-                  }}
-                />
-              </div>
-
-              {/* Domain Context */}
-              <div className="form-group">
-                <label className="form-label" style={{ display: 'block', marginBottom: 4, fontWeight: 600, fontSize: 13 }}>Domain Knowledge & Scope</label>
-                <textarea
-                  className="persona-textarea"
-                  placeholder="Technical background, specialized terminology, libraries..."
-                  rows={2}
-                  value={createdContext}
-                  onChange={e => {
-                    setCreatedContext(e.target.value);
-                    markFormDirty();
-                  }}
-                />
-              </div>
-
-              {/* Granular Style Controls (renderExtStyle parity) */}
-              <div style={{ background: 'var(--color-surface-container-low)', padding: 12, borderRadius: 8, border: '1px solid var(--color-outline)' }}>
-                <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--color-accent)', marginBottom: 8 }}>
-                  Communication Style & Profiler
+            <div className="create-page-content" style={{ padding: '16px 0' }}>
+              <div className="create-form">
+                {/* Persona Name */}
+                <div className="form-group">
+                  <label className="form-label">Persona Name <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. Senior Frontend Architect"
+                    value={createdName}
+                    onChange={e => {
+                      setCreatedName(e.target.value);
+                      markFormDirty();
+                    }}
+                  />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 10 }}>
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 2 }}>Verbosity</label>
+                {/* Role & Instruction */}
+                <div className="form-group">
+                  <label className="form-label">Role & Identity <span className="required">*</span></label>
+                  <textarea
+                    className="persona-textarea"
+                    placeholder="Describe the persona's role, background, and operational purpose..."
+                    rows={3}
+                    value={createdRole}
+                    onChange={e => {
+                      setCreatedRole(e.target.value);
+                      markFormDirty();
+                    }}
+                  />
+                </div>
+
+                {/* Domain Context */}
+                <div className="form-group">
+                  <label className="form-label">Domain Knowledge & Scope</label>
+                  <textarea
+                    className="persona-textarea"
+                    placeholder="Technical background, specialized terminology, libraries..."
+                    rows={2}
+                    value={createdContext}
+                    onChange={e => {
+                      setCreatedContext(e.target.value);
+                      markFormDirty();
+                    }}
+                  />
+                </div>
+
+                {/* Granular Style Controls */}
+                <div className="section-header">Communication Style & Profiler</div>
+
+                <div className="metadata-row">
+                  <div className="form-group compact">
+                    <label className="form-label">Verbosity</label>
                     <select
+                      className="form-select"
                       value={editVerbosity}
                       onChange={e => {
                         setEditVerbosity(e.target.value as any);
                         markFormDirty();
                       }}
-                      style={{ width: '100%', padding: 6, fontSize: 12, borderRadius: 6, background: 'var(--color-surface-container)', color: 'inherit', border: '1px solid var(--color-outline)' }}
                     >
                       <option value="concise">Concise</option>
                       <option value="moderate">Moderate</option>
@@ -490,15 +501,15 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                     </select>
                   </div>
 
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 2 }}>Tech Level</label>
+                  <div className="form-group compact">
+                    <label className="form-label">Tech Level</label>
                     <select
+                      className="form-select"
                       value={editTechLevel}
                       onChange={e => {
                         setEditTechLevel(e.target.value as any);
                         markFormDirty();
                       }}
-                      style={{ width: '100%', padding: 6, fontSize: 12, borderRadius: 6, background: 'var(--color-surface-container)', color: 'inherit', border: '1px solid var(--color-outline)' }}
                     >
                       <option value="beginner">Beginner</option>
                       <option value="intermediate">Intermediate</option>
@@ -507,15 +518,15 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                     </select>
                   </div>
 
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 2 }}>Directness</label>
+                  <div className="form-group compact">
+                    <label className="form-label">Directness</label>
                     <select
+                      className="form-select"
                       value={editDirectness}
                       onChange={e => {
                         setEditDirectness(e.target.value as any);
                         markFormDirty();
                       }}
-                      style={{ width: '100%', padding: 6, fontSize: 12, borderRadius: 6, background: 'var(--color-surface-container)', color: 'inherit', border: '1px solid var(--color-outline)' }}
                     >
                       <option value="direct">Direct</option>
                       <option value="indirect">Indirect</option>
@@ -525,11 +536,11 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 </div>
 
                 {/* Traits Tag Editor */}
-                <div style={{ marginBottom: 10 }}>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 4 }}>Style Traits</label>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                <div className="form-group">
+                  <label className="form-label">Style Traits</label>
+                  <div className="chips-container">
                     {editTraits.map(tr => (
-                      <span key={tr} className="v4-chip custom selected" style={{ fontSize: 12 }}>
+                      <span key={tr} className="v4-chip custom selected">
                         {tr}
                         <button type="button" className="chip-remove" onClick={() => handleRemoveTrait(tr)}>×</button>
                       </span>
@@ -537,11 +548,11 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                       <input
                         type="text"
+                        className="chip-input"
                         placeholder="+ Add trait"
                         value={newTraitInput}
                         onChange={e => setNewTraitInput(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleAddTrait()}
-                        style={{ padding: '4px 8px', fontSize: 12, borderRadius: 12, border: '1px solid var(--color-outline)', background: 'transparent', color: 'inherit' }}
                       />
                       <button type="button" className="chip-add-btn" onClick={handleAddTrait}>+</button>
                     </div>
@@ -549,24 +560,29 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 </div>
 
                 {/* Preferred Response Style */}
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 2 }}>Preferred Style Statement</label>
+                <div className="form-group">
+                  <label className="form-label">Preferred Style Statement</label>
                   <input
                     type="text"
+                    className="form-input"
                     placeholder="e.g. 'Use bulleted summaries and code diffs first'"
                     value={editPrefStyle}
                     onChange={e => {
                       setEditPrefStyle(e.target.value);
                       markFormDirty();
                     }}
-                    style={{ width: '100%', padding: 6, fontSize: 12, borderRadius: 6, background: 'var(--color-surface-container)', color: 'inherit', border: '1px solid var(--color-outline)' }}
                   />
                 </div>
-              </div>
 
-              <button className="btn btn-primary btn-large btn-full" onClick={handleCreate} style={{ width: '100%', marginTop: 8 }}>
-                {editingPersonaId ? 'Update Persona' : 'Save Persona'}
-              </button>
+                <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                  <button className="btn btn-primary btn-large" onClick={handleCreate} style={{ flex: 1 }}>
+                    {editingPersonaId ? 'Update Persona' : 'Save Persona'}
+                  </button>
+                  <button className="btn btn-secondary btn-large" onClick={() => setPage('browse')} style={{ flex: 1 }}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -574,15 +590,13 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
         {/* Prompts Library Page */}
         {page === 'prompts' && (
           <div className="persona-page active">
-            <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <button className="btn-icon" onClick={() => setPage('browse')}>
-                  <span className="material-symbols-outlined">arrow_back</span>
-                </button>
-                <h3 style={{ margin: 0, fontSize: 16 }}>Prompts Library</h3>
-              </div>
+            <div className="page-header">
+              <button className="back-nav-btn" onClick={() => setPage('browse')} title="Back">
+                <span className="material-symbols-outlined">arrow_back</span>
+              </button>
+              <h3>Prompts Library</h3>
               <div style={{ display: 'flex', gap: 6 }}>
-                <label className="btn btn-secondary btn-small" style={{ cursor: 'pointer', margin: 0 }}>
+                <label className="btn btn-secondary btn-small" style={{ cursor: 'pointer', margin: 0, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                   <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload_file</span>
                   <span>Import</span>
                   <input type="file" accept=".json,.txt" onChange={handleImportPromptFile} style={{ display: 'none' }} />
@@ -594,31 +608,33 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
               </div>
             </div>
 
-            <div className="search-box" style={{ marginBottom: 12 }}>
-              <span className="search-icon material-symbols-outlined">search</span>
-              <input
-                type="text"
-                placeholder="Search prompt templates..."
-                value={promptSearch}
-                onChange={e => setPromptSearch(e.target.value)}
-              />
+            <div className="search-container" style={{ margin: '12px 0' }}>
+              <div className="search-input-wrapper">
+                <span className="material-symbols-outlined search-icon">search</span>
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Search prompt templates..."
+                  value={promptSearch}
+                  onChange={e => setPromptSearch(e.target.value)}
+                />
+                {promptSearch && (
+                  <button className="search-clear" onClick={() => setPromptSearch('')} title="Clear">✕</button>
+                )}
+              </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className="persona-list">
               {filteredPrompts.map(pr => (
-                <div
-                  key={pr.id}
-                  className="card"
-                  style={{ padding: 12, background: 'var(--color-surface-container)', borderRadius: 8, border: '1px solid var(--color-outline)' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>{pr.title}</span>
-                    <span className="badge" style={{ fontSize: 10 }}>{pr.category}</span>
+                <div key={pr.id} className="persona-item browse-item" style={{ minHeight: 'auto', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: 6 }}>
+                    <span className="persona-item-name">{pr.title}</span>
+                    <span className="version-badge">{pr.category}</span>
                   </div>
-                  <p style={{ margin: '0 0 8px 0', fontSize: 12, opacity: 0.85, whiteSpace: 'pre-wrap', maxHeight: 60, overflow: 'hidden' }}>
+                  <p style={{ margin: '0 0 10px 0', fontSize: 12, opacity: 0.85, whiteSpace: 'pre-wrap', maxHeight: 60, overflow: 'hidden', width: '100%' }}>
                     {pr.content}
                   </p>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, width: '100%' }}>
                     <button
                       className="btn btn-secondary btn-small"
                       title="Preview template with variable interpolation"
@@ -654,57 +670,65 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
         {/* Add Prompt Page */}
         {page === 'add-prompt' && (
           <div className="persona-page active">
-            <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <button className="btn-icon" onClick={() => setPage('prompts')}>
+            <div className="page-header">
+              <button className="back-nav-btn" onClick={() => setPage('prompts')} title="Back">
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
-              <h3 style={{ margin: 0, fontSize: 16 }}>Add Prompt Template</h3>
+              <h3>Add Prompt Template</h3>
             </div>
 
-            <div className="create-form">
-              <div className="form-group" style={{ marginBottom: 12 }}>
-                <label className="form-label" style={{ display: 'block', marginBottom: 4, fontWeight: 600, fontSize: 13 }}>Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Adversarial Code Review"
-                  value={newPromptTitle}
-                  onChange={e => setNewPromptTitle(e.target.value)}
-                  style={{ width: '100%', padding: 8, borderRadius: 6, background: 'var(--color-surface-container)', color: 'var(--color-text-primary)', border: '1px solid var(--color-outline)' }}
-                />
+            <div className="create-page-content" style={{ padding: '16px 0' }}>
+              <div className="create-form">
+                <div className="form-group">
+                  <label className="form-label">Title <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. Adversarial Code Review"
+                    value={newPromptTitle}
+                    onChange={e => setNewPromptTitle(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Prompt Content <span className="required">*</span></label>
+                  <textarea
+                    className="persona-textarea"
+                    placeholder="Enter prompt instructions with {variables}..."
+                    rows={6}
+                    value={newPromptContent}
+                    onChange={e => setNewPromptContent(e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                  <button
+                    className="btn btn-primary btn-large"
+                    style={{ flex: 1 }}
+                    onClick={async () => {
+                      if (newPromptTitle.trim() && newPromptContent.trim()) {
+                        const saved = await savePromptLocal({
+                          title: newPromptTitle,
+                          content: newPromptContent,
+                          category: 'Custom'
+                        });
+                        setPrompts(prev => [{
+                          id: saved.id,
+                          title: saved.title,
+                          content: saved.content,
+                          category: saved.category || 'Custom'
+                        }, ...prev]);
+                        setNewPromptTitle('');
+                        setNewPromptContent('');
+                        setPage('prompts');
+                      }
+                    }}
+                  >
+                    Save Prompt Template
+                  </button>
+                  <button className="btn btn-secondary btn-large" onClick={() => setPage('prompts')} style={{ flex: 1 }}>
+                    Cancel
+                  </button>
+                </div>
               </div>
-              <div className="form-group" style={{ marginBottom: 12 }}>
-                <label className="form-label" style={{ display: 'block', marginBottom: 4, fontWeight: 600, fontSize: 13 }}>Prompt Content</label>
-                <textarea
-                  className="persona-textarea"
-                  placeholder="Enter prompt instructions with {variables}..."
-                  rows={4}
-                  value={newPromptContent}
-                  onChange={e => setNewPromptContent(e.target.value)}
-                />
-              </div>
-              <button
-                className="btn btn-primary btn-full"
-                onClick={async () => {
-                  if (newPromptTitle.trim() && newPromptContent.trim()) {
-                    const saved = await savePromptLocal({
-                      title: newPromptTitle,
-                      content: newPromptContent,
-                      category: 'Custom'
-                    });
-                    setPrompts(prev => [{
-                      id: saved.id,
-                      title: saved.title,
-                      content: saved.content,
-                      category: saved.category || 'Custom'
-                    }, ...prev]);
-                    setNewPromptTitle('');
-                    setNewPromptContent('');
-                    setPage('prompts');
-                  }
-                }}
-              >
-                Save Prompt Template
-              </button>
             </div>
           </div>
         )}
@@ -712,82 +736,117 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
         {/* Detail Page */}
         {page === 'detail' && selectedPersonaId && personas[selectedPersonaId] && (
           <div className="persona-page active">
-            <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <button className="btn-icon" onClick={() => setPage('browse')}>
+            <div className="page-header">
+              <button className="back-nav-btn" onClick={() => setPage('browse')} title="Back">
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
-              <h3 style={{ margin: 0, fontSize: 16 }}>
-                {personas[selectedPersonaId]?.metadata?.suggested_name || selectedPersonaId}
-              </h3>
+              <h3>Persona Details</h3>
             </div>
 
-            <div className="card" style={{ padding: 16, marginBottom: 16, background: 'var(--color-surface-container)', borderRadius: 8, border: '1px solid var(--color-outline)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <span className="badge">{personas[selectedPersonaId]?.metadata?.domain?.toUpperCase() || 'TECH'}</span>
-                <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>ID: {selectedPersonaId}</span>
+            <div className="persona-detail-content" style={{ padding: '16px 0' }}>
+              <div className="modal-stats" style={{ marginBottom: 16 }}>
+                <div className="stat">
+                  <div className="stat-value">
+                    <span className="material-symbols-outlined">star</span>
+                    <span>{personas[selectedPersonaId]?.metadata?.rating ?? 4.8}</span>
+                  </div>
+                  <div className="stat-label">Rating</div>
+                </div>
+                <div className="stat">
+                  <div className="stat-value">
+                    <span className="material-symbols-outlined">download</span>
+                    <span>{personas[selectedPersonaId]?.metadata?.downloads ?? 45}</span>
+                  </div>
+                  <div className="stat-label">Imports</div>
+                </div>
+                <div className="stat">
+                  <div className="stat-value">
+                    <span>v{personas[selectedPersonaId]?.metadata?.version || '1.0.0'}</span>
+                  </div>
+                  <div className="stat-label">Version</div>
+                </div>
               </div>
-              <h4 style={{ margin: '0 0 6px 0', color: 'var(--color-accent)' }}>Role Definition</h4>
-              <p style={{ color: 'var(--color-text-primary)', fontSize: 13, lineHeight: 1.5, margin: 0 }}>
-                {personas[selectedPersonaId]?.persona?.instruction || 'No persona description.'}
-              </p>
-            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  onSelectActive(selectedPersonaId);
-                  setPage('browse');
-                }}
-              >
-                Set as Active Persona
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => handleStartEdit(personas[selectedPersonaId]!, selectedPersonaId)}
-              >
-                Edit Persona & Style Controls
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={async () => {
-                  const p = personas[selectedPersonaId];
-                  if (!p) return;
-                  setPublishStatus('Publishing...');
-                  const res = await handlePublishPersona({
-                    name: p.metadata?.suggested_name || selectedPersonaId,
-                    extractionData: p,
-                    domain: p.metadata?.domain
-                  });
-                  setPublishStatus(res.mode === 'cloud' ? 'Published to Community!' : 'Saved as Local Draft');
-                  setTimeout(() => setPublishStatus(null), 3000);
-                }}
-              >
-                {publishStatus || 'Publish to Community'}
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => handleExportJson(selectedPersonaId)}
-              >
-                Export Persona JSON
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => setReportModalData({ id: selectedPersonaId, name: personas[selectedPersonaId]?.metadata?.suggested_name || selectedPersonaId })}
-                style={{ color: 'var(--color-error)' }}
-              >
-                Report Persona (Community Moderation)
-              </button>
-              <button
-                className="btn btn-secondary"
-                style={{ color: 'var(--color-error)' }}
-                onClick={() => {
-                  onDeletePersona(selectedPersonaId);
-                  setPage('browse');
-                }}
-              >
-                Delete Persona
-              </button>
+              <div className="form-group" style={{ marginBottom: 16 }}>
+                <label className="form-label" style={{ fontSize: 16, fontWeight: 600 }}>
+                  {personas[selectedPersonaId]?.metadata?.suggested_name || selectedPersonaId}
+                </label>
+                <div className="persona-item-meta" style={{ marginTop: 4 }}>
+                  <span className="status-chip private">{personas[selectedPersonaId]?.metadata?.domain?.toUpperCase() || 'TECH'}</span>
+                  <span className="version-badge">ID: {selectedPersonaId}</span>
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 16 }}>
+                <label className="form-label">Role Definition & System Prompt</label>
+                <div className="persona-textarea" style={{ minHeight: 80, overflowY: 'auto' }}>
+                  {personas[selectedPersonaId]?.persona?.instruction || 'No persona description.'}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 20 }}>
+                <button
+                  className="btn btn-primary btn-large"
+                  onClick={() => {
+                    onSelectActive(selectedPersonaId);
+                    setPage('browse');
+                  }}
+                >
+                  <span className="material-symbols-outlined">check_circle</span>
+                  <span>Set as Active Persona</span>
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => handleStartEdit(personas[selectedPersonaId]!, selectedPersonaId)}
+                >
+                  <span className="material-symbols-outlined">edit</span>
+                  <span>Edit Persona & Style Controls</span>
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={async () => {
+                    const p = personas[selectedPersonaId];
+                    if (!p) return;
+                    setPublishStatus('Publishing...');
+                    const res = await handlePublishPersona({
+                      name: p.metadata?.suggested_name || selectedPersonaId,
+                      extractionData: p,
+                      domain: p.metadata?.domain
+                    });
+                    setPublishStatus(res.mode === 'cloud' ? 'Published to Community!' : 'Saved as Local Draft');
+                    setTimeout(() => setPublishStatus(null), 3000);
+                  }}
+                >
+                  <span className="material-symbols-outlined">cloud_upload</span>
+                  <span>{publishStatus || 'Publish to Community'}</span>
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => handleExportJson(selectedPersonaId)}
+                >
+                  <span className="material-symbols-outlined">download</span>
+                  <span>Export Persona JSON</span>
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setReportModalData({ id: selectedPersonaId, name: personas[selectedPersonaId]?.metadata?.suggested_name || selectedPersonaId })}
+                  style={{ color: 'var(--color-error)' }}
+                >
+                  <span className="material-symbols-outlined">flag</span>
+                  <span>Report Persona (Community Moderation)</span>
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  style={{ color: 'var(--color-error)' }}
+                  onClick={() => {
+                    onDeletePersona(selectedPersonaId);
+                    setPage('browse');
+                  }}
+                >
+                  <span className="material-symbols-outlined">delete</span>
+                  <span>Delete Persona</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

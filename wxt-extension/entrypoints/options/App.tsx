@@ -18,11 +18,16 @@ export const OptionsApp: React.FC = () => {
     maxTokens: 8192
   });
   const [pingStatus, setPingStatus] = useState<Record<string, { testing?: boolean; latencyMs?: number; success?: boolean }>>({});
-  const [toastMsg, setToastMsg] = useState('');
+  const [showKeyMap, setShowKeyMap] = useState<Record<string, boolean>>({});
+  const [statusMsg, setStatusMsg] = useState('');
 
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(''), 2500);
+  const showStatus = (msg: string) => {
+    setStatusMsg(msg);
+    setTimeout(() => setStatusMsg(''), 3000);
+  };
+
+  const toggleShowKey = (provider: string) => {
+    setShowKeyMap(prev => ({ ...prev, [provider]: !prev[provider] }));
   };
 
   const handleTestConnection = async (provider: string) => {
@@ -46,118 +51,189 @@ export const OptionsApp: React.FC = () => {
     a.download = `prompt-assistant-backup-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('Full backup exported successfully.');
+    showStatus('Full backup exported successfully.');
+  };
+
+  const handleSaveSettings = async () => {
+    await sendRpcMessage('UPDATE_SETTINGS', {
+      activeModelProvider: activeModel,
+      activeModelName: activeModel
+    });
+    showStatus('Settings saved successfully!');
   };
 
   return (
-    <div className="options-container" style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 24 }}>Prompt Assistant Settings</h1>
-          <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-secondary)' }}>
-            Configure BYOK model providers, inference parameters, and backups
-          </p>
+    <div className="container">
+      <header>
+        <div className="header-row">
+          <div className="logo">
+            <span className="material-symbols-outlined" style={{ fontSize: 32 }}>tune</span>
+            <h1>Prompt Assistant Settings</h1>
+          </div>
+          <button className="secondary-btn" onClick={handleExportBackup}>
+            <span className="material-symbols-outlined">download</span>
+            <span>Export Full Backup</span>
+          </button>
         </div>
-        <button className="btn btn-secondary" onClick={handleExportBackup}>
-          💾 Export Full Backup
-        </button>
       </header>
 
-      {toastMsg && (
-        <div className="badge badge-info" style={{ width: '100%', padding: 8, marginBottom: 16, textAlign: 'center' }}>
-          {toastMsg}
+      {statusMsg && (
+        <div style={{ background: 'var(--accent-color)', color: 'white', padding: '10px 16px', borderRadius: 8, marginBottom: 20, textAlign: 'center', fontWeight: 500 }}>
+          {statusMsg}
         </div>
       )}
 
       {/* Model Providers Section */}
-      <section className="card" style={{ padding: 20, marginBottom: 20 }}>
-        <h2 style={{ fontSize: 18, marginTop: 0 }}>Active LLM Provider & Model</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginTop: 16 }}>
-          {Object.values(MODEL_REGISTRY).map(m => (
-            <div
-              key={m.id}
-              onClick={() => setActiveModel(m.id)}
-              style={{
-                border: activeModel === m.id ? '2px solid var(--color-accent)' : '1px solid var(--color-outline-variant)',
-                borderRadius: 8,
-                padding: 12,
-                cursor: 'pointer',
-                background: 'var(--color-surface-container)'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong style={{ fontSize: 13 }}>{m.name}</strong>
-                {activeModel === m.id && <span className="badge">Active</span>}
+      <section className="card">
+        <div className="card-header">
+          <span className="material-symbols-outlined" style={{ fontSize: 24, color: 'var(--accent-color)' }}>smart_toy</span>
+          <h2>Active LLM Provider & Model</h2>
+        </div>
+        <p className="model-manager-description">
+          Select your primary synthesis model. Models marked active are invoked for real-time memory analysis.
+        </p>
+        <div className="model-list">
+          {Object.values(MODEL_REGISTRY).map(m => {
+            const isSelected = activeModel === m.id;
+            return (
+              <div
+                key={m.id}
+                className={`model-card ${isSelected ? 'active enabled' : ''}`}
+                onClick={() => setActiveModel(m.id)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="model-card-header">
+                  <div className="model-info">
+                    <span className="material-symbols-outlined model-icon">neurology</span>
+                    <span className="model-name">{m.name}</span>
+                  </div>
+                  <div className={`model-status ${isSelected ? 'enabled' : 'disabled'}`}>
+                    <span className="status-icon">●</span>
+                    <span>{isSelected ? 'Active Model' : 'Available'}</span>
+                  </div>
+                </div>
+                <div className="model-card-body">
+                  <div className="model-details">
+                    <span className="provider-badge">{m.id.toUpperCase()}</span>
+                    <span className="model-badge">{(m.models[0]?.contextWindow || 128000).toLocaleString()} Context</span>
+                    <span className="key-badge">BYOK Supported</span>
+                  </div>
+                </div>
+                <div className="model-card-actions">
+                  <button
+                    className={`action-btn ${isSelected ? 'activate-btn' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveModel(m.id);
+                    }}
+                  >
+                    {isSelected ? '✓ Current Default' : 'Set as Active'}
+                  </button>
+                </div>
               </div>
-              <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '4px 0 0 0' }}>
-                Context: {(m.models[0]?.contextWindow || 128000).toLocaleString()} tokens
-              </p>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* API Keys BYOK Section */}
+      <section className="card">
+        <div className="card-header">
+          <span className="material-symbols-outlined" style={{ fontSize: 24, color: 'var(--accent-color)' }}>key</span>
+          <h2>API Key Vault (AES-GCM 256-Bit Encrypted)</h2>
+        </div>
+        <div className="card-body">
+          <p className="description">
+            Your API keys are encrypted at rest with AES-GCM and never leave your browser extension.
+          </p>
+
+          {['gemini', 'openai', 'anthropic', 'deepseek'].map(p => (
+            <div className="input-group" key={p} style={{ marginBottom: 16 }}>
+              <label style={{ textTransform: 'capitalize' }}>{p} API Key</label>
+              <div className="api-key-wrapper">
+                <input
+                  type={showKeyMap[p] ? 'text' : 'password'}
+                  placeholder={`Enter ${p.toUpperCase()} API key...`}
+                  value={apiKeys[p] || ''}
+                  onChange={e => setApiKeys(prev => ({ ...prev, [p]: e.target.value }))}
+                />
+                <button
+                  type="button"
+                  className="toggle-visibility-btn"
+                  onClick={() => toggleShowKey(p)}
+                  title={showKeyMap[p] ? 'Hide Key' : 'Show Key'}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                    {showKeyMap[p] ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="secondary-btn small"
+                  onClick={() => handleTestConnection(p)}
+                  disabled={pingStatus[p]?.testing}
+                >
+                  {pingStatus[p]?.testing ? 'Testing...' : 'Test Connection'}
+                </button>
+              </div>
+              {pingStatus[p]?.latencyMs && (
+                <div className="hint" style={{ color: pingStatus[p]?.success ? 'var(--success-color)' : 'var(--error-color)', marginTop: 4 }}>
+                  {pingStatus[p]?.success ? `✓ Valid key (${pingStatus[p]?.latencyMs}ms)` : '✗ Invalid key or network error'}
+                </div>
+              )}
             </div>
           ))}
         </div>
       </section>
 
-      {/* API Keys BYOK Section */}
-      <section className="card" style={{ padding: 20, marginBottom: 20 }}>
-        <h2 style={{ fontSize: 18, marginTop: 0 }}>API Key Vault (AES-GCM 256-Bit Encrypted)</h2>
-        {['gemini', 'openai', 'anthropic', 'deepseek'].map(p => (
-          <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-            <label style={{ width: 100, textTransform: 'capitalize', fontWeight: 600 }}>{p}</label>
+      {/* Inference Parameters */}
+      <section className="card">
+        <div className="card-header">
+          <span className="material-symbols-outlined" style={{ fontSize: 24, color: 'var(--accent-color)' }}>tune</span>
+          <h2>Inference & Generation Parameters</h2>
+        </div>
+        <div className="card-body">
+          <div className="input-group" style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label>Temperature: {parameters.temperature}</label>
+              <span className="hint">0.0 (Precise) ➔ 1.0 (Creative)</span>
+            </div>
             <input
-              type="password"
-              placeholder={`${p.toUpperCase()} API Key...`}
-              value={apiKeys[p] || ''}
-              onChange={e => setApiKeys(prev => ({ ...prev, [p]: e.target.value }))}
-              style={{ flex: 1, padding: 8, borderRadius: 6, background: 'var(--color-surface-container)', color: 'var(--color-text-primary)', border: '1px solid var(--color-outline)' }}
+              type="range"
+              min="0"
+              max="1.5"
+              step="0.05"
+              value={parameters.temperature}
+              onChange={e => setParameters(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
+              style={{ width: '100%', accentColor: 'var(--accent-color)' }}
             />
-            <button
-              className="btn btn-secondary btn-small"
-              onClick={() => handleTestConnection(p)}
-              disabled={pingStatus[p]?.testing}
-            >
-              {pingStatus[p]?.testing ? 'Testing...' : 'Test Connection'}
-            </button>
-            {pingStatus[p]?.latencyMs && (
-              <span className="badge badge-success">{pingStatus[p]?.latencyMs}ms</span>
-            )}
           </div>
-        ))}
-      </section>
 
-      {/* Parameter Sliders */}
-      <section className="card" style={{ padding: 20 }}>
-        <h2 style={{ fontSize: 18, marginTop: 0 }}>Generation Parameters</h2>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <label>Temperature: {parameters.temperature}</label>
-            <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>More Creative ➔</span>
+          <div className="input-group">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label>Max Output Tokens: {parameters.maxTokens.toLocaleString()}</label>
+              <span className="hint">1,024 to 16,384 tokens</span>
+            </div>
+            <input
+              type="range"
+              min="1024"
+              max="16384"
+              step="512"
+              value={parameters.maxTokens}
+              onChange={e => setParameters(prev => ({ ...prev, maxTokens: parseInt(e.target.value) }))}
+              style={{ width: '100%', accentColor: 'var(--accent-color)' }}
+            />
           </div>
-          <input
-            type="range"
-            min="0"
-            max="1.5"
-            step="0.05"
-            value={parameters.temperature}
-            onChange={e => setParameters(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <label>Max Output Tokens: {parameters.maxTokens}</label>
-          </div>
-          <input
-            type="range"
-            min="1024"
-            max="16384"
-            step="512"
-            value={parameters.maxTokens}
-            onChange={e => setParameters(prev => ({ ...prev, maxTokens: parseInt(e.target.value) }))}
-            style={{ width: '100%' }}
-          />
         </div>
       </section>
+
+      {/* Save Button Footer */}
+      <footer style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+        <button className="primary-btn" onClick={handleSaveSettings}>
+          <span className="material-symbols-outlined">save</span>
+          <span>Save Changes</span>
+        </button>
+      </footer>
     </div>
   );
 };

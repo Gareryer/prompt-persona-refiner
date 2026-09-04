@@ -44,46 +44,13 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   };
 
   return (
-    <div
-      className="modal-scrim active"
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0, 0, 0, 0.65)',
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 16
-      }}
-    >
-      <div
-        className="modal-dialog"
-        onClick={e => e.stopPropagation()}
-        style={{
-          background: 'var(--color-surface, #1e1e1e)',
-          color: 'var(--color-text-primary, #ffffff)',
-          borderRadius: 12,
-          maxWidth: 440,
-          width: '100%',
-          maxHeight: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--color-outline, #333)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="material-symbols-outlined" style={{ color: 'var(--color-error, #ea4335)' }}>flag</span>
-            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Report Persona</h3>
-          </div>
-          <button className="btn-icon" onClick={onClose} title="Close">
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
+    <div className="persona-modal" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose} title="Close">
+          <span className="material-symbols-outlined">close</span>
+        </button>
+
+        <h2>Report Persona</h2>
 
         {/* Content */}
         <div style={{ padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>

@@ -351,11 +351,11 @@ export const ContextView: React.FC<ContextViewProps> = ({
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                             <input
                               type="text"
+                              className="chip-input"
                               placeholder="+ Add scope tag"
                               value={tagInputs['scope_tags'] || ''}
                               onChange={e => setTagInputs({ ...tagInputs, scope_tags: e.target.value })}
                               onKeyDown={e => e.key === 'Enter' && handleAddCustomTag('context', 'scope_tags', 'scope_tags')}
-                              style={{ padding: '4px 8px', fontSize: 12, borderRadius: 12, border: '1px solid var(--color-outline)', background: 'transparent', color: 'inherit' }}
                             />
                             <button
                               type="button"
@@ -412,11 +412,11 @@ export const ContextView: React.FC<ContextViewProps> = ({
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                             <input
                               type="text"
+                              className="chip-input"
                               placeholder="+ Add banned phrase"
                               value={tagInputs['banned_phrases'] || ''}
                               onChange={e => setTagInputs({ ...tagInputs, banned_phrases: e.target.value })}
                               onKeyDown={e => e.key === 'Enter' && handleAddCustomTag('tone', 'banned_phrases', 'banned_phrases')}
-                              style={{ padding: '4px 8px', fontSize: 12, borderRadius: 12, border: '1px solid var(--color-outline)', background: 'transparent', color: 'inherit' }}
                             />
                             <button
                               type="button"
@@ -477,11 +477,11 @@ export const ContextView: React.FC<ContextViewProps> = ({
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                             <input
                               type="text"
+                              className="chip-input"
                               placeholder="+ Add prohibition"
                               value={tagInputs['prohibitions'] || ''}
                               onChange={e => setTagInputs({ ...tagInputs, prohibitions: e.target.value })}
                               onKeyDown={e => e.key === 'Enter' && handleAddCustomTag('constraints', 'prohibitions', 'prohibitions')}
-                              style={{ padding: '4px 8px', fontSize: 12, borderRadius: 12, border: '1px solid var(--color-outline)', background: 'transparent', color: 'inherit' }}
                             />
                             <button
                               type="button"
@@ -514,11 +514,11 @@ export const ContextView: React.FC<ContextViewProps> = ({
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                             <input
                               type="text"
+                              className="chip-input"
                               placeholder="+ Add requirement"
                               value={tagInputs['requirements'] || ''}
                               onChange={e => setTagInputs({ ...tagInputs, requirements: e.target.value })}
                               onKeyDown={e => e.key === 'Enter' && handleAddCustomTag('constraints', 'requirements', 'requirements')}
-                              style={{ padding: '4px 8px', fontSize: 12, borderRadius: 12, border: '1px solid var(--color-outline)', background: 'transparent', color: 'inherit' }}
                             />
                             <button
                               type="button"
@@ -537,10 +537,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                         <label className="chip-group-label">Response Length Limit</label>
                         <input
                           type="text"
+                          className="form-input"
                           placeholder="e.g. Max 500 words, Under 3 paragraphs"
                           value={(metadata.response_length as string) || ''}
                           onChange={e => handleMetadataChange('constraints', 'response_length', e.target.value)}
-                          style={{ padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--color-outline)', background: 'transparent', color: 'inherit' }}
                         />
                       </div>
                     </div>
