@@ -48,8 +48,15 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
           {/* Stats Bar */}
           <div className="modal-stats">
             <div className="stat">
-              <div className="stat-value">
-                {rating} <span className="material-symbols-outlined">star</span>
+              <div className="stat-value" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                <span>{rating.toFixed(1)}</span>
+                <div style={{ display: 'inline-flex', gap: 1, color: '#fbbc04' }}>
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <span key={i} className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                      {rating >= i ? 'star' : (rating >= i - 0.5 ? 'star_half' : 'star_border')}
+                    </span>
+                  ))}
+                </div>
               </div>
               <div className="stat-label">{raterCount} ratings</div>
             </div>
@@ -120,6 +127,22 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
               <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
                 <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Invariants & Constraints</div>
                 <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{persona.constraints.instruction}</p>
+              </div>
+            )}
+
+            {/* Output Format */}
+            {persona.format?.instruction && (
+              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
+                <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Output Format & Rules</div>
+                <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{persona.format.instruction}</p>
+              </div>
+            )}
+
+            {/* Few-Shot Exemplars */}
+            {persona.exemplar?.instruction && (
+              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
+                <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Few-Shot Examples & Patterns</div>
+                <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{persona.exemplar.instruction}</p>
               </div>
             )}
           </div>

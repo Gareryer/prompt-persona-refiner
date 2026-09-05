@@ -25,7 +25,7 @@ export const LOG_COLORS = {
 export const LOGGER_CONFIG = {
   MAX_ENTRIES: 2000,
   PERSIST_INTERVAL_MS: 5000,
-  STORAGE_KEY: 'pa_logs'
+  STORAGE_KEY: 'allie_logs'
 };
 
 export const PII_PATTERNS = [

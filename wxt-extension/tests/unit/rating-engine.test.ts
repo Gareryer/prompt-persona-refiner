@@ -127,7 +127,7 @@ describe('Rating Subsystem Engine', () => {
     it('creates rating UI container with 5 stars and label', () => {
       const ui = createRatingUI(2, 4);
       expect(ui).toBeDefined();
-      expect(ui.className).toContain('pa-rating-container');
+      expect(ui.className).toContain('allie-rating-container');
       expect(ui.dataset.turnIndex).toBe('2');
       expect(ui.dataset.currentRating).toBe('4');
       expect(ui.dataset.rated).toBe('true');
@@ -137,7 +137,7 @@ describe('Rating Subsystem Engine', () => {
       const container = (globalThis as any).document.createElement('div');
       for (let i = 1; i <= 5; i++) {
         const star = (globalThis as any).document.createElement('button');
-        star.className = 'pa-star';
+        star.className = 'allie-star';
         container.appendChild(star);
       }
       highlightStars(container, 3);

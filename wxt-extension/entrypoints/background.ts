@@ -120,13 +120,14 @@ export default defineBackground(() => {
     if (message.type === 'CHECK_API_KEY') {
       (async () => {
         try {
-          const result = await chrome.storage.local.get(['geminiApiKey', 'pa_models', 'pa_active_model']);
+          const result = await chrome.storage.local.get(['geminiApiKey', 'allie_models', 'allie_active_model', 'pa_models', 'pa_active_model']);
           if (result.geminiApiKey && (result.geminiApiKey as string).length > 10) {
             sendResponse({ hasKey: true, canOpenOptions: true });
             return;
           }
-          if (result.pa_models) {
-            const hasEnabledModelWithKey = Object.values(result.pa_models as Record<string, any>).some(
+          const models = (result.allie_models || result.pa_models) as Record<string, any> | undefined;
+          if (models) {
+            const hasEnabledModelWithKey = Object.values(models).some(
               model => model.enabled && model.apiKey && model.apiKey.length > 10
             );
             if (hasEnabledModelWithKey) {
@@ -406,9 +407,10 @@ export default defineBackground(() => {
     if (message.type === 'GET_MODEL_CONFIG') {
       (async () => {
         try {
-          const result = await chrome.storage.local.get(['pa_models', 'pa_active_model']);
-          const models = (result.pa_models as Record<string, any>) || {};
-          const activeId = (result.pa_active_model as any)?.activeModelId || result.pa_active_model;
+          const result = await chrome.storage.local.get(['allie_models', 'allie_active_model', 'pa_models', 'pa_active_model']);
+          const models = ((result.allie_models || result.pa_models) as Record<string, any>) || {};
+          const rawActive = result.allie_active_model || result.pa_active_model;
+          const activeId = (rawActive as any)?.activeModelId || rawActive;
           const activeModel = activeId ? models[activeId] : null;
 
           if (activeModel && activeModel.enabled) {

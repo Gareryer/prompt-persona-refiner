@@ -1,4 +1,4 @@
-# Next-Gen Multi-Chatbot Prompt Assistant (WXT + React 19 + TypeScript)
+# Allie Persona & Prompt Refiner (WXT + React 19 + TypeScript)
 
 This directory contains the modernized, fully modular implementation of Prompt Persona & Refiner built on top of [WXT (Web Extension Toolbox)](https://wxt.dev/), React 19, TypeScript, and Vite.
 

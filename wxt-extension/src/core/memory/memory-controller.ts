@@ -93,7 +93,7 @@ export class MemoryController {
     if (MemoryController._bridgeInitialized || typeof window === 'undefined') return;
     MemoryController._bridgeInitialized = true;
 
-    window.addEventListener('pa-storage-response', (event: any) => {
+    window.addEventListener('allie-storage-response', (event: any) => {
       const { requestId, success, data, error } = event.detail || {};
       if (requestId === undefined || requestId === null) return;
       const pending = MemoryController._bridgeRequests.get(requestId);
@@ -145,7 +145,7 @@ export class MemoryController {
         }
       });
 
-      window.dispatchEvent(new CustomEvent('pa-storage-request', {
+      window.dispatchEvent(new CustomEvent('allie-storage-request', {
         detail: { action, key, data, requestId }
       }));
     });

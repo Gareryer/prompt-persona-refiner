@@ -48,7 +48,7 @@ export const OptionsApp: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `prompt-assistant-backup-${Date.now()}.json`;
+    a.download = `allie-persona-backup-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showStatus('Full backup exported successfully.');
@@ -68,7 +68,7 @@ export const OptionsApp: React.FC = () => {
         <div className="header-row">
           <div className="logo">
             <span className="material-symbols-outlined" style={{ fontSize: 32 }}>tune</span>
-            <h1>Prompt Assistant Settings</h1>
+            <h1>Allie Persona & Prompt Refiner Settings</h1>
           </div>
           <button className="secondary-btn" onClick={handleExportBackup}>
             <span className="material-symbols-outlined">download</span>

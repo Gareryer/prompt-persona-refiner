@@ -28,7 +28,7 @@ export interface RatingStats {
   };
 }
 
-export const RATINGS_KEY_PREFIX = 'pa_ratings_';
+export const RATINGS_KEY_PREFIX = 'allie_ratings_';
 
 export class RatingManager {
   public sessionId: string;
@@ -201,9 +201,10 @@ export class RatingManager {
       return false;
     }
     try {
-      const backupKey = `pa_ratings_backup_${this.sessionId}`;
-      const result = await chrome.storage.local.get(backupKey);
-      const backup = result?.[backupKey];
+      const backupKey = `allie_ratings_backup_${this.sessionId}`;
+      const legacyBackupKey = `pa_ratings_backup_${this.sessionId}`;
+      const result = await chrome.storage.local.get([backupKey, legacyBackupKey]);
+      const backup = result?.[backupKey] || result?.[legacyBackupKey];
       if (backup?.ratings && Object.keys(backup.ratings).length > 0) {
         this._cache = backup.ratings;
         this.save();
@@ -229,7 +230,7 @@ export class RatingManager {
           const sid = key.replace(RATINGS_KEY_PREFIX, '');
           const data = localStorage.getItem(key);
           if (data) {
-            allBackups[`pa_ratings_backup_${sid}`] = {
+            allBackups[`allie_ratings_backup_${sid}`] = {
               ratings: JSON.parse(data),
               backedUpAt: Date.now(),
               sessionId: sid

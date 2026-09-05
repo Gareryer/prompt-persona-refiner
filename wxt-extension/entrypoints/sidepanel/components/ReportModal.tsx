@@ -23,7 +23,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   onClose,
   onSubmit
 }) => {
-  const [selectedReason, setSelectedReason] = useState('spam');
+  const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [details, setDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -31,6 +31,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   if (!isOpen || !personaId) return null;
 
   const handleSubmit = async () => {
+    if (!selectedReason) return;
     setIsSubmitting(true);
     setErrorMsg(null);
     try {
@@ -134,8 +135,8 @@ export const ReportModal: React.FC<ReportModalProps> = ({
           <button
             className="btn btn-primary"
             onClick={handleSubmit}
-            disabled={isSubmitting}
-            style={{ background: 'var(--color-error, #ea4335)', borderColor: 'var(--color-error, #ea4335)' }}
+            disabled={isSubmitting || !selectedReason}
+            style={{ background: 'var(--color-error, #ea4335)', borderColor: 'var(--color-error, #ea4335)', opacity: (!selectedReason || isSubmitting) ? 0.6 : 1 }}
           >
             {isSubmitting ? 'Submitting...' : 'Submit Report'}
           </button>

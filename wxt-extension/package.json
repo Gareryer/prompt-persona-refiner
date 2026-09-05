@@ -1,7 +1,7 @@
 {
-  "name": "prompt-assistant-wxt",
+  "name": "allie-persona-prompt-refiner",
   "version": "1.0.0",
-  "description": "Persist personas and refine prompts across Gemini, ChatGPT, Claude, DeepSeek, Grok, and Meta AI",
+  "description": "Allie Persona & Prompt Refiner - Persist personas and refine prompts across Gemini, ChatGPT, Claude, DeepSeek, Grok, and Meta AI",
   "private": true,
   "type": "module",
   "scripts": {

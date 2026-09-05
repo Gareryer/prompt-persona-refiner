@@ -189,7 +189,7 @@ export const LLM_TRANSPORTS: Record<string, LLMTransport> = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
       'HTTP-Referer': 'https://gemini.google.com',
-      'X-Title': 'Prompt Assistant'
+      'X-Title': 'Allie Persona & Prompt Refiner'
     }),
     buildBody: (prompt, params = {}, model) => JSON.stringify({
       model: model || 'openai/gpt-oss-120b:free',
@@ -400,12 +400,12 @@ export async function handleRefinement(
       'globalPersona', 'selectedTemplate', 'contextVariables'
     ]);
 
-    const localStorage = await chrome.storage.local.get(['pa_models', 'pa_active_model']);
-    const paModels = (localStorage.pa_models as Record<string, any>) || {};
-    const activeModelId = (localStorage.pa_active_model as any)?.activeModelId;
+    const localStorage = await chrome.storage.local.get(['allie_models', 'allie_active_model', 'pa_models', 'pa_active_model']);
+    const allieModels = ((localStorage.allie_models || localStorage.pa_models) as Record<string, any>) || {};
+    const activeModelId = (localStorage.allie_active_model as any)?.activeModelId || (localStorage.pa_active_model as any)?.activeModelId;
 
     const effectiveModelId = modelId || activeModelId || 'gemini-2.0-flash';
-    let modelConfig = paModels[effectiveModelId];
+    let modelConfig = allieModels[effectiveModelId];
 
     if (!modelConfig) {
       modelConfig = MODEL_CONFIGS[effectiveModelId] || MODEL_CONFIGS['gemini-2.0-flash'];

@@ -2,7 +2,7 @@
 export const RATING_SELECTORS = {
   turnContainer: '[class*="model-response"], [class*="response-container"], .model-turn',
   turnContent: '.model-turn, message-content, [class*="message-content"]',
-  ratingBar: '.pa-rating-bar'
+  ratingBar: '.allie-rating-bar'
 } as const;
 
 export const INIT_DELAY_MS = 500;
@@ -38,7 +38,7 @@ export class RatingInjector {
 
     responseNodes.forEach((node, idx) => {
       if (this.injectedTurns.has(idx)) return;
-      if (node.querySelector('.pa-rating-container')) return;
+      if (node.querySelector('.allie-rating-container')) return;
 
       const currentRatingData = this.ratingManager.getRating(idx);
       const currentRating = currentRatingData ? currentRatingData.rating : null;
@@ -71,7 +71,7 @@ export class RatingInjector {
       this.observer = null;
     }
     if (typeof document !== 'undefined') {
-      document.querySelectorAll('.pa-rating-container').forEach(el => el.remove());
+      document.querySelectorAll('.allie-rating-container').forEach(el => el.remove());
     }
     this.injectedTurns.clear();
   }

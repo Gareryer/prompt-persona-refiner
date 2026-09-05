@@ -10,7 +10,7 @@ export async function getEncryptionKey(): Promise<CryptoKey> {
   if (cachedKey) return cachedKey;
 
   const extensionId = typeof chrome !== 'undefined' && chrome?.runtime?.id ? chrome.runtime.id : 'prompt-persona-refiner-v4';
-  const salt = new TextEncoder().encode('prompt-assistant-api-key-salt-v1');
+  const salt = new TextEncoder().encode('allie-refiner-api-key-salt-v1');
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(extensionId),

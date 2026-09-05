@@ -18,13 +18,13 @@ import { CryptoService } from '../crypto/crypto-service';
 import { logger } from '../logging/logger';
 
 export const MODEL_STORAGE_KEYS = {
-  MODELS: 'pa_models',
-  ACTIVE_MODEL: 'pa_active_model'
+  MODELS: 'allie_models',
+  ACTIVE_MODEL: 'allie_active_model'
 };
 
 export const LEGACY_STORAGE_KEYS = {
-  LLM_CONFIG: 'pa_llm_config',
-  ACTIVE_PROVIDER: 'pa_active_provider'
+  LLM_CONFIG: 'allie_llm_config',
+  ACTIVE_PROVIDER: 'allie_active_provider'
 };
 
 export function modelLog(level: 'info' | 'warn' | 'error' | 'debug', msg: string, data: Record<string, any> = {}): void {
@@ -55,7 +55,13 @@ export class ModelManager {
   public async _doInit(): Promise<void> {
     modelLog('debug', 'ModelManager initializing...');
     try {
-      const stored = await this._getFromStorage(MODEL_STORAGE_KEYS.MODELS);
+      let stored = await this._getFromStorage(MODEL_STORAGE_KEYS.MODELS);
+      if (!stored || Object.keys(stored).length === 0) {
+        const legacyStored = await this._getFromStorage('pa_models');
+        if (legacyStored && Object.keys(legacyStored).length > 0) {
+          stored = legacyStored;
+        }
+      }
       if (!stored || Object.keys(stored).length === 0) {
         this.cache = { ...DEFAULT_MODEL_CONFIGS };
         await this._saveToStorage(MODEL_STORAGE_KEYS.MODELS, DEFAULT_MODEL_CONFIGS);
@@ -158,7 +164,10 @@ export class ModelManager {
 
   async getActiveModelId(): Promise<string> {
     await this._ensureInitialized();
-    const activeId = await this._getFromStorage(MODEL_STORAGE_KEYS.ACTIVE_MODEL);
+    let activeId = await this._getFromStorage(MODEL_STORAGE_KEYS.ACTIVE_MODEL);
+    if (!activeId) {
+      activeId = await this._getFromStorage('pa_active_model');
+    }
     return activeId || 'gemini';
   }
 
@@ -227,10 +236,13 @@ export class ModelManager {
 
   async _migrateFromLegacy(): Promise<boolean> {
     try {
-      const legacy = await this._getFromStorage(LEGACY_STORAGE_KEYS.LLM_CONFIG);
+      let legacy = await this._getFromStorage(LEGACY_STORAGE_KEYS.LLM_CONFIG);
+      if (!legacy) {
+        legacy = await this._getFromStorage('pa_llm_config');
+      }
       if (legacy && legacy.apiKey && legacy.provider) {
         await this.setApiKey(legacy.provider, legacy.apiKey);
-        await this._removeFromStorage(LEGACY_STORAGE_KEYS.LLM_CONFIG);
+        await this._removeFromStorage([LEGACY_STORAGE_KEYS.LLM_CONFIG, 'pa_llm_config']);
         return true;
       }
     } catch (err) {

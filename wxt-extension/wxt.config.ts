@@ -9,7 +9,7 @@ export default defineConfig({
   publicDir: 'public',
   outDir: '.output',
   manifest: {
-    name: 'Prompt Assistant - AI Context-Aware Engineer',
+    name: 'Allie Persona & Prompt Refiner',
     version: '1.0.0',
     description: 'Persist personas and refine prompts across Gemini, ChatGPT, Claude, DeepSeek, Grok, and Meta AI',
     permissions: [
@@ -35,7 +35,7 @@ export default defineConfig({
       'https://openrouter.ai/*'
     ],
     action: {
-      default_title: 'Open Memory Control Panel',
+      default_title: 'Open Allie Persona & Prompt Refiner',
       default_icon: {
         '16': 'icons/icon16.png',
         '32': 'icons/icon32.png',
@@ -58,7 +58,7 @@ export default defineConfig({
         suggested_key: {
           default: 'Alt+M'
         },
-        description: 'Open Memory Control Panel'
+        description: 'Open Allie Persona & Prompt Refiner'
       }
     }
   },

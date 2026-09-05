@@ -147,12 +147,37 @@ export const ContextView: React.FC<ContextViewProps> = ({
   };
 
   const handleRebuildClick = async () => {
+    const confirmed = window.confirm(
+      'Rebuild memory? Unpinned dimensions will be re-synthesized from active chat history.'
+    );
+    if (!confirmed) return;
     setCurrentGeneration(prev => prev + 1);
     await onRebuild();
   };
 
   // Local inputs for custom tag fields
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
+
+  const handleTagInputKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    dimId: DimensionId,
+    field: string,
+    inputKey: string
+  ) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddCustomTag(dimId, field, inputKey);
+    } else if (e.key === 'Backspace' && !tagInputs[inputKey]) {
+      if (!activePersona) return;
+      const currentDim = activePersona[dimId] || { instruction: '' };
+      const currentList: string[] = (currentDim.metadata?.[field] as string[]) || [];
+      if (currentList.length > 0) {
+        e.preventDefault();
+        const lastTag = currentList[currentList.length - 1]!;
+        handleRemoveCustomTag(dimId, field, lastTag);
+      }
+    }
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedMap(prev => ({ ...prev, [id]: !prev[id] }));
@@ -385,6 +410,14 @@ export const ContextView: React.FC<ContextViewProps> = ({
                   </div>
 
                   {/* Dimension-Specific Interactive Metadata Controls */}
+                  {dim.id === 'persona' && (
+                    <div className="persona-name-display" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '6px 10px', background: 'var(--color-surface-container, rgba(255,255,255,0.04))', borderRadius: 8, fontSize: 12 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'var(--color-accent)' }}>badge</span>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>Persona Source:</span>
+                      <span style={{ fontWeight: 500 }}>{activePersona?.metadata?.suggested_name ? `Active: ${activePersona.metadata.suggested_name}` : 'Auto-generated (Global)'}</span>
+                    </div>
+                  )}
+
                   {dim.id === 'context' && (
                     <div className="dimension-metadata-group" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
                       {/* Domain: Single-Select Chips */}
@@ -430,7 +463,7 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               placeholder="+ Add scope tag"
                               value={tagInputs['scope_tags'] || ''}
                               onChange={e => setTagInputs({ ...tagInputs, scope_tags: e.target.value })}
-                              onKeyDown={e => e.key === 'Enter' && handleAddCustomTag('context', 'scope_tags', 'scope_tags')}
+                              onKeyDown={e => handleTagInputKeyDown(e, 'context', 'scope_tags', 'scope_tags')}
                             />
                             <button
                               type="button"
@@ -491,7 +524,7 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               placeholder="+ Add banned phrase"
                               value={tagInputs['banned_phrases'] || ''}
                               onChange={e => setTagInputs({ ...tagInputs, banned_phrases: e.target.value })}
-                              onKeyDown={e => e.key === 'Enter' && handleAddCustomTag('tone', 'banned_phrases', 'banned_phrases')}
+                              onKeyDown={e => handleTagInputKeyDown(e, 'tone', 'banned_phrases', 'banned_phrases')}
                             />
                             <button
                               type="button"
@@ -513,7 +546,7 @@ export const ContextView: React.FC<ContextViewProps> = ({
                       <div className="v4-chip-group single-select">
                         <label className="chip-group-label">Reasoning Methodology</label>
                         <div className="chips-container">
-                          {ComponentSchemas.enums.reasoning.map(r => {
+                          {Array.from(new Set([...ComponentSchemas.enums.reasoning, 'First Principles', 'ReAct'])).map(r => {
                             const isSelected = metadata.reasoning_type === r;
                             return (
                               <button
@@ -556,7 +589,7 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               placeholder="+ Add prohibition"
                               value={tagInputs['prohibitions'] || ''}
                               onChange={e => setTagInputs({ ...tagInputs, prohibitions: e.target.value })}
-                              onKeyDown={e => e.key === 'Enter' && handleAddCustomTag('constraints', 'prohibitions', 'prohibitions')}
+                              onKeyDown={e => handleTagInputKeyDown(e, 'constraints', 'prohibitions', 'prohibitions')}
                             />
                             <button
                               type="button"
@@ -593,7 +626,7 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               placeholder="+ Add requirement"
                               value={tagInputs['requirements'] || ''}
                               onChange={e => setTagInputs({ ...tagInputs, requirements: e.target.value })}
-                              onKeyDown={e => e.key === 'Enter' && handleAddCustomTag('constraints', 'requirements', 'requirements')}
+                              onKeyDown={e => handleTagInputKeyDown(e, 'constraints', 'requirements', 'requirements')}
                             />
                             <button
                               type="button"
@@ -627,7 +660,7 @@ export const ContextView: React.FC<ContextViewProps> = ({
                       <div className="v4-chip-group single-select">
                         <label className="chip-group-label">Target Output Format</label>
                         <div className="chips-container">
-                          {ComponentSchemas.enums.outputType.map(ot => {
+                          {Array.from(new Set([...ComponentSchemas.enums.outputType, 'Bullet Points', 'Table'])).map(ot => {
                             const isSelected = metadata.output_type === ot;
                             return (
                               <button
@@ -637,6 +670,66 @@ export const ContextView: React.FC<ContextViewProps> = ({
                                 onClick={() => handleMetadataChange('format', 'output_type', ot)}
                               >
                                 {ot}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Response Structure Rules: Custom Tags */}
+                      <div className="v4-chip-group multi-select">
+                        <label className="chip-group-label">Response Structure Rules</label>
+                        <div className="chips-container">
+                          {((metadata.structure_rules as string[]) || []).map(rule => (
+                            <span key={rule} className="v4-chip custom selected">
+                              {rule}
+                              <button
+                                type="button"
+                                className="chip-remove"
+                                onClick={() => handleRemoveCustomTag('format', 'structure_rules', rule)}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                            <input
+                              type="text"
+                              className="chip-input"
+                              placeholder="+ Add structure rule"
+                              value={tagInputs['structure_rules'] || ''}
+                              onChange={e => setTagInputs({ ...tagInputs, structure_rules: e.target.value })}
+                              onKeyDown={e => handleTagInputKeyDown(e, 'format', 'structure_rules', 'structure_rules')}
+                            />
+                            <button
+                              type="button"
+                              className="chip-add-btn"
+                              title="Add rule"
+                              onClick={() => handleAddCustomTag('format', 'structure_rules', 'structure_rules')}
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {dim.id === 'exemplar' && (
+                    <div className="dimension-metadata-group" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
+                      <div className="v4-chip-group single-select">
+                        <label className="chip-group-label">Exemplar Pattern Format</label>
+                        <div className="chips-container">
+                          {['Input-Output Pairs', 'Conversational Turns', 'Golden Snippets'].map(fmt => {
+                            const isSelected = (metadata.exemplar_format || 'Input-Output Pairs') === fmt;
+                            return (
+                              <button
+                                key={fmt}
+                                type="button"
+                                className={`v4-chip preset ${isSelected ? 'selected' : ''}`}
+                                onClick={() => handleMetadataChange('exemplar', 'exemplar_format', fmt)}
+                              >
+                                {fmt}
                               </button>
                             );
                           })}
@@ -663,9 +756,14 @@ export const ContextView: React.FC<ContextViewProps> = ({
           </button>
           {expandedMap['injected_context'] && (
             <div className="accordion-content">
-              <p className="help-text" style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>
-                Inject session-specific parameters, active project paths, or execution instructions:
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <p className="help-text" style={{ fontSize: 12, opacity: 0.8, margin: 0 }}>
+                  Inject session-specific parameters or active project paths:
+                </p>
+                <span className="token-counter" style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
+                  {injectedText.length} chars · ~{Math.ceil(injectedText.length / 4)} tokens
+                </span>
+              </div>
               <ExpandableTextarea
                 id="injected-context-input"
                 className="context-textarea"

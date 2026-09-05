@@ -1,5 +1,5 @@
 /**
- * @fileoverview Complete Standalone Theme Controller for Prompt Assistant Extension
+ * @fileoverview Complete Standalone Theme Controller for Allie Persona & Prompt Refiner Extension
  * Ported from theme/theme-controller.js (289 lines)
  * @module theme/theme-controller
  */

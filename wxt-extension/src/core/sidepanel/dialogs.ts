@@ -20,7 +20,7 @@ export interface DialogOptions {
 export function showNotification(message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info'): void {
   if (typeof document === 'undefined') return;
   const toast = document.createElement('div');
-  toast.className = `pa-notification pa-notification-${type}`;
+  toast.className = `allie-notification allie-notification-${type}`;
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
@@ -29,7 +29,7 @@ export function showNotification(message: string, type: 'info' | 'success' | 'wa
 export function showAlertDialog(options: DialogOptions): void {
   if (typeof document === 'undefined') return;
   const dialog = document.createElement('div');
-  dialog.className = 'pa-alert-dialog';
+  dialog.className = 'allie-alert-dialog';
   const cleanup = () => dialog.remove();
   const handleDismiss = () => { cleanup(); options.onDismiss?.(); };
   const handleRetry = () => { cleanup(); options.onRetry?.(); };
@@ -45,7 +45,7 @@ export function showConfirmDialog(options: DialogOptions): Promise<boolean> {
   return new Promise(resolve => {
     if (typeof document === 'undefined') return resolve(false);
     const dialog = document.createElement('div');
-    dialog.className = 'pa-confirm-dialog';
+    dialog.className = 'allie-confirm-dialog';
     const cleanup = () => dialog.remove();
     const handleConfirm = () => { cleanup(); options.onConfirm?.(); resolve(true); };
     const handleCancel = () => { cleanup(); options.onCancel?.(); resolve(false); };
@@ -62,7 +62,7 @@ export function showPromptDialog(options: DialogOptions): Promise<string | null>
   return new Promise(resolve => {
     if (typeof document === 'undefined') return resolve(null);
     const dialog = document.createElement('div');
-    dialog.className = 'pa-prompt-dialog';
+    dialog.className = 'allie-prompt-dialog';
     const cleanup = () => dialog.remove();
     const handleConfirm = (val: string) => { cleanup(); options.onConfirm?.(val); resolve(val); };
     const handleCancel = () => { cleanup(); options.onCancel?.(); resolve(null); };

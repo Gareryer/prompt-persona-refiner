@@ -4,12 +4,14 @@ import { STARTER_PERSONAS } from '../../src/core/memory/presets';
 import { sendRpcMessage } from '../../src/lib/messaging/client';
 import { ContextView } from './components/ContextView';
 import { PersonaView } from './components/PersonaView';
-import { LogsView, type LogItem } from './components/LogsView';
 import { SourcePromptModal } from './components/SourcePromptModal';
 import { savePersonaToStorage } from '../../src/core/sidepanel/session-adapter';
+import { ToastProvider, useToast } from './components/Toast';
+import { ThemeController } from '../../src/core/theme/theme-controller';
 
-export const SidepanelApp: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'context' | 'persona' | 'logs'>('context');
+const SidepanelAppContent: React.FC = () => {
+  const { showToast } = useToast();
+  const [activeTab, setActiveTab] = useState<'context' | 'persona'>('context');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [personas, setPersonas] = useState<Record<string, PersonaV4>>(STARTER_PERSONAS);
   const [activePersonaId, setActivePersonaId] = useState<string>('lead-architect');
@@ -20,14 +22,23 @@ export const SidepanelApp: React.FC = () => {
   });
   const [isRebuilding, setIsRebuilding] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('Just now');
-  const [logs, setLogs] = useState<LogItem[]>([
-    { level: 'INFO', msg: 'Prompt Assistant initialized successfully (V4 Engine)', time: new Date().toLocaleTimeString() },
-    { level: 'DEBUG', msg: 'Multi-chatbot adapter listening on active tab', time: new Date().toLocaleTimeString() }
-  ]);
 
   const [sourceModalOpen, setSourceModalOpen] = useState(false);
 
+  const isIframe = typeof window !== 'undefined' && window.self !== window.top;
+  const [splitViewActive, setSplitViewActive] = useState(isIframe);
+  const [splitViewBusy, setSplitViewBusy] = useState(false);
+
   useEffect(() => {
+    // 0. Theme Controller Initialization & Subscription
+    ThemeController.init().then(() => {
+      setTheme(ThemeController.getResolvedTheme());
+    }).catch(() => {});
+
+    const unsubscribeTheme = ThemeController.subscribe(resolvedTheme => {
+      setTheme(resolvedTheme);
+    });
+
     // 1. Load initial personas with RPC safety guard
     sendRpcMessage('GET_PERSONAS', undefined).then((res: any) => {
       if (res && res.success !== false && !res.error && Object.keys(res).length > 0) {
@@ -37,11 +48,27 @@ export const SidepanelApp: React.FC = () => {
       }
     }).catch(() => {});
 
-    // Query active tab session
+    // Query active tab session and parse Gemini chat URL
     if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
       chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-        if (tabs[0]?.id) {
-          setActiveSessionId(`Tab-${tabs[0].id}`);
+        const activeTab = tabs[0];
+        if (activeTab?.url) {
+          try {
+            const urlObj = new URL(activeTab.url);
+            if (urlObj.hostname.includes('gemini.google.com')) {
+              const pathParts = urlObj.pathname.split('/').filter(Boolean);
+              if (pathParts.length >= 2 && pathParts[0] === 'app') {
+                setActiveSessionId(pathParts[1]!);
+                return;
+              } else if (pathParts.length === 1 && pathParts[0] === 'app') {
+                setActiveSessionId('new_chat');
+                return;
+              }
+            }
+          } catch {}
+        }
+        if (activeTab?.id) {
+          setActiveSessionId(`Tab-${activeTab.id}`);
         }
       }).catch(() => {});
     }
@@ -71,34 +98,32 @@ export const SidepanelApp: React.FC = () => {
       }
     }
 
-    // 3. Storage Session Sync for Diagnostics Logs
-    if (typeof chrome !== 'undefined' && chrome.storage?.session) {
-      chrome.storage.session.get(['extension_logs']).then((res: any) => {
-        if (Array.isArray(res.extension_logs) && res.extension_logs.length > 0) {
-          setLogs(prev => [
-            ...res.extension_logs.map((l: any) => ({
-              level: (l.level || 'INFO').toUpperCase() as any,
-              msg: l.msg || l.message || JSON.stringify(l),
-              time: l.timestamp ? new Date(l.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString()
-            })),
-            ...prev
-          ]);
-        }
-      }).catch(() => {});
-    }
-
     return () => {
+      unsubscribeTheme();
       if (keepAlivePort) {
         try { keepAlivePort.disconnect(); } catch {}
       }
     };
   }, []);
 
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
+  const toggleTheme = async () => {
+    const next = await ThemeController.toggleTheme();
     setTheme(next);
-    document.documentElement.setAttribute('data-theme', next);
     sendRpcMessage('SET_THEME', { theme: next });
+    showToast(`Theme switched to ${next} mode`, 'info', 1500);
+  };
+
+  const handleToggleSplitView = async () => {
+    if (splitViewBusy) return;
+    setSplitViewBusy(true);
+    try {
+      const nextActive = !splitViewActive;
+      setSplitViewActive(nextActive);
+      await sendRpcMessage('TOGGLE_SPLIT_VIEW', { fromIframe: isIframe });
+      showToast(nextActive ? 'Split view enabled' : 'Split view closed', 'info', 2000);
+    } finally {
+      setTimeout(() => setSplitViewBusy(false), 300);
+    }
   };
 
   const handleUpdateActivePersona = (updated: PersonaV4) => {
@@ -124,10 +149,7 @@ export const SidepanelApp: React.FC = () => {
     setActivePersonaId(id);
     sendRpcMessage('SAVE_PERSONA', { id, persona });
     savePersonaToStorage(persona, id).catch(() => {});
-    setLogs(prev => [
-      { level: 'INFO', msg: `Saved persona: ${persona.metadata?.suggested_name || id}`, time: new Date().toLocaleTimeString() },
-      ...prev
-    ]);
+    showToast(`Saved persona: ${persona.metadata?.suggested_name || id}`, 'success', 2500);
   };
 
   const handleDeletePersona = (id: string) => {
@@ -137,6 +159,7 @@ export const SidepanelApp: React.FC = () => {
       return next;
     });
     sendRpcMessage('DELETE_PERSONA', { id });
+    showToast('Persona deleted', 'info', 2000);
     if (activePersonaId === id) {
       const remaining = Object.keys(personas).filter(k => k !== id);
       if (remaining.length > 0) setActivePersonaId(remaining[0]!);
@@ -148,10 +171,7 @@ export const SidepanelApp: React.FC = () => {
     try {
       await new Promise(r => setTimeout(r, 1200));
       setLastUpdated(new Date().toLocaleTimeString());
-      setLogs(prev => [
-        { level: 'INFO', msg: 'Rebuilt 7D memory layer from active chat turns', time: new Date().toLocaleTimeString() },
-        ...prev
-      ]);
+      showToast('Memory rebuilt from chat history', 'success', 2500);
     } finally {
       setIsRebuilding(false);
     }
@@ -166,7 +186,7 @@ export const SidepanelApp: React.FC = () => {
         <div className="header-row">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="material-symbols-outlined" style={{ color: 'var(--color-accent)', fontSize: 24 }}>psychology</span>
-            <h1>Gemini Context</h1>
+            <h1>Allie Persona & Prompt Refiner</h1>
           </div>
           <div className="header-actions">
             <button id="theme-toggle-btn" className="header-action-btn" title="Toggle Theme" onClick={toggleTheme}>
@@ -176,17 +196,14 @@ export const SidepanelApp: React.FC = () => {
             </button>
             <button
               id="split-view-btn"
-              className="header-action-btn"
-              title="Toggle Split View"
-              onClick={() => {
-                sendRpcMessage('TOGGLE_SPLIT_VIEW', { fromIframe: false });
-                setLogs(prev => [
-                  { level: 'INFO', msg: 'Toggled split-view overlay in active tab', time: new Date().toLocaleTimeString() },
-                  ...prev
-                ]);
-              }}
+              className={`header-action-btn ${splitViewActive ? 'active' : ''}`}
+              title={splitViewActive ? "Close Split View" : "Toggle Split View"}
+              onClick={handleToggleSplitView}
+              disabled={splitViewBusy}
             >
-              <span className="material-symbols-outlined">split_scene</span>
+              <span className="material-symbols-outlined">
+                {splitViewActive ? 'close' : 'split_scene'}
+              </span>
             </button>
             <button
               id="open-options-btn"
@@ -201,7 +218,7 @@ export const SidepanelApp: React.FC = () => {
 
         <div className="session-info">
           <span id="session-id" className="session-id">Active Session: {activeSessionId}</span>
-          <div id="llm-status" className="llm-status">
+          <div id="llm-status" className={`llm-status ${llmStatus.connected ? 'connected' : 'warning'}`}>
             <span className={`status-dot ${llmStatus.connected ? 'connected' : ''}`}></span>
             <span className="status-icon material-symbols-outlined">
               {llmStatus.connected ? 'check_circle' : 'warning'}
@@ -226,13 +243,6 @@ export const SidepanelApp: React.FC = () => {
           onClick={() => setActiveTab('persona')}
         >
           <span className="material-symbols-outlined">emoji_people</span> Persona
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'logs' ? 'active' : ''}`}
-          onClick={() => setActiveTab('logs')}
-        >
-          <span className="material-symbols-outlined">terminal</span> Logs
-          <span className="badge badge-count tab-log-count">{logs.length}</span>
         </button>
       </nav>
 
@@ -262,13 +272,6 @@ export const SidepanelApp: React.FC = () => {
             }}
           />
         )}
-
-        {activeTab === 'logs' && (
-          <LogsView
-            logs={logs}
-            onClear={() => setLogs([])}
-          />
-        )}
       </main>
 
       {/* Source Conversation Prompt Modal */}
@@ -283,5 +286,13 @@ export const SidepanelApp: React.FC = () => {
         onRebuildFromSource={handleRebuild}
       />
     </div>
+  );
+};
+
+export const SidepanelApp: React.FC = () => {
+  return (
+    <ToastProvider>
+      <SidepanelAppContent />
+    </ToastProvider>
   );
 };

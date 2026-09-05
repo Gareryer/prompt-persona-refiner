@@ -87,7 +87,7 @@ export function findInputContainer(): HTMLElement | null {
 
 export function createSettingsIcon(): HTMLElement {
   const btn = document.createElement('button');
-  btn.className = 'pa-settings-btn';
+  btn.className = 'allie-settings-btn';
   btn.innerHTML = '⚙';
   btn.title = 'Open Settings';
   btn.onclick = () => safeSendMessage({ type: 'OPEN_OPTIONS_PAGE' });
@@ -95,13 +95,13 @@ export function createSettingsIcon(): HTMLElement {
 }
 
 export function updateModelIndicator(modelName: string): void {
-  const el = findElement('.pa-model-indicator');
+  const el = findElement('.allie-model-indicator');
   if (el) el.textContent = modelName;
 }
 
 export function createRefineToggle(onToggle: (active: boolean) => void): HTMLElement {
   const toggle = document.createElement('button');
-  toggle.className = 'pa-refine-toggle';
+  toggle.className = 'allie-refine-toggle';
   toggle.textContent = '✨ Refine';
   toggle.onclick = () => onToggle(true);
   return toggle;
@@ -113,7 +113,7 @@ export function updateState(updates: Record<string, any>): Record<string, any> {
 
 export function createReviewModal(original: string, refined: string): HTMLElement {
   const modal = document.createElement('div');
-  modal.className = 'pa-review-modal';
+  modal.className = 'allie-review-modal';
   modal.innerHTML = `
     <div class="modal-content">
       <div class="diff-view">
@@ -159,7 +159,7 @@ export function generateDiffHTML(original: string, refined: string): string {
 }
 
 export function updateCharCount(count: number): void {
-  const el = findElement('.pa-char-count');
+  const el = findElement('.allie-char-count');
   if (el) el.textContent = String(count);
 }
 
@@ -176,7 +176,7 @@ export function navigateNextOriginal(): void {}
 export function navigatePrevRefined(): void {}
 export function navigateNextRefined(): void {}
 export function dismissErrorBanner(): void {
-  const banner = findElement('.pa-error-banner');
+  const banner = findElement('.allie-error-banner');
   if (banner) banner.remove();
 }
 
@@ -187,7 +187,7 @@ export function pasteToInput(text: string): boolean {
 export function injectInterface(): void {}
 export function updateSettingsPosition(): void {}
 export function updateVisibility(visible: boolean): void {
-  const el = findElement('.pa-injected-container');
+  const el = findElement('.allie-injected-container');
   if (el) el.style.display = visible ? 'block' : 'none';
 }
 

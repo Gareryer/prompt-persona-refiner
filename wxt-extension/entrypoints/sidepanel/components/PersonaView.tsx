@@ -54,6 +54,8 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [selectedTone, setSelectedTone] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [editingPersonaId, setEditingPersonaId] = useState<string | null>(null);
   const [publishStatus, setPublishStatus] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
@@ -98,7 +100,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
   const [newPromptContent, setNewPromptContent] = useState('');
   const [promptSearch, setPromptSearch] = useState('');
 
-  // Version History Mock State
+  // Version History State
   const [versions, setVersions] = useState<Array<{ version: string; date: string; author: string; changes: string }>>([
     { version: 'v1.0.0', date: 'Initial Synthesis', author: 'Local User', changes: 'Synthesized core role and instructions' }
   ]);
@@ -140,6 +142,22 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     }
   };
 
+  const handleDuplicatePersona = (id: string) => {
+    const source = personas[id];
+    if (!source) return;
+    const newId = `${id}-copy-${Date.now().toString(36).slice(-4)}`;
+    const copyName = `${source.metadata?.suggested_name || id} (Copy)`;
+    const duplicated: PersonaV4 = {
+      ...JSON.parse(JSON.stringify(source)),
+      metadata: {
+        ...source.metadata,
+        suggested_name: copyName,
+        created_at: new Date().toISOString()
+      }
+    };
+    onSavePersona(newId, duplicated);
+  };
+
   const filteredList = Object.entries(personas).filter(([id, p]) => {
     const name = p.metadata?.suggested_name || id;
     const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -147,7 +165,16 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     const toneMeta = p.tone?.metadata || {};
     const traits = ((toneMeta.traits as string[]) || (toneMeta.style_tags as string[]) || []).map(t => t.toLowerCase());
     const matchesTone = !selectedTone || traits.includes(selectedTone.toLowerCase());
-    return matchesSearch && matchesDomain && matchesTone;
+
+    const isDraft = (p.metadata as any)?.status === 'draft' || (p.metadata as any)?.visibility === 'private';
+    const matchesStatus =
+      !selectedStatus ||
+      selectedStatus === 'All' ||
+      (selectedStatus === 'Active' && id === activeId) ||
+      (selectedStatus === 'Draft' && isDraft) ||
+      (selectedStatus === 'Public' && !isDraft);
+
+    return matchesSearch && matchesDomain && matchesTone && matchesStatus;
   });
 
   const filteredPrompts = prompts.filter(p => {
@@ -476,12 +503,13 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
 
               {/* Filter Panel (M3 Floating Dropdown) */}
               <div id="search-filters" className={`filter-panel ${showFilters ? '' : 'hidden'}`}>
+                {/* Domain Chips */}
                 <div className="filter-chip-group" data-filter="domain">
                   <span className="chip-group-label">
                     <span className="material-symbols-outlined">category</span> Domain
                   </span>
                   <div className="chip-row">
-                    {['All', 'Tech', 'Creative', 'Business', 'Education', 'Health', 'Lifestyle'].map(d => {
+                    {['All', 'Tech', 'Creative', 'Business', 'Education', 'Academic', 'Health', 'Lifestyle'].map(d => {
                       const isAll = d === 'All';
                       const isSelected = isAll ? !selectedDomain : selectedDomain?.toLowerCase() === d.toLowerCase();
                       return (
@@ -489,10 +517,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                           key={d}
                           type="button"
                           className={`filter-chip ${isSelected ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedDomain(isAll ? null : d);
-                            setShowFilters(false);
-                          }}
+                          onClick={() => setSelectedDomain(isAll ? null : d)}
                         >
                           {d}
                         </button>
@@ -501,6 +526,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                   </div>
                 </div>
 
+                {/* Tone Chips */}
                 <div className="filter-chip-group" data-filter="tone" style={{ marginTop: 8 }}>
                   <span className="chip-group-label">
                     <span className="material-symbols-outlined">record_voice_over</span> Tone
@@ -514,10 +540,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                           key={t}
                           type="button"
                           className={`filter-chip ${isSelected ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedTone(isAll ? null : t);
-                            setShowFilters(false);
-                          }}
+                          onClick={() => setSelectedTone(isAll ? null : t)}
                         >
                           {t}
                         </button>
@@ -526,8 +549,31 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                   </div>
                 </div>
 
-                {(selectedDomain || selectedTone) && (
-                  <div className="filter-reset-row" style={{ marginTop: 10 }}>
+                {/* Status Chips */}
+                <div className="filter-chip-group" data-filter="status" style={{ marginTop: 8 }}>
+                  <span className="chip-group-label">
+                    <span className="material-symbols-outlined">verified</span> Status
+                  </span>
+                  <div className="chip-row">
+                    {['All', 'Active', 'Draft', 'Public'].map(s => {
+                      const isAll = s === 'All';
+                      const isSelected = isAll ? !selectedStatus : selectedStatus?.toLowerCase() === s.toLowerCase();
+                      return (
+                        <button
+                          key={s}
+                          type="button"
+                          className={`filter-chip ${isSelected ? 'selected' : ''}`}
+                          onClick={() => setSelectedStatus(isAll ? null : s)}
+                        >
+                          {s}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="filter-reset-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+                  {(selectedDomain || selectedTone || selectedStatus) ? (
                     <button
                       id="filter-reset-btn"
                       className="filter-reset"
@@ -535,53 +581,76 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                       onClick={() => {
                         setSelectedDomain(null);
                         setSelectedTone(null);
-                        setShowFilters(false);
+                        setSelectedStatus(null);
                       }}
                     >
                       Reset All Filters ✕
                     </button>
-                  </div>
-                )}
+                  ) : <div />}
+                  <button
+                    className="btn btn-secondary btn-small"
+                    onClick={() => setShowFilters(false)}
+                    style={{ fontSize: 11, padding: '2px 8px' }}
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Persona Cards List */}
             <div id="persona-results" className="persona-list">
               {filteredList.length > 0 ? (
-                filteredList.map(([id, p]) => (
-                  <div
-                    key={id}
-                    className={`persona-item browse-item ${activeId === id ? 'active-persona' : ''}`}
-                    onClick={(e) => handleCardClick(id, e)}
-                  >
-                    <div className="persona-item-info">
-                      <div className="persona-item-name">{p.metadata?.suggested_name || id}</div>
-                      <div className="persona-item-meta">
-                        <span className="status-chip private">{p.metadata?.domain?.toUpperCase() || 'TECH'}</span>
-                        <span className="version-badge">v{p.metadata?.version || '1.0.0'}</span>
-                        <span className="keywords-text">{p.persona?.instruction || ''}</span>
+                filteredList.map(([id, p]) => {
+                  const isDraft = (p.metadata as any)?.status === 'draft' || (p.metadata as any)?.visibility === 'private';
+                  const isActive = activeId === id;
+                  return (
+                    <div
+                      key={id}
+                      className={`persona-item browse-item ${isActive ? 'active-persona' : ''}`}
+                      onClick={(e) => handleCardClick(id, e)}
+                    >
+                      <div className="persona-item-info">
+                        <div className="persona-item-name">{p.metadata?.suggested_name || id}</div>
+                        <div className="persona-item-meta">
+                          <span className={`status-chip ${isActive ? 'active' : (isDraft ? 'draft' : 'public')}`}>
+                            {isActive ? 'ACTIVE' : (isDraft ? 'DRAFT' : (p.metadata?.domain?.toUpperCase() || 'TECH'))}
+                          </span>
+                          <span className="version-badge">v{p.metadata?.version || '1.0.0'}</span>
+                          <span className="keywords-text">{p.persona?.instruction || ''}</span>
+                        </div>
                       </div>
+                      <div className="persona-item-actions">
+                        <button
+                          className="btn-icon"
+                          title="Duplicate Persona"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicatePersona(id);
+                          }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>content_copy</span>
+                        </button>
+                        <button
+                          className="btn-icon"
+                          title="Quick Inspect"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDetailModalPersonaId(id);
+                          }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span>
+                        </button>
+                        {isActive && (
+                          <span className="material-symbols-outlined" style={{ color: 'var(--color-accent)', fontSize: 20 }}>
+                            check_circle
+                          </span>
+                        )}
+                      </div>
+                      <span className="material-symbols-outlined chevron">chevron_right</span>
                     </div>
-                    <div className="persona-item-actions">
-                      <button
-                        className="btn-icon"
-                        title="Quick Inspect"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDetailModalPersonaId(id);
-                        }}
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span>
-                      </button>
-                      {activeId === id && (
-                        <span className="material-symbols-outlined" style={{ color: 'var(--color-accent)', fontSize: 20 }}>
-                          check_circle
-                        </span>
-                      )}
-                    </div>
-                    <span className="material-symbols-outlined chevron">chevron_right</span>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="empty-state">
                   <span className="material-symbols-outlined">search</span>
@@ -616,12 +685,24 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                     <div className="persona-item-info">
                       <div className="persona-item-name">{p.metadata?.suggested_name || id}</div>
                       <div className="persona-item-meta">
-                        <span className="status-chip private">{p.metadata?.domain?.toUpperCase() || 'TECH'}</span>
+                        <span className={`status-chip ${activeId === id ? 'active' : (((p.metadata as any)?.status === 'draft' || (p.metadata as any)?.visibility === 'private') ? 'draft' : 'public')}`}>
+                          {activeId === id ? 'ACTIVE' : (((p.metadata as any)?.status === 'draft' || (p.metadata as any)?.visibility === 'private') ? 'DRAFT' : (p.metadata?.domain?.toUpperCase() || 'TECH'))}
+                        </span>
                         <span className="version-badge">v{p.metadata?.version || '1.0.0'}</span>
                         <span className="keywords-text">{p.persona?.instruction || ''}</span>
                       </div>
                     </div>
                     <div className="persona-item-actions">
+                      <button
+                        className="btn-icon"
+                        title="Duplicate Persona"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDuplicatePersona(id);
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>content_copy</span>
+                      </button>
                       <button
                         className="btn-icon"
                         title="Edit Persona"
@@ -647,7 +728,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                         title="Delete Persona"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onDeletePersona(id);
+                          setDeleteConfirmId(id);
                         }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'var(--color-error)' }}>delete</span>
@@ -1588,6 +1669,65 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 onClick={() => setShowUnsavedModal(false)}
               >
                 Keep Editing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirmId && (
+        <div
+          className="dialog-overlay active"
+          onClick={() => setDeleteConfirmId(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            background: 'rgba(0, 0, 0, 0.65)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16
+          }}
+        >
+          <div
+            className="dialog-container"
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--color-surface, #1e1f20)',
+              color: 'var(--color-text-primary, #fff)',
+              borderRadius: 16,
+              padding: 24,
+              maxWidth: 360,
+              width: '100%',
+              border: '1px solid var(--color-outline, #333)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span className="material-symbols-outlined" style={{ color: 'var(--color-error, #ea4335)', fontSize: 28 }}>warning</span>
+              <h3 style={{ margin: 0, fontSize: 18, color: 'var(--color-text-primary)' }}>Delete Persona</h3>
+            </div>
+            <p style={{ margin: '0 0 20px 0', fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+              Are you sure you want to delete <strong>{personas[deleteConfirmId]?.metadata?.suggested_name || deleteConfirmId}</strong>? This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setDeleteConfirmId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                style={{ background: 'var(--color-error, #ea4335)', borderColor: 'var(--color-error, #ea4335)' }}
+                onClick={() => {
+                  onDeletePersona(deleteConfirmId);
+                  setDeleteConfirmId(null);
+                }}
+              >
+                Delete
               </button>
             </div>
           </div>

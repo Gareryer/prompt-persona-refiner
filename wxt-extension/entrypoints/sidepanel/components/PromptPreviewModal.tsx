@@ -22,16 +22,18 @@ export const PromptPreviewModal: React.FC<PromptPreviewModalProps> = ({
 }) => {
   if (!isOpen || !prompt) return null;
 
-  // Extract variables enclosed in {varName}
-  const variableMatches = Array.from(new Set((prompt.content.match(/\{([a-zA-Z0-9_]+)\}/g) || []).map(v => v.slice(1, -1))));
+  // Extract variables enclosed in {{varName}} or {varName}
+  const variableMatches = Array.from(new Set(
+    Array.from(prompt.content.matchAll(/\{\{?([a-zA-Z0-9_]+)\}?\}/g)).map(m => m[1]!)
+  ));
   const [varValues, setVarValues] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
 
   // Compute interpolated prompt text
   let interpolated = prompt.content;
   for (const v of variableMatches) {
-    const val = varValues[v] ?? `{${v}}`;
-    interpolated = interpolated.replaceAll(`{${v}}`, val);
+    const val = varValues[v] !== undefined && varValues[v] !== '' ? varValues[v] : `{{${v}}}`;
+    interpolated = interpolated.replaceAll(`{{${v}}}`, val).replaceAll(`{${v}}`, val);
   }
 
   const handleCopy = () => {
@@ -40,6 +42,8 @@ export const PromptPreviewModal: React.FC<PromptPreviewModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
     if (onCopy) onCopy(interpolated);
   };
+
+  const tokenEstimate = Math.ceil(interpolated.length / 4);
 
   return (
     <div className="persona-modal" onClick={onClose}>
@@ -65,7 +69,7 @@ export const PromptPreviewModal: React.FC<PromptPreviewModalProps> = ({
                 {variableMatches.map(v => (
                   <div key={v} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 12, fontFamily: 'monospace', minWidth: 80, color: 'var(--color-accent, #8ab4f8)' }}>
-                      {`{${v}}`}:
+                      {`{{${v}}}`}:
                     </span>
                     <input
                       type="text"
@@ -92,7 +96,7 @@ export const PromptPreviewModal: React.FC<PromptPreviewModalProps> = ({
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
               <label style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-text-secondary, #aaa)' }}>
-                Formatted Output ({interpolated.length} chars)
+                Formatted Output ({interpolated.length} chars · ~{tokenEstimate} tokens)
               </label>
             </div>
             <textarea
