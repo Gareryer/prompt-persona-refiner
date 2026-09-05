@@ -1,0 +1,424 @@
+/**
+ * Unified ZIP Packaging and Export Subsystem for Harvester.
+ * Clean-room TypeScript port of Clio's ZIP builder and downloader.
+ *
+ * Responsibilities:
+ * - Bundles structured conversation.json and images/ asset directory into a single archive
+ * - Strips in-memory binary Blobs from serialized JSON to guarantee pure data representation
+ * - Supports both Blob attachments and base64 Data URLs
+ * - Calculates uncompressed export size estimation (estimateExportSize)
+ * - Formats byte counts into human-readable strings (formatBytes)
+ * - Safely orchestrates chrome.downloads.download with object URL lifecycle management and DOM fallback
+ */
+
+import JSZip from 'jszip';
+import type {
+  HarvestConversationRecord,
+  HarvestConversationMetadata,
+  HarvestAttachment,
+  HarvestTurn
+} from '../types';
+import { TextSanitizer } from '../extraction/text-sanitizer';
+import { MediaExtractor } from '../extraction/media-extractor';
+
+export interface ZipBuilderOptions {
+  /** Optional array of image attachments to include if not already attached to turns */
+  images?: HarvestAttachment[];
+  /** Deflate compression level between 1 (fastest) and 9 (maximum compression). Default: 6 */
+  compressionLevel?: number;
+  /** Extra auxiliary files to include in the zip archive (e.g. metadata or readme) */
+  extraFiles?: Record<string, string | Blob | Uint8Array | ArrayBuffer>;
+}
+
+export interface DownloadZipOptions {
+  /** Whether to prompt the user with a save-as file dialog. Default: false */
+  saveAs?: boolean;
+  /** Delay in ms before revoking the created object URL. Default: 30000 */
+  revokeDelayMs?: number;
+}
+
+export class ZipBuilder {
+  /**
+   * Sanitizes a HarvestConversationRecord for JSON serialization by stripping binary Blob references.
+   */
+  static sanitizeRecordForJson(record: HarvestConversationRecord): Record<string, unknown> {
+    const sanitizeAttachment = (att: HarvestAttachment) => {
+      const { blob: _blob, ...rest } = att;
+      return rest;
+    };
+
+    const sanitizedMessages = record.messages.map((turn: HarvestTurn) => {
+      if (!turn.attachments || !Array.isArray(turn.attachments)) {
+        return turn;
+      }
+      return {
+        ...turn,
+        attachments: turn.attachments.map(sanitizeAttachment)
+      };
+    });
+
+    const sanitizedImages = record.images?.map(sanitizeAttachment);
+
+    return {
+      metadata: record.metadata,
+      messages: sanitizedMessages,
+      ...(sanitizedImages ? { images: sanitizedImages } : {})
+    };
+  }
+
+  /**
+   * Builds a JSZip archive from a conversation record and image attachments.
+   */
+  static async buildZip(
+    record: HarvestConversationRecord,
+    options?: ZipBuilderOptions
+  ): Promise<Blob> {
+    const zip = new JSZip();
+
+    // 1. Serialize sanitized conversation.json
+    const cleanRecord = this.sanitizeRecordForJson(record);
+    const jsonString = JSON.stringify(cleanRecord, null, 2);
+    zip.file('conversation.json', jsonString);
+
+    // 2. Gather all image attachments
+    const imageMap = new Map<string, { blob?: Blob; dataUrl?: string }>();
+    const seenAttachments = new Set<HarvestAttachment>();
+
+    const registerImage = (att: HarvestAttachment, fallbackIndex: number) => {
+      if (seenAttachments.has(att)) return;
+      seenAttachments.add(att);
+
+      if (!att.blob && !att.dataUrl) return;
+
+      let filename = att.filename;
+      if (!filename) {
+        const ext = MediaExtractor.getImageExtension(att.blob?.type, att.originalSrc);
+        filename = MediaExtractor.formatImagePath(fallbackIndex, ext);
+      }
+
+      // Normalize path to have images/ prefix if not already present
+      const normalizedPath = filename.startsWith('images/') ? filename : `images/${filename}`;
+
+      if (!imageMap.has(normalizedPath)) {
+        imageMap.set(normalizedPath, { blob: att.blob, dataUrl: att.dataUrl });
+      }
+    };
+
+    let counter = 0;
+
+    // A. From record.images
+    if (record.images && Array.isArray(record.images)) {
+      for (const img of record.images) {
+        registerImage(img, counter++);
+      }
+    }
+
+    // B. From record.messages[].attachments
+    if (record.messages && Array.isArray(record.messages)) {
+      for (const turn of record.messages) {
+        if (turn.attachments && Array.isArray(turn.attachments)) {
+          for (const att of turn.attachments) {
+            if (att.type === 'image') {
+              registerImage(att, counter++);
+            }
+          }
+        }
+      }
+    }
+
+    // C. From options.images
+    if (options?.images && Array.isArray(options.images)) {
+      for (const img of options.images) {
+        registerImage(img, counter++);
+      }
+    }
+
+    // 3. Add images to zip (convert Blob to ArrayBuffer for MV3 ServiceWorker & Node compatibility)
+    for (const [path, img] of imageMap.entries()) {
+      if (img.blob) {
+        if (typeof img.blob.arrayBuffer === 'function') {
+          const arrayBuf = await img.blob.arrayBuffer();
+          zip.file(path, arrayBuf);
+        } else {
+          zip.file(path, img.blob);
+        }
+      } else if (img.dataUrl) {
+        try {
+          const blob = MediaExtractor.dataUrlToBlob(img.dataUrl);
+          const arrayBuf = await blob.arrayBuffer();
+          zip.file(path, arrayBuf);
+        } catch {
+          const commaIdx = img.dataUrl.indexOf(',');
+          const raw = commaIdx >= 0 ? img.dataUrl.slice(commaIdx + 1) : img.dataUrl;
+          if (img.dataUrl.includes(';base64')) {
+            zip.file(path, raw.replace(/\s+/g, ''), { base64: true });
+          } else {
+            zip.file(path, raw);
+          }
+        }
+      }
+    }
+
+    // 4. Add extra auxiliary files
+    if (options?.extraFiles) {
+      for (const [filePath, content] of Object.entries(options.extraFiles)) {
+        if (content instanceof Blob && typeof content.arrayBuffer === 'function') {
+          const buf = await content.arrayBuffer();
+          zip.file(filePath, buf);
+        } else {
+          zip.file(filePath, content);
+        }
+      }
+    }
+
+    // 5. Generate final compressed ZIP Blob
+    const compressionLevel = Math.min(Math.max(options?.compressionLevel ?? 6, 1), 9);
+    const blob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: {
+        level: compressionLevel
+      }
+    });
+
+    return blob;
+  }
+
+  /**
+   * Alias for buildZip to match Clio's naming convention.
+   */
+  static async createZip(
+    record: HarvestConversationRecord,
+    options?: ZipBuilderOptions
+  ): Promise<Blob> {
+    return this.buildZip(record, options);
+  }
+
+  /**
+   * Estimates the uncompressed export size (in bytes) of the conversation record and image assets.
+   */
+  static estimateExportSize(
+    record: HarvestConversationRecord,
+    options?: { images?: HarvestAttachment[]; extraFiles?: Record<string, string | Blob | Uint8Array | ArrayBuffer> }
+  ): number {
+    const cleanRecord = this.sanitizeRecordForJson(record);
+    const jsonString = JSON.stringify(cleanRecord, null, 2);
+
+    let totalBytes = 0;
+    if (typeof TextEncoder !== 'undefined') {
+      totalBytes += new TextEncoder().encode(jsonString).length;
+    } else {
+      totalBytes += jsonString.length;
+    }
+
+    const seenAttachments = new Set<HarvestAttachment>();
+    const countedPaths = new Set<string>();
+
+    const inspectAttachment = (att: HarvestAttachment, fallbackIndex: number) => {
+      if (seenAttachments.has(att)) return;
+      seenAttachments.add(att);
+
+      const filename = att.filename || `images/${String(fallbackIndex + 1).padStart(3, '0')}.png`;
+      if (countedPaths.has(filename)) return;
+      countedPaths.add(filename);
+
+      if (att.blob) {
+        totalBytes += att.blob.size;
+      } else if (att.dataUrl) {
+        const commaIdx = att.dataUrl.indexOf(',');
+        const isBase64 = att.dataUrl.slice(0, Math.max(0, commaIdx)).includes(';base64');
+        const dataPart = commaIdx >= 0 ? att.dataUrl.slice(commaIdx + 1) : att.dataUrl;
+        if (isBase64) {
+          const clean = dataPart.replace(/\s+/g, '');
+          const padding = clean.endsWith('==') ? 2 : clean.endsWith('=') ? 1 : 0;
+          totalBytes += Math.max(0, Math.floor(clean.length * 0.75) - padding);
+        } else {
+          try {
+            const decoded = decodeURIComponent(dataPart);
+            totalBytes += typeof TextEncoder !== 'undefined'
+              ? new TextEncoder().encode(decoded).length
+              : decoded.length;
+          } catch {
+            totalBytes += dataPart.length;
+          }
+        }
+      }
+    };
+
+    let counter = 0;
+    if (record.images) {
+      for (const img of record.images) inspectAttachment(img, counter++);
+    }
+    if (record.messages) {
+      for (const turn of record.messages) {
+        if (turn.attachments) {
+          for (const att of turn.attachments) {
+            if (att.type === 'image') inspectAttachment(att, counter++);
+          }
+        }
+      }
+    }
+    if (options?.images) {
+      for (const img of options.images) inspectAttachment(img, counter++);
+    }
+
+    if (options?.extraFiles) {
+      for (const content of Object.values(options.extraFiles)) {
+        if (typeof content === 'string') {
+          totalBytes += typeof TextEncoder !== 'undefined'
+            ? new TextEncoder().encode(content).length
+            : content.length;
+        } else if (content instanceof Blob) {
+          totalBytes += content.size;
+        } else if (content instanceof Uint8Array) {
+          totalBytes += content.byteLength;
+        } else if (content instanceof ArrayBuffer) {
+          totalBytes += content.byteLength;
+        }
+      }
+    }
+
+    return totalBytes;
+  }
+
+  /**
+   * Formats a byte count into a clean, human-readable string.
+   * e.g. 1024 -> '1 KB', 1048576 -> '1 MB'
+   */
+  static formatBytes(bytes: number, decimals = 2): string {
+    if (!Number.isFinite(bytes) || bytes <= 0) {
+      return '0 Bytes';
+    }
+
+    const k = 1024;
+    const dm = Math.max(0, decimals);
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const unitIndex = Math.max(0, Math.min(i, sizes.length - 1));
+
+    const val = parseFloat((bytes / Math.pow(k, unitIndex)).toFixed(dm));
+    return `${val} ${sizes[unitIndex]}`;
+  }
+
+  /**
+   * Generates a standardized zip filename from conversation metadata.
+   * Format: {site}_{sanitizedTitle}_{timestamp}.zip
+   */
+  static generateZipFilename(metadata: HarvestConversationMetadata, date = new Date()): string {
+    const rawTitle = metadata.title || 'Untitled Conversation';
+    const cleanedTitle = TextSanitizer.cleanTitle(rawTitle);
+    const sanitizedTitle = TextSanitizer.sanitizeFilename(cleanedTitle, 60);
+    const timestamp = TextSanitizer.getTimestamp(date);
+    const site = metadata.site || 'conversation';
+
+    return `${site}_${sanitizedTitle}_${timestamp}.zip`;
+  }
+
+  /**
+   * Triggers the download of a ZIP blob via chrome.downloads.download,
+   * falling back to DOM anchor click in web or test environments.
+   * Safely manages URL object creation, download completion listening, and revocation.
+   */
+  static async downloadZip(
+    blob: Blob,
+    filename: string,
+    options?: DownloadZipOptions
+  ): Promise<number | string> {
+    const url = URL.createObjectURL(blob);
+    const revokeDelayMs = options?.revokeDelayMs ?? 30000;
+
+    let revokeTimer: any = null;
+    const safeRevoke = () => {
+      if (revokeTimer) return;
+      revokeTimer = setTimeout(() => {
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          // Ignore revocation errors
+        }
+      }, revokeDelayMs);
+    };
+
+    const immediateRevoke = () => {
+      if (revokeTimer) {
+        clearTimeout(revokeTimer);
+        revokeTimer = null;
+      }
+      try {
+        URL.revokeObjectURL(url);
+      } catch {
+        // Ignore revocation errors
+      }
+    };
+
+    // 1. Extension Environment: chrome.downloads.download
+    if (typeof chrome !== 'undefined' && chrome?.downloads?.download) {
+      return new Promise<number>((resolve, reject) => {
+        chrome.downloads.download(
+          {
+            url,
+            filename,
+            saveAs: options?.saveAs ?? false
+          },
+          (downloadId?: number) => {
+            const err = chrome.runtime?.lastError;
+            if (err || downloadId === undefined) {
+              immediateRevoke();
+              reject(new Error(err?.message || 'chrome.downloads.download failed to initiate'));
+            } else {
+              // Listen for download completion or interruption to safely revoke object URL
+              if (chrome.downloads?.onChanged?.addListener) {
+                const changeListener = (delta: { id: number; state?: { current?: string } }) => {
+                  if (delta.id === downloadId) {
+                    const state = delta.state?.current;
+                    if (state === 'complete' || state === 'interrupted') {
+                      try {
+                        chrome.downloads.onChanged.removeListener(changeListener);
+                      } catch {
+                        // Ignore removal errors
+                      }
+                      immediateRevoke();
+                    }
+                  }
+                };
+                try {
+                  chrome.downloads.onChanged.addListener(changeListener);
+                } catch {
+                  // Ignore listener registration errors
+                }
+              }
+
+              safeRevoke();
+              resolve(downloadId);
+            }
+          }
+        );
+      });
+    }
+
+    // 2. DOM Fallback (Web / Test / Content script environment)
+    if (typeof document !== 'undefined' && typeof document.createElement === 'function') {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename; // Essential for correct filename preservation in browser downloads
+      if (a.style) {
+        a.style.display = 'none';
+      }
+      const target = document.body || document.documentElement;
+      if (target && typeof target.appendChild === 'function') {
+        target.appendChild(a);
+        a.click();
+        a.remove();
+      } else {
+        a.click();
+      }
+      safeRevoke();
+      return 'dom-download-triggered';
+    }
+
+    // 3. Headless / Node environment
+    safeRevoke();
+    return url;
+  }
+}
