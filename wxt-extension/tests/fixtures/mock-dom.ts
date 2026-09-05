@@ -3,6 +3,7 @@
  */
 
 export class MockNode {
+  nodeType = 1;
   parentNode: MockElement | null = null;
   ownerDocument: any = null;
 
@@ -12,6 +13,10 @@ export class MockNode {
   static readonly DOCUMENT_POSITION_CONTAINS = 8;
   static readonly DOCUMENT_POSITION_CONTAINED_BY = 16;
   static readonly DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32;
+
+  get parentElement(): MockElement | null {
+    return this.parentNode instanceof MockElement ? this.parentNode : null;
+  }
 
   remove() {
     if (this.parentNode) {
@@ -69,6 +74,7 @@ export class MockNode {
 }
 
 export class MockTextNode extends MockNode {
+  override nodeType = 3;
   textContent: string;
 
   constructor(text: string) {
@@ -86,6 +92,13 @@ export class MockElement extends MockNode {
   href = '';
   width = 0;
   height = 0;
+  scrollTop = 0;
+  scrollHeight = 0;
+  clientHeight = 0;
+  scrollWidth = 0;
+  clientWidth = 0;
+  style: Record<string, any> = {};
+  shadowRoot: MockShadowRoot | null = null;
   private _textContent?: string;
   attributes: Record<string, string> = {};
   children: (MockElement | MockTextNode)[] = [];
@@ -170,10 +183,25 @@ export class MockElement extends MockNode {
     return name in this.attributes || (name === 'id' && !!this.id) || (name === 'class' && !!this.className);
   }
 
+  getAttributeNames(): string[] {
+    const names = Object.keys(this.attributes);
+    if (this.id && !names.includes('id')) names.push('id');
+    if (this.className && !names.includes('class')) names.push('class');
+    if (this.src && !names.includes('src')) names.push('src');
+    if (this.href && !names.includes('href')) names.push('href');
+    return names;
+  }
+
   appendChild(child: MockElement | MockTextNode) {
     child.parentNode = this;
     child.ownerDocument = this.ownerDocument;
     this.children.push(child);
+  }
+
+  attachShadow(init?: { mode: 'open' | 'closed' }): MockShadowRoot {
+    const shadow = new MockShadowRoot(this);
+    this.shadowRoot = shadow;
+    return shadow;
   }
 
   replaceChild(newChild: MockElement | MockTextNode, oldChild: MockElement | MockTextNode) {
@@ -204,6 +232,12 @@ export class MockElement extends MockNode {
     clone.value = this.value;
     clone.width = this.width;
     clone.height = this.height;
+    clone.scrollTop = this.scrollTop;
+    clone.scrollHeight = this.scrollHeight;
+    clone.clientHeight = this.clientHeight;
+    clone.scrollWidth = this.scrollWidth;
+    clone.clientWidth = this.clientWidth;
+    clone.style = { ...this.style };
     clone.attributes = { ...this.attributes };
     if (this._textContent !== undefined) {
       clone._textContent = this._textContent;
@@ -235,8 +269,20 @@ export class MockElement extends MockNode {
   }
 
   dispatchEvent(event: any): boolean {
-    event.target = this;
-    event.currentTarget = this;
+    try {
+      event.target = this;
+    } catch {
+      try {
+        Object.defineProperty(event, 'target', { value: this, configurable: true, writable: true });
+      } catch {}
+    }
+    try {
+      event.currentTarget = this;
+    } catch {
+      try {
+        Object.defineProperty(event, 'currentTarget', { value: this, configurable: true, writable: true });
+      } catch {}
+    }
     const list = [...(this.listeners[event.type] || [])];
     for (const item of list) {
       if (event._immediateStopped) break;
@@ -269,6 +315,10 @@ export class MockElement extends MockNode {
   querySelector<T extends MockElement = MockElement>(selector: string): T | null {
     const all = this.querySelectorAll<T>(selector);
     return all.length > 0 ? (all[0] ?? null) : null;
+  }
+
+  matches(selector: string): boolean {
+    return matchesSelector(this, selector);
   }
 
   closest<T extends MockElement = MockElement>(selector: string): T | null {
@@ -414,6 +464,8 @@ function matchesSelector(el: MockElement, selector: string): boolean {
 
 function matchesSimpleSelector(el: MockElement, sel: string): boolean {
   let s = sel;
+  if (s === '*') return true;
+  if (s.startsWith('*')) s = s.slice(1);
 
   // #id selector
   const idMatch = s.match(/^#([a-zA-Z0-9_-]+)/);
@@ -467,8 +519,80 @@ function matchesSimpleSelector(el: MockElement, sel: string): boolean {
     if (op === '^=' && !a.startsWith(e)) return false;
     if (op === '$=' && !a.endsWith(e)) return false;
   }
+  s = s.replace(attrRegex, '');
+  s = s.replace(/:[a-zA-Z0-9_-]+(\([^)]*\))?/g, '');
+
+  if (s.trim().length > 0) return false;
 
   return true;
+}
+
+export class MockShadowRoot extends MockNode {
+  override nodeType = 11; // Node.DOCUMENT_FRAGMENT_NODE
+  host: MockElement;
+  children: (MockElement | MockTextNode)[] = [];
+
+  constructor(host: MockElement) {
+    super();
+    this.host = host;
+    this.ownerDocument = host.ownerDocument;
+  }
+
+  appendChild(child: MockElement | MockTextNode) {
+    child.parentNode = this as any;
+    child.ownerDocument = this.ownerDocument;
+    this.children.push(child);
+  }
+
+  querySelector(sel: string): MockElement | null {
+    for (const child of this.children) {
+      if (child instanceof MockElement) {
+        if (child.matches(sel)) return child;
+        const found = child.querySelector(sel);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  querySelectorAll(sel: string): MockElement[] {
+    const results: MockElement[] = [];
+    for (const child of this.children) {
+      if (child instanceof MockElement) {
+        if (child.matches(sel)) results.push(child);
+        results.push(...child.querySelectorAll(sel));
+      }
+    }
+    return results;
+  }
+}
+
+export class MockMutationObserver {
+  callback: (mutations: any[], observer: MockMutationObserver) => void;
+  target: any = null;
+  options: any = null;
+
+  constructor(callback: (mutations: any[], observer: MockMutationObserver) => void) {
+    this.callback = callback;
+  }
+
+  observe(target: any, options?: any) {
+    this.target = target;
+    this.options = options;
+  }
+
+  disconnect() {
+    this.target = null;
+    this.options = null;
+  }
+
+  takeRecords() {
+    return [];
+  }
+
+  trigger(mutations: any[] = [{ type: 'childList' }]) {
+    this.callback(mutations, this);
+  }
 }
 
 export function setupMockDom() {
@@ -478,6 +602,8 @@ export function setupMockDom() {
 
   const mockDocument = {
     body: mockBody,
+    documentElement: mockRoot,
+    scrollingElement: mockRoot,
     title: '',
     createElement: (tag: string) => new MockElement(tag),
     createTextNode: (text: string) => new MockTextNode(text),
@@ -502,9 +628,14 @@ export function setupMockDom() {
       pathname: '/',
       href: 'https://gemini.google.com/'
     },
-    document: mockDocument
+    document: mockDocument,
+    getComputedStyle: (el: any) => el?.style || {}
   };
   (globalThis as any).window = mockWindow;
+
+  if (typeof (globalThis as any).MutationObserver === 'undefined') {
+    (globalThis as any).MutationObserver = MockMutationObserver;
+  }
 
   return { mockDocument, mockBody, mockRoot, mockWindow };
 }

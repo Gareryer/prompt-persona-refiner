@@ -1,5 +1,12 @@
 import type { ChatbotPlatform, ScrapedTurn } from '../../core/types';
-import type { HarvestPlatform, HarvestTurn, DiscoveredConversation } from '../../core/harvest/types';
+import type {
+  HarvestPlatform,
+  HarvestTurn,
+  DiscoveredConversation,
+  AutoScrollOptions,
+  ScrollResult,
+  ExpandAllContentOptions
+} from '../../core/harvest';
 
 export interface IChatbotAdapter {
   readonly platform: ChatbotPlatform;
@@ -90,5 +97,9 @@ export interface IHarvesterAdapter {
   isStreaming?(): boolean;
   extractTitle?(): string;
   extractConversationId?(): string;
+
+  // 6. Upward Scroller & Expansion Helpers
+  autoScrollHistory?(options?: Partial<AutoScrollOptions>): Promise<ScrollResult>;
+  expandContent?(options?: Partial<ExpandAllContentOptions>): Promise<number>;
 }
 

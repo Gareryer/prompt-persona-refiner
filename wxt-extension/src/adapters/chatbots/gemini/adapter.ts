@@ -3,6 +3,14 @@ import { GEMINI_SELECTORS } from './selectors';
 import { GEMINI_TOKENS } from './tokens';
 import { GeminiContainerPairer } from './container-pairer';
 import { TextSanitizer } from '../../../core/harvest/extraction/text-sanitizer';
+import {
+  findScrollContainer,
+  scrollToLoadAllMessages,
+  expandAllContent,
+  type AutoScrollOptions,
+  type ScrollResult,
+  type ExpandAllContentOptions
+} from '../../../core/harvest';
 import type { ScrapedTurn } from '../../../core/types';
 import type { IChatbotAdapter, IHarvesterAdapter } from '../types';
 import type { HarvestTurn, DiscoveredConversation } from '../../../core/harvest/types';
@@ -220,8 +228,14 @@ export class GeminiAdapter extends BaseChatbotAdapter implements IChatbotAdapter
 
   /**
    * Locates the primary scrolling conversation container in the Gemini DOM.
+   * Leverages resilient findScrollContainer with fallback to direct selector resolution.
    */
   getScrollContainer(): HTMLElement | null {
+    const scroller = findScrollContainer({
+      selectors: GEMINI_SELECTORS.scrollContainer,
+      conversationContainer: this.findElement<HTMLElement>(GEMINI_SELECTORS.conversationContainer)
+    });
+    if (scroller) return scroller;
     return this.findElement<HTMLElement>(GEMINI_SELECTORS.scrollContainer);
   }
 
@@ -237,6 +251,30 @@ export class GeminiAdapter extends BaseChatbotAdapter implements IChatbotAdapter
    */
   getExpandButtonSelectors(): string[] {
     return Array.from(GEMINI_SELECTORS.expandButton);
+  }
+
+  /**
+   * Executes automated upward history scrolling to load past conversation messages.
+   */
+  async autoScrollHistory(options?: Partial<AutoScrollOptions>): Promise<ScrollResult> {
+    const container = this.getScrollContainer();
+    return scrollToLoadAllMessages({
+      container,
+      loadingSelector: this.getLoadingIndicatorSelector(),
+      ...options
+    });
+  }
+
+  /**
+   * Expands all collapsed thinking sections and model thought toggles.
+   */
+  async expandContent(options?: Partial<ExpandAllContentOptions>): Promise<number> {
+    const container = this.getScrollContainer() || (typeof document !== 'undefined' ? document.body : null);
+    return expandAllContent({
+      root: container,
+      selectors: this.getExpandButtonSelectors(),
+      ...options
+    });
   }
 
   /**
