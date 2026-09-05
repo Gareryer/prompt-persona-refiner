@@ -60,7 +60,9 @@ export const RefineToggle: React.FC<RefineToggleProps> = ({
           aria-label="Toggle Allie prompt refinement"
           data-allie="refine-toggle"
         >
-          <span className="allie-toggle-icon">✨</span>
+          <svg className="allie-toggle-spark" viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
+          </svg>
           <span className="allie-toggle-label">{currentLabel}</span>
           <span className="allie-toggle-switch">
             <span className="allie-toggle-track">

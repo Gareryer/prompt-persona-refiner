@@ -51,6 +51,15 @@
   --allie-active-state: rgba(138, 180, 248, 0.20);
   --allie-focus-ring: 0 0 0 2px #8ab4f8;
 
+  --allie-btn-hover-bg: rgba(255, 255, 255, 0.08);
+  --allie-btn-active-bg: rgba(255, 255, 255, 0.14);
+  --allie-accent-container-hover: rgba(138, 180, 248, 0.20);
+  --allie-accent-container-active: rgba(138, 180, 248, 0.26);
+  --allie-accent-border: rgba(138, 180, 248, 0.30);
+  --allie-accent-border-hover: rgba(138, 180, 248, 0.45);
+  --allie-switch-track-off: #8e918f;
+  --allie-switch-knob-off: #8e918f;
+
   --allie-border-subtle: rgba(255, 255, 255, 0.12);
   --allie-toggle-bg-off: #444746;
   --allie-toggle-bg-on: #8ab4f8;
@@ -81,6 +90,15 @@
   --allie-hover-state: rgba(31, 31, 31, 0.08);
   --allie-active-state: rgba(11, 87, 208, 0.15);
   --allie-focus-ring: 0 0 0 2px #0b57d0;
+
+  --allie-btn-hover-bg: rgba(0, 0, 0, 0.06);
+  --allie-btn-active-bg: rgba(0, 0, 0, 0.12);
+  --allie-accent-container-hover: rgba(11, 87, 208, 0.20);
+  --allie-accent-container-active: rgba(11, 87, 208, 0.26);
+  --allie-accent-border: rgba(11, 87, 208, 0.30);
+  --allie-accent-border-hover: rgba(11, 87, 208, 0.45);
+  --allie-switch-track-off: #747775;
+  --allie-switch-knob-off: #747775;
 
   --allie-border-subtle: rgba(0, 0, 0, 0.10);
   --allie-toggle-bg-off: #c4c7c5;

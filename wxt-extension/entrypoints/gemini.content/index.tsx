@@ -239,8 +239,8 @@ export default defineContentScript({
           () => findElement<HTMLElement>(GEMINI_SELECTORS.trailingActions),
           15000
         );
-        const textInputAnchor = await waitForElement(
-          () => findElement<HTMLElement>(GEMINI_SELECTORS.textInputField),
+        const inputAreaAnchor = await waitForElement(
+          () => findElement<HTMLElement>(GEMINI_SELECTORS.inputArea) || findElement<HTMLElement>(GEMINI_SELECTORS.textInputField),
           15000
         );
 
@@ -271,6 +271,10 @@ export default defineContentScript({
             css: [tokensCss, geminiCss, refineToggleCss, geminiTooltipCss].join('\n'),
             onMount(container, _shadow, shadowHost) {
               shadowHost.classList.add('allie-toggle-host');
+              shadowHost.style.display = 'inline-flex';
+              shadowHost.style.alignItems = 'center';
+              shadowHost.style.margin = '0 4px';
+              shadowHost.style.verticalAlign = 'middle';
               syncThemeToHost(shadowHost);
               const root = ReactDOM.createRoot(container);
               root.render(
@@ -291,8 +295,8 @@ export default defineContentScript({
           toggleUi.mount();
         }
 
-        // Mount SettingsButton into text-input-field
-        if (textInputAnchor && (!settingsUi || !settingsUi.shadowHost.isConnected)) {
+        // Mount SettingsButton into input-area (anchored to right of composer)
+        if (inputAreaAnchor && (!settingsUi || !settingsUi.shadowHost.isConnected)) {
           if (settingsUi) {
             settingsUi.remove();
             settingsUi = null;
@@ -301,11 +305,19 @@ export default defineContentScript({
           settingsUi = await createShadowRootUi(ctx, {
             name: 'allie-settings-button',
             position: 'inline',
-            anchor: textInputAnchor,
+            anchor: inputAreaAnchor,
             append: 'last',
             css: [tokensCss, geminiCss, settingsButtonCss, geminiTooltipCss].join('\n'),
             onMount(container, _shadow, shadowHost) {
               shadowHost.classList.add('allie-settings-host');
+              shadowHost.style.position = 'absolute';
+              shadowHost.style.right = '-48px';
+              shadowHost.style.top = '50%';
+              shadowHost.style.transform = 'translateY(-50%)';
+              shadowHost.style.zIndex = '1000';
+              shadowHost.style.display = 'flex';
+              shadowHost.style.alignItems = 'center';
+              shadowHost.style.justifyContent = 'center';
               syncThemeToHost(shadowHost);
               settingsRoot = ReactDOM.createRoot(container);
               renderSettingsButton();

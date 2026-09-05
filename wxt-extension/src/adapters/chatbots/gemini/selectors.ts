@@ -27,6 +27,11 @@ export const GEMINI_SELECTORS = {
     '.text-input-field',
     '.input-area-v2 .input-box'
   ],
+  inputArea: [
+    '.input-area',
+    'input-area-v2',
+    '.text-input-field'
+  ],
   responseContainer: [
     'model-response',
     '.model-response-text',

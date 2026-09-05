@@ -8,45 +8,44 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   padding: 0;
-  border-radius: var(--allie-radius-pill, 9999px);
-  background-color: var(--allie-bg-surface-variant, #282a2c);
-  border: 1px solid var(--allie-border-subtle, rgba(255, 255, 255, 0.12));
+  border-radius: 9999px;
+  background-color: transparent;
+  border: none;
   color: var(--allie-text-secondary, #c4c7c5);
-  box-shadow: var(--allie-elevation-1, 0 1px 3px rgba(0, 0, 0, 0.12));
+  box-shadow: none;
   cursor: pointer;
   outline: none;
   transition: background-color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
-              border-color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
               color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
-              transform var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
+              transform 150ms cubic-bezier(0.2, 0, 0, 1),
               box-shadow var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1));
 }
 
 .allie-settings-btn:hover {
-  background-color: var(--allie-hover-state, rgba(255, 255, 255, 0.08));
-  color: var(--allie-text-primary, #e3e3e3);
-  transform: scale(1.05);
-  box-shadow: var(--allie-elevation-2, 0 3px 6px rgba(0, 0, 0, 0.16));
+  background-color: var(--allie-btn-hover-bg, rgba(255, 255, 255, 0.08));
+  color: var(--allie-text-primary, #ffffff);
 }
 
 .allie-settings-btn:focus-visible {
-  box-shadow: var(--allie-focus-ring, 0 0 0 2px #8ab4f8);
+  box-shadow: 0 0 0 2px var(--allie-focus-ring, rgba(138, 180, 248, 0.5));
 }
 
-.allie-settings-btn.active,
 .allie-settings-btn:active {
+  background-color: var(--allie-btn-active-bg, rgba(255, 255, 255, 0.16));
+  transform: scale(0.92);
+}
+
+.allie-settings-btn.active {
   background-color: var(--allie-accent-container, rgba(138, 180, 248, 0.15));
-  border-color: var(--allie-accent, #8ab4f8);
   color: var(--allie-accent, #8ab4f8);
-  transform: scale(0.96);
 }
 
 .allie-settings-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: block;
   transition: transform var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1));
 }
@@ -57,10 +56,10 @@
 
 .allie-status-dot {
   position: absolute;
-  top: 1px;
-  right: 1px;
-  width: 8px;
-  height: 8px;
+  top: 2px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background-color: var(--allie-status-online, #34a853);
   border: 1.5px solid var(--allie-bg-surface-variant, #282a2c);
