@@ -18,7 +18,8 @@ export default defineConfig({
       'tabs',
       'clipboardWrite',
       'sidePanel',
-      'downloads'
+      'downloads',
+      'scripting'
     ],
     host_permissions: [
       'https://gemini.google.com/*',

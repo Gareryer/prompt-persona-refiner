@@ -4,4 +4,9 @@ export * from './extraction/media-extractor';
 export * from './packaging/zip-builder';
 export * from './scroller/scroller-detector';
 export * from './scroller/auto-scroller';
+export * from './storage/harvest-db';
+export * from './batch/queue-manager';
+export * from './batch/tab-worker';
+export * from './orchestrator';
+
 

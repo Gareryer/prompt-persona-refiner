@@ -65,8 +65,34 @@ export interface ConversationLedgerRow {
   content_extracted_at?: number;
   download_status: DownloadStatus;
   zip_name?: string;
+  downloaded_at?: number;
   last_error?: string;
   attempts?: number;
+}
+
+export type ConversationRecord = ConversationLedgerRow;
+
+export interface AccountRecord {
+  account_label: string;
+  site?: HarvestPlatform | string;
+  discovered_at?: number;
+  last_harvest_at?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface QueueRecord {
+  flat_key: string;
+  site: HarvestPlatform;
+  account_label: string;
+  conversation_id: string;
+  title?: string;
+  url?: string;
+  status: 'pending' | 'in_progress' | 'done' | 'error';
+  attempts: number;
+  queued_at: number;
+  started_at?: number;
+  completed_at?: number;
+  last_error?: string;
 }
 
 export interface DiscoveredConversation {
@@ -85,3 +111,39 @@ export interface HarvestRunRecord {
   error_count: number;
   status: 'running' | 'completed' | 'aborted';
 }
+
+export interface ProcessResult {
+  success: boolean;
+  conversationId: string;
+  site?: HarvestPlatform;
+  zipName?: string;
+  messageCount?: number;
+  error?: string;
+}
+
+export interface BatchProgress {
+  total: number;
+  processed: number;
+  done: number;
+  failed: number;
+  currentItem?: QueueRecord;
+}
+
+export interface BatchSummary {
+  runId?: number;
+  totalQueued: number;
+  doneCount: number;
+  errorCount: number;
+  startedAt: number;
+  completedAt: number;
+  status: 'completed' | 'aborted';
+}
+
+export interface HarvestStatusCounts {
+  total: number;
+  pending: number;
+  done: number;
+  error: number;
+  in_progress: number;
+}
+
