@@ -292,7 +292,21 @@ export class MockElement extends MockNode {
   }
 
   click() {
-    const evt = { type: 'click', bubbles: true, cancelable: true, defaultPrevented: false };
+    const evt: any = {
+      type: 'click',
+      bubbles: true,
+      cancelable: true,
+      defaultPrevented: false,
+      preventDefault() {
+        this.defaultPrevented = true;
+      },
+      stopPropagation() {
+        this._stopped = true;
+      },
+      stopImmediatePropagation() {
+        this._immediateStopped = true;
+      }
+    };
     this.dispatchEvent(evt);
   }
 
@@ -322,8 +336,8 @@ export class MockElement extends MockNode {
   }
 
   closest<T extends MockElement = MockElement>(selector: string): T | null {
-    let curr: MockElement | null = this;
-    while (curr) {
+    let curr: any = this;
+    while (curr && curr instanceof MockElement) {
       if (matchesSelector(curr, selector)) return curr as unknown as T;
       curr = curr.parentNode;
     }
@@ -389,12 +403,12 @@ function parseHtmlToNodes(html: string, ownerDoc: any): (MockElement | MockTextN
 }
 
 function parseAttributes(el: MockElement, attrString: string): void {
-  const attrRegex = /([a-zA-Z0-9_-]+)(?:=["']?([^"'>\s]*)["']?)?/g;
+  const attrRegex = /([a-zA-Z0-9_:-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^'">\s]+)))?/g;
   let match: RegExpExecArray | null;
   while ((match = attrRegex.exec(attrString)) !== null) {
     const name = match[1];
     if (!name || name === '/') continue;
-    const val = match[2] !== undefined ? match[2] : 'true';
+    const val = match[2] ?? match[3] ?? match[4] ?? 'true';
     el.setAttribute(name, val);
   }
 }
@@ -463,6 +477,7 @@ function matchesSelector(el: MockElement, selector: string): boolean {
 }
 
 function matchesSimpleSelector(el: MockElement, sel: string): boolean {
+  if (!el || !(el instanceof MockElement)) return false;
   let s = sel;
   if (s === '*') return true;
   if (s.startsWith('*')) s = s.slice(1);

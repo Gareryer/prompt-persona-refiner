@@ -5,6 +5,8 @@
  */
 
 import { findScrollContainer } from './scroller-detector';
+import { VirtualMessageCache } from './virtual-cache';
+import type { IHarvesterAdapter } from '../../../adapters/chatbots/types';
 
 export interface ScrollConfig {
   /** Distance in pixels to decrement scrollTop per step (default: 5000) */
@@ -349,6 +351,10 @@ export interface AutoScrollOptions {
   onMutation?: (mutations: MutationRecord[]) => void;
   /** Root document or parent node */
   root?: ParentNode | Document | null;
+  /** Optional virtual message cache to capture messages before eviction during upward scroll */
+  virtualCache?: VirtualMessageCache;
+  /** Optional harvester adapter providing messageId and turnIndex resolvers */
+  adapter?: IHarvesterAdapter;
 }
 
 /**
@@ -367,6 +373,9 @@ export async function scrollToLoadAllMessages(
 
   const root = options.root || (typeof document !== 'undefined' ? document : null);
   const container = options.container || findScrollContainer({ root });
+
+  // Initial capture of currently mounted messages into virtual cache if provided
+  options.virtualCache?.captureFromRoot(container || root, options.adapter);
 
   const initialScrollTop = container ? Number(container.scrollTop) || 0 : 0;
   const startTime = Date.now();
@@ -447,6 +456,7 @@ export async function scrollToLoadAllMessages(
         if (idleAttemptsAtTop <= cfg.idleThreshold * 3) {
           consecutiveIdleAtTop = 0;
         }
+        options.virtualCache?.captureFromRoot(container || root, options.adapter);
         safeNotifyMutation(mutations as MutationRecord[]);
       });
       observer.observe(container, {
@@ -556,6 +566,8 @@ export async function scrollToLoadAllMessages(
         }
 
         await sleep(0); // Yield to event loop
+
+        options.virtualCache?.captureFromRoot(container || root, options.adapter);
 
         safeNotifyProgress({
           attempt: attempts,

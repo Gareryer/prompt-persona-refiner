@@ -47,10 +47,10 @@ Clio is an open-source, privacy-first browser extension that extracts complete m
 - **Layer 1 (Unified Subsystem)**: **100% COMPLETE**. Storage (IndexedDB `clio-archive`), Media Extraction (fail-open images), Packaging (JSZip, `chrome.downloads`), Auto-Scroller engine, Work Queue state machine, Batch Tab Worker, and Orchestrator facade are fully built, hardened, and exported.
 - **Layer 2 (Platform-Specific Adapters)**:
   - **Google Gemini**: **100% COMPLETE & VERIFIED** (Production reference implementation with paired container extraction, thinking trace isolation, LaTeX math synthesis, UI chrome stripping, and sidebar enumeration).
+  - **OpenAI ChatGPT**: **100% COMPLETE & VERIFIED** (Production implementation with VirtualMessageCache, ancestor scroll-root detection, CodeMirror 6 line preservation, reasoning header extraction, and sidebar enumeration).
   - **Anthropic Claude**: **PENDING** (Tailored blueprint ready in Section 7.1).
-  - **OpenAI ChatGPT**: **PENDING** (Tailored blueprint ready in Section 7.2).
   - **DeepSeek, Grok, Meta**: **PENDING** (Architecture ready in Section 7.3).
-- **Verification**: **352/352 Vitest unit tests passing** across 23 test suites, zero TypeScript typecheck errors, and production bundle (`2.88 MB`) compiling cleanly in WXT.
+- **Verification**: **385/385 Vitest unit tests passing** across 24 test suites, zero TypeScript typecheck errors, and production bundle (`2.91 MB`) compiling cleanly in WXT.
 
 ---
 

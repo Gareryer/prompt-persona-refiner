@@ -121,15 +121,26 @@ export class TextSanitizer {
     if (typeof root.querySelectorAll !== 'function') return;
 
     // Find pre elements containing code, or standalone code-block elements
-    const codeBlocks = Array.from(root.querySelectorAll('pre, code-block, .code-block'));
+    const codeBlocks = Array.from(root.querySelectorAll('pre, code-block, .code-block, .cm-content'));
 
     for (const block of codeBlocks) {
       // Avoid processing nested blocks that have already been detached/replaced
       if (!block.parentNode || (typeof root.contains === 'function' && !root.contains(block))) continue;
 
-      const codeEl = block.querySelector('code') || block;
+      // If block is .cm-content and its parent/ancestor is already a pre being processed, skip to avoid double fencing
+      if (block.classList?.contains('cm-content') && block.closest?.('pre')) continue;
+
+      const codeEl = block.querySelector('code, .cm-content') || block;
       const lang = this.detectLanguage(block, codeEl);
-      const codeText = codeEl.textContent || '';
+
+      // Preserve CodeMirror 6 line breaks when code is structured as .cm-line block elements
+      let codeText = '';
+      const cmLines = Array.from(codeEl.querySelectorAll?.('.cm-line') || []);
+      if (cmLines.length > 0) {
+        codeText = cmLines.map(line => line.textContent || '').join('\n');
+      } else {
+        codeText = codeEl.textContent || '';
+      }
 
       const fenced = `\n\`\`\`${lang}\n${codeText.trimEnd()}\n\`\`\`\n`;
 
@@ -151,16 +162,23 @@ export class TextSanitizer {
    * Detects the programming language of a code block element.
    */
   static detectLanguage(block: Element, codeEl: Element): string {
-    // 1. Check data-language attribute
+    // 1. Check data-language attribute on block, codeEl, or parent container
     const dataLang =
       block.getAttribute('data-language') ||
       codeEl.getAttribute('data-language') ||
       block.getAttribute('data-lang') ||
-      codeEl.getAttribute('data-lang');
+      codeEl.getAttribute('data-lang') ||
+      block.closest?.('[data-language]')?.getAttribute('data-language') ||
+      block.closest?.('[data-lang]')?.getAttribute('data-lang') ||
+      block.parentElement?.getAttribute('data-language') ||
+      block.parentElement?.getAttribute('data-lang');
     if (dataLang) return dataLang.toLowerCase().trim();
 
     // 2. Check inner language labels (e.g. .code-language, .language-label)
-    const labelEl = block.querySelector('.code-language, .language-label, [class*="language-"]');
+    const labelEl =
+      block.querySelector('.code-language, .language-label, [class*="language-"]') ||
+      block.closest?.('.code-block, [class*="code-block"]')?.querySelector('.code-language, .language-label, [class*="language-"]') ||
+      block.parentElement?.querySelector('.code-language, .language-label');
     if (labelEl && labelEl !== codeEl && labelEl.textContent) {
       const labelText = labelEl.textContent.trim().toLowerCase();
       if (labelText && labelText.length < 25 && !labelText.includes(' ')) {
@@ -169,7 +187,8 @@ export class TextSanitizer {
     }
 
     // 3. Check class names (e.g. class="language-python", class="lang-typescript")
-    const classes = `${block.className || ''} ${codeEl.className || ''}`;
+    const containerClasses = block.closest?.('.code-block, [class*="code-block"]')?.className || '';
+    const classes = `${block.className || ''} ${codeEl.className || ''} ${containerClasses}`;
     const match = classes.match(/(?:language|lang)-([a-zA-Z0-9_+-]+)/i);
     if (match && match[1]) {
       return match[1].toLowerCase();
