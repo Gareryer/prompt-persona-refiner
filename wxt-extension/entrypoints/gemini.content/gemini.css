@@ -12,12 +12,19 @@
 }
 
 :host(.allie-settings-host) {
-  position: fixed;
-  z-index: 10000;
-  display: inline-flex;
+  position: fixed !important;
+  z-index: 10000 !important;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;
+  pointer-events: auto !important;
+  left: var(--allie-settings-left, auto) !important;
+  top: var(--allie-settings-top, auto) !important;
+}
+
+:host(.allie-settings-host[style*="display: none"]),
+:host(.allie-settings-host.allie-hidden) {
+  display: none !important;
 }
 
 .allie-toggle-wrapper {

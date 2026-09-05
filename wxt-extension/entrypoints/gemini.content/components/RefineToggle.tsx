@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GeminiTooltip } from './GeminiTooltip';
 
 export interface RefineToggleProps {
@@ -16,15 +16,21 @@ export const RefineToggle: React.FC<RefineToggleProps> = ({
   label,
   tooltipText
 }) => {
-  const [internalEnabled, setInternalEnabled] = useState(true);
-  const isControlled = controlledEnabled !== undefined;
-  const isEnabled = isControlled ? controlledEnabled : internalEnabled;
+  const [internalEnabled, setInternalEnabled] = useState(
+    controlledEnabled !== undefined ? controlledEnabled : true
+  );
+
+  useEffect(() => {
+    if (controlledEnabled !== undefined) {
+      setInternalEnabled(controlledEnabled);
+    }
+  }, [controlledEnabled]);
+
+  const isEnabled = controlledEnabled !== undefined ? controlledEnabled : internalEnabled;
 
   const performToggle = () => {
-    const nextState = !isEnabled;
-    if (!isControlled) {
-      setInternalEnabled(nextState);
-    }
+    const nextState = !internalEnabled;
+    setInternalEnabled(nextState);
     onToggle?.(nextState);
   };
 
@@ -43,7 +49,7 @@ export const RefineToggle: React.FC<RefineToggleProps> = ({
   };
 
   const currentLabel = label || (status === 'loading' ? 'Refining...' : status === 'success' ? 'Refined' : 'Refine');
-  const defaultTooltip = isEnabled
+  const defaultTooltip = internalEnabled
     ? 'Allie prompt refinement is active (Intercepts Enter / Send)'
     : 'Allie prompt refinement is disabled (Native send)';
 

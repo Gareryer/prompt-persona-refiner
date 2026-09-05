@@ -96,11 +96,29 @@ export default defineContentScript({
     }
 
     let toggleUi: Awaited<ReturnType<typeof createShadowRootUi<ReactDOM.Root>>> | null = null;
+    let toggleRoot: ReactDOM.Root | null = null;
     let settingsUi: Awaited<ReturnType<typeof createShadowRootUi<ReactDOM.Root>>> | null = null;
     let settingsRoot: ReactDOM.Root | null = null;
     let hasActivePersona = false;
     let isMounting = false;
     let resizeObserver: ResizeObserver | null = null;
+
+    function renderRefineToggle() {
+      if (!toggleRoot) return;
+      toggleRoot.render(
+        <RefineToggle
+          enabled={isRefineActive}
+          onToggle={(active) => {
+            isRefineActive = active;
+            renderRefineToggle();
+            if (settingsUi?.shadowHost) {
+              settingsUi.shadowHost.classList.toggle('allie-hidden', !active);
+              settingsUi.shadowHost.style.setProperty('display', active ? 'inline-flex' : 'none', 'important');
+            }
+          }}
+        />
+      );
+    }
 
     // Position updater for fixed SettingsButton outside composer
     function updateSettingsPosition() {
@@ -109,10 +127,15 @@ export default defineContentScript({
                              findElement<HTMLElement>(GEMINI_SELECTORS.textInputField)?.parentElement;
       if (!inputContainer) return;
       const rect = inputContainer.getBoundingClientRect();
-      settingsUi.shadowHost.style.position = 'fixed';
-      settingsUi.shadowHost.style.left = `${rect.right + 12}px`;
-      settingsUi.shadowHost.style.top = `${rect.top + rect.height / 2 - 20}px`;
-      settingsUi.shadowHost.style.zIndex = '10000';
+      settingsUi.shadowHost.style.setProperty('--allie-settings-left', `${rect.right + 12}px`);
+      settingsUi.shadowHost.style.setProperty('--allie-settings-top', `${rect.top + rect.height / 2 - 20}px`);
+      settingsUi.shadowHost.style.setProperty('position', 'fixed', 'important');
+      settingsUi.shadowHost.style.setProperty('left', `${rect.right + 12}px`, 'important');
+      settingsUi.shadowHost.style.setProperty('top', `${rect.top + rect.height / 2 - 20}px`, 'important');
+      settingsUi.shadowHost.style.setProperty('z-index', '10000', 'important');
+      settingsUi.shadowHost.style.setProperty('pointer-events', 'auto', 'important');
+      settingsUi.shadowHost.classList.toggle('allie-hidden', !isRefineActive);
+      settingsUi.shadowHost.style.setProperty('display', isRefineActive ? 'inline-flex' : 'none', 'important');
     }
 
     const onScrollOrResize = () => {
@@ -308,22 +331,13 @@ export default defineContentScript({
               shadowHost.style.margin = '0 4px';
               shadowHost.style.verticalAlign = 'middle';
               syncThemeToHost(shadowHost);
-              const root = ReactDOM.createRoot(container);
-              root.render(
-                <RefineToggle
-                  enabled={isRefineActive}
-                  onToggle={(active) => {
-                    isRefineActive = active;
-                    if (settingsUi?.shadowHost) {
-                      settingsUi.shadowHost.style.display = active ? 'inline-flex' : 'none';
-                    }
-                  }}
-                />
-              );
-              return root;
+              toggleRoot = ReactDOM.createRoot(container);
+              renderRefineToggle();
+              return toggleRoot;
             },
             onRemove(root) {
               root?.unmount();
+              toggleRoot = null;
             }
           });
 
@@ -351,10 +365,11 @@ export default defineContentScript({
             css: [tokensCss, geminiCss, settingsButtonCss, geminiTooltipCss].join('\n'),
             onMount(container, _shadow, shadowHost) {
               shadowHost.classList.add('allie-settings-host');
-              shadowHost.style.position = 'fixed';
-              shadowHost.style.zIndex = '10000';
-              shadowHost.style.pointerEvents = 'auto';
-              shadowHost.style.display = isRefineActive ? 'inline-flex' : 'none';
+              shadowHost.classList.toggle('allie-hidden', !isRefineActive);
+              shadowHost.style.setProperty('position', 'fixed', 'important');
+              shadowHost.style.setProperty('z-index', '10000', 'important');
+              shadowHost.style.setProperty('pointer-events', 'auto', 'important');
+              shadowHost.style.setProperty('display', isRefineActive ? 'inline-flex' : 'none', 'important');
               syncThemeToHost(shadowHost);
               settingsRoot = ReactDOM.createRoot(container);
               renderSettingsButton();
@@ -423,6 +438,7 @@ export default defineContentScript({
       settingsUi?.remove();
       toggleUi = null;
       settingsUi = null;
+      toggleRoot = null;
       settingsRoot = null;
     });
   }
