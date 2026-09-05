@@ -1,5 +1,7 @@
 /**
  * Material 3 Settings Button Styling for Allie Gemini Shadow DOM.
+ * Adopts 40px circular button dimensions, smooth gear hover rotation,
+ * and legacy bottom-center pulsing status dot indicator.
  * Rebrand mandate: Uses '--allie-*' and '.allie-*' exclusively.
  */
 
@@ -8,39 +10,55 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  border-radius: 9999px;
+  border-radius: 50%;
   background-color: transparent;
-  border: none;
+  border: 0px none transparent;
   color: var(--allie-text-secondary, #c4c7c5);
   box-shadow: none;
   cursor: pointer;
   outline: none;
   transition: background-color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
               color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
-              transform 150ms cubic-bezier(0.2, 0, 0, 1),
+              transform var(--allie-transition-fast, 150ms cubic-bezier(0.2, 0, 0, 1)),
               box-shadow var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1));
 }
 
+/* Material 3 State Layer */
+.allie-button-state-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1));
+}
+
 .allie-settings-btn:hover {
-  background-color: var(--allie-btn-hover-bg, rgba(255, 255, 255, 0.08));
+  background-color: var(--allie-btn-hover-bg, rgba(227, 227, 227, 0.08));
   color: var(--allie-text-primary, #ffffff);
 }
 
 .allie-settings-btn:focus-visible {
-  box-shadow: 0 0 0 2px var(--allie-focus-ring, rgba(138, 180, 248, 0.5));
+  outline: 2px solid var(--allie-accent, #a8c7fa);
+  outline-offset: 1px;
+  box-shadow: var(--allie-focus-ring, 0 0 0 2px rgba(138, 180, 248, 0.5));
 }
 
 .allie-settings-btn:active {
-  background-color: var(--allie-btn-active-bg, rgba(255, 255, 255, 0.16));
+  background-color: var(--allie-btn-active-bg, rgba(227, 227, 227, 0.14));
   transform: scale(0.92);
 }
 
 .allie-settings-btn.active {
-  background-color: var(--allie-accent-container, rgba(138, 180, 248, 0.15));
-  color: var(--allie-accent, #8ab4f8);
+  background-color: var(--allie-accent-container, rgba(168, 199, 250, 0.15));
+  color: var(--allie-accent, #a8c7fa);
 }
 
 .allie-settings-icon {
@@ -54,25 +72,72 @@
   transform: rotate(30deg);
 }
 
+/* Legacy Model Indicator Dot (Bottom-center overlay badge) */
 .allie-status-dot {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 7px;
-  height: 7px;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background-color: var(--allie-status-online, #34a853);
-  border: 1.5px solid var(--allie-bg-surface-variant, #282a2c);
-  box-sizing: border-box;
-  animation: allie-dot-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  transition: all 0.3s ease;
+  z-index: 2;
   pointer-events: none;
 }
 
-@keyframes allie-dot-pulse {
+.allie-status-dot.active {
+  background-color: var(--allie-status-online, #34a853);
+  box-shadow: 0 0 6px rgba(52, 168, 83, 0.8);
+  animation: allie-pulse-green 2s ease-in-out infinite;
+}
+
+.allie-status-dot.inactive {
+  background-color: var(--allie-status-offline, #ea4335);
+  box-shadow: 0 0 4px rgba(234, 67, 53, 0.6);
+  animation: allie-pulse-red 1.5s ease-in-out infinite;
+}
+
+@keyframes allie-pulse-green {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(52, 168, 83, 0.7);
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 4px rgba(52, 168, 83, 0.4);
   }
   50% {
-    box-shadow: 0 0 0 3.5px rgba(52, 168, 83, 0);
+    transform: translateX(-50%) scale(1.3);
+    box-shadow: 0 0 10px rgba(52, 168, 83, 0.9);
   }
 }
+
+@keyframes allie-pulse-red {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 4px rgba(234, 67, 53, 0.4);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.3);
+    box-shadow: 0 0 8px rgba(234, 67, 53, 0.9);
+  }
+}
+
+/* Focus Indicator & Touch Target */
+.allie-focus-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.allie-touch-target {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+

@@ -57,18 +57,19 @@ export const RefineToggle: React.FC<RefineToggleProps> = ({
           onKeyDown={handleKeyDown}
           role="switch"
           aria-checked={isEnabled}
-          aria-label="Toggle Allie prompt refinement"
+          aria-label={`Toggle prompt refinement, currently ${isEnabled ? 'On' : 'Off'}`}
           data-allie="refine-toggle"
+          tabIndex={0}
         >
-          <svg className="allie-toggle-spark" viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
-            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
-          </svg>
-          <span className="allie-toggle-label">{currentLabel}</span>
-          <span className="allie-toggle-switch">
-            <span className="allie-toggle-track">
-              <span className="allie-toggle-knob" />
+          <span className="allie-button-state-layer" />
+          <span className="allie-button-label">
+            <span className="allie-toggle-label">{currentLabel}</span>
+            <span className={`allie-switch-track ${isEnabled ? 'checked' : ''}`}>
+              <span className="allie-switch-knob" />
             </span>
           </span>
+          <span className="allie-focus-indicator" />
+          <span className="allie-touch-target" />
         </button>
       </GeminiTooltip>
     </div>

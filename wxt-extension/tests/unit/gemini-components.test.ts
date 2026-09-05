@@ -217,13 +217,13 @@ describe('Phase 4: Gemini Content Injected Components Polish & Refinement', () =
 
     it('renders green status dot and accessible label when hasActivePersona is true', () => {
       const htmlWithDot = renderToStaticMarkup(React.createElement(SettingsButton, { hasActivePersona: true }));
-      expect(htmlWithDot).toContain('allie-status-dot');
+      expect(htmlWithDot).toContain('allie-status-dot active');
       expect(htmlWithDot).toContain('aria-label="Active persona loaded"');
       expect(htmlWithDot).toContain('Open Allie Settings (Active persona loaded)');
 
       const htmlWithoutDot = renderToStaticMarkup(React.createElement(SettingsButton, { hasActivePersona: false }));
-      expect(htmlWithoutDot).not.toContain('allie-status-dot');
-      expect(htmlWithoutDot).not.toContain('Active persona loaded');
+      expect(htmlWithoutDot).toContain('allie-status-dot inactive');
+      expect(htmlWithoutDot).toContain('aria-label="No persona loaded"');
     });
 
     it('applies active class when active prop is true', () => {

@@ -6,12 +6,13 @@
 
 :host,
 :host(.dark-theme) {
-  /* Typography */
-  --allie-font-family: 'Google Sans Flex', 'Google Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Typography - Exact Gemini font stack */
+  --allie-font-family: 'Google Sans Flex', 'Google Sans Text', 'Google Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --allie-font-size-sm: 12px;
   --allie-font-size-base: 14px;
   --allie-font-size-lg: 16px;
-  --allie-line-height: 1.5;
+  --allie-font-weight-medium: 500;
+  --allie-line-height: normal;
 
   /* Pill & Component Radii */
   --allie-radius-pill: 9999px;
@@ -27,10 +28,12 @@
   /* Status Indicators */
   --allie-status-online: #34a853;
   --allie-status-online-glow: 0 0 6px rgba(52, 168, 83, 0.8);
-  --allie-status-offline: #80868b;
+  --allie-status-offline: #ea4335;
+  --allie-status-offline-glow: 0 0 4px rgba(234, 67, 53, 0.6);
 
   /* Transitions */
   --allie-transition-standard: 200ms cubic-bezier(0.2, 0, 0, 1);
+  --allie-transition-fast: 150ms cubic-bezier(0.2, 0, 0, 1);
 
   /* Dark Theme Colors (Gemini Default) */
   --allie-bg-primary: #131314;
@@ -40,31 +43,31 @@
 
   --allie-text-primary: #e3e3e3;
   --allie-text-secondary: #c4c7c5;
+  --allie-text-tertiary: #8e918f;
   --allie-text-disabled: #80868b;
 
-  --allie-accent: #8ab4f8;
+  --allie-accent: #a8c7fa;
   --allie-accent-hover: #aecbfa;
-  --allie-accent-container: rgba(138, 180, 248, 0.15);
+  --allie-accent-container: rgba(168, 199, 250, 0.15);
+  --allie-accent-container-hover: rgba(168, 199, 250, 0.22);
+  --allie-accent-container-active: rgba(168, 199, 250, 0.30);
   --allie-accent-contrast: #041e49;
 
-  --allie-hover-state: rgba(255, 255, 255, 0.08);
-  --allie-active-state: rgba(138, 180, 248, 0.20);
-  --allie-focus-ring: 0 0 0 2px #8ab4f8;
+  /* State Layers */
+  --allie-hover-state: rgba(227, 227, 227, 0.08);
+  --allie-active-state: rgba(227, 227, 227, 0.14);
+  --allie-focus-ring: 0 0 0 2px rgba(138, 180, 248, 0.5);
 
-  --allie-btn-hover-bg: rgba(255, 255, 255, 0.08);
-  --allie-btn-active-bg: rgba(255, 255, 255, 0.14);
-  --allie-accent-container-hover: rgba(138, 180, 248, 0.20);
-  --allie-accent-container-active: rgba(138, 180, 248, 0.26);
-  --allie-accent-border: rgba(138, 180, 248, 0.30);
-  --allie-accent-border-hover: rgba(138, 180, 248, 0.45);
-  --allie-switch-track-off: #8e918f;
-  --allie-switch-knob-off: #8e918f;
+  --allie-btn-hover-bg: rgba(227, 227, 227, 0.08);
+  --allie-btn-active-bg: rgba(227, 227, 227, 0.14);
+
+  /* Switch Tokens (Dark Mode) */
+  --allie-switch-track-off: #444746;
+  --allie-switch-knob-off: #e3e3e3;
+  --allie-switch-track-on: #a8c7fa;
+  --allie-switch-knob-on: #041e49;
 
   --allie-border-subtle: rgba(255, 255, 255, 0.12);
-  --allie-toggle-bg-off: #444746;
-  --allie-toggle-bg-on: #8ab4f8;
-  --allie-toggle-knob-off: #c4c7c5;
-  --allie-toggle-knob-on: #041e49;
 
   /* Inverted Surface Tooltip Tokens (Dark Mode) */
   --allie-tooltip-bg: #e3e3e3;
@@ -73,38 +76,38 @@
 
 :host(.light-theme) {
   /* Light Theme Overrides (Google Blue 600 accent #0b57d0, light grey backgrounds, dark text) */
-  --allie-bg-primary: #f0f4f9;
+  --allie-bg-primary: #f0f4f8;
   --allie-bg-surface: #ffffff;
-  --allie-bg-surface-variant: #e1e3e1;
+  --allie-bg-surface-variant: #e9eef6;
   --allie-bg-surface-elevated: #f8fafd;
 
   --allie-text-primary: #1f1f1f;
   --allie-text-secondary: #444746;
+  --allie-text-tertiary: #747775;
   --allie-text-disabled: #9aa0a6;
 
   --allie-accent: #0b57d0;
   --allie-accent-hover: #1b6ef3;
   --allie-accent-container: rgba(11, 87, 208, 0.12);
+  --allie-accent-container-hover: rgba(11, 87, 208, 0.18);
+  --allie-accent-container-active: rgba(11, 87, 208, 0.24);
   --allie-accent-contrast: #ffffff;
 
+  /* State Layers */
   --allie-hover-state: rgba(31, 31, 31, 0.08);
-  --allie-active-state: rgba(11, 87, 208, 0.15);
-  --allie-focus-ring: 0 0 0 2px #0b57d0;
+  --allie-active-state: rgba(31, 31, 31, 0.12);
+  --allie-focus-ring: 0 0 0 2px rgba(11, 87, 208, 0.4);
 
-  --allie-btn-hover-bg: rgba(0, 0, 0, 0.06);
-  --allie-btn-active-bg: rgba(0, 0, 0, 0.12);
-  --allie-accent-container-hover: rgba(11, 87, 208, 0.20);
-  --allie-accent-container-active: rgba(11, 87, 208, 0.26);
-  --allie-accent-border: rgba(11, 87, 208, 0.30);
-  --allie-accent-border-hover: rgba(11, 87, 208, 0.45);
+  --allie-btn-hover-bg: rgba(31, 31, 31, 0.08);
+  --allie-btn-active-bg: rgba(31, 31, 31, 0.12);
+
+  /* Switch Tokens (Light Mode) */
   --allie-switch-track-off: #747775;
-  --allie-switch-knob-off: #747775;
+  --allie-switch-knob-off: #ffffff;
+  --allie-switch-track-on: #0b57d0;
+  --allie-switch-knob-on: #ffffff;
 
   --allie-border-subtle: rgba(0, 0, 0, 0.10);
-  --allie-toggle-bg-off: #c4c7c5;
-  --allie-toggle-bg-on: #0b57d0;
-  --allie-toggle-knob-off: #ffffff;
-  --allie-toggle-knob-on: #ffffff;
 
   /* Inverted Surface Tooltip Tokens (Light Mode) */
   --allie-tooltip-bg: #1f1f1f;

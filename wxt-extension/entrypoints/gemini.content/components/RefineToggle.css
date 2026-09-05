@@ -1,167 +1,184 @@
 /**
  * Material 3 Refine Toggle Component Styling for Allie Gemini Shadow DOM.
+ * Exactly adopts Gemini's native 'bard-mode-switcher' pill button specifications
+ * (height 40px, padding 0 16px, 9999px pill radius, Google Sans Flex 14px 500)
+ * with an integrated compact Material 3 switch toggler.
  * Rebrand mandate: Uses '--allie-*' and '.allie-*' exclusively.
  */
 
 .allie-toggle-button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 10px 0 8px;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  margin: 0 4px;
   border-radius: var(--allie-radius-pill, 9999px);
   background-color: transparent;
-  border: 1px solid transparent;
+  border: 0px none transparent;
   color: var(--allie-text-secondary, #c4c7c5);
-  font-family: var(--allie-font-family, system-ui, -apple-system, sans-serif);
-  font-size: var(--allie-font-size-sm, 13px);
-  font-weight: 500;
+  font-family: var(--allie-font-family, sans-serif);
+  font-size: var(--allie-font-size-base, 14px);
+  font-weight: var(--allie-font-weight-medium, 500);
+  letter-spacing: 0.2px;
   cursor: pointer;
   outline: none;
   user-select: none;
+  position: relative;
   transition: background-color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
-              border-color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
               color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
-              box-shadow var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
-              transform 150ms cubic-bezier(0.2, 0, 0, 1);
+              transform var(--allie-transition-fast, 150ms cubic-bezier(0.2, 0, 0, 1)),
+              box-shadow var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1));
 }
 
+/* Material 3 State Layer */
+.allie-button-state-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--allie-radius-pill, 9999px);
+  background-color: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1));
+}
+
+/* Hover (Inactive State) */
 .allie-toggle-button:hover {
-  background-color: var(--allie-btn-hover-bg, rgba(255, 255, 255, 0.08));
+  background-color: var(--allie-btn-hover-bg, rgba(227, 227, 227, 0.08));
   color: var(--allie-text-primary, #e3e3e3);
 }
 
-.allie-toggle-button:focus-visible {
-  box-shadow: 0 0 0 2px var(--allie-focus-ring, rgba(138, 180, 248, 0.5));
-}
-
+/* Pressed / Clicked (Inactive State) */
 .allie-toggle-button:active {
-  background-color: var(--allie-btn-active-bg, rgba(255, 255, 255, 0.14));
-  transform: scale(0.96);
+  background-color: var(--allie-btn-active-bg, rgba(227, 227, 227, 0.14));
+  transform: scale(0.98);
 }
 
-/* Active (ON) state */
+/* Focus-visible */
+.allie-toggle-button:focus-visible {
+  outline: 2px solid var(--allie-accent, #a8c7fa);
+  outline-offset: 1px;
+  box-shadow: var(--allie-focus-ring, 0 0 0 2px rgba(138, 180, 248, 0.5));
+}
+
+/* Active (ON / Checked State) */
 .allie-toggle-button.active {
-  background-color: var(--allie-accent-container, rgba(138, 180, 248, 0.12));
-  border: 1px solid var(--allie-accent-border, rgba(138, 180, 248, 0.30));
-  color: var(--allie-accent, #8ab4f8);
+  background-color: var(--allie-accent-container, rgba(168, 199, 250, 0.15));
+  color: var(--allie-text-primary, #e3e3e3);
 }
 
 .allie-toggle-button.active:hover {
-  background-color: var(--allie-accent-container-hover, rgba(138, 180, 248, 0.20));
-  border-color: var(--allie-accent-border-hover, rgba(138, 180, 248, 0.45));
-  color: var(--allie-accent-hover, #adc8ff);
+  background-color: var(--allie-accent-container-hover, rgba(168, 199, 250, 0.22));
+  color: var(--allie-text-primary, #ffffff);
 }
 
 .allie-toggle-button.active:active {
-  background-color: var(--allie-accent-container-active, rgba(138, 180, 248, 0.26));
-  transform: scale(0.96);
+  background-color: var(--allie-accent-container-active, rgba(168, 199, 250, 0.30));
+  transform: scale(0.98);
 }
 
-/* Google 4-point Sparkle Icon */
-.allie-toggle-spark {
-  width: 15px;
-  height: 15px;
-  fill: currentColor;
-  flex-shrink: 0;
-  transition: transform 200ms ease;
-}
-
-.allie-toggle-button:hover .allie-toggle-spark {
-  transform: rotate(15deg) scale(1.1);
+/* Label Container */
+.allie-button-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 1;
 }
 
 .allie-toggle-label {
-  line-height: 1;
-  letter-spacing: 0.1px;
+  font-size: var(--allie-font-size-base, 14px);
+  font-weight: var(--allie-font-weight-medium, 500);
+  line-height: normal;
+  letter-spacing: 0.2px;
 }
 
-/* Material 3 Inline Switch */
-.allie-toggle-switch {
+/* Compact Material 3 Switch Toggler */
+.allie-switch-track {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  position: relative;
-  width: 26px;
-  height: 15px;
-  margin-left: 2px;
-}
-
-.allie-toggle-track {
-  width: 100%;
-  height: 100%;
-  border-radius: var(--allie-radius-pill, 9999px);
-  background-color: transparent;
-  border: 1.5px solid var(--allie-switch-track-off, #8e918f);
+  width: 28px;
+  height: 18px;
+  border-radius: 9px;
+  background-color: var(--allie-switch-track-off, #444746);
   box-sizing: border-box;
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 0 1px;
-  transition: background-color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
-              border-color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1));
+  flex-shrink: 0;
+  transition: background-color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1));
 }
 
-.allie-toggle-button.active .allie-toggle-track {
-  background-color: var(--allie-accent, #8ab4f8);
-  border-color: var(--allie-accent, #8ab4f8);
-}
-
-.allie-toggle-knob {
-  width: 9px;
-  height: 9px;
+.allie-switch-knob {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background-color: var(--allie-switch-knob-off, #8e918f);
+  background-color: var(--allie-switch-knob-off, #e3e3e3);
   transition: transform var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1)),
               background-color var(--allie-transition-standard, 200ms cubic-bezier(0.2, 0, 0, 1));
   will-change: transform;
 }
 
-.allie-toggle-button.active .allie-toggle-knob {
-  transform: translateX(11px);
-  background-color: var(--allie-toggle-knob-on, #041e49);
+/* Checked Switch State */
+.allie-switch-track.checked {
+  background-color: var(--allie-switch-track-on, #a8c7fa);
+}
+
+.allie-switch-track.checked .allie-switch-knob {
+  transform: translate(10px, -50%);
+  background-color: var(--allie-switch-knob-on, #041e49);
+}
+
+/* Focus Indicator & Touch Target */
+.allie-focus-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--allie-radius-pill, 9999px);
+  pointer-events: none;
+}
+
+.allie-touch-target {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 48px;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 /* Status variants */
 .allie-toggle-button.status-loading {
   opacity: 0.9;
   cursor: wait;
-  border-color: var(--allie-accent, #8ab4f8);
+  box-shadow: 0 0 0 2px var(--allie-accent, #a8c7fa);
   animation: allie-toggle-pulse 1.5s ease-in-out infinite;
 }
 
-.allie-toggle-button.status-loading .allie-toggle-icon {
-  animation: allie-icon-spin 1.2s linear infinite;
-  display: inline-block;
-}
-
 .allie-toggle-button.status-success {
-  border-color: var(--allie-status-online, #34a853);
+  box-shadow: 0 0 0 2px var(--allie-status-online, #34a853);
   color: var(--allie-status-online, #34a853);
-  box-shadow: 0 0 6px rgba(52, 168, 83, 0.4);
 }
 
 .allie-toggle-button.status-error {
-  border-color: #ea4335;
-  color: #ea4335;
-  box-shadow: 0 0 6px rgba(234, 67, 53, 0.35);
+  box-shadow: 0 0 0 2px var(--allie-status-offline, #ea4335);
+  color: var(--allie-status-offline, #ea4335);
 }
 
 @keyframes allie-toggle-pulse {
   0%, 100% {
     opacity: 0.9;
-    box-shadow: 0 0 0 0 rgba(138, 180, 248, 0.35);
   }
   50% {
     opacity: 0.7;
-    box-shadow: 0 0 0 3px rgba(138, 180, 248, 0.1);
   }
 }
 
-@keyframes allie-icon-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}

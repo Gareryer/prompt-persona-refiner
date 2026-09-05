@@ -71,10 +71,21 @@ export default defineContentScript({
       });
     }
 
-    // Dynamic theme synchronizer matching Gemini's document.body class
+    // Dynamic theme synchronizer matching Gemini's document.body class & color scheme
     function syncThemeToHost(host: HTMLElement | null | undefined) {
       if (!host || typeof document === 'undefined') return;
-      const isLight = document.body.classList.contains('light-theme');
+      let isLight = document.body.classList.contains('light-theme');
+      if (!isLight && !document.body.classList.contains('dark-theme')) {
+        const bgColor = window.getComputedStyle(document.body).backgroundColor;
+        const rgb = bgColor.match(/\d+/g);
+        if (rgb && rgb[0] && rgb[1] && rgb[2]) {
+          const r = parseInt(rgb[0], 10) || 0;
+          const g = parseInt(rgb[1], 10) || 0;
+          const b = parseInt(rgb[2], 10) || 0;
+          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+          isLight = brightness >= 128;
+        }
+      }
       if (isLight) {
         host.classList.add('light-theme');
         host.classList.remove('dark-theme');
@@ -89,6 +100,27 @@ export default defineContentScript({
     let settingsRoot: ReactDOM.Root | null = null;
     let hasActivePersona = false;
     let isMounting = false;
+    let resizeObserver: ResizeObserver | null = null;
+
+    // Position updater for fixed SettingsButton outside composer
+    function updateSettingsPosition() {
+      if (!settingsUi?.shadowHost || !settingsUi.shadowHost.isConnected) return;
+      const inputContainer = findElement<HTMLElement>(GEMINI_SELECTORS.inputArea) ||
+                             findElement<HTMLElement>(GEMINI_SELECTORS.textInputField)?.parentElement;
+      if (!inputContainer) return;
+      const rect = inputContainer.getBoundingClientRect();
+      settingsUi.shadowHost.style.position = 'fixed';
+      settingsUi.shadowHost.style.left = `${rect.right + 12}px`;
+      settingsUi.shadowHost.style.top = `${rect.top + rect.height / 2 - 20}px`;
+      settingsUi.shadowHost.style.zIndex = '10000';
+    }
+
+    const onScrollOrResize = () => {
+      updateSettingsPosition();
+    };
+
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize, { passive: true });
 
     function renderSettingsButton() {
       if (!settingsRoot) return;
@@ -282,6 +314,9 @@ export default defineContentScript({
                   enabled={isRefineActive}
                   onToggle={(active) => {
                     isRefineActive = active;
+                    if (settingsUi?.shadowHost) {
+                      settingsUi.shadowHost.style.display = active ? 'inline-flex' : 'none';
+                    }
                   }}
                 />
               );
@@ -295,33 +330,36 @@ export default defineContentScript({
           toggleUi.mount();
         }
 
-        // Mount SettingsButton into input-area (anchored to right of composer)
+        // Mount SettingsButton to document.body (fixed layout tracking input container)
         if (inputAreaAnchor && (!settingsUi || !settingsUi.shadowHost.isConnected)) {
           if (settingsUi) {
             settingsUi.remove();
             settingsUi = null;
           }
 
+          resizeObserver?.disconnect();
+          resizeObserver = new ResizeObserver(() => {
+            updateSettingsPosition();
+          });
+          resizeObserver.observe(inputAreaAnchor);
+
           settingsUi = await createShadowRootUi(ctx, {
             name: 'allie-settings-button',
             position: 'inline',
-            anchor: inputAreaAnchor,
+            anchor: 'body',
             append: 'last',
             css: [tokensCss, geminiCss, settingsButtonCss, geminiTooltipCss].join('\n'),
             onMount(container, _shadow, shadowHost) {
               shadowHost.classList.add('allie-settings-host');
-              shadowHost.style.position = 'absolute';
-              shadowHost.style.right = '-48px';
-              shadowHost.style.top = '50%';
-              shadowHost.style.transform = 'translateY(-50%)';
-              shadowHost.style.zIndex = '1000';
-              shadowHost.style.display = 'flex';
-              shadowHost.style.alignItems = 'center';
-              shadowHost.style.justifyContent = 'center';
+              shadowHost.style.position = 'fixed';
+              shadowHost.style.zIndex = '10000';
+              shadowHost.style.pointerEvents = 'auto';
+              shadowHost.style.display = isRefineActive ? 'inline-flex' : 'none';
               syncThemeToHost(shadowHost);
               settingsRoot = ReactDOM.createRoot(container);
               renderSettingsButton();
               updateActivePersonaState();
+              updateSettingsPosition();
               return settingsRoot;
             },
             onRemove(root) {
@@ -331,6 +369,7 @@ export default defineContentScript({
           });
 
           settingsUi.mount();
+          updateSettingsPosition();
         }
 
         // Intercept enter key / send button
@@ -366,6 +405,9 @@ export default defineContentScript({
     // Full cleanup when content script context is invalidated
     ctx.onInvalidated(() => {
       clearTimeout(debouncedMountTimer);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
+      resizeObserver?.disconnect();
       if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
         chrome.storage.onChanged.removeListener(storageListener);
       }
