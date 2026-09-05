@@ -41,6 +41,77 @@ export const GEMINI_SELECTORS = {
     'user-query',
     '.query-text',
     '[data-role="user"]'
+  ],
+  conversationContainer: [
+    '.conversation-container',
+    '[data-conversation-id]',
+    'ms-chat-turn'
+  ],
+  sessionTitle: [
+    '.conversation-title',
+    'h1[data-conversation-title]',
+    'h1'
+  ],
+  scrollContainer: [
+    '#chat-history',
+    '.chat-history-scroll-container',
+    '[data-scroll-container]',
+    'infinite-scroller',
+    'main[class*="overflow-y-auto"]'
+  ],
+  thinkingContainer: [
+    'model-thoughts',
+    '[data-test-id="model-thoughts"]',
+    '.thinking-container'
+  ],
+  thinkingToggle: [
+    '[data-test-id="model-thoughts"] button',
+    'model-thoughts button',
+    'button[aria-label*="thinking" i]',
+    'button[aria-label*="thought" i]'
+  ],
+  thinkingContent: [
+    'model-thoughts .thoughts-body',
+    '.thinking-content',
+    '.thought-process'
+  ],
+  loadingIndicator: [
+    'mat-progress-spinner',
+    '.mdc-circular-progress',
+    '[role="progressbar"]',
+    '[aria-busy="true"]',
+    '.loading-spinner'
+  ],
+  streamingIndicator: [
+    'button[aria-label*="Stop" i]',
+    '.streaming-indicator',
+    '.generating',
+    '[data-streaming="true"]'
+  ],
+  codeBlock: [
+    'pre code',
+    '.code-block code',
+    'code-block'
+  ],
+  codeLanguage: [
+    '[data-language]',
+    '.code-language',
+    '.language-label'
+  ],
+  image: [
+    'img'
+  ],
+  sidebarItem: [
+    'a[data-conversation-id]',
+    'a[href*="/app/"]'
+  ],
+  expandButton: [
+    '[data-test-id="model-thoughts"] button',
+    'model-thoughts button',
+    'button[aria-label*="thinking" i]',
+    'button[aria-label*="thought" i]',
+    'button[aria-label*="draft" i]',
+    'button[aria-label*="Show more" i]'
   ]
 } as const;
 
@@ -66,6 +137,26 @@ export function findElement<T extends Element = HTMLElement>(
 }
 
 /**
+ * Multi-strategy DOM element query supporting selector arrays or a single selector.
+ * Returns elements matching the first selector that yields results.
+ */
+export function findElements<T extends Element = HTMLElement>(
+  selectors: string[] | readonly string[] | string
+): T[] {
+  if (typeof document === 'undefined') return [];
+  const list: readonly string[] = Array.isArray(selectors) ? selectors : [selectors as string];
+  for (const selector of list) {
+    try {
+      const els = Array.from(document.querySelectorAll(selector));
+      if (els.length > 0) return els as T[];
+    } catch {
+      // Continue to next fallback selector
+    }
+  }
+  return [];
+}
+
+/**
  * Convenience helper to locate an element using a known GEMINI_SELECTORS category key.
  */
 export function findGeminiElement<T extends Element = HTMLElement>(
@@ -73,3 +164,13 @@ export function findGeminiElement<T extends Element = HTMLElement>(
 ): T | null {
   return findElement<T>(GEMINI_SELECTORS[key]);
 }
+
+/**
+ * Convenience helper to query elements using a known GEMINI_SELECTORS category key.
+ */
+export function findGeminiElements<T extends Element = HTMLElement>(
+  key: GeminiSelectorKey
+): T[] {
+  return findElements<T>(GEMINI_SELECTORS[key]);
+}
+

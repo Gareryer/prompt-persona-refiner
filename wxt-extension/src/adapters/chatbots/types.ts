@@ -1,4 +1,5 @@
 import type { ChatbotPlatform, ScrapedTurn } from '../../core/types';
+import type { HarvestPlatform, HarvestTurn, DiscoveredConversation } from '../../core/harvest/types';
 
 export interface IChatbotAdapter {
   readonly platform: ChatbotPlatform;
@@ -59,3 +60,35 @@ export interface IChatbotAdapter {
    */
   interceptSubmit?(onRefine: (prompt: string) => Promise<boolean> | boolean): () => void;
 }
+
+/**
+ * Contract for deep archival and extraction adapters.
+ * Platform-specific adapters implement this interface to handle custom DOM structures,
+ * virtualization quirks, scroller containers, and thinking/CoT extraction.
+ */
+export interface IHarvesterAdapter {
+  readonly platform: HarvestPlatform;
+
+  // 1. Scroller & Container Quirks
+  getScrollContainer(): HTMLElement | null;
+  getLoadingIndicatorSelector(): string | null;
+  getExpandButtonSelectors?(): string[];
+
+  // 2. DOM Virtualization Handlers (true for ChatGPT, false for Gemini/Claude)
+  requiresVirtualizationCache(): boolean;
+  getMessageId?(el: HTMLElement): string | null;
+  getTurnIndex?(el: HTMLElement): number | null;
+
+  // 3. Platform-Specific Extraction & Sanitization
+  scrapeHarvestTurns(): Promise<HarvestTurn[]>;
+  sanitizeTurnNode?(clonedNode: HTMLElement): void;
+
+  // 4. History Discovery
+  enumerateConversations?(signal?: AbortSignal): Promise<DiscoveredConversation[]>;
+
+  // 5. Status & Metadata Helpers
+  isStreaming?(): boolean;
+  extractTitle?(): string;
+  extractConversationId?(): string;
+}
+

@@ -1,14 +1,18 @@
 import { BaseChatbotAdapter } from '../base.adapter';
 import { GEMINI_SELECTORS } from './selectors';
 import { GEMINI_TOKENS } from './tokens';
+import { GeminiContainerPairer } from './container-pairer';
+import { TextSanitizer } from '../../../core/harvest/extraction/text-sanitizer';
 import type { ScrapedTurn } from '../../../core/types';
+import type { IChatbotAdapter, IHarvesterAdapter } from '../types';
+import type { HarvestTurn, DiscoveredConversation } from '../../../core/harvest/types';
 
 /**
  * Platform adapter for Google Gemini (gemini.google.com).
  * Manages Angular & Quill SPA integration, capture-phase event interception,
- * prompt text injection, and non-recursive programmatic submission.
+ * prompt text injection, non-recursive programmatic submission, and deep archival harvesting.
  */
-export class GeminiAdapter extends BaseChatbotAdapter {
+export class GeminiAdapter extends BaseChatbotAdapter implements IChatbotAdapter, IHarvesterAdapter {
   readonly platform = 'gemini' as const;
 
   /**
@@ -211,6 +215,148 @@ export class GeminiAdapter extends BaseChatbotAdapter {
       permanent.appendChild(element);
     }
   }
+
+  // --- IHarvesterAdapter Implementation ---
+
+  /**
+   * Locates the primary scrolling conversation container in the Gemini DOM.
+   */
+  getScrollContainer(): HTMLElement | null {
+    return this.findElement<HTMLElement>(GEMINI_SELECTORS.scrollContainer);
+  }
+
+  /**
+   * Returns selector string for Gemini loading / progress indicators.
+   */
+  getLoadingIndicatorSelector(): string | null {
+    return GEMINI_SELECTORS.loadingIndicator.join(', ');
+  }
+
+  /**
+   * Returns list of selector strings for expandable sections (e.g. model thoughts / CoT toggles).
+   */
+  getExpandButtonSelectors(): string[] {
+    return Array.from(GEMINI_SELECTORS.expandButton);
+  }
+
+  /**
+   * Gemini maintains turns in the DOM without aggressive recycling/unmounting.
+   */
+  requiresVirtualizationCache(): boolean {
+    return false;
+  }
+
+  /**
+   * Scrapes structured conversation turns with container pairing, thinking isolation, and images.
+   */
+  async scrapeHarvestTurns(): Promise<HarvestTurn[]> {
+    return GeminiContainerPairer.pairTurns({ adapter: this });
+  }
+
+  /**
+   * Sanitizes cloned turn nodes by stripping interactive chrome, action toolbars, and UI buttons.
+   */
+  sanitizeTurnNode(clonedNode: HTMLElement): void {
+    if (typeof clonedNode.querySelectorAll === 'function') {
+      const junk = clonedNode.querySelectorAll(
+        [
+          ...GEMINI_SELECTORS.thinkingToggle,
+          ...GEMINI_SELECTORS.thinkingContainer,
+          '.message-actions',
+          'message-actions',
+          '.response-actions',
+          '.action-bar',
+          'button',
+          'svg',
+          '[role="button"]'
+        ].join(', ')
+      );
+      junk.forEach(node => node.remove());
+    }
+  }
+
+  /**
+   * Returns true if Gemini is currently streaming / generating a response.
+   */
+  isStreaming(): boolean {
+    if (typeof document === 'undefined') return false;
+    return this.findElement(GEMINI_SELECTORS.streamingIndicator) !== null;
+  }
+
+  /**
+   * Extracts conversation title from DOM landmarks or document.title.
+   */
+  extractTitle(): string {
+    if (typeof document === 'undefined') return 'Untitled Conversation';
+    const titleEl = this.findElement<HTMLElement>(GEMINI_SELECTORS.sessionTitle);
+    if (titleEl && titleEl.textContent?.trim()) {
+      return TextSanitizer.cleanTitle(titleEl.textContent.trim());
+    }
+    return TextSanitizer.cleanTitle(document.title || '');
+  }
+
+  /**
+   * Extracts Gemini conversation ID from URL path (e.g. /app/4f1e56a7bc) or DOM landmark.
+   */
+  extractConversationId(): string {
+    const reservedRoutes = new Set(['new', 'activity', 'settings', 'help', 'faq', 'share', 'updates', 'prompt']);
+
+    if (typeof window !== 'undefined' && window.location) {
+      const match = window.location.pathname.match(/\/app\/([a-zA-Z0-9_-]+)/i);
+      if (match && match[1] && !reservedRoutes.has(match[1].toLowerCase())) {
+        return match[1];
+      }
+    }
+
+    if (typeof document !== 'undefined') {
+      const domEl = document.querySelector('[data-conversation-id]');
+      const id = domEl?.getAttribute('data-conversation-id')?.trim();
+      if (id && !reservedRoutes.has(id.toLowerCase())) {
+        return id;
+      }
+    }
+
+    return '';
+  }
+
+  /**
+   * Enumerates conversation history from the Gemini sidebar.
+   */
+  async enumerateConversations(signal?: AbortSignal): Promise<DiscoveredConversation[]> {
+    if (typeof document === 'undefined' || signal?.aborted) return [];
+    const selector = GEMINI_SELECTORS.sidebarItem.join(', ');
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
+    const seen = new Set<string>();
+    const results: DiscoveredConversation[] = [];
+    const reservedRoutes = new Set(['new', 'activity', 'settings', 'help', 'faq', 'share', 'updates']);
+
+    for (const link of links) {
+      if (signal?.aborted) break;
+      const href = link.getAttribute('href') || link.href || '';
+      const match = href.match(/\/app\/([a-zA-Z0-9_-]+)/i);
+      const conversationId = (match && match[1]) ? match[1] : link.getAttribute('data-conversation-id') || '';
+
+      if (!conversationId || reservedRoutes.has(conversationId.toLowerCase()) || seen.has(conversationId)) {
+        continue;
+      }
+      seen.add(conversationId);
+
+      const title = TextSanitizer.cleanTitle(link.textContent?.trim() || '');
+      const url = href.startsWith('http')
+        ? href
+        : `https://gemini.google.com/${href.replace(/^\/+/, '')}`;
+
+      results.push({
+        site: 'gemini',
+        conversationId,
+        url,
+        title: title || `Conversation ${conversationId}`
+      });
+    }
+
+    return results;
+  }
+
 
   /**
    * Safely checks if an element is a form input/textarea across both browser and Node/mock environments.
