@@ -121,14 +121,14 @@ export class ThemeController {
   static #applyMode(mode: ThemeMode): void {
     const target: 'light' | 'dark' = mode === 'system' ? this.#getSystemPreference() : mode;
     this.#resolvedTheme = target;
-    if (typeof document !== 'undefined') {
+    if (typeof document !== 'undefined' && typeof document.documentElement?.setAttribute === 'function') {
       document.documentElement.setAttribute('data-theme', target);
     }
     this.#updateToggleIcons(mode);
   }
 
   static #updateToggleIcons(mode: ThemeMode): void {
-    if (typeof document === 'undefined') return;
+    if (typeof document === 'undefined' || typeof document.querySelectorAll !== 'function') return;
     const iconName = this.getIcon(mode);
     document.querySelectorAll('.theme-toggle-icon').forEach(icon => {
       icon.textContent = iconName;

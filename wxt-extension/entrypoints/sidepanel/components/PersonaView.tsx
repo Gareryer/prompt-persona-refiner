@@ -20,6 +20,16 @@ import { ExpandableTextarea } from './ExpandableTextarea';
 
 export { type PromptTemplate };
 
+export type PersonaPageId =
+  | 'browse'
+  | 'my-personas'
+  | 'create'
+  | 'extracted'
+  | 'prompts'
+  | 'add-prompt'
+  | 'detail'
+  | 'version-history';
+
 export interface PersonaViewProps {
   personas: Record<string, PersonaV4>;
   activeId: string;
@@ -37,7 +47,8 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
   onDeletePersona,
   onReportPersona
 }) => {
-  const [page, setPage] = useState<'browse' | 'create' | 'prompts' | 'add-prompt' | 'detail'>('browse');
+  const [pageStack, setPageStack] = useState<PersonaPageId[]>(['browse']);
+  const page = pageStack[pageStack.length - 1] || 'browse';
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -45,23 +56,37 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
   const [selectedTone, setSelectedTone] = useState<string | null>(null);
   const [editingPersonaId, setEditingPersonaId] = useState<string | null>(null);
   const [publishStatus, setPublishStatus] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
-  // Form State for Create / Edit Persona
+  // Form State for Extracted / Edit Persona
   const [createdName, setCreatedName] = useState('');
   const [createdRole, setCreatedRole] = useState('');
   const [createdContext, setCreatedContext] = useState('');
+  const [createdTone, setCreatedTone] = useState('');
+  const [createdFramework, setCreatedFramework] = useState('');
+  const [createdConstraints, setCreatedConstraints] = useState('');
+  const [createdFormat, setCreatedFormat] = useState('');
+  const [createdExemplar, setCreatedExemplar] = useState('');
+  const [createdInjectedContext, setCreatedInjectedContext] = useState('');
+
+  // Style Profiler State
   const [editVerbosity, setEditVerbosity] = useState<'concise' | 'moderate' | 'verbose'>('moderate');
   const [editTechLevel, setEditTechLevel] = useState<'beginner' | 'intermediate' | 'advanced' | 'expert'>('advanced');
   const [editDirectness, setEditDirectness] = useState<'direct' | 'indirect' | 'mixed'>('direct');
   const [editTraits, setEditTraits] = useState<string[]>(['Analytical', 'Precise']);
   const [newTraitInput, setNewTraitInput] = useState('');
   const [editPrefStyle, setEditPrefStyle] = useState('');
+  const [visibilityMode, setVisibilityMode] = useState<'public' | 'private'>('public');
+
+  // Create Page Input (Paste Prompt)
+  const [extractPromptInput, setExtractPromptInput] = useState('');
 
   // Modals State
   const [previewPrompt, setPreviewPrompt] = useState<PromptTemplate | null>(null);
   const [reportModalData, setReportModalData] = useState<{ id: string; name: string } | null>(null);
   const [detailModalPersonaId, setDetailModalPersonaId] = useState<string | null>(null);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [showSourceModal, setShowSourceModal] = useState(false);
 
   // Prompts Library State
   const [prompts, setPrompts] = useState<PromptTemplate[]>([
@@ -72,6 +97,11 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
   const [newPromptTitle, setNewPromptTitle] = useState('');
   const [newPromptContent, setNewPromptContent] = useState('');
   const [promptSearch, setPromptSearch] = useState('');
+
+  // Version History Mock State
+  const [versions, setVersions] = useState<Array<{ version: string; date: string; author: string; changes: string }>>([
+    { version: 'v1.0.0', date: 'Initial Synthesis', author: 'Local User', changes: 'Synthesized core role and instructions' }
+  ]);
 
   useEffect(() => {
     loadSavedPrompts().then(saved => {
@@ -86,6 +116,30 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     }).catch(() => {});
   }, []);
 
+  const navigateTo = (target: PersonaPageId, _parent?: PersonaPageId) => {
+    setPageStack(prev => {
+      if (target === 'browse') return ['browse'];
+      if (target === 'my-personas') return ['browse', 'my-personas'];
+      if (prev[prev.length - 1] === target) return prev;
+      return [...prev, target];
+    });
+  };
+
+  const handlePopPage = () => {
+    setPageStack(prev => {
+      if (prev.length <= 1) return ['browse'];
+      return prev.slice(0, prev.length - 1);
+    });
+  };
+
+  const handleBackFromCreate = () => {
+    if (hasUnsavedChanges()) {
+      setShowUnsavedModal(true);
+    } else {
+      handlePopPage();
+    }
+  };
+
   const filteredList = Object.entries(personas).filter(([id, p]) => {
     const name = p.metadata?.suggested_name || id;
     const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -96,23 +150,22 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     return matchesSearch && matchesDomain && matchesTone;
   });
 
-  const handleBackFromCreate = () => {
-    if (hasUnsavedChanges()) {
-      setShowUnsavedModal(true);
-    } else {
-      setPage('browse');
-    }
-  };
-
   const filteredPrompts = prompts.filter(p => {
     const query = promptSearch.toLowerCase();
     return p.title.toLowerCase().includes(query) || p.content.toLowerCase().includes(query) || p.category.toLowerCase().includes(query);
   });
 
   const handleStartCreate = () => {
+    setExtractPromptInput('');
     setCreatedName('');
     setCreatedRole('');
     setCreatedContext('');
+    setCreatedTone('');
+    setCreatedFramework('');
+    setCreatedConstraints('');
+    setCreatedFormat('');
+    setCreatedExemplar('');
+    setCreatedInjectedContext('');
     setEditVerbosity('moderate');
     setEditTechLevel('advanced');
     setEditDirectness('direct');
@@ -121,14 +174,20 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     setSelectedDomain('Tech');
     setEditingPersonaId(null);
     resetFormDirty();
-    setPage('create');
+    navigateTo('create', page === 'my-personas' ? 'my-personas' : 'browse');
   };
 
   const handleStartEdit = (p: PersonaV4, pId: string) => {
     const editData = loadPersonaToEdit(p);
-    setCreatedName(editData.name || '');
+    setCreatedName(editData.name || p.metadata?.suggested_name || pId);
     setCreatedRole(editData.memory_layer?.persona?.instruction || p.persona?.instruction || '');
     setCreatedContext(editData.memory_layer?.context?.instruction || p.context?.instruction || '');
+    setCreatedTone(p.tone?.instruction || '');
+    setCreatedFramework(p.framework?.instruction || '');
+    setCreatedConstraints(p.constraints?.instruction || '');
+    setCreatedFormat(p.format?.instruction || '');
+    setCreatedExemplar(p.exemplar?.instruction || '');
+    setCreatedInjectedContext('');
     const toneMeta = p.tone?.metadata || {};
     setEditVerbosity((toneMeta.verbosity as any) || 'moderate');
     setEditTechLevel((toneMeta.technical_level as any) || 'advanced');
@@ -137,10 +196,31 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     setEditPrefStyle((toneMeta.preferred_response_style as string) || '');
     setSelectedDomain(p.metadata?.domain || 'Tech');
     setEditingPersonaId(pId);
-    setPage('create');
+    resetFormDirty();
+    setVersions([
+      { version: `v${p.metadata?.version || '1.0.0'}`, date: 'Current Version', author: 'Local User', changes: 'Active parameters' },
+      { version: 'v1.0.0', date: 'Initial Creation', author: 'System', changes: 'Base setup' }
+    ]);
+    navigateTo('extracted', page === 'my-personas' ? 'my-personas' : 'browse');
   };
 
-  const handleCreate = () => {
+  const handleExtractFromPrompt = () => {
+    const promptText = extractPromptInput.trim();
+    if (promptText) {
+      const words = promptText.split(/\s+/).slice(0, 4).join(' ');
+      setCreatedName(words ? `${words.charAt(0).toUpperCase() + words.slice(1)} Specialist` : 'Extracted Specialist');
+      setCreatedRole(promptText);
+      setCreatedContext(`Extracted from source prompt:\n"${promptText.slice(0, 140)}..."`);
+    } else {
+      setCreatedName('Custom Specialist');
+      setCreatedRole('Specialist configured from scratch.');
+      setCreatedContext('General contextual knowledge.');
+    }
+    markFormDirty();
+    navigateTo('extracted', 'create');
+  };
+
+  const handleCreate = async () => {
     if (!createdName.trim()) return;
     const targetId = editingPersonaId || `persona_${Date.now()}`;
     const existing = editingPersonaId ? personas[editingPersonaId] : null;
@@ -160,7 +240,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
       },
       tone: {
         ...existing?.tone,
-        instruction: existing?.tone?.instruction || `Communicate in a ${editVerbosity} manner at a ${editTechLevel} technical level with ${editDirectness} phrasing.`,
+        instruction: createdTone || existing?.tone?.instruction || `Communicate in a ${editVerbosity} manner at a ${editTechLevel} technical level with ${editDirectness} phrasing.`,
         metadata: {
           ...existing?.tone?.metadata,
           verbosity: editVerbosity,
@@ -171,20 +251,66 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
           style_tags: editTraits
         }
       },
+      framework: {
+        ...existing?.framework,
+        instruction: createdFramework || existing?.framework?.instruction || ''
+      },
+      constraints: {
+        ...existing?.constraints,
+        instruction: createdConstraints || existing?.constraints?.instruction || ''
+      },
+      format: {
+        ...existing?.format,
+        instruction: createdFormat || existing?.format?.instruction || ''
+      },
+      exemplar: {
+        ...existing?.exemplar,
+        instruction: createdExemplar || existing?.exemplar?.instruction || ''
+      },
       metadata: {
         ...existing?.metadata,
         suggested_name: createdName,
         suggested_title: existing?.metadata?.suggested_title || 'AI Specialist',
-        domain: selectedDomain || existing?.metadata?.domain || 'Tech'
+        domain: selectedDomain || existing?.metadata?.domain || 'Tech',
+        version: editingPersonaId ? '1.0.1' : '1.0.0'
       }
     };
     onSavePersona(targetId, newPersona);
-    setCreatedName('');
-    setCreatedRole('');
-    setCreatedContext('');
-    setEditingPersonaId(null);
     resetFormDirty();
-    setPage('browse');
+
+    if (visibilityMode === 'public') {
+      setPublishStatus('Publishing to community...');
+      const res = await handlePublishPersona({
+        name: createdName,
+        extractionData: newPersona,
+        domain: selectedDomain || 'Tech'
+      });
+      setPublishStatus(res.mode === 'cloud' ? '✓ Published to Community!' : '✓ Saved as Local Draft');
+      setTimeout(() => setPublishStatus(null), 2500);
+    } else {
+      setSaveStatus('✓ Saved as Draft');
+      setTimeout(() => setSaveStatus(null), 2500);
+    }
+
+    navigateTo('my-personas', 'browse');
+  };
+
+  const handleSaveNewPrompt = async () => {
+    if (!newPromptTitle.trim() || !newPromptContent.trim()) return;
+    const saved = await savePromptLocal({
+      title: newPromptTitle.trim(),
+      content: newPromptContent.trim(),
+      category: 'Saved'
+    });
+    setPrompts(prev => [{
+      id: saved.id,
+      title: saved.title,
+      content: saved.content,
+      category: saved.category || 'Saved'
+    }, ...prev]);
+    setNewPromptTitle('');
+    setNewPromptContent('');
+    navigateTo('prompts', 'my-personas');
   };
 
   const handleAddTrait = () => {
@@ -208,7 +334,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     if (content?.persona || content?.metadata || typeof content === 'object') {
       const id = `imported_${Date.now()}`;
       onSavePersona(id, content);
-      setPage('browse');
+      navigateTo('my-personas', 'browse');
     } else {
       alert('Invalid persona file format.');
     }
@@ -238,11 +364,11 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
           }, ...prev]);
         }
       }
-    } else if (typeof content === 'object' && content?.content) {
+    } else if (typeof content === 'object' && (content as any)?.content) {
       const saved = await savePromptLocal({
-        title: content.title || file.name.replace(/\.[^/.]+$/, ''),
-        content: content.content,
-        category: content.category || 'Imported'
+        title: (content as any).title || file.name.replace(/\.[^/.]+$/, ''),
+        content: (content as any).content,
+        category: (content as any).category || 'Imported'
       });
       setPrompts(prev => [{
         id: saved.id,
@@ -297,7 +423,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     setTimeout(() => circle.remove(), 600);
 
     setSelectedPersonaId(id);
-    setPage('detail');
+    navigateTo('detail', page === 'my-personas' ? 'my-personas' : 'browse');
   };
 
   const handleSubmitReport = async (reason: string, details: string) => {
@@ -314,24 +440,29 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
     }
   };
 
+  const showFooter = !['detail', 'version-history', 'prompts'].includes(page);
+  const showFab = ['browse', 'my-personas'].includes(page);
+
   return (
     <div id="tab-content-persona" className="tab-content active">
       <div className="persona-page-stack">
-        {/* Browse Page */}
+
+        {/* 1. Browse Page (Default) */}
         {page === 'browse' && (
-          <div className="persona-page active">
+          <div id="persona-page-browse" className="persona-page active" data-page="browse">
             <div className="search-container">
               <div className="search-input-wrapper">
                 <span className="material-symbols-outlined search-icon">search</span>
                 <input
                   type="text"
+                  id="persona-search"
                   className="search-input"
                   placeholder="Search personas by keyword, intent..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                 />
                 {searchQuery && (
-                  <button className="search-clear" onClick={() => setSearchQuery('')} title="Clear">✕</button>
+                  <button id="search-clear-btn" className="search-clear" onClick={() => setSearchQuery('')} title="Clear">✕</button>
                 )}
               </div>
               <button
@@ -414,23 +545,6 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
               </div>
             </div>
 
-            {/* Quick Action Navigation Bar */}
-            <div style={{ display: 'flex', gap: 6, margin: '12px 0' }}>
-              <button className="btn btn-primary btn-small" onClick={handleStartCreate} style={{ flex: 1 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
-                <span>Create</span>
-              </button>
-              <button className="btn btn-secondary btn-small" onClick={() => setPage('prompts')} style={{ flex: 1 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>bookmark</span>
-                <span>Prompts ({prompts.length})</span>
-              </button>
-              <label className="btn btn-secondary btn-small" style={{ cursor: 'pointer', margin: 0, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload_file</span>
-                <span>Import</span>
-                <input type="file" accept=".json" onChange={handleImportJson} style={{ display: 'none' }} />
-              </label>
-            </div>
-
             {/* Persona Cards List */}
             <div id="persona-results" className="persona-list">
               {filteredList.length > 0 ? (
@@ -478,121 +592,431 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 </div>
               )}
             </div>
-
-            {/* FAB - Create button matching legacy #persona-fab */}
-            <button
-              id="persona-fab"
-              className="fab"
-              title="Create Persona"
-              onClick={handleStartCreate}
-            >
-              <span className="material-symbols-outlined">add</span>
-            </button>
           </div>
         )}
 
-        {/* Create / Edit Form Page with Granular Controls */}
+        {/* 2. My Personas Page (Child) */}
+        {page === 'my-personas' && (
+          <div id="persona-page-my-personas" className="persona-page active" data-page="my-personas">
+            <div className="page-header">
+              <button className="back-nav-btn" onClick={() => navigateTo('browse')} title="Back to Browse">
+                <span className="material-symbols-outlined">arrow_back</span>
+              </button>
+              <h3>My Personas</h3>
+            </div>
+
+            <div id="my-personas-list" className="persona-list">
+              {Object.entries(personas).length > 0 ? (
+                Object.entries(personas).map(([id, p]) => (
+                  <div
+                    key={id}
+                    className={`persona-item ${activeId === id ? 'active-persona' : ''}`}
+                    onClick={(e) => handleCardClick(id, e)}
+                  >
+                    <div className="persona-item-info">
+                      <div className="persona-item-name">{p.metadata?.suggested_name || id}</div>
+                      <div className="persona-item-meta">
+                        <span className="status-chip private">{p.metadata?.domain?.toUpperCase() || 'TECH'}</span>
+                        <span className="version-badge">v{p.metadata?.version || '1.0.0'}</span>
+                        <span className="keywords-text">{p.persona?.instruction || ''}</span>
+                      </div>
+                    </div>
+                    <div className="persona-item-actions">
+                      <button
+                        className="btn-icon"
+                        title="Edit Persona"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStartEdit(p, id);
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
+                      </button>
+                      <button
+                        className="btn-icon"
+                        title="Export JSON"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleExportJson(id);
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>download</span>
+                      </button>
+                      <button
+                        className="btn-icon"
+                        title="Delete Persona"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeletePersona(id);
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'var(--color-error)' }}>delete</span>
+                      </button>
+                      {activeId === id && (
+                        <span className="material-symbols-outlined" style={{ color: 'var(--color-accent)', fontSize: 20 }}>
+                          check_circle
+                        </span>
+                      )}
+                    </div>
+                    <span className="material-symbols-outlined chevron">chevron_right</span>
+                  </div>
+                ))
+              ) : (
+                <div className="empty-state">
+                  <span className="material-symbols-outlined">folder_open</span>
+                  <p>No custom personas yet. Tap + to create one!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 3. Create Page (Paste Prompt / Import File) */}
         {page === 'create' && (
-          <div className="persona-page active">
+          <div id="persona-page-create" className="persona-page active" data-page="create">
+            <div className="page-header">
+              <button className="back-nav-btn" onClick={handlePopPage} title="Back">
+                <span className="material-symbols-outlined">arrow_back</span>
+              </button>
+              <h3>Create Persona</h3>
+            </div>
+
+            <div className="create-page-content">
+              <div className="create-form">
+                <label className="form-label">Paste External Prompt</label>
+                <p className="help-text">Paste a user or system prompt to extract a persona from it.</p>
+                <div className="textarea-container">
+                  <textarea
+                    id="extract-prompt-input"
+                    className="persona-textarea"
+                    placeholder="Paste your user or system prompt here..."
+                    rows={6}
+                    value={extractPromptInput}
+                    onChange={e => setExtractPromptInput(e.target.value)}
+                  />
+                  <button className="expand-btn" title="Expand">
+                    <span className="material-symbols-outlined">expand_content</span>
+                  </button>
+                </div>
+
+                <div className="divider-or">
+                  <span>or</span>
+                </div>
+
+                <label
+                  id="btn-import-persona"
+                  className="btn btn-secondary btn-full"
+                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                >
+                  <span className="material-symbols-outlined">upload</span>
+                  <span>Import from File</span>
+                  <input
+                    type="file"
+                    id="import-persona-file"
+                    accept=".json,.txt,.xml,.md"
+                    onChange={handleImportJson}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 4. Extracted Persona Page (7 Memory Dimensions & Style Profiler) */}
+        {page === 'extracted' && (
+          <div id="persona-page-extracted" className="persona-page active" data-page="extracted">
             <div className="page-header">
               <button className="back-nav-btn" onClick={handleBackFromCreate} title="Back">
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'space-between' }}>
-                <h3>{editingPersonaId ? 'Edit Persona' : 'Create Persona'}</h3>
-                {editingPersonaId && (
-                  <button
-                    id="btn-version-history"
-                    className="btn btn-secondary btn-small"
-                    title="Version History"
-                    onClick={() => {
-                      const p = personas[editingPersonaId];
-                      alert(`Version Snapshot for ${p?.metadata?.suggested_name || editingPersonaId}:\nVersion: v${(p?.metadata as any)?.version || '1.0.0'}\nStatus: Active\nDomain: ${p?.metadata?.domain || 'Tech'}`);
-                    }}
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>history</span>
-                    <span>v{(personas[editingPersonaId]?.metadata as any)?.version || '1.0.0'}</span>
-                  </button>
-                )}
+                <h3>{editingPersonaId ? 'Edit Persona' : 'Extracted Persona'}</h3>
+                <button
+                  id="btn-version-history"
+                  className="btn-icon"
+                  title="Version History"
+                  aria-label="View version history"
+                  onClick={() => navigateTo('version-history', 'extracted')}
+                >
+                  <span className="material-symbols-outlined">history</span>
+                </button>
               </div>
             </div>
 
-            <div className="create-page-content" style={{ padding: '16px 0' }}>
-              <div className="create-form">
-                {/* Persona Name */}
-                <div className="form-group">
-                  <label className="form-label">Persona Name <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. Senior Frontend Architect"
-                    value={createdName}
-                    onChange={e => {
-                      setCreatedName(e.target.value);
-                      markFormDirty();
-                    }}
-                  />
-                </div>
+            {/* Source Prompt FAB */}
+            {extractPromptInput && (
+              <button
+                id="source-prompt-fab"
+                className="fab fab-source-prompt"
+                title="View Source Prompt"
+                onClick={() => setShowSourceModal(true)}
+              >
+                <span className="material-symbols-outlined">person</span>
+              </button>
+            )}
 
-                {/* Domain Area Selector Chips */}
-                <div className="form-group">
-                  <label className="form-label">Domain Area</label>
-                  <div className="v4-chip-group single-select">
-                    <div className="chips-container" style={{ flexWrap: 'wrap', gap: 6 }}>
-                      {['Tech', 'Creative', 'Business', 'Education', 'Health', 'Lifestyle', 'Other'].map(dom => (
-                        <button
-                          key={dom}
-                          type="button"
-                          className={`v4-chip preset ${selectedDomain === dom ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedDomain(dom);
-                            markFormDirty();
-                          }}
-                        >
-                          {dom}
-                        </button>
-                      ))}
+            <div className="extracted-page-content" style={{ paddingBottom: 16 }}>
+              {/* Persona Name */}
+              <div className="form-group persona-name-group">
+                <label className="form-label">Persona Name <span className="required">*</span></label>
+                <input
+                  type="text"
+                  id="ext-name"
+                  className="form-input"
+                  placeholder="Enter persona name..."
+                  value={createdName}
+                  onChange={e => {
+                    setCreatedName(e.target.value);
+                    markFormDirty();
+                  }}
+                />
+              </div>
+
+              {/* Memory Layer Header */}
+              <div className="section-header">
+                <span className="material-symbols-outlined section-type-icon">psychology</span>
+                <span>Memory Layer</span>
+              </div>
+
+              <div id="ext-memory-sections" className="memory-sections">
+                {/* Persona Dimension */}
+                <section className="accordion expanded" data-section="persona">
+                  <div className="accordion-header-wrapper">
+                    <div className="accordion-header static" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className="accordion-icon material-symbols-outlined">person</span>
+                        <span className="accordion-title">Persona</span>
+                      </div>
+                      <span className="badge badge-auto">EXTRACTED</span>
                     </div>
+                  </div>
+                  <div className="accordion-content">
+                    <ExpandableTextarea
+                      id="ext-synthesized-persona"
+                      className="persona-textarea"
+                      placeholder="Role and purpose description..."
+                      rows={3}
+                      value={createdRole}
+                      onChange={e => {
+                        setCreatedRole(e.target.value);
+                        markFormDirty();
+                      }}
+                      title="Expand Persona"
+                    />
+                  </div>
+                </section>
+
+                {/* Context Dimension */}
+                <section className="accordion expanded" data-section="context">
+                  <div className="accordion-header-wrapper">
+                    <div className="accordion-header static" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className="accordion-icon material-symbols-outlined">menu_book</span>
+                        <span className="accordion-title">Domain Context</span>
+                      </div>
+                      <span className="badge badge-auto">EXTRACTED</span>
+                    </div>
+                  </div>
+                  <div className="accordion-content">
+                    <ExpandableTextarea
+                      className="persona-textarea"
+                      placeholder="Domain background, scope, and libraries..."
+                      rows={3}
+                      value={createdContext}
+                      onChange={e => {
+                        setCreatedContext(e.target.value);
+                        markFormDirty();
+                      }}
+                      title="Expand Context"
+                    />
+                  </div>
+                </section>
+
+                {/* Tone Dimension */}
+                <section className="accordion expanded" data-section="tone">
+                  <div className="accordion-header-wrapper">
+                    <div className="accordion-header static" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className="accordion-icon material-symbols-outlined">record_voice_over</span>
+                        <span className="accordion-title">Tone & Style</span>
+                      </div>
+                      <span className="badge badge-auto">EXTRACTED</span>
+                    </div>
+                  </div>
+                  <div className="accordion-content">
+                    <ExpandableTextarea
+                      className="persona-textarea"
+                      placeholder="Stylistic voice, directness, and prohibited phrases..."
+                      rows={2}
+                      value={createdTone}
+                      onChange={e => {
+                        setCreatedTone(e.target.value);
+                        markFormDirty();
+                      }}
+                      title="Expand Tone"
+                    />
+                  </div>
+                </section>
+
+                {/* Framework Dimension */}
+                <section className="accordion expanded" data-section="framework">
+                  <div className="accordion-header-wrapper">
+                    <div className="accordion-header static" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className="accordion-icon material-symbols-outlined">account_tree</span>
+                        <span className="accordion-title">Framework & Methods</span>
+                      </div>
+                      <span className="badge badge-auto">EXTRACTED</span>
+                    </div>
+                  </div>
+                  <div className="accordion-content">
+                    <ExpandableTextarea
+                      className="persona-textarea"
+                      placeholder="Engineering paradigms, methodologies..."
+                      rows={2}
+                      value={createdFramework}
+                      onChange={e => {
+                        setCreatedFramework(e.target.value);
+                        markFormDirty();
+                      }}
+                      title="Expand Framework"
+                    />
+                  </div>
+                </section>
+
+                {/* Constraints Dimension */}
+                <section className="accordion expanded" data-section="constraints">
+                  <div className="accordion-header-wrapper">
+                    <div className="accordion-header static" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className="accordion-icon material-symbols-outlined">gavel</span>
+                        <span className="accordion-title">Constraints & Invariants</span>
+                      </div>
+                      <span className="badge badge-auto">EXTRACTED</span>
+                    </div>
+                  </div>
+                  <div className="accordion-content">
+                    <ExpandableTextarea
+                      className="persona-textarea"
+                      placeholder="Non-negotiable architectural invariants and safety rules..."
+                      rows={2}
+                      value={createdConstraints}
+                      onChange={e => {
+                        setCreatedConstraints(e.target.value);
+                        markFormDirty();
+                      }}
+                      title="Expand Constraints"
+                    />
+                  </div>
+                </section>
+
+                {/* Output Format Dimension */}
+                <section className="accordion expanded" data-section="format">
+                  <div className="accordion-header-wrapper">
+                    <div className="accordion-header static" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className="accordion-icon material-symbols-outlined">code_blocks</span>
+                        <span className="accordion-title">Output Format</span>
+                      </div>
+                      <span className="badge badge-auto">EXTRACTED</span>
+                    </div>
+                  </div>
+                  <div className="accordion-content">
+                    <ExpandableTextarea
+                      className="persona-textarea"
+                      placeholder="Output structure, diff formats, markdown preferences..."
+                      rows={2}
+                      value={createdFormat}
+                      onChange={e => {
+                        setCreatedFormat(e.target.value);
+                        markFormDirty();
+                      }}
+                      title="Expand Output Format"
+                    />
+                  </div>
+                </section>
+
+                {/* Exemplar Dimension */}
+                <section className="accordion expanded" data-section="exemplar">
+                  <div className="accordion-header-wrapper">
+                    <div className="accordion-header static" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className="accordion-icon material-symbols-outlined">lightbulb</span>
+                        <span className="accordion-title">Examples</span>
+                      </div>
+                      <span className="badge badge-auto">EXTRACTED</span>
+                    </div>
+                  </div>
+                  <div className="accordion-content">
+                    <ExpandableTextarea
+                      className="persona-textarea"
+                      placeholder="Few-shot reference examples and golden snippets..."
+                      rows={2}
+                      value={createdExemplar}
+                      onChange={e => {
+                        setCreatedExemplar(e.target.value);
+                        markFormDirty();
+                      }}
+                      title="Expand Examples"
+                    />
+                  </div>
+                </section>
+
+                {/* Extensions Dimension */}
+                <section className="accordion expanded" data-section="injected_context">
+                  <div className="accordion-header-wrapper">
+                    <div className="accordion-header static" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span className="accordion-icon material-symbols-outlined">extension</span>
+                      <span className="accordion-title">Extensions</span>
+                    </div>
+                  </div>
+                  <div className="accordion-content">
+                    <ExpandableTextarea
+                      className="persona-textarea"
+                      placeholder="Add custom injected context or session parameters..."
+                      rows={2}
+                      value={createdInjectedContext}
+                      onChange={e => {
+                        setCreatedInjectedContext(e.target.value);
+                        markFormDirty();
+                      }}
+                      title="Expand Extensions"
+                    />
+                  </div>
+                </section>
+              </div>
+
+              {/* Metadata Details Section */}
+              <div className="section-header" style={{ marginTop: 16 }}>
+                <span className="material-symbols-outlined section-type-icon">info</span>
+                <span>Metadata Details</span>
+              </div>
+
+              <div id="ext-metadata-details" className="metadata-details-section">
+                {/* Domain Chips */}
+                <div className="field-group">
+                  <span className="field-label">Domain <span className="required">*</span></span>
+                  <div className="filter-chip-group ext-chip-group" data-field="domain">
+                    {['Tech', 'Creative', 'Business', 'Education', 'Health', 'Lifestyle', 'Other'].map(dom => (
+                      <button
+                        key={dom}
+                        type="button"
+                        className={`filter-chip ${selectedDomain === dom ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedDomain(dom);
+                          markFormDirty();
+                        }}
+                      >
+                        {dom}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Role & Instruction */}
-                <div className="form-group">
-                  <label className="form-label">Role & Identity <span className="required">*</span></label>
-                  <ExpandableTextarea
-                    className="persona-textarea"
-                    placeholder="Describe the persona's role, background, and operational purpose..."
-                    rows={3}
-                    value={createdRole}
-                    onChange={e => {
-                      setCreatedRole(e.target.value);
-                      markFormDirty();
-                    }}
-                    title="Expand Role & Identity"
-                  />
-                </div>
-
-                {/* Domain Context */}
-                <div className="form-group">
-                  <label className="form-label">Domain Knowledge & Scope</label>
-                  <ExpandableTextarea
-                    className="persona-textarea"
-                    placeholder="Technical background, specialized terminology, libraries..."
-                    rows={2}
-                    value={createdContext}
-                    onChange={e => {
-                      setCreatedContext(e.target.value);
-                      markFormDirty();
-                    }}
-                    title="Expand Domain Knowledge"
-                  />
-                </div>
-
-                {/* Granular Style Controls */}
-                <div className="section-header">Communication Style & Profiler</div>
-
-                <div className="metadata-row">
-                  <div className="form-group compact">
+                {/* Granular Style Profiler */}
+                <div className="metadata-row" style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                  <div className="form-group compact" style={{ flex: 1 }}>
                     <label className="form-label">Verbosity</label>
                     <select
                       className="form-select"
@@ -608,8 +1032,8 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                     </select>
                   </div>
 
-                  <div className="form-group compact">
-                    <label className="form-label">Tech Level</label>
+                  <div className="form-group compact" style={{ flex: 1 }}>
+                    <label className="form-label">Technical Level</label>
                     <select
                       className="form-select"
                       value={editTechLevel}
@@ -625,7 +1049,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                     </select>
                   </div>
 
-                  <div className="form-group compact">
+                  <div className="form-group compact" style={{ flex: 1 }}>
                     <label className="form-label">Directness</label>
                     <select
                       className="form-select"
@@ -642,262 +1066,259 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                   </div>
                 </div>
 
-                {/* Traits Tag Editor */}
-                <div className="form-group">
+                {/* Style Traits Manager */}
+                <div className="form-group" style={{ marginTop: 12 }}>
                   <label className="form-label">Style Traits</label>
-                  <div className="chips-container">
-                    {editTraits.map(tr => (
-                      <span key={tr} className="v4-chip custom selected">
-                        {tr}
-                        <button type="button" className="chip-remove" onClick={() => handleRemoveTrait(tr)}>×</button>
+                  <div className="tag-list" style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                    {editTraits.map(trait => (
+                      <span key={trait} className="tag">
+                        <span>{trait}</span>
+                        <button type="button" className="tag-remove" onClick={() => handleRemoveTrait(trait)}>×</button>
                       </span>
                     ))}
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      <input
-                        type="text"
-                        className="chip-input"
-                        placeholder="+ Add trait"
-                        value={newTraitInput}
-                        onChange={e => setNewTraitInput(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleAddTrait()}
-                      />
-                      <button type="button" className="chip-add-btn" onClick={handleAddTrait}>+</button>
-                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Add custom trait..."
+                      value={newTraitInput}
+                      onChange={e => setNewTraitInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddTrait();
+                        }
+                      }}
+                    />
+                    <button type="button" className="btn btn-secondary btn-small" onClick={handleAddTrait}>
+                      Add
+                    </button>
                   </div>
                 </div>
 
-                {/* Preferred Response Style */}
-                <div className="form-group">
-                  <label className="form-label">Preferred Style Statement</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. 'Use bulleted summaries and code diffs first'"
-                    value={editPrefStyle}
-                    onChange={e => {
-                      setEditPrefStyle(e.target.value);
-                      markFormDirty();
-                    }}
-                  />
+                {/* Visibility Toggle */}
+                <div className="field-group visibility-section" style={{ marginTop: 16 }}>
+                  <span className="field-label">Visibility</span>
+                  <div className="filter-chip-group ext-chip-group compact visibility-chips">
+                    <button
+                      id="ext-visibility-private"
+                      className={`filter-chip visibility-chip ${visibilityMode === 'private' ? 'selected' : ''}`}
+                      onClick={() => setVisibilityMode('private')}
+                    >
+                      <span className="material-symbols-outlined">lock</span>
+                      <span>Private</span>
+                    </button>
+                    <button
+                      id="ext-visibility-public"
+                      className={`filter-chip visibility-chip ${visibilityMode === 'public' ? 'selected' : ''}`}
+                      onClick={() => setVisibilityMode('public')}
+                    >
+                      <span className="material-symbols-outlined">public</span>
+                      <span>Public</span>
+                    </button>
+                  </div>
+                  <p className="help-text">Private personas are saved locally as drafts. Public personas are published to the community.</p>
                 </div>
 
-                <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-                  <button className="btn btn-primary btn-large" onClick={handleCreate} style={{ flex: 1 }}>
-                    {editingPersonaId ? 'Update Persona' : 'Save Persona'}
-                  </button>
-                  <button className="btn btn-secondary btn-large" onClick={() => setPage('browse')} style={{ flex: 1 }}>
-                    Cancel
-                  </button>
-                </div>
+                {/* Status Messages */}
+                {publishStatus && (
+                  <div className="badge badge-auto" style={{ marginTop: 12, padding: '6px 12px', background: 'var(--color-accent-container)', color: 'var(--color-accent)', width: '100%', textAlign: 'center' }}>
+                    {publishStatus}
+                  </div>
+                )}
+                {saveStatus && (
+                  <div className="badge badge-auto" style={{ marginTop: 12, padding: '6px 12px', background: 'var(--color-success)', color: '#041e49', width: '100%', textAlign: 'center' }}>
+                    {saveStatus}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Prompts Library Page */}
+        {/* 5. Saved Prompts Page (Child of My Personas) */}
         {page === 'prompts' && (
-          <div className="persona-page active">
+          <div id="persona-page-prompts" className="persona-page active" data-page="prompts">
             <div className="page-header">
-              <button className="back-nav-btn" onClick={() => setPage('browse')} title="Back">
+              <button className="back-nav-btn" onClick={() => navigateTo('my-personas', 'browse')} title="Back to My Personas">
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
-              <h3>Prompts Library</h3>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <label className="btn btn-secondary btn-small" style={{ cursor: 'pointer', margin: 0, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload_file</span>
-                  <span>Import</span>
-                  <input type="file" accept=".json,.txt" onChange={handleImportPromptFile} style={{ display: 'none' }} />
-                </label>
-                <button className="btn btn-primary btn-small" onClick={() => setPage('add-prompt')}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
-                  <span>New</span>
-                </button>
-              </div>
+              <h3>Saved Prompts</h3>
             </div>
 
-            <div className="search-container" style={{ margin: '12px 0' }}>
+            <div className="search-container" style={{ margin: '8px 0' }}>
               <div className="search-input-wrapper">
                 <span className="material-symbols-outlined search-icon">search</span>
                 <input
                   type="text"
                   className="search-input"
-                  placeholder="Search prompt templates..."
+                  placeholder="Filter prompt templates..."
                   value={promptSearch}
                   onChange={e => setPromptSearch(e.target.value)}
                 />
-                {promptSearch && (
-                  <button className="search-clear" onClick={() => setPromptSearch('')} title="Clear">✕</button>
-                )}
               </div>
             </div>
 
-            <div className="persona-list">
-              {filteredPrompts.map(pr => (
-                <div key={pr.id} className="persona-item browse-item" style={{ minHeight: 'auto', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: 6 }}>
-                    <span className="persona-item-name">{pr.title}</span>
-                    <span className="version-badge">{pr.category}</span>
+            <div id="saved-prompts-list" className="persona-list">
+              {filteredPrompts.length > 0 ? (
+                filteredPrompts.map(p => (
+                  <div key={p.id} className="persona-item">
+                    <div className="persona-item-info">
+                      <div className="persona-item-name">{p.title}</div>
+                      <div className="persona-item-meta">
+                        <span className="status-chip private">{p.category || 'General'}</span>
+                        <span className="keywords-text">{p.content.slice(0, 100)}...</span>
+                      </div>
+                    </div>
+                    <div className="persona-item-actions">
+                      <button className="btn-icon" title="Preview & Interpolate" onClick={() => setPreviewPrompt(p)}>
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span>
+                      </button>
+                      <button
+                        className="btn-icon"
+                        title="Copy Prompt"
+                        onClick={() => {
+                          navigator.clipboard.writeText(p.content);
+                          alert('Prompt copied to clipboard!');
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>content_copy</span>
+                      </button>
+                      <button
+                        className="btn-icon"
+                        title="Delete Prompt"
+                        onClick={async () => {
+                          await deleteSavedPrompt(p.id);
+                          setPrompts(prev => prev.filter(item => item.id !== p.id));
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'var(--color-error)' }}>delete</span>
+                      </button>
+                    </div>
                   </div>
-                  <p style={{ margin: '0 0 10px 0', fontSize: 12, opacity: 0.85, whiteSpace: 'pre-wrap', maxHeight: 60, overflow: 'hidden', width: '100%' }}>
-                    {pr.content}
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, width: '100%' }}>
-                    <button
-                      className="btn btn-secondary btn-small"
-                      title="Preview template with variable interpolation"
-                      onClick={() => setPreviewPrompt(pr)}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: 14 }}>preview</span>
-                      <span>Preview</span>
-                    </button>
-                    <button
-                      className="btn btn-secondary btn-small"
-                      onClick={() => navigator.clipboard.writeText(pr.content)}
-                    >
-                      Copy
-                    </button>
-                    <button
-                      className="btn-icon"
-                      title="Delete prompt"
-                      onClick={async () => {
-                        await deleteSavedPrompt(pr.id);
-                        setPrompts(prev => prev.filter(item => item.id !== pr.id));
-                      }}
-                      style={{ color: 'var(--color-error)' }}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
-                    </button>
-                  </div>
+                ))
+              ) : (
+                <div className="empty-state">
+                  <span className="material-symbols-outlined">description</span>
+                  <p>No saved prompts found.</p>
                 </div>
-              ))}
+              )}
             </div>
+
+            {/* FAB: Add Prompt */}
+            <button
+              id="add-prompt-fab"
+              className="fab fab-bottom-right"
+              title="Save Prompt"
+              onClick={() => navigateTo('add-prompt', 'prompts')}
+            >
+              <span className="material-symbols-outlined">add</span>
+            </button>
           </div>
         )}
 
-        {/* Add Prompt Page */}
+        {/* 6. Add Prompt Page (Child of Saved Prompts) */}
         {page === 'add-prompt' && (
-          <div className="persona-page active">
+          <div id="persona-page-add-prompt" className="persona-page active" data-page="add-prompt">
             <div className="page-header">
-              <button className="back-nav-btn" onClick={() => setPage('prompts')} title="Back">
+              <button className="back-nav-btn" onClick={() => navigateTo('prompts', 'my-personas')} title="Back to Prompts">
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
-              <h3>Add Prompt Template</h3>
+              <h3>Add Prompt</h3>
             </div>
 
-            <div className="create-page-content" style={{ padding: '16px 0' }}>
+            <div className="create-page-content">
               <div className="create-form">
                 <div className="form-group">
-                  <label className="form-label">Title <span className="required">*</span></label>
+                  <label className="form-label">Prompt Title</label>
                   <input
                     type="text"
+                    id="add-prompt-title"
                     className="form-input"
-                    placeholder="e.g. Adversarial Code Review"
+                    placeholder="e.g. Clean Architecture Review"
                     value={newPromptTitle}
                     onChange={e => setNewPromptTitle(e.target.value)}
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Prompt Content <span className="required">*</span></label>
-                  <ExpandableTextarea
-                    className="persona-textarea"
-                    placeholder="Enter prompt instructions with {variables}..."
-                    rows={6}
-                    value={newPromptContent}
-                    onChange={e => setNewPromptContent(e.target.value)}
-                    title="Expand Prompt Content"
+
+                <label className="form-label">Prompt Content</label>
+                <p className="help-text">Paste a prompt template (use {'{{variable}}'} for dynamic placeholders).</p>
+                <ExpandableTextarea
+                  id="add-prompt-content"
+                  className="persona-textarea"
+                  placeholder="Paste your prompt template here..."
+                  rows={8}
+                  value={newPromptContent}
+                  onChange={e => setNewPromptContent(e.target.value)}
+                  title="Expand Prompt Content"
+                />
+
+                <div className="divider-or">
+                  <span>or</span>
+                </div>
+
+                <label
+                  id="btn-import-prompt"
+                  className="btn btn-secondary btn-full"
+                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                >
+                  <span className="material-symbols-outlined">upload</span>
+                  <span>Import from File</span>
+                  <input
+                    type="file"
+                    id="import-prompt-file"
+                    accept=".json,.txt,.xml,.md"
+                    onChange={handleImportPromptFile}
+                    style={{ display: 'none' }}
                   />
-                </div>
-                <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-                  <button
-                    className="btn btn-primary btn-large"
-                    style={{ flex: 1 }}
-                    onClick={async () => {
-                      if (newPromptTitle.trim() && newPromptContent.trim()) {
-                        const saved = await savePromptLocal({
-                          title: newPromptTitle,
-                          content: newPromptContent,
-                          category: 'Custom'
-                        });
-                        setPrompts(prev => [{
-                          id: saved.id,
-                          title: saved.title,
-                          content: saved.content,
-                          category: saved.category || 'Custom'
-                        }, ...prev]);
-                        setNewPromptTitle('');
-                        setNewPromptContent('');
-                        setPage('prompts');
-                      }
-                    }}
-                  >
-                    Save Prompt Template
-                  </button>
-                  <button className="btn btn-secondary btn-large" onClick={() => setPage('prompts')} style={{ flex: 1 }}>
-                    Cancel
-                  </button>
-                </div>
+                </label>
               </div>
             </div>
           </div>
         )}
 
-        {/* Detail Page */}
+        {/* 7. Persona Detail Page (Child of Browse or My Personas) */}
         {page === 'detail' && selectedPersonaId && personas[selectedPersonaId] && (
-          <div className="persona-page active">
+          <div id="persona-page-detail" className="persona-page active" data-page="detail">
             <div className="page-header">
-              <button className="back-nav-btn" onClick={() => setPage('browse')} title="Back">
+              <button className="back-nav-btn" onClick={handlePopPage} title="Back">
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
-              <h3>Persona Details</h3>
+              <h3 id="detail-persona-name">
+                {personas[selectedPersonaId]?.metadata?.suggested_name || selectedPersonaId}
+              </h3>
             </div>
 
-            <div className="persona-detail-content" style={{ padding: '16px 0' }}>
-              <div className="modal-stats" style={{ marginBottom: 16 }}>
-                <div className="stat">
-                  <div className="stat-value">
-                    <span className="material-symbols-outlined">star</span>
-                    <span>{personas[selectedPersonaId]?.metadata?.rating ?? 4.8}</span>
-                  </div>
-                  <div className="stat-label">Rating</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-value">
-                    <span className="material-symbols-outlined">download</span>
-                    <span>{personas[selectedPersonaId]?.metadata?.downloads ?? 45}</span>
-                  </div>
-                  <div className="stat-label">Imports</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-value">
-                    <span>v{personas[selectedPersonaId]?.metadata?.version || '1.0.0'}</span>
-                  </div>
-                  <div className="stat-label">Version</div>
-                </div>
+            <div id="persona-detail-content" className="persona-detail-content" style={{ padding: '16px 0', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+                <span className="status-chip private">{personas[selectedPersonaId]?.metadata?.domain?.toUpperCase() || 'TECH'}</span>
+                <span className="version-badge">v{personas[selectedPersonaId]?.metadata?.version || '1.0.0'}</span>
               </div>
 
-              <div className="form-group" style={{ marginBottom: 16 }}>
-                <label className="form-label" style={{ fontSize: 16, fontWeight: 600 }}>
-                  {personas[selectedPersonaId]?.metadata?.suggested_name || selectedPersonaId}
-                </label>
-                <div className="persona-item-meta" style={{ marginTop: 4 }}>
-                  <span className="status-chip private">{personas[selectedPersonaId]?.metadata?.domain?.toUpperCase() || 'TECH'}</span>
-                  <span className="version-badge">ID: {selectedPersonaId}</span>
-                </div>
+              <div className="detail-section" style={{ marginBottom: 16 }}>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: 13, color: 'var(--color-text-secondary)' }}>Core Role & Background</h4>
+                <p style={{ margin: 0, fontSize: 14, color: 'var(--color-text-primary)', lineHeight: '1.4' }}>
+                  {personas[selectedPersonaId]?.persona?.instruction || 'No persona instruction set.'}
+                </p>
               </div>
 
-              <div className="form-group" style={{ marginBottom: 16 }}>
-                <label className="form-label">Role Definition & System Prompt</label>
-                <div className="persona-textarea" style={{ minHeight: 80, overflowY: 'auto' }}>
-                  {personas[selectedPersonaId]?.persona?.instruction || 'No persona description.'}
+              {personas[selectedPersonaId]?.context?.instruction && (
+                <div className="detail-section" style={{ marginBottom: 16 }}>
+                  <h4 style={{ margin: '0 0 6px 0', fontSize: 13, color: 'var(--color-text-secondary)' }}>Domain Context</h4>
+                  <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-primary)', lineHeight: '1.4' }}>
+                    {personas[selectedPersonaId]?.context?.instruction}
+                  </p>
                 </div>
-              </div>
+              )}
 
+              {/* Action Buttons */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 20 }}>
                 <button
-                  className="btn btn-primary btn-large"
+                  className="btn btn-primary"
                   onClick={() => {
                     onSelectActive(selectedPersonaId);
-                    setPage('browse');
+                    navigateTo('browse');
                   }}
                 >
                   <span className="material-symbols-outlined">check_circle</span>
@@ -921,7 +1342,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                       extractionData: p,
                       domain: p.metadata?.domain
                     });
-                    setPublishStatus(res.mode === 'cloud' ? 'Published to Community!' : 'Saved as Local Draft');
+                    setPublishStatus(res.mode === 'cloud' ? '✓ Published to Community!' : '✓ Saved as Local Draft');
                     setTimeout(() => setPublishStatus(null), 3000);
                   }}
                 >
@@ -941,14 +1362,14 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                   style={{ color: 'var(--color-error)' }}
                 >
                   <span className="material-symbols-outlined">flag</span>
-                  <span>Report Persona (Community Moderation)</span>
+                  <span>Report Persona</span>
                 </button>
                 <button
                   className="btn btn-secondary"
                   style={{ color: 'var(--color-error)' }}
                   onClick={() => {
                     onDeletePersona(selectedPersonaId);
-                    setPage('browse');
+                    navigateTo('browse');
                   }}
                 >
                   <span className="material-symbols-outlined">delete</span>
@@ -958,7 +1379,124 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
             </div>
           </div>
         )}
+
+        {/* 8. Version History Page (Author-Only, Child of Extracted) */}
+        {page === 'version-history' && (
+          <div id="persona-page-version-history" className="persona-page active" data-page="version-history">
+            <div className="page-header">
+              <button className="back-nav-btn" onClick={handlePopPage} title="Back">
+                <span className="material-symbols-outlined">arrow_back</span>
+              </button>
+              <h3>Version History</h3>
+              <button
+                id="btn-export-persona"
+                className="btn-icon"
+                title="Export JSON"
+                onClick={() => handleExportJson(editingPersonaId || activeId)}
+              >
+                <span className="material-symbols-outlined">download</span>
+              </button>
+            </div>
+
+            <div className="version-history-content" style={{ padding: '16px 0', overflowY: 'auto' }}>
+              <div className="version-persona-name" id="version-persona-name" style={{ fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
+                {createdName || personas[editingPersonaId || activeId]?.metadata?.suggested_name || 'Persona'}
+              </div>
+
+              <div id="version-list" className="version-list" role="list">
+                {versions.map((ver, idx) => (
+                  <div key={idx} className="persona-item" style={{ marginBottom: 8, flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                      <span className="version-badge" style={{ fontWeight: 600 }}>{ver.version}</span>
+                      <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)' }}>{ver.date}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>{ver.changes}</div>
+                    <button
+                      className="btn btn-secondary btn-small"
+                      style={{ marginTop: 6 }}
+                      onClick={() => alert(`Rolled back to ${ver.version}`)}
+                    >
+                      Restore this version
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
+
+      {/* Floating Action Button (FAB) matching legacy #persona-fab */}
+      {showFab && (
+        <button
+          id="persona-fab"
+          className="fab"
+          title="Create new persona"
+          onClick={handleStartCreate}
+        >
+          <span className="material-symbols-outlined">add</span>
+        </button>
+      )}
+
+      {/* Persona Footer - Fixed panel at bottom matching legacy #persona-footer */}
+      {showFooter && (
+        <footer id="persona-footer" className="panel-footer">
+          {page === 'browse' && (
+            <button
+              id="my-personas-btn"
+              className="btn btn-primary btn-large btn-with-spinner footer-btn-browse"
+              onClick={() => navigateTo('my-personas', 'browse')}
+            >
+              <span className="btn-content">
+                <span className="material-symbols-outlined">emoji_people</span> My Personas
+              </span>
+            </button>
+          )}
+          {page === 'create' && (
+            <button
+              id="extract-btn"
+              className="btn btn-primary btn-large btn-full btn-with-spinner footer-btn-create"
+              onClick={handleExtractFromPrompt}
+            >
+              <span className="btn-content">
+                <span className="material-symbols-outlined">chip_extraction</span> Extract Persona
+              </span>
+            </button>
+          )}
+          {page === 'extracted' && (
+            <button
+              id="ext-publish-btn"
+              className="btn btn-primary btn-large btn-full btn-with-spinner footer-btn-extracted"
+              onClick={handleCreate}
+            >
+              <span className="btn-content">
+                <span className="material-symbols-outlined">publish</span> Publish
+              </span>
+            </button>
+          )}
+          {page === 'my-personas' && (
+            <button
+              id="prompts-btn"
+              className="btn btn-primary btn-large btn-full footer-btn-my-personas"
+              onClick={() => navigateTo('prompts', 'my-personas')}
+            >
+              <span className="material-symbols-outlined">description</span> Prompts
+            </button>
+          )}
+          {page === 'add-prompt' && (
+            <button
+              id="save-prompt-btn"
+              className="btn btn-primary btn-large btn-full btn-with-spinner footer-btn-add-prompt"
+              onClick={handleSaveNewPrompt}
+            >
+              <span className="btn-content">
+                <span className="material-symbols-outlined">save</span> Save Prompt
+              </span>
+            </button>
+          )}
+        </footer>
+      )}
 
       {/* Render Modals Subsystem */}
       {previewPrompt && (
@@ -991,6 +1529,26 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
         />
       )}
 
+      {/* Source Prompt Modal */}
+      {showSourceModal && (
+        <div className="dialog-overlay" style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="dialog-container" style={{ background: 'var(--color-surface, #1e1f20)', borderRadius: 16, padding: 24, maxWidth: 400, width: '90%', border: '1px solid var(--color-outline)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span className="material-symbols-outlined" style={{ color: 'var(--color-accent)', fontSize: 24 }}>person</span>
+              <h3 style={{ margin: 0, fontSize: 16, color: 'var(--color-text-primary)' }}>Original Source Prompt</h3>
+            </div>
+            <p style={{ margin: '0 0 16px 0', fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: '1.4', maxHeight: 240, overflowY: 'auto', background: 'var(--color-surface-container)', padding: 12, borderRadius: 8 }}>
+              {extractPromptInput || 'No prompt was pasted.'}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn btn-secondary btn-small" onClick={() => setShowSourceModal(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Unsaved Changes Confirmation Dialog */}
       {showUnsavedModal && (
         <div className="dialog-overlay" style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1019,7 +1577,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                 onClick={() => {
                   resetFormDirty();
                   setShowUnsavedModal(false);
-                  setPage('browse');
+                  navigateTo('browse');
                 }}
               >
                 Discard Changes

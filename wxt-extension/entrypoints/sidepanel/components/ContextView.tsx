@@ -109,13 +109,27 @@ export const ContextView: React.FC<ContextViewProps> = ({
   const [injectedSaved, setInjectedSaved] = useState(false);
   const [currentGeneration, setCurrentGeneration] = useState(0);
 
-  // Load custom injected context from session storage on mount
+  // Load custom injected context and disabled states from storage on mount
   useEffect(() => {
     if (typeof chrome !== 'undefined' && chrome.storage?.session) {
       chrome.storage.session.get(['user_injected_context']).then((res: any) => {
         if (res?.user_injected_context?.text) {
           setInjectedText(res.user_injected_context.text);
         }
+      }).catch(() => {});
+    }
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      chrome.storage.local.get(['session_Tab-1_disabled']).then((res: any) => {
+        const disabledMap = res?.['session_Tab-1_disabled'] || {};
+        setEnabledMap(prev => {
+          const next = { ...prev };
+          DIMENSION_DEFS.forEach(dim => {
+            if (disabledMap[`component.${dim.id}`]) {
+              next[dim.id] = false;
+            }
+          });
+          return next;
+        });
       }).catch(() => {});
     }
   }, []);
@@ -146,11 +160,30 @@ export const ContextView: React.FC<ContextViewProps> = ({
 
   const toggleEnabled = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setEnabledMap(prev => ({ ...prev, [id]: !prev[id] }));
+    e.preventDefault();
+    setEnabledMap(prev => {
+      const nextState = !prev[id];
+      const next = { ...prev, [id]: nextState };
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        chrome.storage.local.get(['session_Tab-1_disabled']).then((res: any) => {
+          const disabledMap = res?.['session_Tab-1_disabled'] || {};
+          if (nextState) {
+            delete disabledMap[`component.${id}`];
+          } else {
+            disabledMap[`component.${id}`] = true;
+          }
+          chrome.storage.local.set({ 'session_Tab-1_disabled': disabledMap }).catch(() => {});
+        }).catch(() => {});
+      }
+      return next;
+    });
   };
 
   const handleTogglePin = (dimId: DimensionId, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     if (!activePersona) return;
     const currentDim = activePersona[dimId] || { instruction: '' };
     const nextPinned = !currentDim.pinned;
@@ -285,12 +318,17 @@ export const ContextView: React.FC<ContextViewProps> = ({
                 </span>
                 <span className="accordion-title">{dim.title}</span>
                 <div className="header-controls">
+                  {!isEnabled && (
+                    <span className="badge stale" title="Dimension disabled from refinement">
+                      STALE
+                    </span>
+                  )}
                   <span
-                    className={`pin-toggle ${isPinned ? 'active' : ''}`}
-                    title={isPinned ? 'Dimension locked as verbatim' : 'Pin dimension'}
+                    className={`pin-toggle ${isPinned ? 'pinned' : ''}`}
+                    title={isPinned ? `Unpin ${dim.title} to allow automatic updates` : `Pin ${dim.title} to prevent automatic updates`}
                     onClick={(e) => handleTogglePin(dim.id, e)}
                   >
-                    <span className="material-symbols-outlined">push_pin</span>
+                    <span className="material-symbols-outlined">{isPinned ? 'keep' : 'push_pin'}</span>
                   </span>
                 </div>
                 <label className="toggle-switch" onClick={(e) => toggleEnabled(dim.id, e)}>
@@ -300,7 +338,13 @@ export const ContextView: React.FC<ContextViewProps> = ({
               </button>
 
               {isExpanded && (
-                <div className="accordion-content">
+                <div
+                  className={`accordion-content ${!isEnabled ? 'disabled-content' : ''}`}
+                  style={{
+                    opacity: isEnabled ? 1 : 0.5,
+                    pointerEvents: isEnabled ? 'auto' : 'none'
+                  }}
+                >
                   {/* Textarea Container with In-Place Fullscreen */}
                   <ExpandableTextarea
                     id={`v4-${dim.id}-textarea`}
@@ -320,7 +364,6 @@ export const ContextView: React.FC<ContextViewProps> = ({
                       title="Locked as verbatim: protected from automated extraction overrides"
                       onClick={() => handleTogglePin(dim.id)}
                     >
-                      <span className="material-symbols-outlined badge-pin-icon">push_pin</span>
                       VERBATIM
                     </span>
                     {isPinned && currentGeneration > 0 && (

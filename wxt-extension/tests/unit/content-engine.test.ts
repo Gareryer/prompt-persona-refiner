@@ -15,7 +15,8 @@ const mockDocument = {
     classList: {
       contains: (cls: string) => mockDocument.documentElement.className.includes(cls)
     },
-    getAttribute: vi.fn().mockReturnValue(null)
+    getAttribute: vi.fn().mockReturnValue(null),
+    setAttribute: vi.fn()
   },
   getElementById: (id: string) => elementsMap.get(id) || null,
   createElement: (tag: string) => {
