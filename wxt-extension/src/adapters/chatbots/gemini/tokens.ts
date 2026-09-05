@@ -55,6 +55,24 @@ export const GEMINI_TOKENS = {
       '--allie-transition-standard': '200ms cubic-bezier(0.2, 0, 0, 1)'
     }
   },
+  tooltip: {
+    radius: '4px',
+    padding: '4px 8px',
+    minHeight: '24px',
+    fontSize: '12px',
+    fontWeight: '400',
+    lineHeight: '16px',
+    letterSpacing: '0.1px',
+    cssVars: {
+      '--allie-tooltip-radius': '4px',
+      '--allie-tooltip-padding': '4px 8px',
+      '--allie-tooltip-min-height': '24px',
+      '--allie-tooltip-font-size': '12px',
+      '--allie-tooltip-font-weight': '400',
+      '--allie-tooltip-line-height': '16px',
+      '--allie-tooltip-letter-spacing': '0.1px'
+    }
+  },
   dark: {
     bgPrimary: '#131314',
     bgSurface: '#1e1f20',
@@ -94,7 +112,10 @@ export const GEMINI_TOKENS = {
       '--allie-toggle-bg-off': '#444746',
       '--allie-toggle-bg-on': '#8ab4f8',
       '--allie-toggle-knob-off': '#c4c7c5',
-      '--allie-toggle-knob-on': '#041e49'
+      '--allie-toggle-knob-on': '#041e49',
+      '--allie-tooltip-bg': '#e3e3e3',
+      '--allie-tooltip-text': '#1f1f1f',
+      '--allie-tooltip-shadow': '0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15)'
     }
   },
   light: {
@@ -136,7 +157,10 @@ export const GEMINI_TOKENS = {
       '--allie-toggle-bg-off': '#c4c7c5',
       '--allie-toggle-bg-on': '#0b57d0',
       '--allie-toggle-knob-off': '#ffffff',
-      '--allie-toggle-knob-on': '#ffffff'
+      '--allie-toggle-knob-on': '#ffffff',
+      '--allie-tooltip-bg': '#1f1f1f',
+      '--allie-tooltip-text': '#ffffff',
+      '--allie-tooltip-shadow': '0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 3px 1px rgba(0, 0, 0, 0.1)'
     }
   }
 } as const;
@@ -152,6 +176,7 @@ export function getAllieCssVariables(theme: 'light' | 'dark' = 'dark'): Record<s
     ...GEMINI_TOKENS.elevation.cssVars,
     ...GEMINI_TOKENS.status.cssVars,
     ...GEMINI_TOKENS.transitions.cssVars,
+    ...GEMINI_TOKENS.tooltip.cssVars,
     ...themeVars
   };
 }

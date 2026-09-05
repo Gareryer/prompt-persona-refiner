@@ -62,6 +62,7 @@ export const GeminiTooltip: React.FC<GeminiTooltipProps> = ({
         <div
           role="tooltip"
           className={`allie-tooltip-bubble allie-tooltip-${position}`}
+          data-allie="tooltip"
         >
           {text}
         </div>

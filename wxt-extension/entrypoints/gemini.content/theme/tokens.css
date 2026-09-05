@@ -69,9 +69,17 @@
 
   --allie-border-subtle: rgba(255, 255, 255, 0.12);
 
-  /* Inverted Surface Tooltip Tokens (Dark Mode) */
+  /* Inverted Surface Tooltip Tokens (Dark Mode) - Mat MDC Tooltip */
   --allie-tooltip-bg: #e3e3e3;
   --allie-tooltip-text: #1f1f1f;
+  --allie-tooltip-radius: 4px;
+  --allie-tooltip-padding: 4px 8px;
+  --allie-tooltip-min-height: 24px;
+  --allie-tooltip-font-size: 12px;
+  --allie-tooltip-font-weight: 400;
+  --allie-tooltip-line-height: 16px;
+  --allie-tooltip-letter-spacing: 0.1px;
+  --allie-tooltip-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
 }
 
 :host(.light-theme) {
@@ -109,7 +117,8 @@
 
   --allie-border-subtle: rgba(0, 0, 0, 0.10);
 
-  /* Inverted Surface Tooltip Tokens (Light Mode) */
+  /* Inverted Surface Tooltip Tokens (Light Mode) - Mat MDC Tooltip */
   --allie-tooltip-bg: #1f1f1f;
   --allie-tooltip-text: #ffffff;
+  --allie-tooltip-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 3px 1px rgba(0, 0, 0, 0.1);
 }
