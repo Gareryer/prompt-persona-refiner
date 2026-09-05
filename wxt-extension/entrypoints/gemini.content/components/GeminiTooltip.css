@@ -1,0 +1,50 @@
+/**
+ * Material 3 Tooltip Component Styling for Allie Gemini Shadow DOM.
+ */
+
+.allie-tooltip-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.allie-tooltip-bubble {
+  position: absolute;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 2000;
+  padding: 6px 10px;
+  font-family: var(--allie-font-family, system-ui, -apple-system, sans-serif);
+  font-size: var(--allie-font-size-sm, 12px);
+  line-height: var(--allie-line-height, 1.5);
+  color: var(--allie-tooltip-text, #1f1f1f);
+  background-color: var(--allie-tooltip-bg, #e3e3e3);
+  border: 1px solid var(--allie-border-subtle, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  box-shadow: var(--allie-elevation-2, 0 3px 6px rgba(0, 0, 0, 0.2));
+  animation: allie-fade-in 150ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.allie-tooltip-top {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.allie-tooltip-bottom {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.allie-tooltip-left {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.allie-tooltip-right {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}

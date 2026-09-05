@@ -1,0 +1,65 @@
+import React from 'react';
+import { GeminiTooltip } from './GeminiTooltip';
+
+export interface SettingsButtonProps {
+  onClick?: () => void;
+  tooltipText?: string;
+  active?: boolean;
+  hasActivePersona?: boolean;
+}
+
+export const SettingsButton: React.FC<SettingsButtonProps> = ({
+  onClick,
+  tooltipText,
+  active = false,
+  hasActivePersona = false
+}) => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onClick) {
+      onClick();
+    } else if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+      chrome.runtime.sendMessage({ type: 'OPEN_SIDEPANEL' });
+    }
+  };
+
+  const defaultTooltip = hasActivePersona
+    ? 'Allie Settings & Personas (Active persona loaded)'
+    : 'Allie Settings & Personas';
+
+  const accessibleLabel = hasActivePersona
+    ? 'Open Allie Settings (Active persona loaded)'
+    : 'Open Allie Settings';
+
+  return (
+    <div className="allie-settings-wrapper">
+      <GeminiTooltip text={tooltipText || defaultTooltip} position="top">
+        <button
+          type="button"
+          className={`allie-settings-btn ${active ? 'active' : ''}`}
+          onClick={handleClick}
+          aria-label={accessibleLabel}
+          title={accessibleLabel}
+          data-allie="settings-button"
+        >
+          <svg
+            className="allie-settings-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          {hasActivePersona && (
+            <span className="allie-status-dot" aria-label="Active persona loaded" />
+          )}
+        </button>
+      </GeminiTooltip>
+    </div>
+  );
+};

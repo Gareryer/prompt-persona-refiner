@@ -7,7 +7,6 @@ import './../src/components/injections/injections.css';
 
 export default defineContentScript({
   matches: [
-    'https://gemini.google.com/*',
     'https://chatgpt.com/*',
     'https://chat.openai.com/*',
     'https://claude.ai/*',
