@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { GeminiAdapter } from '../../src/adapters/chatbots/gemini/adapter';
 import { GEMINI_SELECTORS, findElement } from '../../src/adapters/chatbots/gemini/selectors';
 import { contentObserver } from '../../src/content/observer';
-import { splitViewController } from '../../src/content/split-view';
 import { RefineToggle, SettingsButton } from './components';
 
 import tokensCss from './theme/tokens.css?inline';
@@ -120,40 +119,79 @@ export default defineContentScript({
       );
     }
 
+    // Resolves the currently active, visible composer input container in Gemini
+    function getActiveComposerContainer(): HTMLElement | null {
+      const inputField = document.querySelector<HTMLElement>('.text-input-field');
+      if (inputField && inputField.offsetParent !== null) {
+        return inputField;
+      }
+      const inputAreaV2 = document.querySelector<HTMLElement>('input-area-v2');
+      if (inputAreaV2 && inputAreaV2.offsetParent !== null) {
+        return inputAreaV2;
+      }
+      const inputContainer = document.querySelector<HTMLElement>('input-container');
+      if (inputContainer && inputContainer.offsetParent !== null) {
+        return inputContainer;
+      }
+      return findElement<HTMLElement>(GEMINI_SELECTORS.inputArea) ||
+             findElement<HTMLElement>(GEMINI_SELECTORS.textInputField)?.parentElement || null;
+    }
+
     // Position updater for fixed SettingsButton outside composer
     function updateSettingsPosition() {
       if (!settingsUi?.shadowHost || !settingsUi.shadowHost.isConnected) return;
-      const inputContainer = findElement<HTMLElement>(GEMINI_SELECTORS.inputArea) ||
-                             findElement<HTMLElement>(GEMINI_SELECTORS.textInputField)?.parentElement;
+      const inputContainer = getActiveComposerContainer();
       if (!inputContainer) return;
       const rect = inputContainer.getBoundingClientRect();
-      settingsUi.shadowHost.style.setProperty('--allie-settings-left', `${rect.right + 12}px`);
-      settingsUi.shadowHost.style.setProperty('--allie-settings-top', `${rect.top + rect.height / 2 - 20}px`);
+      if (rect.width === 0 && rect.height === 0) return;
+
+      const targetLeft = `${rect.right + 12}px`;
+      const targetTop = `${rect.top + rect.height / 2 - 20}px`;
+
+      settingsUi.shadowHost.style.setProperty('--allie-settings-left', targetLeft);
+      settingsUi.shadowHost.style.setProperty('--allie-settings-top', targetTop);
       settingsUi.shadowHost.style.setProperty('position', 'fixed', 'important');
-      settingsUi.shadowHost.style.setProperty('left', `${rect.right + 12}px`, 'important');
-      settingsUi.shadowHost.style.setProperty('top', `${rect.top + rect.height / 2 - 20}px`, 'important');
+      settingsUi.shadowHost.style.setProperty('left', targetLeft, 'important');
+      settingsUi.shadowHost.style.setProperty('top', targetTop, 'important');
       settingsUi.shadowHost.style.setProperty('z-index', '10000', 'important');
       settingsUi.shadowHost.style.setProperty('pointer-events', 'auto', 'important');
       settingsUi.shadowHost.classList.toggle('allie-hidden', !isRefineActive);
       settingsUi.shadowHost.style.setProperty('display', isRefineActive ? 'inline-flex' : 'none', 'important');
     }
 
+    let dynamicTrackingRaf: number | null = null;
+    function startDynamicTracking(durationMs = 2500) {
+      if (dynamicTrackingRaf) cancelAnimationFrame(dynamicTrackingRaf);
+      const start = performance.now();
+      function step(now: number) {
+        updateSettingsPosition();
+        if (now - start < durationMs) {
+          dynamicTrackingRaf = requestAnimationFrame(step);
+        } else {
+          dynamicTrackingRaf = null;
+        }
+      }
+      dynamicTrackingRaf = requestAnimationFrame(step);
+    }
+
     const onScrollOrResize = () => {
       updateSettingsPosition();
     };
 
-    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true });
     window.addEventListener('resize', onScrollOrResize, { passive: true });
 
     function renderSettingsButton() {
       if (!settingsRoot) return;
       settingsRoot.render(
         <SettingsButton
-          active={splitViewController.isSplitViewActive()}
           hasActivePersona={hasActivePersona}
           onClick={() => {
-            splitViewController.toggleSplitView();
-            renderSettingsButton();
+            if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+              chrome.runtime.sendMessage({ type: 'TOGGLE_SIDEPANEL' }).catch((err) => {
+                console.warn('[Allie Gemini] Failed to toggle sidepanel:', err);
+              });
+            }
           }}
         />
       );
@@ -265,6 +303,9 @@ export default defineContentScript({
     function setupSubmitInterception() {
       unregisterSubmit?.();
       unregisterSubmit = adapter.interceptSubmit(async (rawPrompt: string) => {
+        // Trigger smooth 60fps tracking as Angular moves composer to the bottom
+        startDynamicTracking(2500);
+
         if (!isRefineActive) {
           // Refine toggle disabled: bypass Allie and proceed with native submit
           return true;
@@ -274,6 +315,7 @@ export default defineContentScript({
           const res = await contentObserver.executeRefinement();
           if (res.success && res.refinedPrompt) {
             // Refinement succeeded and prompt updated: proceed with native submit
+            startDynamicTracking(2500);
             return true;
           }
         } catch (err) {
@@ -281,6 +323,7 @@ export default defineContentScript({
         }
 
         // On refinement failure or fallback, allow native send to prevent blocking the user
+        startDynamicTracking(2500);
         return true;
       });
     }
@@ -410,6 +453,9 @@ export default defineContentScript({
         debouncedMountTimer = setTimeout(() => {
           mountInjections();
         }, 200);
+      } else {
+        // Continuous tracking for internal DOM alterations & Angular view changes
+        updateSettingsPosition();
       }
     });
 
@@ -417,10 +463,20 @@ export default defineContentScript({
       domObserver.observe(document.body, { childList: true, subtree: true });
     }
 
+    // Periodic watchdog interval ensuring alignment never drifts
+    const positionWatchdogInterval = setInterval(() => {
+      updateSettingsPosition();
+    }, 400);
+
     // Full cleanup when content script context is invalidated
     ctx.onInvalidated(() => {
       clearTimeout(debouncedMountTimer);
-      window.removeEventListener('scroll', onScrollOrResize);
+      clearInterval(positionWatchdogInterval);
+      if (dynamicTrackingRaf) {
+        cancelAnimationFrame(dynamicTrackingRaf);
+        dynamicTrackingRaf = null;
+      }
+      window.removeEventListener('scroll', onScrollOrResize, true);
       window.removeEventListener('resize', onScrollOrResize);
       resizeObserver?.disconnect();
       if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {

@@ -55,9 +55,23 @@ export async function toggleSidepanel(
   sender: chrome.runtime.MessageSender,
   sendResponse: (res: any) => void
 ): Promise<void> {
-  const tabId = sender.tab?.id;
-  const windowId = sender.tab?.windowId;
-  if (!tabId) {
+  let tabId = sender.tab?.id;
+  let windowId = sender.tab?.windowId;
+  if (!tabId || !windowId) {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (activeTab) {
+          tabId = tabId || activeTab.id;
+          windowId = windowId || activeTab.windowId;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (!tabId && !windowId) {
     sendResponse({ success: false, error: 'No tab ID' });
     return;
   }

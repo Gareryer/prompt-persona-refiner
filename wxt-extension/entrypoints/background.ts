@@ -190,8 +190,8 @@ export default defineBackground(() => {
       return true;
     }
 
-    // TOGGLE_SIDEPANEL
-    if (message.type === 'TOGGLE_SIDEPANEL') {
+    // TOGGLE_SIDEPANEL / OPEN_SIDEPANEL
+    if (message.type === 'TOGGLE_SIDEPANEL' || message.type === 'OPEN_SIDEPANEL') {
       toggleSidepanel(sender, sendResponse);
       return true;
     }
