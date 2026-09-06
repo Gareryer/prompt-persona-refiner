@@ -18,6 +18,43 @@ export class MockNode {
     return this.parentNode instanceof MockElement ? this.parentNode : null;
   }
 
+  get nextSibling(): MockNode | null {
+    if (!this.parentNode) return null;
+    const idx = this.parentNode.children.indexOf(this as any);
+    if (idx !== -1 && idx < this.parentNode.children.length - 1) {
+      return (this.parentNode.children[idx + 1] as MockNode) || null;
+    }
+    return null;
+  }
+
+  get previousSibling(): MockNode | null {
+    if (!this.parentNode) return null;
+    const idx = this.parentNode.children.indexOf(this as any);
+    if (idx > 0) {
+      return (this.parentNode.children[idx - 1] as MockNode) || null;
+    }
+    return null;
+  }
+
+  replaceWith(...nodes: (MockNode | string)[]) {
+    if (!this.parentNode) return;
+    const parent = this.parentNode;
+    const idx = parent.children.indexOf(this as any);
+    if (idx !== -1) {
+      const converted = nodes.map(n => typeof n === 'string' ? new MockTextNode(n) : n);
+      parent.children.splice(idx, 1, ...(converted as any));
+      converted.forEach(n => {
+        n.parentNode = parent;
+        n.ownerDocument = parent.ownerDocument;
+      });
+      this.parentNode = null;
+    }
+  }
+
+  contains(other: MockNode): boolean {
+    return other === this;
+  }
+
   remove() {
     if (this.parentNode) {
       this.parentNode.children = this.parentNode.children.filter(c => (c as MockNode) !== this);
@@ -76,6 +113,14 @@ export class MockNode {
 export class MockTextNode extends MockNode {
   override nodeType = 3;
   textContent: string;
+
+  get nodeValue(): string {
+    return this.textContent;
+  }
+
+  set nodeValue(val: string) {
+    this.textContent = val;
+  }
 
   constructor(text: string) {
     super();
@@ -198,6 +243,40 @@ export class MockElement extends MockNode {
     this.children.push(child);
   }
 
+  insertBefore(newChild: MockElement | MockTextNode, refChild: MockElement | MockTextNode | null) {
+    if (!refChild) {
+      this.appendChild(newChild);
+      return newChild;
+    }
+    const idx = this.children.indexOf(refChild);
+    if (idx !== -1) {
+      newChild.parentNode = this;
+      newChild.ownerDocument = this.ownerDocument;
+      this.children.splice(idx, 0, newChild);
+    } else {
+      this.appendChild(newChild);
+    }
+    return newChild;
+  }
+
+  insertAdjacentText(position: 'beforebegin' | 'afterbegin' | 'beforeend' | 'afterend', text: string) {
+    const textNode = new MockTextNode(text);
+    if (position === 'beforebegin') {
+      if (this.parentNode instanceof MockElement) {
+        this.parentNode.insertBefore(textNode, this);
+      }
+    } else if (position === 'afterbegin') {
+      this.insertBefore(textNode, this.children[0] || null);
+    } else if (position === 'beforeend') {
+      this.appendChild(textNode);
+    } else if (position === 'afterend') {
+      if (this.parentNode instanceof MockElement) {
+        const next = this.nextSibling as MockElement | MockTextNode | null;
+        this.parentNode.insertBefore(textNode, next);
+      }
+    }
+  }
+
   attachShadow(init?: { mode: 'open' | 'closed' }): MockShadowRoot {
     const shadow = new MockShadowRoot(this);
     this.shadowRoot = shadow;
@@ -214,7 +293,7 @@ export class MockElement extends MockNode {
     }
   }
 
-  contains(child: MockNode): boolean {
+  override contains(child: MockNode): boolean {
     if (child === this) return true;
     for (const c of this.children) {
       if (c === child) return true;
@@ -496,16 +575,6 @@ function matchesSimpleSelector(el: MockElement, sel: string): boolean {
     s = s.slice(tagMatch[1].length);
   }
 
-  // Class names
-  const classMatches = s.match(/\.([a-zA-Z0-9_-]+)/g);
-  if (classMatches) {
-    for (const cm of classMatches) {
-      const cls = cm.slice(1);
-      if (!el.classList.contains(cls)) return false;
-    }
-    s = s.replace(/\.([a-zA-Z0-9_-]+)/g, '');
-  }
-
   // :not(selector)
   const notRegex = /:not\(([^)]+)\)/g;
   let notMatch: RegExpExecArray | null;
@@ -514,6 +583,16 @@ function matchesSimpleSelector(el: MockElement, sel: string): boolean {
     if (innerSelector && matchesSelector(el, innerSelector)) return false;
   }
   s = s.replace(/:not\([^)]+\)/g, '');
+
+  // Class names (supporting escaped forward slashes e.g. .group\/row)
+  const classMatches = s.match(/\.((?:[a-zA-Z0-9_-]|\\\/|\/)+)/g);
+  if (classMatches) {
+    for (const cm of classMatches) {
+      const cls = cm.slice(1).replace(/\\/g, '');
+      if (!el.classList.contains(cls)) return false;
+    }
+    s = s.replace(/\.((?:[a-zA-Z0-9_-]|\\\/|\/)+)/g, '');
+  }
 
   // Attribute selectors
   const attrRegex = /\[([a-zA-Z0-9_-]+)([\*~|^$]?=)?["']?([^"'\]]*)["']?(\s+i)?\]/g;

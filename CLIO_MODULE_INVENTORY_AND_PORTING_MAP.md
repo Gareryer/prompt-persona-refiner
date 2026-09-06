@@ -1,6 +1,6 @@
 # Clio Codebase Full Inventory & WXT Modular Porting Blueprint
 
-> **Document Status**: **ACTIVE & PRODUCTION-VERIFIED** (Phase 1–4 Complete, 352/352 Vitest Tests Passing, Clean Build).
+> **Document Status**: **ACTIVE & PRODUCTION-VERIFIED** (Phase 1–5 Complete, 428/428 Vitest Tests Passing, Clean Build).
 > **Document Purpose**: Comprehensive technical reference auditing every module, class, function, selector, state machine, and data flow in [Clio](https://github.com/martymcenroe/Clio) (v1.4.1 / v1.6.2), paired with a modular target architecture for clean-room TypeScript porting into the `wxt-extension` framework.
 > **Architecture Core Pattern**: **Platform-Specific Adapters** for DOM discovery, scroller quirks, and HTML extraction/sanitization paired with a **Unified Subsystem** for persistence (IndexedDB), media harvesting, packaging (JSZip), and batch queue orchestration.
 
@@ -43,14 +43,14 @@
 
 Clio is an open-source, privacy-first browser extension that extracts complete multi-turn conversations from **Google Gemini**, **Anthropic Claude**, and **OpenAI ChatGPT** into structured JSON archives with local image asset bundles.
 
-### Current Implementation Status: **Phase 1–4 Complete**
+### Current Implementation Status: **Phase 1–5 Complete**
 - **Layer 1 (Unified Subsystem)**: **100% COMPLETE**. Storage (IndexedDB `clio-archive`), Media Extraction (fail-open images), Packaging (JSZip, `chrome.downloads`), Auto-Scroller engine, Work Queue state machine, Batch Tab Worker, and Orchestrator facade are fully built, hardened, and exported.
 - **Layer 2 (Platform-Specific Adapters)**:
   - **Google Gemini**: **100% COMPLETE & VERIFIED** (Production reference implementation with paired container extraction, thinking trace isolation, LaTeX math synthesis, UI chrome stripping, and sidebar enumeration).
   - **OpenAI ChatGPT**: **100% COMPLETE & VERIFIED** (Production implementation with VirtualMessageCache, ancestor scroll-root detection, CodeMirror 6 line preservation, reasoning header extraction, and sidebar enumeration).
-  - **Anthropic Claude**: **PENDING** (Tailored blueprint ready in Section 7.1).
+  - **Anthropic Claude**: **100% COMPLETE & VERIFIED** (Production implementation with 2-row CSS Grid isolation, in-place chronological tool call harvesting, artifact widget chrome stripping, Clio #37 / #39 / #43 resilience, and dual REST/DOM enumeration).
   - **DeepSeek, Grok, Meta**: **PENDING** (Architecture ready in Section 7.3).
-- **Verification**: **385/385 Vitest unit tests passing** across 24 test suites, zero TypeScript typecheck errors, and production bundle (`2.91 MB`) compiling cleanly in WXT.
+- **Verification**: **428/428 Vitest unit tests passing** across 25 test suites, zero TypeScript typecheck errors, and production bundle (`2.95 MB`) compiling cleanly in WXT.
 
 ---
 
@@ -66,10 +66,25 @@ wxt-extension/
 ├── src/
 │    ├── adapters/chatbots/
 │    │    ├── types.ts                   [MODIFIED: Added IHarvesterAdapter contract]
-│    │    └── gemini/
-│    │         ├── selectors.ts          [MODIFIED: Added scroller, thoughts, spinners]
-│    │         ├── container-pairer.ts   [NEW: Paired container turn extraction]
-│    │         └── adapter.ts            [MODIFIED: Implements IHarvesterAdapter]
+│    │    ├── gemini/
+│    │    │    ├── selectors.ts          [MODIFIED: Added scroller, thoughts, spinners]
+│    │    │    ├── container-pairer.ts   [NEW: Paired container turn extraction]
+│    │    │    └── adapter.ts            [MODIFIED: Implements IHarvesterAdapter]
+│    │    │
+│    │    ├── chatgpt/
+│    │    │    ├── selectors.ts          [NEW: ChatGPT scrollers, reasoning, CodeMirror]
+│    │    │    ├── turn-scraper.ts       [NEW: Virtualization merge & reasoning parser]
+│    │    │    ├── adapter.ts            [NEW: Ancestor scroller & sidebar enumeration]
+│    │    │    └── index.ts              [NEW: Barrel export]
+│    │    │
+│    │    ├── claude/
+│    │    │    ├── selectors.ts          [NEW: Modern 2-row grid, tools, scroller]
+│    │    │    ├── turn-scraper.ts       [NEW: Grid scraper, Clio #37/#39/#43 protection]
+│    │    │    ├── adapter.ts            [NEW: Dual REST/DOM enumeration, submit guard]
+│    │    │    └── index.ts              [NEW: Barrel export]
+│    │    │
+│    │    ├── chatgpt.adapter.ts         [MODIFIED: Backward compatibility re-export]
+│    │    └── claude.adapter.ts          [MODIFIED: Backward compatibility re-export]
 │    │
 │    └── core/harvest/                   [NEW: Complete Unified Subsystem]
 │         ├── index.ts                   [NEW: Public Facade Entrypoint]
@@ -85,6 +100,7 @@ wxt-extension/
 │         │
 │         ├── scroller/
 │         │    ├── scroller-detector.ts  [NEW: isRealScroller & Shadow DOM ancestor finder]
+│         │    ├── virtual-cache.ts      [NEW: DOM recycling recovery for React virtual lists]
 │         │    └── auto-scroller.ts      [NEW: MutationObserver upward loop & spinner wait]
 │         │
 │         ├── storage/
@@ -95,9 +111,11 @@ wxt-extension/
 │              └── tab-worker.ts         [NEW: Tab lifecycle, re-injection & batch loop]
 │
 └── tests/
-     ├── fixtures/mock-dom.ts            [MODIFIED: Added compareDocumentPosition, Shadow DOM]
+     ├── fixtures/mock-dom.ts            [MODIFIED: DOM position, siblings, Shadow DOM]
      └── unit/
           ├── gemini-harvester.test.ts   [NEW: 44 tests for Gemini container pairing]
+          ├── chatgpt-harvester.test.ts  [NEW: 33 tests for ChatGPT virtual cache & ancestor scrollers]
+          ├── claude-harvester.test.ts   [NEW: 43 tests for Claude 2-row grid & edge cases]
           ├── media-and-zip.test.ts      [NEW: 46 tests for images, data URLs, JSZip]
           ├── auto-scroller.test.ts      [NEW: 52 tests for scrollers & mutation loops]
           └── harvest-db-and-batch.test.ts [NEW: 42 tests for IndexedDB & batch crawler]
@@ -107,7 +125,7 @@ wxt-extension/
 To preserve architecture integrity, the following modules were **intentionally left alone**:
 - `src/core/memory/*`: Working memory, 7-dimension persona schemas, `UnifiedAnalyzer`, `RecentFocus`, and `MemoryController` remain 100% decoupled from heavy archival crawling.
 - `src/core/extractor/*` & `src/core/refiner/*`: Real-time prompt refinement and LLM persona extraction pipelines are completely unaffected.
-- `src/adapters/chatbots/claude.adapter.ts` & `chatgpt.adapter.ts`: Their daily real-time prompt interception and DOM observation remain active; their harvest adapters will be implemented in subsequent phases.
+- `src/adapters/chatbots/deepseek.adapter.ts`, `grok.adapter.ts`, `meta.adapter.ts`: Their prompt refinement and DOM observation remain active; their harvest adapters will be implemented in subsequent phases.
 
 ---
 
@@ -317,8 +335,8 @@ Because our WXT extension has existing adapters for DeepSeek, Grok, and Meta:
 | **Auto-Scroller** | None | Upward scroll loop | Unified `AutoScroller` (MutationObserver) | **COMPLETE** |
 | **Batch Worker** | None | Worker tab automation + crawl queue | Unified `QueueManager` & `TabWorker` | **COMPLETE** |
 | **Gemini Adapter** | Basic text scraper | Custom element scraper | `GeminiAdapter` (`IHarvesterAdapter`) | **COMPLETE** |
-| **Claude Adapter** | Outdated selectors (`[data-cds]`) | Verified Grid Selectors (`.font-claude-response`) | ClaudeAdapter with Clio verified selectors | **PLANNED (Next)** |
-| **ChatGPT Scroller** | None (viewport only) | Ancestor `div.group/scroll-root` resolution | ChatGPTAdapter with `findScrollContainer()` | **PLANNED** |
+| **Claude Adapter** | Outdated selectors (`[data-cds]`) | Verified Grid Selectors (`.font-claude-response`) | ClaudeAdapter with Clio verified selectors | **COMPLETE** |
+| **ChatGPT Scroller** | None (viewport only) | Ancestor `div.group/scroll-root` resolution | ChatGPTAdapter with `findScrollContainer()` | **COMPLETE** |
 
 ---
 
@@ -344,7 +362,17 @@ Because our WXT extension has existing adapters for DeepSeek, Grok, and Meta:
 - **Files**: `src/core/harvest/storage/harvest-db.ts`, `src/core/harvest/batch/queue-manager.ts`, `src/core/harvest/batch/tab-worker.ts`, `src/core/harvest/orchestrator.ts`, `wxt.config.ts`.
 - **Tests**: 42 tests in `tests/unit/harvest-db-and-batch.test.ts`.
 
+### Phase 5: ChatGPT Harvester Adapter & DOM Virtualization Recovery
+- **Status**: **COMPLETE & PRODUCTION-VERIFIED**.
+- **Files**: `src/adapters/chatbots/chatgpt/selectors.ts`, `src/adapters/chatbots/chatgpt/turn-scraper.ts`, `src/adapters/chatbots/chatgpt/adapter.ts`, `src/adapters/chatbots/chatgpt/index.ts`, `src/core/harvest/scroller/virtual-cache.ts`.
+- **Tests**: 33 tests in `tests/unit/chatgpt-harvester.test.ts`.
+
+### Phase 6: Claude Harvester Adapter & 2-Row CSS Grid Engine
+- **Status**: **COMPLETE & PRODUCTION-VERIFIED**.
+- **Files**: `src/adapters/chatbots/claude/selectors.ts`, `src/adapters/chatbots/claude/turn-scraper.ts`, `src/adapters/chatbots/claude/adapter.ts`, `src/adapters/chatbots/claude/index.ts`, `src/adapters/chatbots/claude.adapter.ts`.
+- **Tests**: 55 tests in `tests/unit/claude-harvester.test.ts` (including 12 hardened adversarial tests).
+
 ### Total Verification Summary
-- **Tests**: **352 passed, 0 failed** across 23 test suites in 11.98s.
+- **Tests**: **440 passed, 0 failed** across 25 test suites (272 dedicated harvester tests + 168 existing extension tests).
 - **Typecheck**: `tsc --noEmit` exited with 0 errors.
-- **Production Build**: `wxt build` generated clean Chrome MV3 bundle in 10.9s (2.88 MB).
+- **Production Build**: `wxt build` generated clean Chrome MV3 bundle in 16.9s (2.95 MB).

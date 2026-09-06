@@ -31,6 +31,7 @@ export interface HarvestTurn {
   modelSlug?: string;
   attachments?: HarvestAttachment[];
   timestamp: number;
+  type?: 'thinking-only' | string;
 }
 
 export interface HarvestConversationMetadata {
