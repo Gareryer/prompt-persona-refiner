@@ -43,7 +43,7 @@ export class ZipBuilder {
    */
   static sanitizeRecordForJson(record: HarvestConversationRecord): Record<string, unknown> {
     const sanitizeAttachment = (att: HarvestAttachment) => {
-      const { blob: _blob, ...rest } = att;
+      const { blob: _blob, dataUrl: _dataUrl, ...rest } = att;
       return rest;
     };
 
