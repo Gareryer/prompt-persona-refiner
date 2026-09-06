@@ -152,5 +152,28 @@ describe('Rating Subsystem Engine', () => {
       expect(() => injector.init()).not.toThrow();
       expect(() => injector.destroy()).not.toThrow();
     });
+
+    it('queries DOM using adapter assistantMessage selectors and injects rating UI', () => {
+      const nodeA = (globalThis as any).document.createElement('div');
+      const nodeB = (globalThis as any).document.createElement('div');
+      const qsaSpy = vi.spyOn((globalThis as any).document, 'querySelectorAll').mockReturnValue([nodeA, nodeB]);
+
+      const injector = new RatingInjector('session_adaptive_test');
+      injector.injectRatings();
+
+      expect(qsaSpy).toHaveBeenCalled();
+      const queriedSelector = qsaSpy.mock.calls[0]?.[0] as string;
+      expect(queriedSelector).toBeDefined();
+      expect(nodeA.appendChild).toHaveBeenCalled();
+      expect(nodeB.appendChild).toHaveBeenCalled();
+      expect(injector.injectedTurns.size).toBe(2);
+
+      // Subsequent call does not re-inject already tracked nodes
+      nodeA.appendChild.mockClear();
+      injector.injectRatings();
+      expect(nodeA.appendChild).not.toHaveBeenCalled();
+
+      qsaSpy.mockRestore();
+    });
   });
 });

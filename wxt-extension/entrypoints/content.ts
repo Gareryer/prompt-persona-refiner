@@ -29,6 +29,26 @@ export default defineContentScript({
     // Initialize content script observer (theme, shortcuts, message dispatch)
     contentObserver.init();
 
+    // Universal Submit Interception for active chatbot adapter (ChatGPT, Claude, etc.)
+    let unregisterSubmit: (() => void) | null = null;
+    if (typeof adapter.interceptSubmit === 'function') {
+      unregisterSubmit = adapter.interceptSubmit(async (_rawPrompt: string) => {
+        try {
+          const res = await contentObserver.executeRefinement();
+          if (res.success && res.refinedPrompt) {
+            return true;
+          }
+        } catch (err) {
+          console.warn(`[WXT ${adapter.platform}] Prompt refinement error during submit:`, err);
+        }
+        return true; // Fail-open: allow native send on error or bypass
+      });
+
+      ctx.onInvalidated(() => {
+        unregisterSubmit?.();
+      });
+    }
+
     // Mount Shadow DOM Floating Refiner Badge
     try {
       const ui = await createShadowRootUi(ctx, {

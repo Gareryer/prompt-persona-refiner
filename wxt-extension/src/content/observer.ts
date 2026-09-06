@@ -9,6 +9,13 @@ export const SELECTORS = {
  * @fileoverview Complete Content Script Observer & In-Page Injection Coordinator
  * Ported from content/observer.js (2206 lines)
  * @module content/observer
+ *
+ * ARCHITECTURAL INVARIANT:
+ * DO NOT IMPORT OR INSTANTIATE `HarvestDB` IN THIS FILE OR ANY CONTENT SCRIPT MODULE.
+ * Content scripts execute in the host page's origin (chatgpt.com, claude.ai, gemini.google.com).
+ * Opening IndexedDB databases here would create stores under the third-party website's origin
+ * rather than the extension origin (chrome-extension://<id>/), leading to Safari ITP 7-day purges
+ * and partition leaks. All persistence must remain in background / sidepanel extension contexts.
  */
 
 import { detectPageTheme, observeThemeChanges, type PageTheme } from './theme-detector';
@@ -17,6 +24,13 @@ import { isExtensionContextValid, showExtensionReloadNotification } from './cont
 import { resolveChatbotAdapter } from '../adapters/chatbots/registry';
 import { sendRpcMessage } from '../lib/messaging/client';
 import { logger } from '../core/logging/logger';
+import { MediaExtractor } from '../core/harvest/extraction/media-extractor';
+import type {
+  HarvestConversationRecord,
+  HarvestConversationMetadata,
+  HarvestPlatform,
+  HarvestTurn
+} from '../core/harvest/types';
 
 export function obsLog(level: 'info' | 'warn' | 'error' | 'debug', msg: string, data: Record<string, any> = {}): void {
   if (level === 'error') logger.error(msg, data);
@@ -228,7 +242,8 @@ export class ContentObserver {
           return false;
         }
 
-        switch (message.type) {
+        const msgType = message?.type || message?.action;
+        switch (msgType) {
           case 'GET_THEME': {
             sendResponse({ theme: detectTheme() });
             return true;
@@ -251,6 +266,129 @@ export class ContentObserver {
           }
           case 'TRIGGER_REFINE_SHORTCUT': {
             this.executeRefinement().then(res => sendResponse(res));
+            return true;
+          }
+          case 'HARVEST_EXTRACT': {
+            (async () => {
+              try {
+                const adapter = resolveChatbotAdapter();
+                if (!adapter) {
+                  sendResponse({
+                    success: false,
+                    error: `No chatbot adapter matched for hostname: ${typeof location !== 'undefined' ? location.hostname : 'unknown'}`
+                  });
+                  return;
+                }
+
+                const harvester = adapter as any;
+                if (typeof harvester.scrapeHarvestTurns !== 'function') {
+                  sendResponse({
+                    success: false,
+                    error: `Adapter for ${adapter.platform} does not implement scrapeHarvestTurns`
+                  });
+                  return;
+                }
+
+                // 1. Mandatory Auto-Scroll: load lazy-loaded turns
+                let scrollResult: any = null;
+                if (typeof harvester.autoScrollHistory === 'function') {
+                  try {
+                    scrollResult = await harvester.autoScrollHistory(message?.scrollOptions);
+                  } catch (scrollErr: any) {
+                    obsLog('warn', 'autoScrollHistory encountered warning, continuing extraction', {
+                      error: scrollErr?.message || String(scrollErr)
+                    });
+                  }
+                }
+
+                // 2. Mandatory Expand: open collapsed thinking, tool use, and code folds
+                let expandedCount = 0;
+                if (typeof harvester.expandContent === 'function') {
+                  try {
+                    expandedCount = await harvester.expandContent(message?.expandOptions);
+                  } catch (expandErr: any) {
+                    obsLog('warn', 'expandContent encountered warning, continuing extraction', {
+                      error: expandErr?.message || String(expandErr)
+                    });
+                  }
+                }
+
+                // 3. Mandatory Scrape: deep structured extraction
+                const messages = await harvester.scrapeHarvestTurns();
+
+                // 4. Mandatory Media Extraction: download image binary blobs in page context
+                const { images, errors: imageErrors } = await MediaExtractor.extractImages(
+                  messages,
+                  message?.mediaOptions
+                );
+
+                // 5. Metadata extraction
+                const conversationId =
+                  (typeof harvester.extractConversationId === 'function'
+                    ? harvester.extractConversationId()
+                    : '') ||
+                  (typeof message?.conversationId === 'string'
+                    ? message.conversationId
+                    : `conv-${Date.now()}`);
+
+                const title =
+                  (typeof harvester.extractTitle === 'function'
+                    ? harvester.extractTitle()
+                    : '') ||
+                  (typeof document !== 'undefined' ? document.title : '') ||
+                  'Untitled Conversation';
+
+                const url =
+                  typeof window !== 'undefined' && window.location
+                    ? window.location.href
+                    : message?.url || '';
+
+                const extractedAt = new Date().toISOString();
+
+                const warnings: string[] = [];
+                if (scrollResult?.warning) warnings.push(scrollResult.warning);
+                if (imageErrors && imageErrors.length > 0) {
+                  warnings.push(`${imageErrors.length} image(s) failed to download`);
+                }
+
+                const metadata: HarvestConversationMetadata = {
+                  site: adapter.platform as HarvestPlatform,
+                  accountLabel: message?.accountLabel || 'default',
+                  conversationId,
+                  title,
+                  url,
+                  extractedAt,
+                  messageCount: messages.length,
+                  imageCount: images.length,
+                  partialSuccess: (imageErrors && imageErrors.length > 0) || !!scrollResult?.warning,
+                  warnings: warnings.length > 0 ? warnings : undefined,
+                  scrollAttempts: scrollResult?.scrollAttempts
+                };
+
+                const record: HarvestConversationRecord = {
+                  metadata,
+                  messages,
+                  images: messages.flatMap((m: HarvestTurn) => m.attachments || [])
+                };
+
+                sendResponse({
+                  success: true,
+                  data: record,
+                  metadata: record.metadata,
+                  messages: record.messages,
+                  images,
+                  warnings
+                });
+              } catch (err: any) {
+                obsLog('error', 'HARVEST_EXTRACT execution error', {
+                  error: err?.message || String(err)
+                });
+                sendResponse({
+                  success: false,
+                  error: err?.message || String(err)
+                });
+              }
+            })();
             return true;
           }
           default:

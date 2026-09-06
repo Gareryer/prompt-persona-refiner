@@ -15,6 +15,7 @@ export const INIT_DELAY_MS = 500;
 import { RatingManager } from './rating-manager';
 import { createRatingUI } from './rating-ui';
 import { logger } from '../logging/logger';
+import { resolveChatbotAdapter } from '../../adapters/chatbots/registry';
 
 export class RatingInjector {
   public ratingManager: RatingManager;
@@ -34,7 +35,17 @@ export class RatingInjector {
 
   injectRatings(): void {
     if (typeof document === 'undefined') return;
-    const responseNodes = document.querySelectorAll<HTMLElement>('.model-response-text, [data-role="model"]');
+
+    const adapter = resolveChatbotAdapter();
+    const selectors = adapter?.getSelectors?.();
+    const assistantConfig = selectors?.assistantMessage;
+    const selector = Array.isArray(assistantConfig)
+      ? assistantConfig.join(', ')
+      : (typeof assistantConfig === 'string' && assistantConfig.trim().length > 0)
+        ? assistantConfig
+        : '.model-response-text, [data-role="model"]';
+
+    const responseNodes = document.querySelectorAll<HTMLElement>(selector);
 
     responseNodes.forEach((node, idx) => {
       if (this.injectedTurns.has(idx)) return;

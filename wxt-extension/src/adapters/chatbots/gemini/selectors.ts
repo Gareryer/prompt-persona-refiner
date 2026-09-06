@@ -37,6 +37,11 @@ export const GEMINI_SELECTORS = {
     '.model-response-text',
     '[data-role="model"]'
   ],
+  assistantMessage: [
+    '.model-response-text',
+    '[data-role="model"]',
+    'model-response'
+  ],
   userQuery: [
     'user-query',
     '.query-text',
