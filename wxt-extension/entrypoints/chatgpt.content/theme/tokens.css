@@ -1,0 +1,125 @@
+/**
+ * OpenAI ChatGPT Design Tokens (Allie Namespace).
+ * Encapsulated for Shadow DOM consumption.
+ * Adopts Söhne typography, dark/light surfaces, emerald accent (#10a37f).
+ */
+
+:host,
+:host(.dark-theme) {
+  /* Typography - ChatGPT font stack */
+  --allie-font-family: 'Söhne', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+  --allie-font-size-sm: 12px;
+  --allie-font-size-base: 14px;
+  --allie-font-size-lg: 16px;
+  --allie-font-weight-medium: 500;
+  --allie-line-height: normal;
+
+  /* Pill & Component Radii */
+  --allie-radius-pill: 9999px;
+  --allie-radius-card: 16px;
+  --allie-radius-input: 24px;
+  --allie-radius-sm: 8px;
+  --allie-radius-lg: 24px;
+
+  /* Elevation Shadows */
+  --allie-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --allie-elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --allie-elevation-3: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* Status Indicators */
+  --allie-status-online: #10a37f;
+  --allie-status-online-glow: 0 0 6px rgba(16, 163, 127, 0.8);
+  --allie-status-offline: #ef4444;
+  --allie-status-offline-glow: 0 0 4px rgba(239, 68, 68, 0.6);
+
+  /* Transitions */
+  --allie-transition-standard: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --allie-transition-fast: 100ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Dark Theme Colors (ChatGPT Default) */
+  --allie-bg-primary: #212121;
+  --allie-bg-surface: #2f2f2f;
+  --allie-bg-surface-variant: #383838;
+  --allie-bg-surface-elevated: #424242;
+
+  --allie-text-primary: #ececec;
+  --allie-text-secondary: #b4b4b4;
+  --allie-text-tertiary: #8e8e8e;
+  --allie-text-disabled: #676767;
+
+  --allie-accent: #10a37f;
+  --allie-accent-hover: #1a7f64;
+  --allie-accent-container: rgba(16, 163, 127, 0.18);
+  --allie-accent-container-hover: rgba(16, 163, 127, 0.26);
+  --allie-accent-container-active: rgba(16, 163, 127, 0.35);
+  --allie-accent-contrast: #ffffff;
+
+  /* State Layers */
+  --allie-hover-state: rgba(255, 255, 255, 0.08);
+  --allie-active-state: rgba(16, 163, 127, 0.25);
+  --allie-focus-ring: 0 0 0 2px rgba(16, 163, 127, 0.5);
+
+  --allie-btn-hover-bg: rgba(255, 255, 255, 0.08);
+  --allie-btn-active-bg: rgba(255, 255, 255, 0.14);
+
+  /* Switch Tokens (Dark Mode) */
+  --allie-switch-track-off: #424242;
+  --allie-switch-knob-off: #b4b4b4;
+  --allie-switch-track-on: #10a37f;
+  --allie-switch-knob-on: #ffffff;
+
+  --allie-border-subtle: rgba(255, 255, 255, 0.15);
+
+  /* Tooltip Tokens */
+  --allie-tooltip-bg: #0d0d0d;
+  --allie-tooltip-text: #ffffff;
+  --allie-tooltip-radius: 6px;
+  --allie-tooltip-padding: 4px 8px;
+  --allie-tooltip-min-height: 24px;
+  --allie-tooltip-font-size: 12px;
+  --allie-tooltip-font-weight: 500;
+  --allie-tooltip-line-height: 16px;
+  --allie-tooltip-letter-spacing: 0px;
+  --allie-tooltip-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+:host(.light-theme) {
+  /* Light Theme Overrides */
+  --allie-bg-primary: #ffffff;
+  --allie-bg-surface: #f9f9f9;
+  --allie-bg-surface-variant: #ececec;
+  --allie-bg-surface-elevated: #ffffff;
+
+  --allie-text-primary: #0d0d0d;
+  --allie-text-secondary: #5d5d5d;
+  --allie-text-tertiary: #737373;
+  --allie-text-disabled: #9e9e9e;
+
+  --allie-accent: #10a37f;
+  --allie-accent-hover: #1a7f64;
+  --allie-accent-container: rgba(16, 163, 127, 0.12);
+  --allie-accent-container-hover: rgba(16, 163, 127, 0.18);
+  --allie-accent-container-active: rgba(16, 163, 127, 0.25);
+  --allie-accent-contrast: #ffffff;
+
+  /* State Layers */
+  --allie-hover-state: rgba(0, 0, 0, 0.05);
+  --allie-active-state: rgba(16, 163, 127, 0.18);
+  --allie-focus-ring: 0 0 0 2px rgba(16, 163, 127, 0.4);
+
+  --allie-btn-hover-bg: rgba(0, 0, 0, 0.05);
+  --allie-btn-active-bg: rgba(0, 0, 0, 0.10);
+
+  /* Switch Tokens (Light Mode) */
+  --allie-switch-track-off: #d1d5db;
+  --allie-switch-knob-off: #ffffff;
+  --allie-switch-track-on: #10a37f;
+  --allie-switch-knob-on: #ffffff;
+
+  --allie-border-subtle: rgba(0, 0, 0, 0.12);
+
+  /* Tooltip Tokens */
+  --allie-tooltip-bg: #0d0d0d;
+  --allie-tooltip-text: #ffffff;
+  --allie-tooltip-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

@@ -45,6 +45,20 @@ export interface BatchControlOptions {
 }
 
 /**
+ * Mapping of harvest platforms to their dedicated modular content script bundles.
+ */
+export const PLATFORM_SCRIPT_BUNDLES: Record<HarvestPlatform, string> = {
+  gemini: 'content-scripts/gemini.js',
+  chatgpt: 'content-scripts/chatgpt.js',
+  claude: 'content-scripts/claude.js',
+  deepseek: 'content-scripts/content.js',
+  grok: 'content-scripts/content.js',
+  meta: 'content-scripts/content.js'
+};
+
+export const FALLBACK_SCRIPT_BUNDLE = 'content-scripts/content.js';
+
+/**
  * Builds canonical URL for a conversation if explicit URL was not provided.
  */
 export function buildPlatformConversationUrl(site: HarvestPlatform, conversationId: string): string {
@@ -164,8 +178,11 @@ export async function sendExtractWithRecovery(
       msg.includes('Could not establish connection');
 
     if (isDisconnected && typeof chrome !== 'undefined' && chrome?.scripting?.executeScript) {
-      const primaryScript = deps?.site === 'gemini' ? 'content-scripts/gemini.js' : 'content-scripts/content.js';
-      const fallbackScript = deps?.site === 'gemini' ? 'content-scripts/content.js' : 'content-scripts/gemini.js';
+      const site = deps?.site;
+      const primaryScript = (site && site in PLATFORM_SCRIPT_BUNDLES)
+        ? PLATFORM_SCRIPT_BUNDLES[site as HarvestPlatform]
+        : FALLBACK_SCRIPT_BUNDLE;
+      const fallbackScript = FALLBACK_SCRIPT_BUNDLE;
 
       try {
         await chrome.scripting.executeScript({
@@ -173,13 +190,15 @@ export async function sendExtractWithRecovery(
           files: [primaryScript]
         });
       } catch {
-        try {
-          await chrome.scripting.executeScript({
-            target: { tabId },
-            files: [fallbackScript]
-          });
-        } catch {
-          // If fallback injection fails, continue to retry attempt
+        if (primaryScript !== fallbackScript) {
+          try {
+            await chrome.scripting.executeScript({
+              target: { tabId },
+              files: [fallbackScript]
+            });
+          } catch {
+            // If fallback injection fails, continue to retry attempt
+          }
         }
       }
 

@@ -1,0 +1,125 @@
+/**
+ * Anthropic Claude Design Tokens (Allie Namespace).
+ * Encapsulated for Shadow DOM consumption.
+ * Adopts Warm Ivory / Terracotta aesthetic and custom typography.
+ */
+
+:host,
+:host(.dark-theme) {
+  /* Typography - Claude font stack */
+  --allie-font-family: 'Tipperary', 'Tiempos Text', 'Styrene A', 'Styrene B', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --allie-font-size-sm: 12px;
+  --allie-font-size-base: 14px;
+  --allie-font-size-lg: 16px;
+  --allie-font-weight-medium: 500;
+  --allie-line-height: normal;
+
+  /* Component Radii */
+  --allie-radius-pill: 9999px;
+  --allie-radius-card: 16px;
+  --allie-radius-input: 16px;
+  --allie-radius-sm: 8px;
+  --allie-radius-lg: 24px;
+
+  /* Elevation Shadows */
+  --allie-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.20);
+  --allie-elevation-2: 0 4px 8px -2px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+  --allie-elevation-3: 0 12px 16px -4px rgba(0, 0, 0, 0.30), 0 4px 6px -2px rgba(0, 0, 0, 0.20);
+
+  /* Status Indicators */
+  --allie-status-online: #da7756;
+  --allie-status-online-glow: 0 0 6px rgba(218, 119, 86, 0.8);
+  --allie-status-offline: #ef4444;
+  --allie-status-offline-glow: 0 0 4px rgba(239, 68, 68, 0.6);
+
+  /* Transitions */
+  --allie-transition-standard: 160ms cubic-bezier(0.2, 0, 0, 1);
+  --allie-transition-fast: 100ms cubic-bezier(0.2, 0, 0, 1);
+
+  /* Dark Theme Colors */
+  --allie-bg-primary: #1f1e1d;
+  --allie-bg-surface: #2b2a27;
+  --allie-bg-surface-variant: #383633;
+  --allie-bg-surface-elevated: #46433e;
+
+  --allie-text-primary: #fbfaf7;
+  --allie-text-secondary: #c2beb6;
+  --allie-text-tertiary: #9a978f;
+  --allie-text-disabled: #797670;
+
+  --allie-accent: #da7756;
+  --allie-accent-hover: #e08767;
+  --allie-accent-container: rgba(218, 119, 86, 0.18);
+  --allie-accent-container-hover: rgba(218, 119, 86, 0.26);
+  --allie-accent-container-active: rgba(218, 119, 86, 0.35);
+  --allie-accent-contrast: #ffffff;
+
+  /* State Layers */
+  --allie-hover-state: rgba(255, 255, 255, 0.08);
+  --allie-active-state: rgba(218, 119, 86, 0.25);
+  --allie-focus-ring: 0 0 0 2px rgba(218, 119, 86, 0.5);
+
+  --allie-btn-hover-bg: rgba(255, 255, 255, 0.08);
+  --allie-btn-active-bg: rgba(255, 255, 255, 0.14);
+
+  /* Switch Tokens (Dark Mode) */
+  --allie-switch-track-off: #46433e;
+  --allie-switch-knob-off: #c2beb6;
+  --allie-switch-track-on: #da7756;
+  --allie-switch-knob-on: #ffffff;
+
+  --allie-border-subtle: rgba(255, 255, 255, 0.12);
+
+  /* Tooltip Tokens */
+  --allie-tooltip-bg: #141312;
+  --allie-tooltip-text: #fbfaf7;
+  --allie-tooltip-radius: 8px;
+  --allie-tooltip-padding: 4px 10px;
+  --allie-tooltip-min-height: 24px;
+  --allie-tooltip-font-size: 12px;
+  --allie-tooltip-font-weight: 450;
+  --allie-tooltip-line-height: 16px;
+  --allie-tooltip-letter-spacing: 0px;
+  --allie-tooltip-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+:host(.light-theme) {
+  /* Warm Ivory Light Theme Overrides */
+  --allie-bg-primary: #faf9f5;
+  --allie-bg-surface: #f0eee6;
+  --allie-bg-surface-variant: #e5e3d8;
+  --allie-bg-surface-elevated: #ffffff;
+
+  --allie-text-primary: #141312;
+  --allie-text-secondary: #5d5b56;
+  --allie-text-tertiary: #7c7971;
+  --allie-text-disabled: #9a978f;
+
+  --allie-accent: #cc785c;
+  --allie-accent-hover: #b96348;
+  --allie-accent-container: rgba(204, 120, 92, 0.12);
+  --allie-accent-container-hover: rgba(204, 120, 92, 0.18);
+  --allie-accent-container-active: rgba(204, 120, 92, 0.25);
+  --allie-accent-contrast: #ffffff;
+
+  /* State Layers */
+  --allie-hover-state: rgba(20, 19, 18, 0.06);
+  --allie-active-state: rgba(204, 120, 92, 0.18);
+  --allie-focus-ring: 0 0 0 2px rgba(204, 120, 92, 0.4);
+
+  --allie-btn-hover-bg: rgba(20, 19, 18, 0.06);
+  --allie-btn-active-bg: rgba(20, 19, 18, 0.10);
+
+  /* Switch Tokens (Light Mode) */
+  --allie-switch-track-off: #c2beb6;
+  --allie-switch-knob-off: #ffffff;
+  --allie-switch-track-on: #cc785c;
+  --allie-switch-knob-on: #ffffff;
+
+  --allie-border-subtle: rgba(0, 0, 0, 0.10);
+
+  /* Tooltip Tokens */
+  --allie-tooltip-bg: #141312;
+  --allie-tooltip-text: #ffffff;
+  --allie-tooltip-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}

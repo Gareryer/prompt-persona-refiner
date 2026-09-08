@@ -1,0 +1,83 @@
+import React, { useState, useEffect } from 'react';
+import { ChatGPTTooltip } from './ChatGPTTooltip';
+
+export interface RefineToggleProps {
+  enabled?: boolean;
+  onToggle?: (enabled: boolean) => void;
+  status?: 'idle' | 'loading' | 'success' | 'error';
+  label?: string;
+  tooltipText?: string;
+}
+
+export const RefineToggle: React.FC<RefineToggleProps> = ({
+  enabled: controlledEnabled,
+  onToggle,
+  status = 'idle',
+  label,
+  tooltipText
+}) => {
+  const [internalEnabled, setInternalEnabled] = useState(
+    controlledEnabled !== undefined ? controlledEnabled : true
+  );
+
+  useEffect(() => {
+    if (controlledEnabled !== undefined) {
+      setInternalEnabled(controlledEnabled);
+    }
+  }, [controlledEnabled]);
+
+  const isEnabled = controlledEnabled !== undefined ? controlledEnabled : internalEnabled;
+
+  const performToggle = () => {
+    const nextState = !internalEnabled;
+    setInternalEnabled(nextState);
+    onToggle?.(nextState);
+  };
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    performToggle();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === ' ' || e.key === 'Enter' || e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      performToggle();
+    }
+  };
+
+  const currentLabel = label || (status === 'loading' ? 'Refining...' : status === 'success' ? 'Refined' : 'Refine');
+  const defaultTooltip = internalEnabled
+    ? 'Allie prompt refinement is active (Intercepts Enter / Send)'
+    : 'Allie prompt refinement is disabled (Native send)';
+
+  return (
+    <div className="allie-toggle-wrapper">
+      <ChatGPTTooltip text={tooltipText || defaultTooltip} position="top">
+        <button
+          type="button"
+          className={`allie-toggle-button ${isEnabled ? 'active' : ''} ${status !== 'idle' ? `status-${status}` : ''}`}
+          onClick={handleToggle}
+          onKeyDown={handleKeyDown}
+          role="switch"
+          aria-checked={isEnabled}
+          aria-label={`Toggle prompt refinement, currently ${isEnabled ? 'On' : 'Off'}`}
+          data-allie="refine-toggle"
+          tabIndex={0}
+        >
+          <span className="allie-button-state-layer" />
+          <span className="allie-button-label">
+            <span className="allie-toggle-label">{currentLabel}</span>
+            <span className={`allie-switch-track ${isEnabled ? 'checked' : ''}`}>
+              <span className="allie-switch-knob" />
+            </span>
+          </span>
+          <span className="allie-focus-indicator" />
+          <span className="allie-touch-target" />
+        </button>
+      </ChatGPTTooltip>
+    </div>
+  );
+};

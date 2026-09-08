@@ -7,9 +7,6 @@ import './../src/components/injections/injections.css';
 
 export default defineContentScript({
   matches: [
-    'https://chatgpt.com/*',
-    'https://chat.openai.com/*',
-    'https://claude.ai/*',
     'https://chat.deepseek.com/*',
     'https://grok.com/*',
     'https://x.com/i/grok*',

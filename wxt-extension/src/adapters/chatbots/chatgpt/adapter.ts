@@ -1,5 +1,6 @@
 import { BaseChatbotAdapter } from '../base.adapter';
 import { CHATGPT_SELECTORS } from './selectors';
+import { CHATGPT_TOKENS } from './tokens';
 import { ChatGPTTurnScraper } from './turn-scraper';
 import { TextSanitizer } from '../../../core/harvest/extraction/text-sanitizer';
 import { VirtualMessageCache } from '../../../core/harvest/scroller/virtual-cache';
@@ -48,6 +49,10 @@ export class ChatGPTAdapter extends BaseChatbotAdapter implements IChatbotAdapte
 
   getSelectors(): typeof CHATGPT_SELECTORS {
     return CHATGPT_SELECTORS;
+  }
+
+  getStyleTokens(): Record<string, any> {
+    return CHATGPT_TOKENS;
   }
 
   getInputText(): string {

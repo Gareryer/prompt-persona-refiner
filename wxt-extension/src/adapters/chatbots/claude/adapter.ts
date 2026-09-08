@@ -1,5 +1,6 @@
 import { BaseChatbotAdapter } from '../base.adapter';
 import { CLAUDE_SELECTORS } from './selectors';
+import { CLAUDE_TOKENS } from './tokens';
 import { ClaudeTurnScraper, stripArtifactWidgetChrome } from './turn-scraper';
 import { TextSanitizer } from '../../../core/harvest/extraction/text-sanitizer';
 import {
@@ -43,6 +44,10 @@ export class ClaudeAdapter extends BaseChatbotAdapter implements IChatbotAdapter
 
   getSelectors(): typeof CLAUDE_SELECTORS {
     return CLAUDE_SELECTORS;
+  }
+
+  getStyleTokens(): Record<string, any> {
+    return CLAUDE_TOKENS;
   }
 
   getInputText(): string {
@@ -89,19 +94,30 @@ export class ClaudeAdapter extends BaseChatbotAdapter implements IChatbotAdapter
 
   /**
    * Claude user message bubble is narrow; walk up to wide parent row container.
-   * Stops before document body or main, and verifies positive offsetWidth.
+   * Uses ChatWait widening heuristic (parent width ratio >= 1.3, max depth 6)
+   * while stopping before document body or main.
    */
   resolveAnchor(element: HTMLElement): HTMLElement {
     let current: HTMLElement | null = element;
+    const initialWidth = element.offsetWidth || 1;
+    let depth = 0;
     while (
       current &&
       current.parentElement &&
       current.parentElement !== document.body &&
       current.parentElement.tagName !== 'MAIN' &&
-      current.offsetWidth > 0 &&
-      current.offsetWidth < 500
+      depth < 6
     ) {
-      current = current.parentElement;
+      const parentWidth = current.parentElement.offsetWidth || 0;
+      if (parentWidth > 0 && (parentWidth / initialWidth >= 1.3 || (current.offsetWidth > 0 && current.offsetWidth < 500))) {
+        current = current.parentElement;
+        if (parentWidth >= 500) {
+          return current;
+        }
+      } else {
+        current = current.parentElement;
+      }
+      depth++;
     }
     return current || element;
   }

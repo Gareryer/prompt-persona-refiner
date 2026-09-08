@@ -50,7 +50,7 @@ Clio is an open-source, privacy-first browser extension that extracts complete m
   - **OpenAI ChatGPT**: **100% COMPLETE & VERIFIED** (Production implementation with VirtualMessageCache, ancestor scroll-root detection, CodeMirror 6 line preservation, reasoning header extraction, and sidebar enumeration).
   - **Anthropic Claude**: **100% COMPLETE & VERIFIED** (Production implementation with 2-row CSS Grid isolation, in-place chronological tool call harvesting, artifact widget chrome stripping, Clio #37 / #39 / #43 resilience, and dual REST/DOM enumeration).
   - **DeepSeek, Grok, Meta**: **PENDING** (Architecture ready in Section 7.3).
-- **Verification**: **428/428 Vitest unit tests passing** across 25 test suites, zero TypeScript typecheck errors, and production bundle (`2.95 MB`) compiling cleanly in WXT.
+- **Verification**: **478/478 Vitest unit tests passing** across 27 test suites, zero TypeScript typecheck errors, and production bundle compiling cleanly in WXT with dedicated modular bundles for Gemini, ChatGPT, and Claude.
 
 ---
 
@@ -63,25 +63,49 @@ wxt-extension/
 ├── package.json                         [MODIFIED: Added jszip v3.10.1 & @types/jszip]
 ├── wxt.config.ts                        [MODIFIED: Added 'scripting' permission for MV3]
 │
+├── entrypoints/
+│    ├── gemini.content/                 [MODIFIED: Added onReanchor Angular swap detection]
+│    │    ├── index.tsx                  [Gemini modular entrypoint with 60fps tracking]
+│    │    ├── gemini.css                 [Host layout styles & scoped Shadow DOM rules]
+│    │    ├── theme/tokens.css           [Material 3 encapsulated CSS tokens]
+│    │    └── components/                [RefineToggle, SettingsButton, GeminiTooltip]
+│    │
+│    ├── chatgpt.content/                [NEW: Modular WXT content script for ChatGPT]
+│    │    ├── index.tsx                  [Dual-surface composer resolution & scroll tracking]
+│    │    ├── chatgpt.css                [Host layout styles & scoped Shadow DOM rules]
+│    │    ├── theme/tokens.css           [OpenAI Söhne & Emerald encapsulated tokens]
+│    │    └── components/                [RefineToggle, SettingsButton, ChatGPTTooltip]
+│    │
+│    ├── claude.content/                 [NEW: Modular WXT content script for Claude]
+│    │    ├── index.tsx                  [Tiptap capture-phase Enter & bubble widening]
+│    │    ├── claude.css                 [Host layout styles & scoped Shadow DOM rules]
+│    │    ├── theme/tokens.css           [Warm Ivory & Terracotta encapsulated tokens]
+│    │    └── components/                [RefineToggle, SettingsButton, ClaudeTooltip]
+│    │
+│    └── content.ts                      [MODIFIED: Scoped strictly to DeepSeek, Grok, Meta]
+│
 ├── src/
 │    ├── adapters/chatbots/
 │    │    ├── types.ts                   [MODIFIED: Added IHarvesterAdapter contract]
 │    │    ├── gemini/
 │    │    │    ├── selectors.ts          [MODIFIED: Added scroller, thoughts, spinners]
 │    │    │    ├── container-pairer.ts   [NEW: Paired container turn extraction]
+│    │    │    ├── tokens.ts             [Material 3 design tokens & CSS generator]
 │    │    │    └── adapter.ts            [MODIFIED: Implements IHarvesterAdapter]
 │    │    │
 │    │    ├── chatgpt/
 │    │    │    ├── selectors.ts          [NEW: ChatGPT scrollers, reasoning, CodeMirror]
 │    │    │    ├── turn-scraper.ts       [NEW: Virtualization merge & reasoning parser]
-│    │    │    ├── adapter.ts            [NEW: Ancestor scroller & sidebar enumeration]
+│    │    │    ├── tokens.ts             [NEW: OpenAI tokens & getAllieCssVariables]
+│    │    │    ├── adapter.ts            [MODIFIED: Added getStyleTokens()]
 │    │    │    └── index.ts              [NEW: Barrel export]
 │    │    │
 │    │    ├── claude/
 │    │    │    ├── selectors.ts          [NEW: Modern 2-row grid, tools, scroller]
 │    │    │    ├── turn-scraper.ts       [NEW: Grid scraper, Clio #37/#39/#43 protection]
-│    │    │    ├── adapter.ts            [NEW: Dual REST/DOM enumeration, submit guard]
-│    │    │    └── index.ts              [NEW: Barrel export]
+│    │    │    ├── tokens.ts             [NEW: Claude tokens & getAllieCssVariables]
+│    │    │    ├── adapter.ts            [MODIFIED: Enhanced resolveAnchor & getStyleTokens]
+│    │    │    └── index.ts              [MODIFIED: Barrel export]
 │    │    │
 │    │    ├── chatgpt.adapter.ts         [MODIFIED: Backward compatibility re-export]
 │    │    └── claude.adapter.ts          [MODIFIED: Backward compatibility re-export]
@@ -108,17 +132,20 @@ wxt-extension/
 │         │
 │         └── batch/
 │              ├── queue-manager.ts      [NEW: Work queue state machine & deduplication]
-│              └── tab-worker.ts         [NEW: Tab lifecycle, re-injection & batch loop]
+│              └── tab-worker.ts         [MODIFIED: Added PLATFORM_SCRIPT_BUNDLES routing]
 │
 └── tests/
      ├── fixtures/mock-dom.ts            [MODIFIED: DOM position, siblings, Shadow DOM]
      └── unit/
-          ├── gemini-harvester.test.ts   [NEW: 44 tests for Gemini container pairing]
-          ├── chatgpt-harvester.test.ts  [NEW: 33 tests for ChatGPT virtual cache & ancestor scrollers]
-          ├── claude-harvester.test.ts   [NEW: 43 tests for Claude 2-row grid & edge cases]
-          ├── media-and-zip.test.ts      [NEW: 46 tests for images, data URLs, JSZip]
-          ├── auto-scroller.test.ts      [NEW: 52 tests for scrollers & mutation loops]
-          └── harvest-db-and-batch.test.ts [NEW: 42 tests for IndexedDB & batch crawler]
+          ├── gemini-components.test.ts  [15 tests for Gemini injected components]
+          ├── chatgpt-components.test.ts [NEW: 17 tests for ChatGPT injected components]
+          ├── claude-components.test.ts  [NEW: 17 tests for Claude injected components]
+          ├── gemini-harvester.test.ts   [44 tests for Gemini container pairing]
+          ├── chatgpt-harvester.test.ts  [33 tests for ChatGPT virtual cache & ancestor scrollers]
+          ├── claude-harvester.test.ts   [43 tests for Claude 2-row grid & edge cases]
+          ├── media-and-zip.test.ts      [46 tests for images, data URLs, JSZip]
+          ├── auto-scroller.test.ts      [52 tests for scrollers & mutation loops]
+          └── harvest-db-and-batch.test.ts [MODIFIED: 42 tests including dedicated script targeting]
 ```
 
 ### 2.2 Untouched Core Areas (Clean Decoupling)
@@ -245,7 +272,13 @@ During the Gemini implementation, 11 critical real-world edge cases were discove
 8. **Windows NTFS Trailing Periods**: Stripped trailing periods and spaces in `sanitizeFilename()` to prevent Windows file creation errors.
 9. **Premature Promise Resolution in IndexedDB**: `dequeueNext` resolved before `tx.oncomplete`, risking reading uncommitted state. Fixed by binding resolution to transaction commit.
 10. **Worker Tab Closure Freeze**: `waitForTabComplete` only listened to `tabs.onUpdated`. Added listener for `tabs.onRemoved` to immediately abort if the tab is closed, preventing a 45-second stall.
-11. **Platform Script Targeting**: In Chrome MV3, WXT outputs `content-scripts/gemini.js` for Gemini and `content-scripts/content.js` for others. `tab-worker.ts` was updated to target the correct bundle dynamically upon `"Receiving end does not exist"`.
+11. **Platform Script Targeting & Dedicated Bundles**: WXT compiles dedicated modular content script bundles (`content-scripts/gemini.js`, `content-scripts/chatgpt.js`, `content-scripts/claude.js`) and a scoped fallback `content-scripts/content.js`. `tab-worker.ts` routes through `PLATFORM_SCRIPT_BUNDLES`, ensuring script re-injection always targets the native platform bundle with strict fallback to `content.js`, completely eliminating cross-domain script pollution (e.g. Gemini scripts executing on ChatGPT/Claude).
+12. **ChatWait & Clio DOM Hooking Insights**:
+    - **Dual-Surface Composers**: Probes both classic authenticated and modern/mobile `wm-app` composers.
+    - **Tiptap Capture-Phase Enter**: Intercepts Enter `keydown` during capture phase before Tiptap's internal handler fires.
+    - **Narrow Bubble Widening**: Uses `resolveAnchor` parent-walking algorithm with width ratio > 1.3 to escape 70% max-width user bubbles.
+    - **Nested `.row-start-1` Guard**: All response body scrapers enforce `!el.closest('.row-start-2')` preventing false-positive thinking block stripping (Clio PR #40).
+    - **Angular Swap Detection**: Watches for transient `<pending-request>` to permanent `<model-response>` swap ensuring injected UI survives long stream completions.
 
 ---
 

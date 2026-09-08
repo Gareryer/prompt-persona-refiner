@@ -1306,7 +1306,7 @@ describe('Phase 4: IndexedDB Persistence & Batch Queue Subsystem', () => {
       await expect(waitPromise).rejects.toThrow(/Tab 88 was closed before navigation completed/);
     });
 
-    it('sendExtractWithRecovery targets content-scripts/gemini.js for Gemini and content.js for Claude', async () => {
+    it('sendExtractWithRecovery targets dedicated script bundles for Gemini, ChatGPT, and Claude', async () => {
       const executeScriptMock = vi.fn().mockResolvedValue([]);
 
       (globalThis as any).chrome = {
@@ -1324,7 +1324,7 @@ describe('Phase 4: IndexedDB Persistence & Batch Queue Subsystem', () => {
         }
       };
 
-      // 1. Gemini target
+      // 1. Gemini target -> content-scripts/gemini.js
       await expect(
         sendExtractWithRecovery(50, { sleep: async () => {}, site: 'gemini' })
       ).rejects.toThrow();
@@ -1336,7 +1336,20 @@ describe('Phase 4: IndexedDB Persistence & Batch Queue Subsystem', () => {
         })
       );
 
-      // 2. Claude target
+      // 2. ChatGPT target -> content-scripts/chatgpt.js
+      executeScriptMock.mockClear();
+      await expect(
+        sendExtractWithRecovery(55, { sleep: async () => {}, site: 'chatgpt' })
+      ).rejects.toThrow();
+
+      expect(executeScriptMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: { tabId: 55 },
+          files: ['content-scripts/chatgpt.js']
+        })
+      );
+
+      // 3. Claude target -> content-scripts/claude.js
       executeScriptMock.mockClear();
       await expect(
         sendExtractWithRecovery(60, { sleep: async () => {}, site: 'claude' })
@@ -1345,6 +1358,19 @@ describe('Phase 4: IndexedDB Persistence & Batch Queue Subsystem', () => {
       expect(executeScriptMock).toHaveBeenCalledWith(
         expect.objectContaining({
           target: { tabId: 60 },
+          files: ['content-scripts/claude.js']
+        })
+      );
+
+      // 4. Secondary provider target -> content-scripts/content.js
+      executeScriptMock.mockClear();
+      await expect(
+        sendExtractWithRecovery(70, { sleep: async () => {}, site: 'deepseek' })
+      ).rejects.toThrow();
+
+      expect(executeScriptMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: { tabId: 70 },
           files: ['content-scripts/content.js']
         })
       );

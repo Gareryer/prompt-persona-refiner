@@ -9,4 +9,4 @@ export {
 } from './selectors';
 export { ClaudeTurnScraper, stripArtifactWidgetChrome, type ClaudeScraperOptions } from './turn-scraper';
 export { ClaudeAdapter } from './adapter';
-
+export { CLAUDE_TOKENS, getAllieCssVariables } from './tokens';

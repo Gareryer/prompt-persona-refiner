@@ -1,31 +1,33 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { GeminiAdapter } from '../../src/adapters/chatbots/gemini/adapter';
-import { GEMINI_SELECTORS, findElement } from '../../src/adapters/chatbots/gemini/selectors';
+import { ClaudeAdapter } from '../../src/adapters/chatbots/claude/adapter';
+import { CLAUDE_SELECTORS, findElement } from '../../src/adapters/chatbots/claude/selectors';
 import { contentObserver } from '../../src/content/observer';
 import { RefineToggle, SettingsButton } from './components';
 
 import tokensCss from './theme/tokens.css?inline';
-import geminiCss from './gemini.css?inline';
+import claudeCss from './claude.css?inline';
 import refineToggleCss from './components/RefineToggle.css?inline';
 import settingsButtonCss from './components/SettingsButton.css?inline';
-import geminiTooltipCss from './components/GeminiTooltip.css?inline';
+import claudeTooltipCss from './components/ClaudeTooltip.css?inline';
 
 export default defineContentScript({
-  matches: ['*://gemini.google.com/*'],
+  matches: ['https://claude.ai/*'],
   cssInjectionMode: 'ui',
   runAt: 'document_idle',
   async main(ctx) {
-    console.log('[Allie] Initializing Gemini Modular Platform Content Script');
+    console.log('[Allie] Initializing Claude Modular Platform Content Script');
 
-    // 1. Inject host layout fix: allow protrusion of external settings button
-    const hostStyleId = 'allie-gemini-host-styles';
+    // 1. Inject host layout style fix
+    const hostStyleId = 'allie-claude-host-styles';
     let hostStyleEl = document.getElementById(hostStyleId) as HTMLStyleElement | null;
     if (!hostStyleEl) {
       hostStyleEl = document.createElement('style');
       hostStyleEl.id = hostStyleId;
       hostStyleEl.textContent = `
-        .text-input-field {
+        fieldset:has(.ProseMirror),
+        div:has(> .ProseMirror),
+        div[contenteditable="true"] {
           overflow: visible !important;
           position: relative !important;
         }
@@ -33,14 +35,14 @@ export default defineContentScript({
       (document.head || document.documentElement).appendChild(hostStyleEl);
     }
 
-    // Initialize content script observer (listeners, theme, shortcuts)
+    // Initialize content script observer
     contentObserver.init();
 
-    const adapter = new GeminiAdapter();
+    const adapter = new ClaudeAdapter();
     let isRefineActive = true;
     let unregisterSubmit: (() => void) | null = null;
 
-    // Resilient element waiter supporting dynamic Angular SPA rendering
+    // Resilient element waiter supporting dynamic React SPA rendering
     function waitForElement<T extends Element = HTMLElement>(
       resolver: () => T | null,
       timeoutMs = 15000
@@ -70,11 +72,52 @@ export default defineContentScript({
       });
     }
 
-    // Dynamic theme synchronizer matching Gemini's document.body class & color scheme
+    // Resolves active Claude ProseMirror composer container
+    function getActiveComposerContainer(): HTMLElement | null {
+      const input = adapter.getActiveInput();
+      if (input && input.offsetParent !== null) {
+        const fieldset = input.closest('fieldset');
+        if (fieldset) return fieldset;
+        const container = input.closest('div[class*="relative"]') as HTMLElement;
+        if (container) return container;
+        return input.parentElement || input;
+      }
+
+      const proseMirror = document.querySelector<HTMLElement>('.ProseMirror');
+      if (proseMirror && proseMirror.offsetParent !== null) {
+        return proseMirror.closest('fieldset') || proseMirror.parentElement || proseMirror;
+      }
+
+      return null;
+    }
+
+    // Resolves trailing action buttons container in Claude composer
+    function getTrailingActionsContainer(): HTMLElement | null {
+      const submitBtn = adapter.getSubmitButton();
+      if (submitBtn && submitBtn.parentElement) {
+        return submitBtn.parentElement;
+      }
+
+      const inputContainer = getActiveComposerContainer();
+      if (inputContainer) {
+        const trailing = inputContainer.querySelector<HTMLElement>('div.flex.items-center.gap-2') ||
+                         inputContainer.querySelector<HTMLElement>('div.flex.items-center.justify-between') ||
+                         inputContainer.querySelector<HTMLElement>('div.flex.items-center');
+        if (trailing) return trailing;
+      }
+
+      return null;
+    }
+
+    // Dynamic theme synchronizer matching Claude's html[data-theme] or html.dark
     function syncThemeToHost(host: HTMLElement | null | undefined) {
       if (!host || typeof document === 'undefined') return;
-      let isLight = document.body.classList.contains('light-theme');
-      if (!isLight && !document.body.classList.contains('dark-theme')) {
+      const html = document.documentElement;
+      let isDark = html.classList.contains('dark') ||
+                   document.body.classList.contains('dark') ||
+                   html.getAttribute('data-theme') === 'dark';
+
+      if (!isDark && !html.classList.contains('light') && html.getAttribute('data-theme') !== 'light') {
         const bgColor = window.getComputedStyle(document.body).backgroundColor;
         const rgb = bgColor.match(/\d+/g);
         if (rgb && rgb[0] && rgb[1] && rgb[2]) {
@@ -82,15 +125,16 @@ export default defineContentScript({
           const g = parseInt(rgb[1], 10) || 0;
           const b = parseInt(rgb[2], 10) || 0;
           const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-          isLight = brightness >= 128;
+          isDark = brightness < 128;
         }
       }
-      if (isLight) {
-        host.classList.add('light-theme');
-        host.classList.remove('dark-theme');
-      } else {
+
+      if (isDark) {
         host.classList.add('dark-theme');
         host.classList.remove('light-theme');
+      } else {
+        host.classList.add('light-theme');
+        host.classList.remove('dark-theme');
       }
     }
 
@@ -119,24 +163,6 @@ export default defineContentScript({
       );
     }
 
-    // Resolves the currently active, visible composer input container in Gemini
-    function getActiveComposerContainer(): HTMLElement | null {
-      const inputField = document.querySelector<HTMLElement>('.text-input-field');
-      if (inputField && inputField.offsetParent !== null) {
-        return inputField;
-      }
-      const inputAreaV2 = document.querySelector<HTMLElement>('input-area-v2');
-      if (inputAreaV2 && inputAreaV2.offsetParent !== null) {
-        return inputAreaV2;
-      }
-      const inputContainer = document.querySelector<HTMLElement>('input-container');
-      if (inputContainer && inputContainer.offsetParent !== null) {
-        return inputContainer;
-      }
-      return findElement<HTMLElement>(GEMINI_SELECTORS.inputArea) ||
-             findElement<HTMLElement>(GEMINI_SELECTORS.textInputField)?.parentElement || null;
-    }
-
     // Position updater for fixed SettingsButton outside composer
     function updateSettingsPosition() {
       if (!settingsUi?.shadowHost || !settingsUi.shadowHost.isConnected) return;
@@ -146,7 +172,7 @@ export default defineContentScript({
       if (rect.width === 0 && rect.height === 0) return;
 
       const targetLeft = `${rect.right + 12}px`;
-      const targetTop = `${rect.top + rect.height / 2 - 20}px`;
+      const targetTop = `${rect.top + rect.height / 2 - 18}px`;
 
       settingsUi.shadowHost.style.setProperty('--allie-settings-left', targetLeft);
       settingsUi.shadowHost.style.setProperty('--allie-settings-top', targetTop);
@@ -160,7 +186,7 @@ export default defineContentScript({
     }
 
     let dynamicTrackingRaf: number | null = null;
-    function startDynamicTracking(durationMs = 2500) {
+    function startDynamicTracking(durationMs = 2000) {
       if (dynamicTrackingRaf) cancelAnimationFrame(dynamicTrackingRaf);
       const start = performance.now();
       function step(now: number) {
@@ -189,7 +215,7 @@ export default defineContentScript({
           onClick={() => {
             if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
               chrome.runtime.sendMessage({ type: 'TOGGLE_SIDEPANEL' }).catch((err) => {
-                console.warn('[Allie Gemini] Failed to toggle sidepanel:', err);
+                console.warn('[Allie Claude] Failed to toggle sidepanel:', err);
               });
             }
           }}
@@ -209,9 +235,8 @@ export default defineContentScript({
             return true;
           }
 
-          // Check URL-based session
           if (typeof window !== 'undefined' && window.location) {
-            const match = window.location.pathname.match(/\/app\/([a-zA-Z0-9_-]+)/);
+            const match = window.location.pathname.match(/\/chat\/([a-zA-Z0-9_-]+)/);
             if (match) {
               const sessionKey = `session_${match[1]}`;
               const sessionRes = await chrome.storage.local.get(sessionKey);
@@ -223,7 +248,6 @@ export default defineContentScript({
           }
         }
 
-        // Messaging fallback if available
         if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
           const res: any = await new Promise((resolve) => {
             try {
@@ -240,7 +264,7 @@ export default defineContentScript({
           }
         }
       } catch (err) {
-        console.debug('[Allie Gemini] Error checking active persona:', err);
+        console.debug('[Allie Claude] Error checking active persona:', err);
       }
       return false;
     }
@@ -288,42 +312,36 @@ export default defineContentScript({
       if (settingsUi?.shadowHost) syncThemeToHost(settingsUi.shadowHost);
     }
 
-    // Observe theme alterations on document.body
+    // Observe theme alterations on documentElement & body
     const themeObserver = new MutationObserver(() => {
       syncAllHosts();
     });
 
-    if (document.body) {
-      themeObserver.observe(document.body, {
-        attributes: true,
-        attributeFilter: ['class']
-      });
-    }
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme', 'style']
+    });
 
     function setupSubmitInterception() {
       unregisterSubmit?.();
-      unregisterSubmit = adapter.interceptSubmit(async (rawPrompt: string) => {
-        // Trigger smooth 60fps tracking as Angular moves composer to the bottom
-        startDynamicTracking(2500);
+      unregisterSubmit = adapter.interceptSubmit(async (_rawPrompt: string) => {
+        startDynamicTracking(2000);
 
         if (!isRefineActive) {
-          // Refine toggle disabled: bypass Allie and proceed with native submit
           return true;
         }
 
         try {
           const res = await contentObserver.executeRefinement();
           if (res.success && res.refinedPrompt) {
-            // Refinement succeeded and prompt updated: proceed with native submit
-            startDynamicTracking(2500);
+            startDynamicTracking(2000);
             return true;
           }
         } catch (err) {
-          console.warn('[Allie Gemini] Prompt refinement error during submit:', err);
+          console.warn('[Allie Claude] Prompt refinement error during submit:', err);
         }
 
-        // On refinement failure or fallback, allow native send to prevent blocking the user
-        startDynamicTracking(2500);
+        startDynamicTracking(2000);
         return true;
       });
     }
@@ -334,11 +352,11 @@ export default defineContentScript({
 
       try {
         const trailingAnchor = await waitForElement(
-          () => findElement<HTMLElement>(GEMINI_SELECTORS.trailingActions),
+          () => getTrailingActionsContainer(),
           15000
         );
         const inputAreaAnchor = await waitForElement(
-          () => findElement<HTMLElement>(GEMINI_SELECTORS.inputArea) || findElement<HTMLElement>(GEMINI_SELECTORS.textInputField),
+          () => getActiveComposerContainer(),
           15000
         );
 
@@ -350,23 +368,18 @@ export default defineContentScript({
           }
 
           toggleUi = await createShadowRootUi(ctx, {
-            name: 'allie-refine-toggle',
+            name: 'allie-claude-refine-toggle',
             position: 'inline',
             anchor: trailingAnchor,
             append: (anchor, ui) => {
-              const buttonsWrapper = anchor.querySelector('.input-buttons-wrapper-bottom');
-              if (buttonsWrapper) {
-                anchor.insertBefore(ui, buttonsWrapper);
+              const submitBtn = adapter.getSubmitButton();
+              if (submitBtn && submitBtn.parentElement === anchor) {
+                anchor.insertBefore(ui, submitBtn);
               } else {
-                const modeSwitcher = anchor.querySelector('bard-mode-switcher, .model-picker-container');
-                if (modeSwitcher && modeSwitcher.nextSibling) {
-                  anchor.insertBefore(ui, modeSwitcher.nextSibling);
-                } else {
-                  anchor.appendChild(ui);
-                }
+                anchor.appendChild(ui);
               }
             },
-            css: [tokensCss, geminiCss, refineToggleCss, geminiTooltipCss].join('\n'),
+            css: [tokensCss, claudeCss, refineToggleCss, claudeTooltipCss].join('\n'),
             onMount(container, _shadow, shadowHost) {
               shadowHost.classList.add('allie-toggle-host');
               shadowHost.style.display = 'inline-flex';
@@ -401,11 +414,11 @@ export default defineContentScript({
           resizeObserver.observe(inputAreaAnchor);
 
           settingsUi = await createShadowRootUi(ctx, {
-            name: 'allie-settings-button',
+            name: 'allie-claude-settings-button',
             position: 'inline',
             anchor: 'body',
             append: 'last',
-            css: [tokensCss, geminiCss, settingsButtonCss, geminiTooltipCss].join('\n'),
+            css: [tokensCss, claudeCss, settingsButtonCss, claudeTooltipCss].join('\n'),
             onMount(container, _shadow, shadowHost) {
               shadowHost.classList.add('allie-settings-host');
               shadowHost.classList.toggle('allie-hidden', !isRefineActive);
@@ -430,10 +443,9 @@ export default defineContentScript({
           updateSettingsPosition();
         }
 
-        // Intercept enter key / send button
         setupSubmitInterception();
       } catch (err) {
-        console.warn('[Allie Gemini] Error mounting Shadow DOM UIs:', err);
+        console.warn('[Allie Claude] Error mounting Shadow DOM UIs:', err);
       } finally {
         isMounting = false;
       }
@@ -442,40 +454,9 @@ export default defineContentScript({
     // Initial mount
     await mountInjections();
 
-    // Observe SPA navigation, Angular Web Component swap (<pending-request> -> <model-response>), and DOM re-anchoring
+    // Observe SPA navigation and DOM re-anchoring
     let debouncedMountTimer: any = null;
-    const domObserver = new MutationObserver((mutations) => {
-      // Re-verify host layout style is connected in case Angular cleared document.head
-      if (hostStyleEl && !hostStyleEl.isConnected) {
-        (document.head || document.documentElement).appendChild(hostStyleEl);
-      }
-
-      // ChatWait insight: Detect Angular Web Component swap from pending-request to permanent model-response
-      let hasAngularSwap = false;
-      for (const mutation of mutations) {
-        if (mutation.addedNodes.length > 0) {
-          for (let i = 0; i < mutation.addedNodes.length; i++) {
-            const node = mutation.addedNodes[i];
-            if (node && node.nodeType === Node.ELEMENT_NODE) {
-              const el = node as HTMLElement;
-              if (
-                el.tagName === 'MODEL-RESPONSE' ||
-                el.classList?.contains('model-response') ||
-                el.querySelector?.('model-response')
-              ) {
-                hasAngularSwap = true;
-                break;
-              }
-            }
-          }
-        }
-        if (hasAngularSwap) break;
-      }
-
-      if (hasAngularSwap) {
-        startDynamicTracking(1500);
-      }
-
+    const domObserver = new MutationObserver(() => {
       if (
         (!toggleUi || !toggleUi.shadowHost.isConnected) ||
         (!settingsUi || !settingsUi.shadowHost.isConnected)
@@ -485,7 +466,6 @@ export default defineContentScript({
           mountInjections();
         }, 200);
       } else {
-        // Continuous tracking for internal DOM alterations & Angular view changes
         updateSettingsPosition();
       }
     });
@@ -494,7 +474,6 @@ export default defineContentScript({
       domObserver.observe(document.body, { childList: true, subtree: true });
     }
 
-    // Periodic watchdog interval ensuring alignment never drifts
     const positionWatchdogInterval = setInterval(() => {
       updateSettingsPosition();
     }, 400);
