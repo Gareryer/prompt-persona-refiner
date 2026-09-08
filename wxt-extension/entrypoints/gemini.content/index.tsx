@@ -3,12 +3,13 @@ import ReactDOM from 'react-dom/client';
 import { GeminiAdapter } from '../../src/adapters/chatbots/gemini/adapter';
 import { GEMINI_SELECTORS, findElement } from '../../src/adapters/chatbots/gemini/selectors';
 import { contentObserver } from '../../src/content/observer';
-import { RefineToggle, SettingsButton } from './components';
+import { RefineToggle, SettingsButton, ScraperToolbar } from './components';
 
 import tokensCss from './theme/tokens.css?inline';
 import geminiCss from './gemini.css?inline';
 import refineToggleCss from './components/RefineToggle.css?inline';
 import settingsButtonCss from './components/SettingsButton.css?inline';
+import scraperToolbarCss from './components/ScraperToolbar.css?inline';
 import geminiTooltipCss from './components/GeminiTooltip.css?inline';
 
 export default defineContentScript({
@@ -184,12 +185,34 @@ export default defineContentScript({
     function renderSettingsButton() {
       if (!settingsRoot) return;
       settingsRoot.render(
-        <SettingsButton
+        <ScraperToolbar
           hasActivePersona={hasActivePersona}
-          onClick={() => {
+          onSettingsClick={() => {
             if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
               chrome.runtime.sendMessage({ type: 'TOGGLE_SIDEPANEL' }).catch((err) => {
                 console.warn('[Allie Gemini] Failed to toggle sidepanel:', err);
+              });
+            }
+          }}
+          onExportClick={async () => {
+            if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+              await new Promise<void>((resolve, reject) => {
+                chrome.runtime.sendMessage({ type: 'HARVEST_EXPORT_ACTIVE_TAB' }, (res) => {
+                  if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+                  else if (res?.error) reject(new Error(res.error));
+                  else resolve();
+                });
+              });
+            }
+          }}
+          onSyncClick={async () => {
+            if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+              await new Promise<void>((resolve, reject) => {
+                chrome.runtime.sendMessage({ type: 'HARVEST_SYNC_ACTIVE_TAB' }, (res) => {
+                  if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+                  else if (res?.error) reject(new Error(res.error));
+                  else resolve();
+                });
               });
             }
           }}
@@ -405,7 +428,7 @@ export default defineContentScript({
             position: 'inline',
             anchor: 'body',
             append: 'last',
-            css: [tokensCss, geminiCss, settingsButtonCss, geminiTooltipCss].join('\n'),
+            css: [tokensCss, geminiCss, settingsButtonCss, scraperToolbarCss, geminiTooltipCss].join('\n'),
             onMount(container, _shadow, shadowHost) {
               shadowHost.classList.add('allie-settings-host');
               shadowHost.classList.toggle('allie-hidden', !isRefineActive);

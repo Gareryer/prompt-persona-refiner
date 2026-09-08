@@ -432,7 +432,7 @@ export class MediaExtractor {
           continue;
         }
 
-        const result = await this.fetchImage(task.attachment.originalSrc, task.turnIndex, task.imageIndex, {
+        const result = await this.fetchImage(task.attachment.originalSrc || '', task.turnIndex, task.imageIndex, {
           signal,
           credentials
         });

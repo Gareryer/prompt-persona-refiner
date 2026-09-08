@@ -19,6 +19,7 @@ import {
 import { handleRefinement, callLLMForExtraction } from '../src/core/orchestration/api-proxy';
 import { activeRefinements, activeExtractions } from '../src/core/orchestration/session-state';
 import { decryptApiKey, isEncrypted } from '../src/core/crypto/crypto-service';
+import { HarvestOrchestrator } from '../src/core/harvest/orchestrator';
 
 export default defineBackground(() => {
   bgLog('info', 'Background service worker starting (WXT Modular Engine)...');
@@ -321,6 +322,43 @@ export default defineBackground(() => {
       }).catch(err => {
         sendResponse({ success: false, error: err.message, disabledFacts: {} });
       });
+      return true;
+    }
+
+    // HARVEST_EXPORT_ACTIVE_TAB
+    if (message.type === 'HARVEST_EXPORT_ACTIVE_TAB') {
+      (async () => {
+        try {
+          const orchestrator = new HarvestOrchestrator();
+          const targetTabId = message.tabId || sender.tab?.id;
+          const result = await orchestrator.extractActiveTab({
+            tabId: targetTabId,
+            download: true,
+            saveAs: false
+          });
+          sendResponse(result);
+        } catch (err: any) {
+          sendResponse({ success: false, error: err?.message || String(err) });
+        }
+      })();
+      return true;
+    }
+
+    // HARVEST_SYNC_ACTIVE_TAB
+    if (message.type === 'HARVEST_SYNC_ACTIVE_TAB') {
+      (async () => {
+        try {
+          const orchestrator = new HarvestOrchestrator();
+          const targetTabId = message.tabId || sender.tab?.id;
+          const result = await orchestrator.extractActiveTab({
+            tabId: targetTabId,
+            download: false
+          });
+          sendResponse(result);
+        } catch (err: any) {
+          sendResponse({ success: false, error: err?.message || String(err) });
+        }
+      })();
       return true;
     }
 

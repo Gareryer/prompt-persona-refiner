@@ -265,7 +265,9 @@ export class ChatGPTTurnScraper {
         seenSrc.add(src);
         attachments.push({
           type: 'image',
+          kind: 'image',
           originalSrc: src,
+          url: src,
           turnIndex
         });
       }
@@ -301,7 +303,7 @@ export class ChatGPTTurnScraper {
         files.push({
           type: 'file',
           name,
-          kind: lines[1] || null,
+          kind: lines[1] || 'file',
           downloadable: false,
           turnIndex
         });
@@ -315,18 +317,42 @@ export class ChatGPTTurnScraper {
 
     for (const control of downloadControls) {
       const label = (control.getAttribute('aria-label') || control.textContent || '').trim();
-      if (!/^download\b/i.test(label)) continue;
-      if (/^download\s+(apps?|the\s+app)$/i.test(label)) continue;
-      if (seenDownloads.has(label)) continue;
+      const downloadAttr = control.getAttribute('download');
+      const href = control.getAttribute('href');
 
-      seenDownloads.add(label);
+      if (!downloadAttr && !/^download\b/i.test(label)) continue;
+      if (/^download\s+(apps?|the\s+app)$/i.test(label)) continue;
+
       const rest = label.replace(/^download\s+/i, '').trim();
       const looksLikeFilename = /^[^\s]+\.[A-Za-z0-9]{1,10}$/.test(rest);
+      const name = (downloadAttr && downloadAttr !== 'true') ? downloadAttr : (looksLikeFilename ? rest : null);
+      const dedupKey = name || label;
+      if (seenDownloads.has(dedupKey)) continue;
+      seenDownloads.add(dedupKey);
+
+      // Check parent card for secondary descriptor line
+      let kind: string | null = null;
+      let card: HTMLElement | null = control.parentElement;
+      while (card && card !== element && !card.hasAttribute?.('data-message-author-role')) {
+        const isCard =
+          (card.className && /file|surface|attachment|card|rounded/i.test(card.className));
+        if (isCard) {
+          const lines = this.elementTextLines(card);
+          if (lines.length >= 2 && lines[1] && !lines[1].toLowerCase().includes('download')) {
+            kind = lines[1];
+          }
+          break;
+        }
+        card = card.parentElement;
+      }
+
       files.push({
-        type: 'artifact',
-        name: looksLikeFilename ? rest : null,
-        label,
+        type: 'file',
+        name,
+        label: kind || label,
+        kind: kind || 'file',
         downloadable: true,
+        url: href || undefined,
         turnIndex
       });
     }
@@ -341,8 +367,12 @@ export class ChatGPTTurnScraper {
     if (el && typeof el.innerText === 'string' && el.innerText.trim()) {
       return el.innerText.split('\n').map(s => s.trim()).filter(Boolean);
     }
+    const isLeaf = (e: Element) => {
+      const childElements = Array.from(e.children || []).filter(c => (c as any).nodeType === 1);
+      return childElements.length === 0 && (e.textContent || '').trim().length > 0;
+    };
     const leaves = Array.from(el.querySelectorAll?.('*') || [])
-      .filter(e => e.children.length === 0 && (e.textContent || '').trim())
+      .filter(isLeaf)
       .map(e => e.textContent!.trim());
     if (leaves.length) return leaves;
     const text = (el.textContent || '').trim();

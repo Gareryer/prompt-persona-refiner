@@ -463,7 +463,7 @@ describe('Phase 5: Claude Harvester Adapter & 2-Row CSS Grid Scraper', () => {
       const text = TextSanitizer.extractTextContent(turnNode);
       expect(text).toContain('Here is your artifact:');
       expect(text).toContain('Code Snippet');
-      expect(text).toContain('```js');
+      expect(text).toMatch(/```(?:js|javascript)/);
       expect(text).toContain('console.log("hello");');
       expect(text).not.toContain('Copy response');
       expect(text).not.toContain('Send via Gmail');

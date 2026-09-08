@@ -3,6 +3,26 @@
  * Ports Clio's HTML sanitization, code-fence preservation, and filename sanitization.
  */
 
+export const CODE_HEADER_NOISE = new Set([
+  'copy', 'copied', 'edit', 'run', 'share', 'download', 'expand', 'collapse',
+  'wrap', 'unwrap', 'preview', 'code', 'copy code', 'ask chatgpt', 'always show details'
+]);
+
+export const LANGUAGE_ALIASES: Record<string, string> = {
+  py: 'python', python3: 'python',
+  js: 'javascript', node: 'javascript', mjs: 'javascript', cjs: 'javascript',
+  ts: 'typescript',
+  sh: 'bash', shell: 'bash', zsh: 'bash', console: 'bash',
+  ps: 'powershell', ps1: 'powershell', pwsh: 'powershell',
+  yml: 'yaml', md: 'markdown', rb: 'ruby', 'c++': 'cpp', 'c#': 'csharp'
+};
+
+export const SHEBANG_LANGUAGES: Record<string, string> = {
+  python: 'python', bash: 'bash', sh: 'bash', zsh: 'bash', dash: 'bash',
+  node: 'javascript', deno: 'javascript', ruby: 'ruby', perl: 'perl',
+  pwsh: 'powershell'
+};
+
 export class TextSanitizer {
   /**
    * Sanitizes an HTML element into clean text/markdown.
@@ -49,12 +69,11 @@ export class TextSanitizer {
           const indent = match ? match[0].length : 0;
           if (indent < minIndent) minIndent = indent;
         }
-        if (minIndent === Infinity) minIndent = 0;
 
         return lines
-          .map(line => {
-            if (!line.trim()) return '';
-            return line.slice(minIndent).trimEnd();
+          .map(l => {
+            if (l.trim().length === 0) return '';
+            return minIndent !== Infinity && minIndent > 0 ? l.slice(minIndent).trimEnd() : l.trimEnd();
           })
           .join('\n');
       })
@@ -111,36 +130,16 @@ export class TextSanitizer {
     }
   }
 
-export const CODE_HEADER_NOISE = new Set([
-  'copy', 'copied', 'edit', 'run', 'share', 'download', 'expand', 'collapse',
-  'wrap', 'unwrap', 'preview', 'code', 'copy code', 'ask chatgpt', 'always show details'
-]);
-
-export const LANGUAGE_ALIASES: Record<string, string> = {
-  py: 'python', python3: 'python',
-  js: 'javascript', node: 'javascript', mjs: 'javascript', cjs: 'javascript',
-  ts: 'typescript',
-  sh: 'bash', shell: 'bash', zsh: 'bash', console: 'bash',
-  ps: 'powershell', ps1: 'powershell', pwsh: 'powershell',
-  yml: 'yaml', md: 'markdown', rb: 'ruby', 'c++': 'cpp', 'c#': 'csharp'
-};
-
-export const SHEBANG_LANGUAGES: Record<string, string> = {
-  python: 'python', bash: 'bash', sh: 'bash', zsh: 'bash', dash: 'bash',
-  node: 'javascript', deno: 'javascript', ruby: 'ruby', perl: 'perl',
-  pwsh: 'powershell'
-};
-
   /**
    * The OUTERMOST <pre> around an element.
    * Ascends above nested CodeMirror pre.cm-content to outer pre.overflow-visible (Clio #263).
    */
-  static outermostPre(el: Element | null | undefined): Element | null {
+  static outermostPre(el: Element | null | undefined): HTMLElement | null {
     if (!el || typeof (el as any).closest !== 'function') return null;
-    let outer = el.closest('pre');
+    let outer: HTMLElement | null = el.closest('pre');
     if (!outer) return null;
-    while (outer.parentElement) {
-      const above = outer.parentElement.closest('pre');
+    while (outer && outer.parentElement) {
+      const above: HTMLElement | null = outer.parentElement.closest('pre');
       if (!above) break;
       outer = above;
     }
@@ -180,7 +179,7 @@ export const SHEBANG_LANGUAGES: Record<string, string> = {
       .split(/[\s\n\r\t]+/)
       .map(t => t.trim().toLowerCase())
       .filter(t => t && !CODE_HEADER_NOISE.has(t));
-    return tokens.length === 1 ? this.normaliseLanguage(tokens[0]) : '';
+    return tokens.length === 1 && tokens[0] ? this.normaliseLanguage(tokens[0]) : '';
   }
 
   /**
@@ -190,18 +189,19 @@ export const SHEBANG_LANGUAGES: Record<string, string> = {
   static sniffCodeLanguage(text: string): string {
     const body = String(text || '');
     const lines = body.split('\n').map(l => l.trim()).filter(Boolean);
-    if (!lines.length) return '';
+    if (!lines.length || !lines[0]) return '';
     const first = lines[0];
 
     // Shebang
     const shebang = first.match(/^#!\s*(?:\S*\/env\s+)?(\S+)/);
-    if (shebang) {
+    if (shebang && shebang[1]) {
       const interp = shebang[1].split(/[\\/]/).pop()?.replace(/[0-9.]+$/, '').toLowerCase() || '';
       if (SHEBANG_LANGUAGES[interp]) return SHEBANG_LANGUAGES[interp];
     }
 
     // JSON parsing check
-    if (/^[{[]/.test(first) && /[}\]]$/.test(lines[lines.length - 1])) {
+    const last = lines[lines.length - 1];
+    if (/^[{[]/.test(first) && last && /[}\]]$/.test(last)) {
       try {
         JSON.parse(body);
         return 'json';
@@ -253,7 +253,7 @@ export const SHEBANG_LANGUAGES: Record<string, string> = {
       // Avoid processing nested blocks that have already been detached/replaced
       if (!block.parentNode || (typeof root.contains === 'function' && !root.contains(block))) continue;
 
-      const scope = this.outermostPre(block) || block;
+      const scope = this.outermostPre(block) || (block as HTMLElement);
       if (!scope.parentNode || (typeof root.contains === 'function' && !root.contains(scope))) continue;
 
       const codeEl = scope.querySelector('code, .cm-content') || block.querySelector('code, .cm-content') || block;
@@ -292,8 +292,14 @@ export const SHEBANG_LANGUAGES: Record<string, string> = {
     const scope = this.outermostPre(codeEl) || this.outermostPre(block) || block;
 
     const fromClass = (el: Element | null | undefined): string => {
-      if (!el || !el.classList) return '';
-      for (const cls of Array.from(el.classList)) {
+      if (!el) return '';
+      const rawClass =
+        (typeof (el as HTMLElement).className === 'string' ? (el as HTMLElement).className : '') ||
+        (typeof el.getAttribute === 'function' ? el.getAttribute('class') || '' : '');
+      const tokens = rawClass
+        ? rawClass.split(/\s+/).filter(Boolean)
+        : (el.classList && typeof (el.classList as any)[Symbol.iterator] === 'function' ? Array.from(el.classList) : []);
+      for (const cls of tokens) {
         const m = cls.match(/^(?:language|lang|highlight)[-_](.+)$/i);
         if (m && m[1]) return m[1];
       }
@@ -319,7 +325,14 @@ export const SHEBANG_LANGUAGES: Record<string, string> = {
       attr(codeEl, 'data-lang') ||
       attr(block, 'data-lang') ||
       attr(scope, 'data-lang') ||
+      firstText(codeEl, '[data-language]') ||
+      firstText(block, '[data-language]') ||
       firstText(scope, '[data-language]') ||
+      firstText(codeEl, '.code-language') ||
+      firstText(block, '.code-language') ||
+      firstText(scope, '.code-language') ||
+      firstText(codeEl, '.language-label') ||
+      firstText(block, '.language-label') ||
       firstText(scope, '.language-label') ||
       this.headerLabel(scope) ||
       '';

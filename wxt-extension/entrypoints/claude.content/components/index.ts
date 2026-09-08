@@ -6,3 +6,6 @@ export type { SettingsButtonProps } from './SettingsButton';
 
 export { ClaudeTooltip } from './ClaudeTooltip';
 export type { ClaudeTooltipProps } from './ClaudeTooltip';
+
+export { ScraperToolbar } from './ScraperToolbar';
+export type { ScraperToolbarProps } from './ScraperToolbar';

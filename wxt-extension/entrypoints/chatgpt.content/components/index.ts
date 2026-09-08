@@ -6,3 +6,6 @@ export type { SettingsButtonProps } from './SettingsButton';
 
 export { ChatGPTTooltip } from './ChatGPTTooltip';
 export type { ChatGPTTooltipProps } from './ChatGPTTooltip';
+
+export { ScraperToolbar } from './ScraperToolbar';
+export type { ScraperToolbarProps } from './ScraperToolbar';

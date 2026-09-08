@@ -24,6 +24,10 @@ import type { HarvestTurn, DiscoveredConversation } from '../../../core/harvest/
  */
 export class ClaudeAdapter extends BaseChatbotAdapter implements IChatbotAdapter, IHarvesterAdapter {
   readonly platform = 'claude' as const;
+  readonly ordersFromCapture = false;
+  readonly citationDecoration = null;
+  readonly uploadedFileCard = null;
+  readonly downloadAffordance = null;
 
   /**
    * Guard flag to prevent infinite refinement loops during programmatic submission.

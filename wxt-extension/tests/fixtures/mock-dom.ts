@@ -15,7 +15,7 @@ export class MockNode {
   static readonly DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32;
 
   get parentElement(): MockElement | null {
-    return this.parentNode instanceof MockElement ? this.parentNode : null;
+    return this.parentNode && (this.parentNode as any).nodeType === 1 ? (this.parentNode as MockElement) : null;
   }
 
   get nextSibling(): MockNode | null {
@@ -142,6 +142,24 @@ export class MockElement extends MockNode {
   clientHeight = 0;
   scrollWidth = 0;
   clientWidth = 0;
+  offsetTop = 0;
+  offsetLeft = 0;
+  offsetWidth = 0;
+  offsetHeight = 0;
+
+  getBoundingClientRect() {
+    return {
+      top: this.offsetTop,
+      left: this.offsetLeft,
+      right: this.offsetLeft + (this.offsetWidth || 100),
+      bottom: this.offsetTop + (this.offsetHeight || 50),
+      width: this.offsetWidth || 100,
+      height: this.offsetHeight || 50,
+      x: this.offsetLeft,
+      y: this.offsetTop,
+      toJSON: () => {}
+    };
+  }
   style: Record<string, any> = {};
   shadowRoot: MockShadowRoot | null = null;
   private _textContent?: string;
@@ -149,20 +167,30 @@ export class MockElement extends MockNode {
   children: (MockElement | MockTextNode)[] = [];
   listeners: Record<string, { handler: Function; capture: boolean }[]> = {};
 
-  classList = {
-    contains: (cls: string) => this.className.split(/\s+/).includes(cls),
-    add: (cls: string) => {
-      if (!this.classList.contains(cls)) {
-        this.className = `${this.className} ${cls}`.trim();
+  get classList() {
+    const el = this;
+    return {
+      contains: (cls: string) => el.className.split(/\s+/).includes(cls),
+      add: (cls: string) => {
+        if (!el.className.split(/\s+/).includes(cls)) {
+          el.className = `${el.className} ${cls}`.trim();
+        }
+      },
+      remove: (cls: string) => {
+        el.className = el.className
+          .split(/\s+/)
+          .filter(c => c !== cls)
+          .join(' ');
+      },
+      [Symbol.iterator]: () => {
+        const tokens = el.className ? el.className.split(/\s+/).filter(Boolean) : [];
+        return tokens[Symbol.iterator]();
+      },
+      get length(): number {
+        return el.className ? el.className.split(/\s+/).filter(Boolean).length : 0;
       }
-    },
-    remove: (cls: string) => {
-      this.className = this.className
-        .split(/\s+/)
-        .filter(c => c !== cls)
-        .join(' ');
-    }
-  };
+    };
+  }
 
   constructor(tagName: string, ownerDocument?: any) {
     super();

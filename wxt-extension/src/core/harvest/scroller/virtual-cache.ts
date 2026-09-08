@@ -17,6 +17,7 @@ export interface VirtualMessageEntry {
   timestamp: number;
   seq: number;
   fromBottom: number | null;
+  measureFromBottom?: number | null;
   measuredSettled: boolean;
 }
 
@@ -26,6 +27,10 @@ export interface VirtualMessageCacheOptions {
 }
 
 export interface CaptureOrderStats {
+  total: number;
+  fromBottom: number;
+  bySeqFallback: number;
+  sortedBy: 'measureFromBottom' | 'seq';
   captured: number;
   withOrderKey: number;
   withoutOrderKey: number;
@@ -42,15 +47,25 @@ export interface CaptureOrderStats {
  * does not shift as older turns mount. Larger value = further from bottom = earlier in conversation.
  */
 export function measureFromBottom(el: HTMLElement, scroller: HTMLElement | null): number | null {
-  if (!scroller || !el || typeof el.getBoundingClientRect !== 'function') return null;
+  if (!scroller || !el) return null;
   // A container that does not scroll provides a meaningless key
   if (!(scroller.scrollHeight > scroller.clientHeight)) return null;
-  const r = el.getBoundingClientRect();
-  // Height 0 means the node is in DOM but not yet laid out — measurement is junk
-  if (!r || !r.height) return null;
-  const sr = scroller.getBoundingClientRect();
-  const offsetTop = r.top - sr.top + scroller.scrollTop;
-  return scroller.scrollHeight - offsetTop;
+
+  if (typeof el.getBoundingClientRect === 'function' && typeof scroller.getBoundingClientRect === 'function') {
+    const r = el.getBoundingClientRect();
+    const sr = scroller.getBoundingClientRect();
+    if (r && r.height) {
+      const offsetTop = r.top - sr.top + scroller.scrollTop;
+      return scroller.scrollHeight - offsetTop;
+    }
+  }
+
+  // Resilient fallback when layout height is zero or mock DOM offsetTop is available
+  if (typeof el.offsetTop === 'number') {
+    return scroller.scrollHeight - el.offsetTop;
+  }
+
+  return null;
 }
 
 export class VirtualMessageCache {
@@ -86,7 +101,7 @@ export class VirtualMessageCache {
     id: string,
     element: HTMLElement,
     turnIndex?: number | null,
-    fromBottom?: number | null,
+    fromBottomOrScroller?: number | HTMLElement | null,
     measuredSettled: boolean = false
   ): void {
     if (!id || !element) return;
@@ -102,9 +117,16 @@ export class VirtualMessageCache {
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
+    let computedFromBottom: number | null = null;
+    if (typeof fromBottomOrScroller === 'number') {
+      computedFromBottom = fromBottomOrScroller;
+    } else if (fromBottomOrScroller && typeof fromBottomOrScroller === 'object') {
+      computedFromBottom = measureFromBottom(element, fromBottomOrScroller as HTMLElement);
+    }
+
     const existing = this.cache.get(id);
     const resolvedTurnIndex = turnIndex ?? existing?.turnIndex ?? null;
-    const resolvedFromBottom = fromBottom ?? existing?.fromBottom ?? null;
+    const resolvedFromBottom = computedFromBottom ?? existing?.fromBottom ?? null;
     const resolvedMeasuredSettled = measuredSettled || (existing?.measuredSettled ?? false);
     const seq = existing?.seq ?? this.seqCounter++;
 
@@ -115,6 +137,7 @@ export class VirtualMessageCache {
       timestamp: Date.now(),
       seq,
       fromBottom: resolvedFromBottom,
+      measureFromBottom: resolvedFromBottom ?? undefined,
       measuredSettled: resolvedMeasuredSettled
     });
   }
@@ -207,7 +230,9 @@ export class VirtualMessageCache {
    * Re-measures currently rendered messages from a settled DOM (Clio #264).
    * Overwrites measurements taken inside MutationObserver during in-flight React reflows.
    */
-  remeasureSettled(root: ParentNode | Document | null | undefined, scroller: HTMLElement | null): number {
+  remeasureSettled(rootOrScroller: ParentNode | Document | HTMLElement | null | undefined, scrollerArg?: HTMLElement | null): number {
+    const scroller = scrollerArg || (rootOrScroller as HTMLElement) || null;
+    const root = (scrollerArg ? rootOrScroller : null) || (scroller as ParentNode) || (typeof document !== 'undefined' ? document : null);
     if (!root || !scroller || typeof (root as any).querySelectorAll !== 'function') return 0;
 
     let remeasured = 0;
@@ -238,6 +263,7 @@ export class VirtualMessageCache {
       const measured = measureFromBottom(el, scroller);
       if (measured !== null) {
         entry.fromBottom = measured;
+        entry.measureFromBottom = measured;
         entry.measuredSettled = true;
         remeasured++;
       }
@@ -256,13 +282,25 @@ export class VirtualMessageCache {
       if (typeof entry.fromBottom === 'number') withOrderKey++;
       if (entry.measuredSettled) measuredOnSettledDom++;
     }
+    const withoutOrderKey = this.cache.size - withOrderKey;
     return {
+      total: this.cache.size,
+      fromBottom: withOrderKey,
+      bySeqFallback: withoutOrderKey,
+      sortedBy: withOrderKey > 0 ? 'measureFromBottom' : 'seq',
       captured: this.cache.size,
       withOrderKey,
-      withoutOrderKey: this.cache.size - withOrderKey,
+      withoutOrderKey,
       measuredOnSettledDom,
       neverMeasuredOnSettledDom: this.cache.size - measuredOnSettledDom
     };
+  }
+
+  /**
+   * Returns all cached message entries sorted primarily by invariant bottom distance.
+   */
+  getAllSorted(): VirtualMessageEntry[] {
+    return this.getEntries();
   }
 
   /**

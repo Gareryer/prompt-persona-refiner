@@ -351,6 +351,27 @@ export class ContentObserver {
                   warnings.push(`${imageErrors.length} image(s) failed to download`);
                 }
 
+                // Count non-image file/artifact attachments (Clio #262)
+                const fileCount = messages.reduce((n: number, t: HarvestTurn) =>
+                  n + (t.attachments || []).filter(a => a.type === 'file' || a.type === 'artifact').length, 0);
+
+                // Check ordering stats only for adapters that order from capture cache (Clio #272)
+                const ordersFromCapture = !!harvester.ordersFromCapture;
+                let orderInfo: any = undefined;
+                if (ordersFromCapture && harvester.virtualCache && typeof harvester.virtualCache.getCaptureOrderStats === 'function') {
+                  const stats = harvester.virtualCache.getCaptureOrderStats();
+                  orderInfo = {
+                    orderedBy: 'distance from the scroller bottom, measured at capture time',
+                    capturedMessages: stats.captured,
+                    withOrderKey: stats.withOrderKey,
+                    withoutOrderKey: stats.withoutOrderKey,
+                    neverMeasuredOnSettledDom: stats.neverMeasuredOnSettledDom
+                  };
+                  if (stats.withoutOrderKey > 0) {
+                    warnings.push(`${stats.withoutOrderKey} message(s) could not be positioned and were appended in capture order`);
+                  }
+                }
+
                 const metadata: HarvestConversationMetadata = {
                   site: adapter.platform as HarvestPlatform,
                   accountLabel: message?.accountLabel || 'default',
@@ -360,9 +381,14 @@ export class ContentObserver {
                   extractedAt,
                   messageCount: messages.length,
                   imageCount: images.length,
-                  partialSuccess: (imageErrors && imageErrors.length > 0) || !!scrollResult?.warning,
+                  fileCount,
+                  partialSuccess:
+                    (imageErrors && imageErrors.length > 0) ||
+                    !!scrollResult?.warning ||
+                    (ordersFromCapture && (orderInfo?.withoutOrderKey || 0) > 0),
                   warnings: warnings.length > 0 ? warnings : undefined,
-                  scrollAttempts: scrollResult?.scrollAttempts
+                  scrollAttempts: scrollResult?.scrollAttempts,
+                  orderInfo
                 };
 
                 const record: HarvestConversationRecord = {

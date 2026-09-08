@@ -14,6 +14,7 @@ export type HarvestPlatform =
 export interface HarvestAttachment {
   type: 'image' | 'file' | 'artifact';
   originalSrc?: string;
+  url?: string;
   name?: string | null;
   label?: string;
   kind?: string | null;
