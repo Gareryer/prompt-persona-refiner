@@ -101,5 +101,11 @@ export interface IHarvesterAdapter {
   // 6. Upward Scroller & Expansion Helpers
   autoScrollHistory?(options?: Partial<AutoScrollOptions>): Promise<ScrollResult>;
   expandContent?(options?: Partial<ExpandAllContentOptions>): Promise<number>;
+
+  // 7. Site-Specific Ordering & Citation Scoping (Clio #262, #272, #279)
+  readonly ordersFromCapture?: boolean;
+  readonly citationDecoration?: string | null;
+  readonly uploadedFileCard?: string | null;
+  readonly downloadAffordance?: string | null;
 }
 

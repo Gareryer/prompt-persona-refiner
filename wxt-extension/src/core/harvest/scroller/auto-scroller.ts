@@ -375,7 +375,7 @@ export async function scrollToLoadAllMessages(
   const container = options.container || findScrollContainer({ root });
 
   // Initial capture of currently mounted messages into virtual cache if provided
-  options.virtualCache?.captureFromRoot(container || root, options.adapter);
+  options.virtualCache?.captureFromRoot(container || root, options.adapter, container);
 
   const initialScrollTop = container ? Number(container.scrollTop) || 0 : 0;
   const startTime = Date.now();
@@ -456,7 +456,7 @@ export async function scrollToLoadAllMessages(
         if (idleAttemptsAtTop <= cfg.idleThreshold * 3) {
           consecutiveIdleAtTop = 0;
         }
-        options.virtualCache?.captureFromRoot(container || root, options.adapter);
+        options.virtualCache?.captureFromRoot(container || root, options.adapter, container);
         safeNotifyMutation(mutations as MutationRecord[]);
       });
       observer.observe(container, {
@@ -500,6 +500,10 @@ export async function scrollToLoadAllMessages(
           await sleep(cfg.scrollDelay);
         }
         await sleep(0); // Yield to event loop
+
+        // Layout has settled for this round: remeasure bottom distances
+        options.virtualCache?.captureFromRoot(container || root, options.adapter, container);
+        options.virtualCache?.remeasureSettled(container || root, container);
 
         const postWaitScrollTop = Number(container.scrollTop) || 0;
         const currentScrollHeight = Number(container.scrollHeight) || 0;
@@ -567,7 +571,9 @@ export async function scrollToLoadAllMessages(
 
         await sleep(0); // Yield to event loop
 
-        options.virtualCache?.captureFromRoot(container || root, options.adapter);
+        // Layout settled: capture and remeasure
+        options.virtualCache?.captureFromRoot(container || root, options.adapter, container);
+        options.virtualCache?.remeasureSettled(container || root, container);
 
         safeNotifyProgress({
           attempt: attempts,
@@ -587,6 +593,10 @@ export async function scrollToLoadAllMessages(
   } finally {
     observer?.disconnect();
   }
+
+  // Final settle pass to guarantee all rendered turns have settled measurements
+  options.virtualCache?.captureFromRoot(container || root, options.adapter, container);
+  options.virtualCache?.remeasureSettled(container || root, container);
 
   const finalScrollTop = Number(container.scrollTop) || 0;
   const reachedTop = finalScrollTop <= 0 && consecutiveIdleAtTop >= cfg.idleThreshold;

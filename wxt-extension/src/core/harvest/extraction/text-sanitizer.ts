@@ -111,11 +111,137 @@ export class TextSanitizer {
     }
   }
 
+export const CODE_HEADER_NOISE = new Set([
+  'copy', 'copied', 'edit', 'run', 'share', 'download', 'expand', 'collapse',
+  'wrap', 'unwrap', 'preview', 'code', 'copy code', 'ask chatgpt', 'always show details'
+]);
+
+export const LANGUAGE_ALIASES: Record<string, string> = {
+  py: 'python', python3: 'python',
+  js: 'javascript', node: 'javascript', mjs: 'javascript', cjs: 'javascript',
+  ts: 'typescript',
+  sh: 'bash', shell: 'bash', zsh: 'bash', console: 'bash',
+  ps: 'powershell', ps1: 'powershell', pwsh: 'powershell',
+  yml: 'yaml', md: 'markdown', rb: 'ruby', 'c++': 'cpp', 'c#': 'csharp'
+};
+
+export const SHEBANG_LANGUAGES: Record<string, string> = {
+  python: 'python', bash: 'bash', sh: 'bash', zsh: 'bash', dash: 'bash',
+  node: 'javascript', deno: 'javascript', ruby: 'ruby', perl: 'perl',
+  pwsh: 'powershell'
+};
+
+  /**
+   * The OUTERMOST <pre> around an element.
+   * Ascends above nested CodeMirror pre.cm-content to outer pre.overflow-visible (Clio #263).
+   */
+  static outermostPre(el: Element | null | undefined): Element | null {
+    if (!el || typeof (el as any).closest !== 'function') return null;
+    let outer = el.closest('pre');
+    if (!outer) return null;
+    while (outer.parentElement) {
+      const above = outer.parentElement.closest('pre');
+      if (!above) break;
+      outer = above;
+    }
+    return outer;
+  }
+
+  /**
+   * Normalizes a raw language label or token to a canonical language identifier.
+   */
+  static normaliseLanguage(raw: string): string {
+    const cleaned = String(raw || '').trim().toLowerCase();
+    if (!cleaned || CODE_HEADER_NOISE.has(cleaned)) return '';
+    if (/\s/.test(cleaned)) return '';
+    if (!/^[a-z0-9+#._-]{1,20}$/.test(cleaned)) return '';
+    return LANGUAGE_ALIASES[cleaned] || cleaned;
+  }
+
+  /**
+   * Extracts a language from a code block's header strip, filtering out button captions.
+   */
+  static headerLabel(pre: Element): string {
+    if (!pre || typeof pre.querySelector !== 'function') return '';
+    const header = pre.querySelector('[class*="sticky"], header, [class*="header"]');
+    if (!header) return '';
+
+    // Prefer leaf element that reduces to a single non-control word
+    const leaves = Array.from(header.querySelectorAll('*'))
+      .filter(el => el.children.length === 0 && (el.textContent || '').trim());
+    for (const leaf of leaves) {
+      const token = this.normaliseLanguage(leaf.textContent || '');
+      if (token) return token;
+    }
+
+    // Otherwise test full header text tokens
+    const tokens = (header.textContent || '')
+      .trim()
+      .split(/[\s\n\r\t]+/)
+      .map(t => t.trim().toLowerCase())
+      .filter(t => t && !CODE_HEADER_NOISE.has(t));
+    return tokens.length === 1 ? this.normaliseLanguage(tokens[0]) : '';
+  }
+
+  /**
+   * Infers code language from text content directly when markup lacks headers/attributes (Clio #263).
+   * Deliberately narrow to avoid false positive labeling.
+   */
+  static sniffCodeLanguage(text: string): string {
+    const body = String(text || '');
+    const lines = body.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return '';
+    const first = lines[0];
+
+    // Shebang
+    const shebang = first.match(/^#!\s*(?:\S*\/env\s+)?(\S+)/);
+    if (shebang) {
+      const interp = shebang[1].split(/[\\/]/).pop()?.replace(/[0-9.]+$/, '').toLowerCase() || '';
+      if (SHEBANG_LANGUAGES[interp]) return SHEBANG_LANGUAGES[interp];
+    }
+
+    // JSON parsing check
+    if (/^[{[]/.test(first) && /[}\]]$/.test(lines[lines.length - 1])) {
+      try {
+        JSON.parse(body);
+        return 'json';
+      } catch { /* not JSON */ }
+    }
+
+    // Git / Unified Diff
+    if (/^(diff --git |index [0-9a-f]{7,}|--- |\+\+\+ )/.test(first) ||
+        lines.some(l => /^@@ -\d+(,\d+)? \+\d+(,\d+)? @@/.test(l))) {
+      return 'diff';
+    }
+
+    // HTML
+    if (/^<(!doctype\s+html|html[\s>])/i.test(first)) return 'html';
+
+    // SQL
+    if (/^\s*select\b[\s\S]*\bfrom\b/i.test(body) && /;\s*$/.test(body.trim())) {
+      return 'sql';
+    }
+
+    // Python structural markers
+    if (lines.some(l => /^(def|class)\s+[A-Za-z_]\w*\s*[(:]/.test(l)) ||
+        lines.some(l => /^from\s+[\w.]+\s+import\s+/.test(l)) ||
+        lines.some(l => /^import\s+[\w.]+$/.test(l) && !/;/.test(l))) {
+      return 'python';
+    }
+
+    // PowerShell
+    const cmdlets = body.match(/\b(?:Get|Set|New|Remove|Write|Test|Start|Stop|Add|Select|Where|ForEach|Invoke|Import|Export|Register|Unregister|Copy|Move|Join|Split|Convert|Out)-[A-Z][A-Za-z]+\b/g) || [];
+    if (/^param\s*\(/im.test(body) || cmdlets.length >= 2) return 'powershell';
+
+    return '';
+  }
+
   /**
    * Replaces <pre><code> blocks and code-blocks with markdown code fences:
    * ```[lang]
    * [code]
    * ```
+   * Replaces the outermost <pre> container to strip button chrome (Clio #263).
    */
   static formatCodeBlocks(root: HTMLElement | Element): void {
     if (typeof root.querySelectorAll !== 'function') return;
@@ -127,11 +253,10 @@ export class TextSanitizer {
       // Avoid processing nested blocks that have already been detached/replaced
       if (!block.parentNode || (typeof root.contains === 'function' && !root.contains(block))) continue;
 
-      // If block is .cm-content and its parent/ancestor is already a pre being processed, skip to avoid double fencing
-      if (block.classList?.contains('cm-content') && block.closest?.('pre')) continue;
+      const scope = this.outermostPre(block) || block;
+      if (!scope.parentNode || (typeof root.contains === 'function' && !root.contains(scope))) continue;
 
-      const codeEl = block.querySelector('code, .cm-content') || block;
-      const lang = this.detectLanguage(block, codeEl);
+      const codeEl = scope.querySelector('code, .cm-content') || block.querySelector('code, .cm-content') || block;
 
       // Preserve CodeMirror 6 line breaks when code is structured as .cm-line block elements
       let codeText = '';
@@ -142,15 +267,16 @@ export class TextSanitizer {
         codeText = codeEl.textContent || '';
       }
 
+      const lang = this.detectLanguage(scope, codeEl, codeText);
       const fenced = `\n\`\`\`${lang}\n${codeText.trimEnd()}\n\`\`\`\n`;
 
       if (typeof root.ownerDocument?.createTextNode === 'function') {
         const textNode = root.ownerDocument.createTextNode(fenced);
-        block.parentNode.replaceChild(textNode, block);
+        scope.parentNode.replaceChild(textNode, scope);
       } else {
         // Fallback for mock environments
         try {
-          (block as HTMLElement).textContent = fenced;
+          (scope as HTMLElement).textContent = fenced;
         } catch {
           // Ignore
         }
@@ -159,42 +285,49 @@ export class TextSanitizer {
   }
 
   /**
-   * Detects the programming language of a code block element.
+   * Detects the programming language of a code block element using class, attributes,
+   * outer header labels, and unambiguous content sniffing.
    */
-  static detectLanguage(block: Element, codeEl: Element): string {
-    // 1. Check data-language attribute on block, codeEl, or parent container
-    const dataLang =
-      block.getAttribute('data-language') ||
-      codeEl.getAttribute('data-language') ||
-      block.getAttribute('data-lang') ||
-      codeEl.getAttribute('data-lang') ||
-      block.closest?.('[data-language]')?.getAttribute('data-language') ||
-      block.closest?.('[data-lang]')?.getAttribute('data-lang') ||
-      block.parentElement?.getAttribute('data-language') ||
-      block.parentElement?.getAttribute('data-lang');
-    if (dataLang) return dataLang.toLowerCase().trim();
+  static detectLanguage(block: Element, codeEl: Element, codeText: string = ''): string {
+    const scope = this.outermostPre(codeEl) || this.outermostPre(block) || block;
 
-    // 2. Check inner language labels (e.g. .code-language, .language-label)
-    const labelEl =
-      block.querySelector('.code-language, .language-label, [class*="language-"]') ||
-      block.closest?.('.code-block, [class*="code-block"]')?.querySelector('.code-language, .language-label, [class*="language-"]') ||
-      block.parentElement?.querySelector('.code-language, .language-label');
-    if (labelEl && labelEl !== codeEl && labelEl.textContent) {
-      const labelText = labelEl.textContent.trim().toLowerCase();
-      if (labelText && labelText.length < 25 && !labelText.includes(' ')) {
-        return labelText;
+    const fromClass = (el: Element | null | undefined): string => {
+      if (!el || !el.classList) return '';
+      for (const cls of Array.from(el.classList)) {
+        const m = cls.match(/^(?:language|lang|highlight)[-_](.+)$/i);
+        if (m && m[1]) return m[1];
       }
-    }
+      return '';
+    };
 
-    // 3. Check class names (e.g. class="language-python", class="lang-typescript")
-    const containerClasses = block.closest?.('.code-block, [class*="code-block"]')?.className || '';
-    const classes = `${block.className || ''} ${codeEl.className || ''} ${containerClasses}`;
-    const match = classes.match(/(?:language|lang)-([a-zA-Z0-9_+-]+)/i);
-    if (match && match[1]) {
-      return match[1].toLowerCase();
-    }
+    const attr = (el: Element | null | undefined, name: string): string | null => {
+      return el && typeof el.getAttribute === 'function' ? el.getAttribute(name) : null;
+    };
 
-    return '';
+    const firstText = (el: Element | null | undefined, sel: string): string => {
+      const hit = el && typeof el.querySelector === 'function' ? el.querySelector(sel) : null;
+      return hit ? (attr(hit, 'data-language') || hit.textContent || '') : '';
+    };
+
+    const declared =
+      fromClass(codeEl) ||
+      fromClass(block) ||
+      fromClass(scope) ||
+      attr(codeEl, 'data-language') ||
+      attr(block, 'data-language') ||
+      attr(scope, 'data-language') ||
+      attr(codeEl, 'data-lang') ||
+      attr(block, 'data-lang') ||
+      attr(scope, 'data-lang') ||
+      firstText(scope, '[data-language]') ||
+      firstText(scope, '.language-label') ||
+      this.headerLabel(scope) ||
+      '';
+
+    const cleaned = this.normaliseLanguage(declared);
+    if (cleaned) return cleaned;
+
+    return this.sniffCodeLanguage(codeText || codeEl.textContent || '');
   }
 
   /**

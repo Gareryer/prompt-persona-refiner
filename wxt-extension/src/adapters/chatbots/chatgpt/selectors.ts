@@ -92,8 +92,23 @@ export const CHATGPT_SELECTORS = {
     'button[aria-label*="thought" i]',
     'button[aria-label*="reason" i]',
     'button[aria-expanded="false"]'
+  ],
+  citationDecoration: [
+    '[aria-label="Sources"]',
+    '[class*="footnote"]',
+    '[data-testid*="citation"]'
+  ],
+  uploadedFileCard: [
+    '[data-testid="library-file-icon"]'
+  ],
+  downloadAffordance: [
+    'button',
+    'a',
+    '[role="menuitem"]'
   ]
 } as const;
+
+export const CHATGPT_ORDERS_FROM_CAPTURE = true;
 
 export type ChatGPTSelectorKey = keyof typeof CHATGPT_SELECTORS;
 

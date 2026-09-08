@@ -24,6 +24,10 @@ import type { HarvestTurn, DiscoveredConversation } from '../../../core/harvest/
  */
 export class ChatGPTAdapter extends BaseChatbotAdapter implements IChatbotAdapter, IHarvesterAdapter {
   readonly platform = 'chatgpt' as const;
+  readonly ordersFromCapture = true;
+  readonly citationDecoration = CHATGPT_SELECTORS.citationDecoration.join(', ');
+  readonly uploadedFileCard = CHATGPT_SELECTORS.uploadedFileCard.join(', ');
+  readonly downloadAffordance = CHATGPT_SELECTORS.downloadAffordance.join(', ');
 
   /**
    * Dedicated VirtualMessageCache to counter React virtual list unmounting off-screen turns.

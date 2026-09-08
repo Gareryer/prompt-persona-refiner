@@ -2,6 +2,10 @@
  * Virtual Message Cache for Chatbot DOM Virtualization.
  * Caches cloned snapshots of rendered messages before chat platforms
  * (specifically OpenAI ChatGPT's React virtualization) unmount them during upward scrolling.
+ *
+ * Implements Clio #264 / #272 / #289 invariant bottom-distance ordering to prevent
+ * transcript scrambling on virtualized lists where data-testid="conversation-turn-N"
+ * is provisional and relative only to the currently rendered window.
  */
 
 import type { IHarvesterAdapter } from '../../../adapters/chatbots/types';
@@ -11,6 +15,9 @@ export interface VirtualMessageEntry {
   turnIndex: number | null;
   element: HTMLElement;
   timestamp: number;
+  seq: number;
+  fromBottom: number | null;
+  measuredSettled: boolean;
 }
 
 export interface VirtualMessageCacheOptions {
@@ -18,9 +25,38 @@ export interface VirtualMessageCacheOptions {
   maxEntries?: number;
 }
 
+export interface CaptureOrderStats {
+  captured: number;
+  withOrderKey: number;
+  withoutOrderKey: number;
+  measuredOnSettledDom: number;
+  neverMeasuredOnSettledDom: number;
+}
+
+/**
+ * Calculates distance from the BOTTOM of the scroller to the top of an element.
+ *
+ * This is the invariant ordering key for virtualized lists (Clio #264).
+ * Prepending older content above increases scrollHeight by delta D and pushes
+ * every existing element's offset down by exactly D, so (scrollHeight - offsetTop)
+ * does not shift as older turns mount. Larger value = further from bottom = earlier in conversation.
+ */
+export function measureFromBottom(el: HTMLElement, scroller: HTMLElement | null): number | null {
+  if (!scroller || !el || typeof el.getBoundingClientRect !== 'function') return null;
+  // A container that does not scroll provides a meaningless key
+  if (!(scroller.scrollHeight > scroller.clientHeight)) return null;
+  const r = el.getBoundingClientRect();
+  // Height 0 means the node is in DOM but not yet laid out — measurement is junk
+  if (!r || !r.height) return null;
+  const sr = scroller.getBoundingClientRect();
+  const offsetTop = r.top - sr.top + scroller.scrollTop;
+  return scroller.scrollHeight - offsetTop;
+}
+
 export class VirtualMessageCache {
   private readonly cache = new Map<string, VirtualMessageEntry>();
   private readonly maxEntries: number;
+  private seqCounter: number = 0;
 
   constructor(options?: VirtualMessageCacheOptions) {
     this.maxEntries = options?.maxEntries ?? 5000;
@@ -44,9 +80,15 @@ export class VirtualMessageCache {
 
   /**
    * Caches a message element by deep-cloning it.
-   * Updates turnIndex if a more accurate index is discovered.
+   * Updates turnIndex, fromBottom, and settled status if more accurate readings are found.
    */
-  set(id: string, element: HTMLElement, turnIndex?: number | null): void {
+  set(
+    id: string,
+    element: HTMLElement,
+    turnIndex?: number | null,
+    fromBottom?: number | null,
+    measuredSettled: boolean = false
+  ): void {
     if (!id || !element) return;
 
     if (this.cache.size >= this.maxEntries && !this.cache.has(id)) {
@@ -62,21 +104,30 @@ export class VirtualMessageCache {
 
     const existing = this.cache.get(id);
     const resolvedTurnIndex = turnIndex ?? existing?.turnIndex ?? null;
+    const resolvedFromBottom = fromBottom ?? existing?.fromBottom ?? null;
+    const resolvedMeasuredSettled = measuredSettled || (existing?.measuredSettled ?? false);
+    const seq = existing?.seq ?? this.seqCounter++;
 
     this.cache.set(id, {
       id,
       turnIndex: resolvedTurnIndex,
       element: cloned,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      seq,
+      fromBottom: resolvedFromBottom,
+      measuredSettled: resolvedMeasuredSettled
     });
   }
 
   /**
    * Scans root for rendered message elements and captures cloned snapshots into the cache.
-   * Resolves message ID and turn index via adapter hooks or resilient DOM landmarks.
-   * Returns the count of newly captured or updated message elements.
+   * Resolves message ID, turn index, and invariant bottom distance.
    */
-  captureFromRoot(root: ParentNode | Document | null | undefined, adapter?: IHarvesterAdapter): number {
+  captureFromRoot(
+    root: ParentNode | Document | null | undefined,
+    adapter?: IHarvesterAdapter,
+    scroller?: HTMLElement | null
+  ): number {
     if (!root || typeof (root as any).querySelectorAll !== 'function') return 0;
 
     let captured = 0;
@@ -135,14 +186,16 @@ export class VirtualMessageCache {
         el.getAttribute('data-role');
       const role = roleAttr === 'user' ? 'user' : roleAttr === 'assistant' ? 'assistant' : undefined;
 
+      const fromBottom = scroller ? measureFromBottom(el, scroller) : null;
+
       if (id) {
         const isNew = !this.cache.has(id);
-        this.set(id, el, turnIndex);
+        this.set(id, el, turnIndex, fromBottom, false);
         if (isNew) captured++;
       } else if (turnIndex !== null) {
         const syntheticId = role ? `turn-${turnIndex}-${role}` : `turn-${turnIndex}`;
         const isNew = !this.cache.has(syntheticId);
-        this.set(syntheticId, el, turnIndex);
+        this.set(syntheticId, el, turnIndex, fromBottom, false);
         if (isNew) captured++;
       }
     }
@@ -151,33 +204,103 @@ export class VirtualMessageCache {
   }
 
   /**
-   * Returns all cached cloned elements, ordered by turnIndex ascending (if available),
-   * then by timestamp.
+   * Re-measures currently rendered messages from a settled DOM (Clio #264).
+   * Overwrites measurements taken inside MutationObserver during in-flight React reflows.
+   */
+  remeasureSettled(root: ParentNode | Document | null | undefined, scroller: HTMLElement | null): number {
+    if (!root || !scroller || typeof (root as any).querySelectorAll !== 'function') return 0;
+
+    let remeasured = 0;
+    const selectors = [
+      '[data-message-author-role]',
+      '[data-testid^="conversation-turn-"]',
+      '[data-message-id]'
+    ].join(', ');
+
+    let rawElements: HTMLElement[] = [];
+    try {
+      rawElements = Array.from((root as any).querySelectorAll(selectors)) as HTMLElement[];
+    } catch {
+      return 0;
+    }
+
+    for (const el of rawElements) {
+      const id =
+        el.getAttribute('data-message-id') ||
+        el.querySelector('[data-message-id]')?.getAttribute('data-message-id') ||
+        el.closest?.('[data-message-id]')?.getAttribute('data-message-id') ||
+        null;
+
+      if (!id) continue;
+      const entry = this.cache.get(id);
+      if (!entry) continue;
+
+      const measured = measureFromBottom(el, scroller);
+      if (measured !== null) {
+        entry.fromBottom = measured;
+        entry.measuredSettled = true;
+        remeasured++;
+      }
+    }
+
+    return remeasured;
+  }
+
+  /**
+   * Returns ordering statistics indicating confidence in transcript reconstruction (Clio #264, #272).
+   */
+  getCaptureOrderStats(): CaptureOrderStats {
+    let withOrderKey = 0;
+    let measuredOnSettledDom = 0;
+    for (const entry of this.cache.values()) {
+      if (typeof entry.fromBottom === 'number') withOrderKey++;
+      if (entry.measuredSettled) measuredOnSettledDom++;
+    }
+    return {
+      captured: this.cache.size,
+      withOrderKey,
+      withoutOrderKey: this.cache.size - withOrderKey,
+      measuredOnSettledDom,
+      neverMeasuredOnSettledDom: this.cache.size - measuredOnSettledDom
+    };
+  }
+
+  /**
+   * Returns all cached cloned elements in stable conversation order.
    */
   getAll(): HTMLElement[] {
     return this.getEntries().map(e => e.element);
   }
 
   /**
-   * Returns all cached message entries with metadata, sorted by turnIndex ascending.
+   * Returns all cached message entries sorted primarily by invariant bottom distance
+   * descending (b.fromBottom - a.fromBottom) so earlier turns come first.
+   * Unmeasured turns are safely appended in capture sequence without being dropped.
    */
   getEntries(): VirtualMessageEntry[] {
     const entries = Array.from(this.cache.values());
-    entries.sort((a, b) => {
-      if (a.turnIndex !== null && b.turnIndex !== null) {
+    const measured = entries.filter(e => typeof e.fromBottom === 'number');
+    const unmeasured = entries.filter(e => typeof e.fromBottom !== 'number');
+
+    // Earlier turns sit higher up, meaning larger distance from scroller bottom
+    measured.sort((a, b) => (b.fromBottom! - a.fromBottom!) || (a.seq - b.seq));
+
+    // Unmeasured fallback: preserve turnIndex if both have it, otherwise capture sequence (seq)
+    unmeasured.sort((a, b) => {
+      if (a.turnIndex !== null && b.turnIndex !== null && a.turnIndex !== b.turnIndex) {
         return a.turnIndex - b.turnIndex;
       }
-      if (a.turnIndex !== null) return -1;
-      if (b.turnIndex !== null) return 1;
-      return a.timestamp - b.timestamp;
+      return a.seq - b.seq;
     });
-    return entries;
+
+    return [...measured, ...unmeasured];
   }
 
   /**
-   * Clears all cached messages.
+   * Clears all cached messages and resets sequence counter.
    */
   clear(): void {
     this.cache.clear();
+    this.seqCounter = 0;
   }
 }

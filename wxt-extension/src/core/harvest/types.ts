@@ -12,13 +12,25 @@ export type HarvestPlatform =
   | 'meta';
 
 export interface HarvestAttachment {
-  type: 'image';
-  originalSrc: string;
-  filename?: string;
+  type: 'image' | 'file' | 'artifact';
+  originalSrc?: string;
+  name?: string | null;
+  label?: string;
+  kind?: string | null;
+  downloadable?: boolean;
+  filename?: string | null;
   blob?: Blob;
   dataUrl?: string;
-  turnIndex: number;
+  turnIndex?: number;
   error?: string;
+}
+
+export interface HarvestOrderInfo {
+  orderedBy: string;
+  capturedMessages: number;
+  withOrderKey: number;
+  withoutOrderKey: number;
+  neverMeasuredOnSettledDom: number;
 }
 
 export interface HarvestTurn {
@@ -43,9 +55,11 @@ export interface HarvestConversationMetadata {
   extractedAt: string;
   messageCount: number;
   imageCount: number;
+  fileCount?: number;
   partialSuccess?: boolean;
   warnings?: string[];
   scrollAttempts?: number;
+  orderInfo?: HarvestOrderInfo;
 }
 
 export interface HarvestConversationRecord {

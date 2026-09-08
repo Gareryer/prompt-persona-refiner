@@ -1,7 +1,8 @@
 /**
  * Structured Turn Scraper for OpenAI ChatGPT SPA.
  * Extracts conversation turns with OpenAI reasoning header isolation,
- * model slug extraction, CodeMirror code fence preservation, and image attachment harvesting.
+ * model slug extraction, CodeMirror code fence preservation, image attachment harvesting,
+ * and in-scroll file & download affordance capture (Clio #262, #263, #264, #279).
  * Supports DOM virtualization recovery via VirtualMessageCache.
  */
 
@@ -41,7 +42,23 @@ export class ChatGPTTurnScraper {
     const candidates: { el: HTMLElement; live: boolean; key: string }[] = [];
     const seenKeys = new Set<string>();
 
-    // 1. Collect live DOM message elements in natural DOM order
+    // 1. When virtualCache is present, start with cached entries (already sorted by invariant bottom-distance)
+    if (virtualCache && virtualCache.size > 0) {
+      for (const entry of virtualCache.getEntries()) {
+        const role = this.resolveRole(entry.element);
+        const roleKey = entry.turnIndex !== null ? `turn-${entry.turnIndex}-${role}` : null;
+        const primaryKey = entry.id || roleKey || `cached-${candidates.length}`;
+
+        if (!seenKeys.has(primaryKey) && !(entry.id && seenKeys.has(entry.id))) {
+          seenKeys.add(primaryKey);
+          if (entry.id) seenKeys.add(entry.id);
+          if (roleKey) seenKeys.add(roleKey);
+          candidates.push({ el: entry.element, live: false, key: primaryKey });
+        }
+      }
+    }
+
+    // 2. Collect live DOM message elements in natural DOM order
     if (root) {
       const userSelector = CHATGPT_SELECTORS.userMessage.join(', ');
       const assistantSelector = CHATGPT_SELECTORS.assistantMessage.join(', ');
@@ -63,34 +80,12 @@ export class ChatGPTTurnScraper {
         const role = this.resolveRole(el);
         const primaryKey = id || (turnIdx !== null ? `turn-${turnIdx}-${role}` : `dom-${candidates.length}`);
 
-        if (seenKeys.has(primaryKey)) continue;
+        if (seenKeys.has(primaryKey) || (id && seenKeys.has(id))) continue;
         seenKeys.add(primaryKey);
         if (id) seenKeys.add(id);
         if (turnIdx !== null) seenKeys.add(`turn-${turnIdx}-${role}`);
 
         candidates.push({ el, live: true, key: primaryKey });
-      }
-    }
-
-    // 2. Merge elements from VirtualMessageCache (captures off-screen evicted turns)
-    if (virtualCache && virtualCache.size > 0) {
-      for (const entry of virtualCache.getEntries()) {
-        const role = this.resolveRole(entry.element);
-        const roleKey = entry.turnIndex !== null ? `turn-${entry.turnIndex}-${role}` : null;
-        const primaryKey = entry.id || roleKey || `cached-${candidates.length}`;
-
-        // Check if either entry.id, roleKey, or primaryKey was already seen
-        const isDuplicate =
-          (entry.id && seenKeys.has(entry.id)) ||
-          (roleKey && seenKeys.has(roleKey)) ||
-          seenKeys.has(primaryKey);
-
-        if (!isDuplicate) {
-          seenKeys.add(primaryKey);
-          if (entry.id) seenKeys.add(entry.id);
-          if (roleKey) seenKeys.add(roleKey);
-          candidates.push({ el: entry.element, live: false, key: primaryKey });
-        }
       }
     }
 
@@ -115,13 +110,15 @@ export class ChatGPTTurnScraper {
       }
     }
 
-    // 4. Sort turns stably by turnIndex ascending, then by timestamp
-    rawTurns.sort((a, b) => {
-      if (a.turnIndex !== b.turnIndex) {
-        return a.turnIndex - b.turnIndex;
-      }
-      return a.timestamp - b.timestamp;
-    });
+    // 4. If virtualCache was not used and all candidates have turnIndex, sort by turnIndex ascending
+    if ((!virtualCache || virtualCache.size === 0) && rawTurns.every(t => typeof t.turnIndex === 'number')) {
+      rawTurns.sort((a, b) => {
+        if (a.turnIndex !== b.turnIndex) {
+          return a.turnIndex - b.turnIndex;
+        }
+        return a.timestamp - b.timestamp;
+      });
+    }
 
     // 5. Re-index turnIndex sequentially (0, 1, 2, ...) to ensure a monotonic sequence
     return rawTurns.map((turn, idx) => ({
@@ -131,7 +128,7 @@ export class ChatGPTTurnScraper {
   }
 
   /**
-   * Extracts a user turn with sanitized prompt content and image attachments.
+   * Extracts a user turn with sanitized prompt content and image/file attachments.
    */
   static extractUserTurn(
     element: HTMLElement,
@@ -140,7 +137,7 @@ export class ChatGPTTurnScraper {
     adapter?: IHarvesterAdapter
   ): HarvestTurn {
     const turnContainer = element.closest?.('[data-testid^="conversation-turn-"]') as HTMLElement | null;
-    const images = this.findImages(turnContainer || element, turnIndex);
+    const attachments = this.findAttachments(turnContainer || element, turnIndex);
 
     const cloned = typeof element.cloneNode === 'function'
       ? (element.cloneNode(true) as HTMLElement)
@@ -158,7 +155,7 @@ export class ChatGPTTurnScraper {
       role: 'user',
       content,
       rawText: element.textContent?.trim() || '',
-      attachments: images.length > 0 ? images : undefined,
+      attachments: attachments.length > 0 ? attachments : undefined,
       timestamp: Date.now()
     };
   }
@@ -188,8 +185,8 @@ export class ChatGPTTurnScraper {
     // 2. Extract model slug
     const modelSlug = this.extractModelSlug(element);
 
-    // 3. Extract attachments (e.g. DALL-E generated images)
-    const images = this.findImages(turnContainer || element, turnIndex);
+    // 3. Extract attachments (e.g. DALL-E images and generated file download controls)
+    const attachments = this.findAttachments(turnContainer || element, turnIndex);
 
     // 4. Clone element to sanitize body without mutating live DOM
     const cloned = typeof element.cloneNode === 'function'
@@ -218,14 +215,13 @@ export class ChatGPTTurnScraper {
       rawText: element.textContent?.trim() || '',
       thinking,
       modelSlug: modelSlug || undefined,
-      attachments: images.length > 0 ? images : undefined,
+      attachments: attachments.length > 0 ? attachments : undefined,
       timestamp: Date.now()
     };
   }
 
   /**
-   * Harvests image attachments from a message or turn container,
-   * filtering out user avatars, system icons, and SVG chrome.
+   * Harvests image attachments, filtering out user avatars, system icons, and citation decorations (Clio #279).
    */
   static findImages(element: HTMLElement, turnIndex: number): HarvestAttachment[] {
     if (typeof element.querySelectorAll !== 'function') return [];
@@ -242,6 +238,14 @@ export class ChatGPTTurnScraper {
       const cls = (img.className || '').toLowerCase();
       const role = img.getAttribute('role') || '';
       const ariaHidden = img.getAttribute('aria-hidden') === 'true';
+
+      // Clio #279 / #284: Skip citation decoration icons
+      const isCitation = img.closest?.('[aria-label="Sources"], [class*="footnote"], [data-testid*="citation"]') !== null;
+      if (isCitation) continue;
+
+      if (src.includes('googleusercontent.com') || src.includes('gstatic.com')) {
+        continue;
+      }
 
       // Filter out avatars, icons, logos, and UI chrome
       const isUiIcon =
@@ -268,6 +272,81 @@ export class ChatGPTTurnScraper {
     }
 
     return attachments;
+  }
+
+  /**
+   * Harvests both images and attached files / download affordances (Clio #262, #279).
+   */
+  static findAttachments(element: HTMLElement, turnIndex: number): HarvestAttachment[] {
+    const images = this.findImages(element, turnIndex);
+    const files: HarvestAttachment[] = [];
+
+    // 1. Operator-uploaded file cards in user messages (Clio #262)
+    const uploadedCardSelectors = CHATGPT_SELECTORS.uploadedFileCard.join(', ');
+    const fileIcons = Array.from(element.querySelectorAll?.(uploadedCardSelectors) || []) as HTMLElement[];
+    const seenFiles = new Set<string>();
+
+    for (const icon of fileIcons) {
+      let card: HTMLElement | null = icon;
+      for (let i = 0; i < 6 && card?.parentElement && card.parentElement !== element; i++) {
+        card = card.parentElement;
+        if ((card.textContent || '').trim().length > 3) break;
+      }
+      if (!card) continue;
+
+      const lines = this.elementTextLines(card);
+      const name = lines[0];
+      if (name && !seenFiles.has(name)) {
+        seenFiles.add(name);
+        files.push({
+          type: 'file',
+          name,
+          kind: lines[1] || null,
+          downloadable: false,
+          turnIndex
+        });
+      }
+    }
+
+    // 2. Generated artifact download controls in assistant messages (Clio #262)
+    const downloadSelectors = CHATGPT_SELECTORS.downloadAffordance.join(', ');
+    const downloadControls = Array.from(element.querySelectorAll?.(downloadSelectors) || []) as HTMLElement[];
+    const seenDownloads = new Set<string>();
+
+    for (const control of downloadControls) {
+      const label = (control.getAttribute('aria-label') || control.textContent || '').trim();
+      if (!/^download\b/i.test(label)) continue;
+      if (/^download\s+(apps?|the\s+app)$/i.test(label)) continue;
+      if (seenDownloads.has(label)) continue;
+
+      seenDownloads.add(label);
+      const rest = label.replace(/^download\s+/i, '').trim();
+      const looksLikeFilename = /^[^\s]+\.[A-Za-z0-9]{1,10}$/.test(rest);
+      files.push({
+        type: 'artifact',
+        name: looksLikeFilename ? rest : null,
+        label,
+        downloadable: true,
+        turnIndex
+      });
+    }
+
+    return [...images, ...files];
+  }
+
+  /**
+   * Helper to retrieve text lines of an element, resilient against jsdom innerText limitations.
+   */
+  static elementTextLines(el: HTMLElement): string[] {
+    if (el && typeof el.innerText === 'string' && el.innerText.trim()) {
+      return el.innerText.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+    const leaves = Array.from(el.querySelectorAll?.('*') || [])
+      .filter(e => e.children.length === 0 && (e.textContent || '').trim())
+      .map(e => e.textContent!.trim());
+    if (leaves.length) return leaves;
+    const text = (el.textContent || '').trim();
+    return text ? [text] : [];
   }
 
   /**

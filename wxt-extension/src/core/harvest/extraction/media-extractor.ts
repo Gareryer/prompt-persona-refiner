@@ -70,6 +70,18 @@ export interface FetchImageOptions {
   credentials?: RequestCredentials;
 }
 
+export const BLACKLISTED_IMAGE_HOSTS = [
+  's2.googleusercontent.com',
+  't1.gstatic.com',
+  'www.google.com/s2/favicons',
+  'google.com/s2/favicons'
+];
+
+export function isBlacklistedFaviconUrl(url?: string): boolean {
+  if (!url) return false;
+  return BLACKLISTED_IMAGE_HOSTS.some(host => url.includes(host));
+}
+
 export class MediaExtractor {
   /**
    * Resolves the appropriate file extension given a MIME type or URL.
@@ -268,6 +280,18 @@ export class MediaExtractor {
       };
     }
 
+    if (isBlacklistedFaviconUrl(src)) {
+      return {
+        success: false,
+        originalSrc: src,
+        turnIndex,
+        imageIndex,
+        path: destinationPath,
+        filename: destinationPath,
+        error: 'Ignored citation favicon'
+      };
+    }
+
     try {
       // 1. Data URI: Direct synchronous-like conversion to Blob
       if (src.startsWith('data:')) {
@@ -351,6 +375,9 @@ export class MediaExtractor {
         if (att.type === 'image' && (att.originalSrc || att.blob || att.dataUrl)) {
           if (!att.originalSrc && att.dataUrl) {
             att.originalSrc = att.dataUrl;
+          }
+          if (att.originalSrc && isBlacklistedFaviconUrl(att.originalSrc)) {
+            continue;
           }
           tasks.push({
             turn,
