@@ -707,12 +707,6 @@ export default defineBackground(() => {
       return true;
     }
 
-    // CHECK_RATING_ELIGIBILITY
-    if (message.type === 'CHECK_RATING_ELIGIBILITY') {
-      sendResponse({ eligible: false, message: 'Rating eligibility check completed.' });
-      return true;
-    }
-
     // SAVE_DRAFT (Dual-envelope support for both RPC and legacy sendMessage)
     if (message.type === 'SAVE_DRAFT') {
       (async () => {

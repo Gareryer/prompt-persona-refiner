@@ -98,12 +98,14 @@ export function createRatingUI(
 }
 
 export function updateRatingUI(container: HTMLElement, rating: number): void {
-  const stars = container.querySelectorAll<HTMLElement>('.allie-rating-star');
-  stars.forEach((s, idx) => {
-    if (idx < rating) {
-      s.classList.add('active');
-    } else {
-      s.classList.remove('active');
-    }
-  });
+  const starsContainer = container.querySelector<HTMLElement>('.allie-stars-container');
+  if (starsContainer) {
+    setStarsRating(starsContainer, rating);
+  }
+  const label = container.querySelector<HTMLElement>('.allie-rating-label');
+  if (label) {
+    label.textContent = rating ? 'Your rating:' : 'Rate this response:';
+  }
+  container.dataset.rated = rating ? 'true' : 'false';
+  container.dataset.currentRating = String(rating);
 }
