@@ -151,17 +151,25 @@ export default defineContentScript({
       // Bottom-anchored positioning: align with bottom action bar / submit button
       const submitBtn = findElement<HTMLElement>(GEMINI_SELECTORS.submitButton) ||
                         findElement<HTMLElement>(GEMINI_SELECTORS.trailingActions);
-      let targetTop: string;
+      let topNum: number;
       if (submitBtn && submitBtn.isConnected) {
         const btnRect = submitBtn.getBoundingClientRect();
         if (btnRect.height > 0 && btnRect.bottom > 0) {
-          targetTop = `${btnRect.top + btnRect.height / 2 - 20}px`;
+          topNum = btnRect.top + btnRect.height / 2 - 20;
         } else {
-          targetTop = `${rect.bottom - 44}px`;
+          topNum = rect.bottom - 44;
         }
       } else {
-        targetTop = `${rect.bottom - 44}px`;
+        topNum = rect.bottom - 44;
       }
+
+      if (typeof window !== 'undefined') {
+        const maxTop = window.innerHeight - 48;
+        topNum = Math.min(topNum, maxTop);
+        topNum = Math.max(8, topNum);
+      }
+
+      const targetTop = `${topNum}px`;
 
       settingsUi.shadowHost.style.setProperty('--allie-settings-left', targetLeft);
       settingsUi.shadowHost.style.setProperty('--allie-settings-top', targetTop);
