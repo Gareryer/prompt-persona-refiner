@@ -821,7 +821,7 @@ describe('Phase 4: IndexedDB Persistence & Batch Queue Subsystem', () => {
 
       expect(result.success).toBe(true);
       expect(result.conversationId).toBe('proc-1');
-      expect(result.zipName).toMatch(/^gemini_Extracted_Discussion_/);
+      expect(result.zipName).toBe('proc-1.zip');
       expect(result.messageCount).toBe(2);
 
       // Verify DB marked as downloaded
@@ -1100,7 +1100,7 @@ describe('Phase 4: IndexedDB Persistence & Batch Queue Subsystem', () => {
       expect(result.success).toBe(true);
       expect(result.record?.metadata.conversationId).toBe('tab-active-1');
       expect(result.downloadId).toBe(999);
-      expect(result.zipFilename).toMatch(/^gemini_Active_Tab_Chat_/);
+      expect(result.zipFilename).toBe('tab-active-1.zip');
 
       // Verify DB state
       const conv = await testDb.getConversation({

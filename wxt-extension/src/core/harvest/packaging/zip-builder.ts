@@ -330,24 +330,19 @@ export class ZipBuilder {
 
   /**
    * Generates a standardized zip filename from conversation metadata.
-   * Format: {site}_{sanitizedTitle}_{sessionId}_{timestamp}.zip
-   * Embedding the permanent session ID guarantees future-proof traceability even if the chat is renamed.
+   * Format: {sessionId}.zip
+   * Uses only the permanent session ID across all platforms without site, title, or timestamp.
    */
-  static generateZipFilename(metadata: HarvestConversationMetadata, date = new Date()): string {
-    const rawTitle = metadata.title || 'Untitled Conversation';
-    const cleanedTitle = TextSanitizer.cleanTitle(rawTitle);
-    const sanitizedTitle = TextSanitizer.sanitizeFilename(cleanedTitle, 50);
-    const timestamp = TextSanitizer.getTimestamp(date);
-    const site = metadata.site || 'conversation';
-    const sessionId = metadata.conversationId
-      ? TextSanitizer.sanitizeFilename(metadata.conversationId, 40)
-      : '';
+  static generateZipFilename(metadata: HarvestConversationMetadata, _date = new Date()): string {
+    const rawId = metadata.conversationId?.trim();
+    const sessionId = rawId ? TextSanitizer.sanitizeFilename(rawId, 100) : '';
 
     if (sessionId && sessionId !== 'untitled') {
-      return `${site}_${sanitizedTitle}_${sessionId}_${timestamp}.zip`;
+      const cleanId = sessionId.replace(/\.zip$/i, '');
+      return `${cleanId}.zip`;
     }
 
-    return `${site}_${sanitizedTitle}_${timestamp}.zip`;
+    return 'session.zip';
   }
 
   /**

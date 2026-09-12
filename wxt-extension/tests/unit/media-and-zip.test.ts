@@ -643,42 +643,45 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
     });
 
     describe('generateZipFilename', () => {
-      it('generates standardized, filesystem-safe filename with timestamp', () => {
-        const d = new Date('2026-09-05T20:30:00.000Z');
-        const filename = ZipBuilder.generateZipFilename(
-          {
-            site: 'gemini',
-            accountLabel: 'default',
-            conversationId: '123',
-            title: 'Neural Networks 101 - Gemini',
-            url: 'https://gemini.google.com',
-            extractedAt: '2026-09-05',
-            messageCount: 2,
-            imageCount: 0
-          },
-          d
-        );
+      it('uses only session id as the full zip name across all platforms', () => {
+        const filename1 = ZipBuilder.generateZipFilename({
+          site: 'gemini',
+          accountLabel: 'default',
+          conversationId: '123',
+          title: 'Neural Networks 101 - Gemini',
+          url: 'https://gemini.google.com',
+          extractedAt: '2026-09-05',
+          messageCount: 2,
+          imageCount: 0
+        });
+        expect(filename1).toBe('123.zip');
 
-        expect(filename).toBe('gemini_Neural_Networks_101_123_2026-09-05T20-30-00.zip');
+        const filename2 = ZipBuilder.generateZipFilename({
+          site: 'chatgpt',
+          accountLabel: 'default',
+          conversationId: '6a8d751f-26ec-83ea-a465-89fdeadc3d79',
+          title: 'Advanced Typescript Architecture',
+          url: 'https://chatgpt.com/c/6a8d751f-26ec-83ea-a465-89fdeadc3d79',
+          extractedAt: '2026-09-05',
+          messageCount: 10,
+          imageCount: 1
+        });
+        expect(filename2).toBe('6a8d751f-26ec-83ea-a465-89fdeadc3d79.zip');
       });
 
-      it('handles untitled or empty titles with fallback and session ID', () => {
-        const d = new Date('2026-09-05T20:30:00.000Z');
-        const filename = ZipBuilder.generateZipFilename(
-          {
-            site: 'claude',
-            accountLabel: 'default',
-            conversationId: '456',
-            title: '',
-            url: 'https://claude.ai',
-            extractedAt: '2026-09-05',
-            messageCount: 0,
-            imageCount: 0
-          },
-          d
-        );
+      it('handles missing or empty session ID with fallback', () => {
+        const filename = ZipBuilder.generateZipFilename({
+          site: 'claude',
+          accountLabel: 'default',
+          conversationId: '',
+          title: '',
+          url: 'https://claude.ai',
+          extractedAt: '2026-09-05',
+          messageCount: 0,
+          imageCount: 0
+        });
 
-        expect(filename).toBe('claude_Untitled_Conversation_456_2026-09-05T20-30-00.zip');
+        expect(filename).toBe('session.zip');
       });
     });
   });
