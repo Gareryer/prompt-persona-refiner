@@ -526,5 +526,74 @@ describe('Claude Content Injected Components & Design Tokens', () => {
       expect(childElements.length).toBe(1);
       expect(childElements[0]!.id).toBe('refine-toggle-host');
     });
+
+    it('inserts RefineToggle before wrapper div containing button when buttons are nested in child wrappers', () => {
+      document.body.innerHTML = `
+        <div class="flex items-center gap-1 trailing-actions">
+          <div class="btn-wrapper-mic">
+            <button id="nested-mic-btn" aria-label="Use microphone">mic</button>
+          </div>
+          <div class="btn-wrapper-speech">
+            <button id="nested-speech-btn" aria-label="Speech mode">speech</button>
+          </div>
+        </div>
+      `;
+
+      const anchor = document.querySelector<HTMLElement>('.trailing-actions')!;
+      const ui = document.createElement('div');
+      ui.id = 'refine-toggle-host';
+
+      appendRefineToggleToAnchor(anchor, ui, null);
+
+      const childElements = Array.from(anchor.children).filter(c => c.nodeType === 1);
+      expect(childElements.length).toBe(3);
+      expect(childElements[0]!.id).toBe('refine-toggle-host');
+      expect(childElements[1]!.classList.contains('btn-wrapper-mic')).toBe(true);
+      expect(childElements[2]!.classList.contains('btn-wrapper-speech')).toBe(true);
+    });
+
+    it('resolves trailing actions container in empty state when mic button uses data-cds="Button"', () => {
+      document.body.innerHTML = `
+        <div class="input-pill">
+          <div class="ProseMirror" contenteditable="true"></div>
+          <div class="flex items-center gap-1 trailing-actions">
+            <div data-cds="Button" aria-label="Use microphone">mic</div>
+          </div>
+        </div>
+      `;
+
+      const inputContainer = document.querySelector<HTMLElement>('.input-pill');
+      const trailing = getTrailingActionsContainer(inputContainer, null);
+      expect(trailing).toBeTruthy();
+      expect(trailing!.classList.contains('trailing-actions')).toBe(true);
+    });
+
+    it('excludes buttons inside Claude disclaimer chin from being selected as trailing buttons', () => {
+      document.body.innerHTML = `
+        <fieldset class="composer">
+          <div class="input-pill">
+            <div class="ProseMirror" contenteditable="true"></div>
+            <div class="flex items-center trailing-actions">
+              <button aria-label="Voice input">mic</button>
+            </div>
+          </div>
+          <div class="group/chin-trail">
+            <div data-disclaimer="true">
+              <a href="https://support.anthropic.com">Disclaimer</a>
+            </div>
+            <button data-testid="model-selector-dropdown">Sonnet</button>
+          </div>
+        </fieldset>
+      `;
+
+      const input = document.querySelector<HTMLElement>('.ProseMirror');
+      const container = getActiveComposerContainer(input);
+      const trailing = getTrailingActionsContainer(container, null);
+
+      expect(trailing).toBeTruthy();
+      expect(trailing!.classList.contains('trailing-actions')).toBe(true);
+      expect(trailing!.querySelector('[data-testid="model-selector-dropdown"]')).toBeNull();
+      expect(trailing!.closest('.group/chin-trail')).toBeNull();
+    });
   });
 });

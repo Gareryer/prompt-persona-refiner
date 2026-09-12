@@ -134,7 +134,6 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
             className="allie-toolbar-btn allie-toolbar-trigger"
             onClick={handleTriggerClick}
             aria-label="Open Allie Toolbar"
-            title="Open Allie Toolbar"
             tabIndex={0}
           >
             <span className="allie-button-state-layer" />
