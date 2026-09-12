@@ -175,6 +175,7 @@ export class ZipBuilder {
     const compressionLevel = Math.min(Math.max(options?.compressionLevel ?? 6, 1), 9);
     const blob = await zip.generateAsync({
       type: 'blob',
+      mimeType: 'application/zip',
       compression: 'DEFLATE',
       compressionOptions: {
         level: compressionLevel
@@ -195,7 +196,7 @@ export class ZipBuilder {
   }
 
   /**
-   * Estimates the uncompressed export size (in bytes) of the conversation record and image assets.
+   * Calculates total uncompressed byte size of all record assets and attachments.
    */
   static estimateExportSize(
     record: HarvestConversationRecord,
@@ -261,7 +262,6 @@ export class ZipBuilder {
     if (options?.images) {
       for (const img of options.images) inspectAttachment(img, counter++);
     }
-
     if (options?.extraFiles) {
       for (const content of Object.values(options.extraFiles)) {
         if (typeof content === 'string') {
@@ -319,21 +319,44 @@ export class ZipBuilder {
    * Triggers the download of a ZIP blob via chrome.downloads.download,
    * falling back to DOM anchor click in web or test environments.
    * Safely manages URL object creation, download completion listening, and revocation.
+   *
+   * In MV3 Background Service Workers where URL.createObjectURL is undefined in
+   * ServiceWorkerGlobalScope, seamlessly falls back to a base64 Data URL.
    */
   static async downloadZip(
     blob: Blob,
     filename: string,
     options?: DownloadZipOptions
   ): Promise<number | string> {
-    const url = URL.createObjectURL(blob);
+    const isObjectUrlSupported =
+      typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function';
+
+    let url: string;
+    let isBlobUrl = false;
+
+    if (isObjectUrlSupported) {
+      try {
+        url = URL.createObjectURL(blob);
+        isBlobUrl = true;
+      } catch {
+        // Fall back to data URL if createObjectURL throws in certain worker environments
+        url = await MediaExtractor.blobToDataUrl(blob);
+      }
+    } else {
+      url = await MediaExtractor.blobToDataUrl(blob);
+    }
+
     const revokeDelayMs = options?.revokeDelayMs ?? 30000;
 
     let revokeTimer: any = null;
     const safeRevoke = () => {
+      if (!isBlobUrl) return;
       if (revokeTimer) return;
       revokeTimer = setTimeout(() => {
         try {
-          URL.revokeObjectURL(url);
+          if (typeof URL !== 'undefined' && typeof URL.revokeObjectURL === 'function') {
+            URL.revokeObjectURL(url);
+          }
         } catch {
           // Ignore revocation errors
         }
@@ -341,12 +364,15 @@ export class ZipBuilder {
     };
 
     const immediateRevoke = () => {
+      if (!isBlobUrl) return;
       if (revokeTimer) {
         clearTimeout(revokeTimer);
         revokeTimer = null;
       }
       try {
-        URL.revokeObjectURL(url);
+        if (typeof URL !== 'undefined' && typeof URL.revokeObjectURL === 'function') {
+          URL.revokeObjectURL(url);
+        }
       } catch {
         // Ignore revocation errors
       }

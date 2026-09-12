@@ -713,6 +713,72 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
       expect(URL.revokeObjectURL).toHaveBeenCalled();
     });
 
+    it('seamlessly falls back to base64 Data URL in Service Workers where URL.createObjectURL is undefined', async () => {
+      const originalCreate = URL.createObjectURL;
+      delete (URL as any).createObjectURL;
+
+      const mockDownload = vi.fn().mockImplementation((_opts, callback) => {
+        callback(101);
+      });
+
+      (globalThis as any).chrome = {
+        downloads: {
+          download: mockDownload
+        },
+        runtime: {}
+      };
+
+      const testBlob = new Blob(['service-worker-blob'], { type: 'application/zip' });
+      const downloadId = await ZipBuilder.downloadZip(testBlob, 'sw-export.zip', { revokeDelayMs: 10 });
+
+      expect(downloadId).toBe(101);
+      expect(mockDownload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: expect.stringMatching(/^data:application\/zip;base64,/),
+          filename: 'sw-export.zip',
+          saveAs: false
+        }),
+        expect.any(Function)
+      );
+
+      // Verify no crash on revocation
+      await new Promise(res => setTimeout(res, 25));
+
+      URL.createObjectURL = originalCreate;
+    });
+
+    it('falls back to data URL when URL.createObjectURL throws an error', async () => {
+      const originalCreate = URL.createObjectURL;
+      URL.createObjectURL = vi.fn().mockImplementation(() => {
+        throw new Error('Illegal invocation in worker');
+      });
+
+      const mockDownload = vi.fn().mockImplementation((_opts, callback) => {
+        callback(102);
+      });
+
+      (globalThis as any).chrome = {
+        downloads: {
+          download: mockDownload
+        },
+        runtime: {}
+      };
+
+      const testBlob = new Blob(['throw-blob'], { type: 'application/zip' });
+      const downloadId = await ZipBuilder.downloadZip(testBlob, 'throw-export.zip');
+
+      expect(downloadId).toBe(102);
+      expect(mockDownload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: expect.stringMatching(/^data:application\/zip;base64,/),
+          filename: 'throw-export.zip'
+        }),
+        expect.any(Function)
+      );
+
+      URL.createObjectURL = originalCreate;
+    });
+
     it('rejects with chrome.runtime.lastError when download fails to initiate', async () => {
       const mockDownload = vi.fn().mockImplementation((_opts, callback) => {
         (globalThis as any).chrome.runtime.lastError = { message: 'Disk space exhausted' };
