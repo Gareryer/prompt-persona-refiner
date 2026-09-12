@@ -330,14 +330,22 @@ export class ZipBuilder {
 
   /**
    * Generates a standardized zip filename from conversation metadata.
-   * Format: {site}_{sanitizedTitle}_{timestamp}.zip
+   * Format: {site}_{sanitizedTitle}_{sessionId}_{timestamp}.zip
+   * Embedding the permanent session ID guarantees future-proof traceability even if the chat is renamed.
    */
   static generateZipFilename(metadata: HarvestConversationMetadata, date = new Date()): string {
     const rawTitle = metadata.title || 'Untitled Conversation';
     const cleanedTitle = TextSanitizer.cleanTitle(rawTitle);
-    const sanitizedTitle = TextSanitizer.sanitizeFilename(cleanedTitle, 60);
+    const sanitizedTitle = TextSanitizer.sanitizeFilename(cleanedTitle, 50);
     const timestamp = TextSanitizer.getTimestamp(date);
     const site = metadata.site || 'conversation';
+    const sessionId = metadata.conversationId
+      ? TextSanitizer.sanitizeFilename(metadata.conversationId, 40)
+      : '';
+
+    if (sessionId && sessionId !== 'untitled') {
+      return `${site}_${sanitizedTitle}_${sessionId}_${timestamp}.zip`;
+    }
 
     return `${site}_${sanitizedTitle}_${timestamp}.zip`;
   }
@@ -349,6 +357,10 @@ export class ZipBuilder {
    *
    * In MV3 Background Service Workers where URL.createObjectURL is undefined in
    * ServiceWorkerGlobalScope, seamlessly falls back to a base64 Data URL.
+   *
+   * Cross-browser resilience:
+   * - Chromium: Uses chrome.downloads.onDeterminingFilename to prevent data: URLs from defaulting to "download.zip".
+   * - Firefox & Safari: Safely checks listener availability; Firefox/Safari already respect filename on download options.
    */
   static async downloadZip(
     blob: Blob,
@@ -408,6 +420,54 @@ export class ZipBuilder {
     // 1. Extension Environment: chrome.downloads.download
     if (typeof chrome !== 'undefined' && chrome?.downloads?.download) {
       return new Promise<number>((resolve, reject) => {
+        let expectedDownloadId: number | undefined;
+        let determiningListener: any = null;
+
+        const cleanupDetermining = () => {
+          if (determiningListener && typeof chrome?.downloads?.onDeterminingFilename?.removeListener === 'function') {
+            try {
+              chrome.downloads.onDeterminingFilename.removeListener(determiningListener);
+            } catch {
+              // Ignore removal errors
+            }
+            determiningListener = null;
+          }
+        };
+
+        // Chromium-only hook: chrome.downloads.onDeterminingFilename prevents data: URLs from defaulting to "download.zip".
+        // Strictly guarded for non-Chromium browsers (Firefox, Safari) where onDeterminingFilename is undefined.
+        if (typeof chrome?.downloads?.onDeterminingFilename?.addListener === 'function') {
+          determiningListener = (
+            item: any,
+            suggest: (suggestion?: { filename: string; conflictAction?: string }) => void
+          ) => {
+            const isMatch =
+              (expectedDownloadId !== undefined && item.id === expectedDownloadId) ||
+              (item.url === url) ||
+              (url.startsWith('data:') && item.url?.startsWith('data:'));
+
+            if (isMatch) {
+              try {
+                suggest({ filename, conflictAction: 'uniquify' });
+              } catch {
+                // If suggest throws (e.g. already suggested or aborted), fail-open
+              }
+              cleanupDetermining();
+              return true;
+            }
+          };
+
+          try {
+            chrome.downloads.onDeterminingFilename.addListener(determiningListener);
+          } catch {
+            determiningListener = null;
+          }
+        }
+
+        const fallbackTimer = setTimeout(() => {
+          cleanupDetermining();
+        }, 30000);
+
         chrome.downloads.download(
           {
             url,
@@ -415,8 +475,11 @@ export class ZipBuilder {
             saveAs: options?.saveAs ?? false
           },
           (downloadId?: number) => {
+            expectedDownloadId = downloadId;
             const err = chrome.runtime?.lastError;
             if (err || downloadId === undefined) {
+              clearTimeout(fallbackTimer);
+              cleanupDetermining();
               immediateRevoke();
               reject(new Error(err?.message || 'chrome.downloads.download failed to initiate'));
             } else {
@@ -426,6 +489,8 @@ export class ZipBuilder {
                   if (delta.id === downloadId) {
                     const state = delta.state?.current;
                     if (state === 'complete' || state === 'interrupted') {
+                      clearTimeout(fallbackTimer);
+                      cleanupDetermining();
                       try {
                         chrome.downloads.onChanged.removeListener(changeListener);
                       } catch {

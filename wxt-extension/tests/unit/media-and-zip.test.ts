@@ -659,10 +659,10 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
           d
         );
 
-        expect(filename).toBe('gemini_Neural_Networks_101_2026-09-05T20-30-00.zip');
+        expect(filename).toBe('gemini_Neural_Networks_101_123_2026-09-05T20-30-00.zip');
       });
 
-      it('handles untitled or empty titles with fallback', () => {
+      it('handles untitled or empty titles with fallback and session ID', () => {
         const d = new Date('2026-09-05T20:30:00.000Z');
         const filename = ZipBuilder.generateZipFilename(
           {
@@ -678,7 +678,7 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
           d
         );
 
-        expect(filename).toBe('claude_Untitled_Conversation_2026-09-05T20-30-00.zip');
+        expect(filename).toBe('claude_Untitled_Conversation_456_2026-09-05T20-30-00.zip');
       });
     });
   });
@@ -777,6 +777,71 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
       );
 
       URL.createObjectURL = originalCreate;
+    });
+
+    it('registers onDeterminingFilename in Chromium and calls suggest with filename and uniquify', async () => {
+      let registeredListener: any = null;
+      const mockAddListener = vi.fn().mockImplementation((listener) => {
+        registeredListener = listener;
+      });
+      const mockRemoveListener = vi.fn();
+      const mockSuggest = vi.fn();
+
+      const mockDownload = vi.fn().mockImplementation((_opts, callback) => {
+        callback(200);
+        // Simulate Chromium invoking onDeterminingFilename
+        if (registeredListener) {
+          registeredListener({ id: 200, url: 'data:application/zip;base64,AAA' }, mockSuggest);
+        }
+      });
+
+      (globalThis as any).chrome = {
+        downloads: {
+          download: mockDownload,
+          onDeterminingFilename: {
+            addListener: mockAddListener,
+            removeListener: mockRemoveListener
+          }
+        },
+        runtime: {}
+      };
+
+      const testBlob = new Blob(['chromium-zip'], { type: 'application/zip' });
+      const downloadId = await ZipBuilder.downloadZip(testBlob, 'chatgpt_test_123_2026.zip');
+
+      expect(downloadId).toBe(200);
+      expect(mockAddListener).toHaveBeenCalled();
+      expect(mockSuggest).toHaveBeenCalledWith({
+        filename: 'chatgpt_test_123_2026.zip',
+        conflictAction: 'uniquify'
+      });
+      expect(mockRemoveListener).toHaveBeenCalled();
+    });
+
+    it('operates cleanly in non-Chromium environments (Firefox/Safari) where onDeterminingFilename is undefined', async () => {
+      const mockDownload = vi.fn().mockImplementation((_opts, callback) => {
+        callback(300);
+      });
+
+      // Firefox and Safari have chrome.downloads.download but NOT onDeterminingFilename
+      (globalThis as any).chrome = {
+        downloads: {
+          download: mockDownload,
+          onDeterminingFilename: undefined
+        },
+        runtime: {}
+      };
+
+      const testBlob = new Blob(['firefox-zip'], { type: 'application/zip' });
+      const downloadId = await ZipBuilder.downloadZip(testBlob, 'claude_test_456_2026.zip');
+
+      expect(downloadId).toBe(300);
+      expect(mockDownload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filename: 'claude_test_456_2026.zip'
+        }),
+        expect.any(Function)
+      );
     });
 
     it('rejects with chrome.runtime.lastError when download fails to initiate', async () => {
