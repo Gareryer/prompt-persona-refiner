@@ -1,6 +1,6 @@
 # Clio Codebase Full Inventory & WXT Modular Porting Blueprint
 
-> **Document Status**: **ACTIVE & PRODUCTION-VERIFIED** (Phase 1–8 Complete, 542/542 Vitest Tests Passing across 30 suites, Clean Typecheck & Production Build).
+> **Document Status**: **ACTIVE & PRODUCTION-VERIFIED** (Phase 1–9 Complete, 563/563 Vitest Tests Passing across 30 suites, Clean Typecheck & Production Build).
 > **Document Purpose**: Comprehensive technical reference auditing every module, class, function, selector, state machine, and data flow in [Clio](https://github.com/martymcenroe/Clio) (v1.4.1 / v1.6.2), paired with a modular target architecture for clean-room TypeScript porting into the `wxt-extension` framework.
 > **Architecture Core Pattern**: **Platform-Specific Adapters** for DOM discovery, scroller quirks, and HTML extraction/sanitization paired with a **Unified Subsystem** for persistence (IndexedDB), media harvesting, packaging (JSZip), and batch queue orchestration.
 
@@ -43,14 +43,14 @@
 
 Clio is an open-source, privacy-first browser extension that extracts complete multi-turn conversations from **Google Gemini**, **Anthropic Claude**, and **OpenAI ChatGPT** into structured JSON archives with local image asset bundles.
 
-### Current Implementation Status: **Phase 1–8 Complete**
-- **Layer 1 (Unified Subsystem)**: **100% COMPLETE**. Storage (IndexedDB `clio-archive`), Media Extraction (fail-open images), Packaging (JSZip, `chrome.downloads`), Auto-Scroller engine, Work Queue state machine, Batch Tab Worker, and Orchestrator facade are fully built, hardened, and exported.
+### Current Implementation Status: **Phase 1–9 Complete**
+- **Layer 1 (Unified Subsystem)**: **100% COMPLETE**. Storage (IndexedDB `clio-archive`), Media Extraction (fail-open images), Packaging (JSZip, `chrome.downloads`, MV3 ServiceWorker base64 data URL fallback), Auto-Scroller engine, Work Queue state machine, Batch Tab Worker, and Orchestrator facade are fully built, hardened, and exported.
 - **Layer 2 (Platform-Specific Adapters)**:
   - **Google Gemini**: **100% COMPLETE & VERIFIED** (Production reference implementation with paired container extraction, thinking trace isolation, LaTeX math synthesis, UI chrome stripping, M3 Scraper Toolbar, and sidebar enumeration).
   - **OpenAI ChatGPT**: **100% COMPLETE & VERIFIED** (Production implementation with VirtualMessageCache, ancestor scroll-root detection, CodeMirror 6 line preservation, reasoning header extraction, M3 Scraper Toolbar, and sidebar enumeration).
   - **Anthropic Claude**: **100% COMPLETE & VERIFIED** (Production implementation with 2-row CSS Grid isolation, in-place chronological tool call harvesting, artifact widget chrome stripping, Clio #37 / #39 / #43 resilience, M3 Scraper Toolbar, and dual REST/DOM enumeration).
   - **DeepSeek, Grok, Meta**: **PENDING** (Architecture ready in Section 7.3).
-- **Verification**: **542/542 Vitest unit tests passing** across 30 test suites, zero TypeScript typecheck errors, and production bundle compiling cleanly in WXT with dedicated modular bundles and M3 Scraper Action Toolbars across Gemini, ChatGPT, and Claude.
+- **Verification**: **563/563 Vitest unit tests passing** across 30 test suites, zero TypeScript typecheck errors, and production bundle compiling cleanly in WXT with dedicated modular bundles and M3 Scraper Action Toolbars across Gemini, ChatGPT, and Claude.
 
 ---
 
@@ -404,7 +404,7 @@ Because our WXT extension has existing adapters for DeepSeek, Grok, and Meta:
 ### Phase 2: Unified Media Extraction & ZIP Packaging
 - **Status**: **COMPLETE**.
 - **Files**: `src/core/harvest/extraction/media-extractor.ts`, `src/core/harvest/packaging/zip-builder.ts`, `package.json` (`jszip`).
-- **Tests**: 46 tests in `tests/unit/media-and-zip.test.ts`.
+- **Tests**: 48 tests in `tests/unit/media-and-zip.test.ts`.
 
 ### Phase 3: Auto-Scroller & Upward History Loading
 - **Status**: **COMPLETE**.
@@ -438,11 +438,17 @@ Because our WXT extension has existing adapters for DeepSeek, Grok, and Meta:
 - **Key Deliverables**: Collapsible M3 scraper toolbar (Style 4 trigger &rarr; click-to-expand stadium pill capsule with outside-click collapse for Settings, Export, Sync, Collapse), `HARVEST_EXPORT_ACTIVE_TAB` and `HARVEST_SYNC_ACTIVE_TAB` background handlers, `updateRatingUI` `.allie-stars-container` star selector fix, and `MessageDispatcherService` contract suite.
 - **Tests**: 39 tests in `tests/unit/scraper-toolbars.test.ts`, 5 tests in `tests/unit/clio-parity-attachments.test.ts`, 6 tests in `tests/unit/clio-parity-ordering.test.ts`, 12 tests in `tests/unit/rating-engine.test.ts`, 15 tests in `tests/unit/messaging.test.ts`.
 
+### Phase 9: MV3 Background Service Worker ZIP Packaging Hardening
+- **Status**: **COMPLETE & PRODUCTION-VERIFIED**.
+- **Files**: `src/core/harvest/packaging/zip-builder.ts`, `tests/unit/media-and-zip.test.ts`.
+- **Key Deliverables**: Resolved `URL.createObjectURL is not a function` runtime error in Chromium MV3 background service workers (`ServiceWorkerGlobalScope`) triggered by single-conversation ZIP exports from in-composer ScraperToolbars. Implemented graceful base64 Data URL fallback via `MediaExtractor.blobToDataUrl(blob)` with MIME specification `application/zip` and safe conditional object URL revocation.
+- **Tests**: 2 tests added in `tests/unit/media-and-zip.test.ts` (48 tests total in suite).
+
 ### Total Verification Summary
-- **Tests**: **542 passed, 0 failed** across 30 test suites (100% pass rate).
+- **Tests**: **563 passed, 0 failed** across 30 test suites (100% pass rate).
 - **Typecheck**: `tsc --noEmit` clean (0 errors).
 - **Production Build**: `wxt build` generates clean Chrome MV3 bundle containing 4 isolated, partitioned content scripts:
-  - `content-scripts/gemini.js` (428 KB)
-  - `content-scripts/chatgpt.js` (428 KB)
-  - `content-scripts/claude.js` (428 KB)
-  - `content-scripts/content.js` (403 KB)
+  - `content-scripts/gemini.js` (449.60 KB)
+  - `content-scripts/chatgpt.js` (451.00 KB)
+  - `content-scripts/claude.js` (451.62 KB)
+  - `content-scripts/content.js` (412.41 KB)
