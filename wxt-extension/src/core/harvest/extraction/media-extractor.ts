@@ -420,6 +420,13 @@ export class MediaExtractor {
           const path = this.formatImagePath(task.imageIndex, ext);
           task.attachment.filename = path;
           delete task.attachment.error;
+          if (!task.attachment.dataUrl && typeof task.attachment.blob.arrayBuffer === 'function') {
+            try {
+              task.attachment.dataUrl = await this.blobToDataUrl(task.attachment.blob);
+            } catch {
+              // Ignore failure to convert to dataUrl
+            }
+          }
           images.push({
             path,
             filename: path,
@@ -442,6 +449,15 @@ export class MediaExtractor {
 
         if (result.success) {
           task.attachment.blob = result.blob;
+          if (result.originalSrc?.startsWith('data:')) {
+            task.attachment.dataUrl = result.originalSrc;
+          } else if (result.blob && typeof result.blob.arrayBuffer === 'function') {
+            try {
+              task.attachment.dataUrl = await this.blobToDataUrl(result.blob);
+            } catch {
+              // Ignore failure to convert to dataUrl
+            }
+          }
           delete task.attachment.error;
           images.push({
             path: result.path,
@@ -450,7 +466,7 @@ export class MediaExtractor {
             mimeType: result.mimeType,
             originalSrc: result.originalSrc,
             turnIndex: result.turnIndex,
-            imageIndex: result.imageIndex
+            imageIndex: task.imageIndex
           });
         } else {
           task.attachment.error = result.error;

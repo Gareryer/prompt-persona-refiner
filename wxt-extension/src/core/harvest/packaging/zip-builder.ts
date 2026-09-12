@@ -81,18 +81,27 @@ export class ZipBuilder {
     zip.file('conversation.json', jsonString);
 
     // 2. Gather all image attachments
-    const imageMap = new Map<string, { blob?: Blob; dataUrl?: string }>();
+    const imageMap = new Map<string, { blob?: Blob; dataUrl?: string; originalSrc?: string }>();
     const seenAttachments = new Set<HarvestAttachment>();
 
     const registerImage = (att: HarvestAttachment, fallbackIndex: number) => {
       if (seenAttachments.has(att)) return;
       seenAttachments.add(att);
 
-      if (!att.blob && !att.dataUrl) return;
+      const isValidBlob =
+        att.blob instanceof Blob ||
+        (att.blob && typeof (att.blob as any).arrayBuffer === 'function');
+      const hasDataUrl = typeof att.dataUrl === 'string' && att.dataUrl.length > 0;
+      const hasSrc = typeof att.originalSrc === 'string' && att.originalSrc.length > 0;
+
+      if (!isValidBlob && !hasDataUrl && !hasSrc) return;
 
       let filename = att.filename;
       if (!filename) {
-        const ext = MediaExtractor.getImageExtension(att.blob?.type, att.originalSrc);
+        const ext = MediaExtractor.getImageExtension(
+          isValidBlob ? att.blob?.type : undefined,
+          att.originalSrc || (hasDataUrl ? att.dataUrl : undefined)
+        );
         filename = MediaExtractor.formatImagePath(fallbackIndex, ext);
       }
 
@@ -100,7 +109,11 @@ export class ZipBuilder {
       const normalizedPath = filename.startsWith('images/') ? filename : `images/${filename}`;
 
       if (!imageMap.has(normalizedPath)) {
-        imageMap.set(normalizedPath, { blob: att.blob, dataUrl: att.dataUrl });
+        imageMap.set(normalizedPath, {
+          blob: isValidBlob ? att.blob : undefined,
+          dataUrl: hasDataUrl ? att.dataUrl : undefined,
+          originalSrc: att.originalSrc
+        });
       }
     };
 
@@ -135,27 +148,37 @@ export class ZipBuilder {
 
     // 3. Add images to zip (convert Blob to ArrayBuffer for MV3 ServiceWorker & Node compatibility)
     for (const [path, img] of imageMap.entries()) {
-      if (img.blob) {
-        if (typeof img.blob.arrayBuffer === 'function') {
-          const arrayBuf = await img.blob.arrayBuffer();
+      try {
+        if (img.blob && (img.blob instanceof Blob || typeof (img.blob as any).arrayBuffer === 'function')) {
+          const arrayBuf = await (img.blob as any).arrayBuffer();
           zip.file(path, arrayBuf);
-        } else {
-          zip.file(path, img.blob);
-        }
-      } else if (img.dataUrl) {
-        try {
-          const blob = MediaExtractor.dataUrlToBlob(img.dataUrl);
-          const arrayBuf = await blob.arrayBuffer();
-          zip.file(path, arrayBuf);
-        } catch {
-          const commaIdx = img.dataUrl.indexOf(',');
-          const raw = commaIdx >= 0 ? img.dataUrl.slice(commaIdx + 1) : img.dataUrl;
-          if (img.dataUrl.includes(';base64')) {
-            zip.file(path, raw.replace(/\s+/g, ''), { base64: true });
-          } else {
-            zip.file(path, raw);
+        } else if (img.dataUrl) {
+          try {
+            const blob = MediaExtractor.dataUrlToBlob(img.dataUrl);
+            const arrayBuf = await blob.arrayBuffer();
+            zip.file(path, arrayBuf);
+          } catch {
+            const commaIdx = img.dataUrl.indexOf(',');
+            const raw = commaIdx >= 0 ? img.dataUrl.slice(commaIdx + 1) : img.dataUrl;
+            if (img.dataUrl.includes(';base64')) {
+              zip.file(path, raw.replace(/\s+/g, ''), { base64: true });
+            } else {
+              zip.file(path, raw);
+            }
+          }
+        } else if (img.originalSrc && (img.originalSrc.startsWith('http://') || img.originalSrc.startsWith('https://'))) {
+          try {
+            const resp = await fetch(img.originalSrc);
+            if (resp.ok) {
+              const arrayBuf = await resp.arrayBuffer();
+              zip.file(path, arrayBuf);
+            }
+          } catch {
+            // Fail-open: single image fetch failure should not abort archive
           }
         }
+      } catch (imgError) {
+        console.warn(`[ZipBuilder] Failed to bundle image '${path}' (fail-open):`, imgError);
       }
     }
 
@@ -223,8 +246,12 @@ export class ZipBuilder {
       if (countedPaths.has(filename)) return;
       countedPaths.add(filename);
 
-      if (att.blob) {
-        totalBytes += att.blob.size;
+      const isValidBlob =
+        att.blob instanceof Blob ||
+        (att.blob && typeof (att.blob as any).size === 'number');
+
+      if (isValidBlob) {
+        totalBytes += (att.blob as any).size;
       } else if (att.dataUrl) {
         const commaIdx = att.dataUrl.indexOf(',');
         const isBase64 = att.dataUrl.slice(0, Math.max(0, commaIdx)).includes(';base64');

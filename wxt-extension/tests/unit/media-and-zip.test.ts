@@ -1166,6 +1166,89 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
       const plainBlob = MediaExtractor.dataUrlToBlob(rawPercent);
       expect(plainBlob.type).toBe('text/plain');
     });
+
+    it('buildZip handles attachments with empty object {} blob and falls back to dataUrl without throwing', async () => {
+      const record: HarvestConversationRecord = {
+        metadata: {
+          site: 'chatgpt',
+          accountLabel: 'default',
+          conversationId: 'chatgpt-ipc-1',
+          title: 'ChatGPT IPC Test',
+          url: 'https://chatgpt.com/c/chatgpt-ipc-1',
+          extractedAt: new Date().toISOString(),
+          messageCount: 1,
+          imageCount: 1
+        },
+        messages: [
+          {
+            id: 'm1',
+            turnIndex: 0,
+            role: 'user',
+            content: 'Check diagram',
+            timestamp: Date.now(),
+            attachments: [
+              {
+                type: 'image',
+                filename: 'images/001.png',
+                // Simulating empty object after Chrome IPC serialization of a Blob
+                blob: {} as any,
+                dataUrl: SAMPLE_BASE64_PNG,
+                originalSrc: 'https://example.com/img.png',
+                turnIndex: 0
+              }
+            ]
+          }
+        ]
+      };
+
+      const zipBlob = await ZipBuilder.buildZip(record);
+      expect(zipBlob).toBeInstanceOf(Blob);
+
+      const loadedZip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
+      const imgFile = loadedZip.file('images/001.png');
+      expect(imgFile).not.toBeNull();
+      const imgBytes = await imgFile!.async('uint8array');
+      expect(imgBytes.length).toBeGreaterThan(0);
+    });
+
+    it('buildZip fails-open when an image has invalid data and no dataUrl, producing valid zip', async () => {
+      const record: HarvestConversationRecord = {
+        metadata: {
+          site: 'chatgpt',
+          accountLabel: 'default',
+          conversationId: 'chatgpt-failopen-1',
+          title: 'ChatGPT Fail-Open Test',
+          url: 'https://chatgpt.com/c/chatgpt-failopen-1',
+          extractedAt: new Date().toISOString(),
+          messageCount: 1,
+          imageCount: 1
+        },
+        messages: [
+          {
+            id: 'm1',
+            turnIndex: 0,
+            role: 'user',
+            content: 'Hello',
+            timestamp: Date.now(),
+            attachments: [
+              {
+                type: 'image',
+                filename: 'images/001.png',
+                blob: {} as any, // completely unreadable
+                turnIndex: 0
+              }
+            ]
+          }
+        ]
+      };
+
+      // Must not throw "Can't read the data of 'images/001.png'"
+      const zipBlob = await ZipBuilder.buildZip(record);
+      expect(zipBlob).toBeInstanceOf(Blob);
+
+      const loadedZip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
+      expect(loadedZip.file('conversation.json')).not.toBeNull();
+    });
   });
 });
 
