@@ -58,6 +58,7 @@ import {
   createRatingUI,
   highlightStars,
   setStarsRating,
+  updateRatingUI,
   RatingInjector
 } from '../../src/core/rating';
 
@@ -142,6 +143,101 @@ describe('Rating Subsystem Engine', () => {
       }
       highlightStars(container, 3);
       setStarsRating(container, 4);
+    });
+
+    it('updateRatingUI fills stars, updates label and dataset', () => {
+      const container = (globalThis as any).document.createElement('div');
+
+      const starsContainer = (globalThis as any).document.createElement('div');
+      starsContainer.className = 'allie-stars-container';
+      for (let i = 1; i <= 5; i++) {
+        const star = (globalThis as any).document.createElement('button');
+        star.className = 'allie-star';
+        starsContainer.appendChild(star);
+      }
+      container.appendChild(starsContainer);
+
+      const label = (globalThis as any).document.createElement('span');
+      label.className = 'allie-rating-label';
+      label.textContent = 'Rate this response:';
+      container.appendChild(label);
+
+      container.querySelector = vi.fn((selector: string) => {
+        if (selector === '.allie-stars-container') return starsContainer;
+        if (selector === '.allie-rating-label') return label;
+        return null;
+      });
+
+      updateRatingUI(container, 3);
+
+      const stars = starsContainer.children as any[];
+      const filled = stars.filter((s: any) => s.classList.contains('allie-star-filled'));
+      expect(filled.length).toBe(3);
+      expect(stars.slice(3).every((s: any) => !s.classList.contains('allie-star-filled'))).toBe(true);
+      expect(label.textContent).toBe('Your rating:');
+      expect(container.dataset.currentRating).toBe('3');
+      expect(container.dataset.rated).toBe('true');
+    });
+
+    it('updateRatingUI with zero rating clears stars and resets label', () => {
+      const container = (globalThis as any).document.createElement('div');
+
+      const starsContainer = (globalThis as any).document.createElement('div');
+      starsContainer.className = 'allie-stars-container';
+      for (let i = 1; i <= 5; i++) {
+        const star = (globalThis as any).document.createElement('button');
+        star.className = 'allie-star';
+        starsContainer.appendChild(star);
+      }
+      container.appendChild(starsContainer);
+
+      const label = (globalThis as any).document.createElement('span');
+      label.className = 'allie-rating-label';
+      container.appendChild(label);
+      container.querySelector = vi.fn((selector: string) => {
+        if (selector === '.allie-stars-container') return starsContainer;
+        if (selector === '.allie-rating-label') return label;
+        return null;
+      });
+
+      updateRatingUI(container, 2);
+      updateRatingUI(container, 0);
+
+      const filled = (starsContainer.children as any[]).filter((s: any) => s.classList.contains('allie-star-filled'));
+      expect(filled.length).toBe(0);
+      expect(label.textContent).toBe('Rate this response:');
+      expect(container.dataset.currentRating).toBe('0');
+      expect(container.dataset.rated).toBe('false');
+    });
+
+    it('updateRatingUI is idempotent and re-renders on rating change', () => {
+      const container = (globalThis as any).document.createElement('div');
+
+      const starsContainer = (globalThis as any).document.createElement('div');
+      starsContainer.className = 'allie-stars-container';
+      for (let i = 1; i <= 5; i++) {
+        const star = (globalThis as any).document.createElement('button');
+        star.className = 'allie-star';
+        starsContainer.appendChild(star);
+      }
+      container.appendChild(starsContainer);
+
+      const label = (globalThis as any).document.createElement('span');
+      label.className = 'allie-rating-label';
+      container.appendChild(label);
+      container.querySelector = vi.fn((selector: string) => {
+        if (selector === '.allie-stars-container') return starsContainer;
+        if (selector === '.allie-rating-label') return label;
+        return null;
+      });
+
+      updateRatingUI(container, 2);
+      updateRatingUI(container, 4);
+
+      const stars = starsContainer.children as any[];
+      expect(stars.filter((s: any) => s.classList.contains('allie-star-filled')).length).toBe(4);
+      expect(stars[0].textContent).toBe('★');
+      expect(stars[4].textContent).toBe('☆');
     });
   });
 
