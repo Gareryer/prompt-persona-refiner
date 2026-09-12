@@ -1110,6 +1110,41 @@ describe('Phase 4: IndexedDB Persistence & Batch Queue Subsystem', () => {
       });
       expect(conv?.download_status).toBe('done');
       expect(conv?.zip_name).toBe(result.zipFilename);
+      expect(conv?.messages).toHaveLength(2);
+      expect(conv?.messages?.[0]?.content).toBe('Hello AI');
+    });
+
+    it('extractActiveTab with download: false saves messages to DB and skips zip generation', async () => {
+      const mockRecord = createMockExtractionRecord('tab-sync-1', 'gemini', 'Sync Only Chat');
+      const buildZipMock = vi.fn();
+      const downloadZipMock = vi.fn();
+
+      const customDeps: Partial<TabWorkerDeps> = {
+        navigateAndExtract: vi.fn().mockResolvedValue(mockRecord),
+        buildZip: buildZipMock,
+        downloadZip: downloadZipMock,
+        db: testDb
+      };
+
+      const result = await orchestrator.extractActiveTab({
+        tabId: 105,
+        download: false,
+        customDeps
+      });
+
+      expect(result.success).toBe(true);
+      expect(buildZipMock).not.toHaveBeenCalled();
+      expect(downloadZipMock).not.toHaveBeenCalled();
+
+      // Verify DB state contains full messages
+      const conv = await testDb.getConversation({
+        site: 'gemini',
+        account_label: 'test-user',
+        conversation_id: 'tab-sync-1'
+      });
+      expect(conv?.download_status).toBe('done');
+      expect(conv?.messages).toHaveLength(2);
+      expect(conv?.messages?.[1]?.content).toBe('Hello human! How can I help you today?');
     });
 
     it('extractActiveTab traps failure and returns error object', async () => {

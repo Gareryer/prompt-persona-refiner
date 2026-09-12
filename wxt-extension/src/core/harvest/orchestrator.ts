@@ -86,14 +86,29 @@ export class HarvestOrchestrator {
    */
   async extractActiveTab(options?: ExtractTabOptions): Promise<ExtractTabResult> {
     let targetTabId = options?.tabId;
+    let targetTabUrl = '';
 
     // 1. Resolve active tab if not specified
     if (targetTabId === undefined) {
       if (typeof chrome !== 'undefined' && chrome?.tabs?.query) {
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        let tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+        if (!tabs[0]?.id) {
+          tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        }
+        if (!tabs[0]?.id) {
+          tabs = await chrome.tabs.query({ active: true });
+        }
         if (tabs[0]?.id !== undefined) {
           targetTabId = tabs[0].id;
+          targetTabUrl = tabs[0].url || '';
         }
+      }
+    } else if (typeof chrome !== 'undefined' && chrome?.tabs?.get && targetTabId > 0) {
+      try {
+        const tab = await chrome.tabs.get(targetTabId);
+        targetTabUrl = tab?.url || '';
+      } catch {
+        // Tab lookup error ignored in test or headless environments
       }
     }
 
@@ -101,13 +116,23 @@ export class HarvestOrchestrator {
       targetTabId = 0;
     }
 
+    let detectedSite: HarvestPlatform | undefined;
+    if (targetTabUrl) {
+      if (targetTabUrl.includes('gemini.google.com')) detectedSite = 'gemini';
+      else if (targetTabUrl.includes('chatgpt.com')) detectedSite = 'chatgpt';
+      else if (targetTabUrl.includes('claude.ai')) detectedSite = 'claude';
+      else if (targetTabUrl.includes('deepseek.com')) detectedSite = 'deepseek';
+      else if (targetTabUrl.includes('x.com') || targetTabUrl.includes('twitter.com')) detectedSite = 'grok';
+      else if (targetTabUrl.includes('meta.ai')) detectedSite = 'meta';
+    }
+
     try {
       // 2. Extract conversation record
       let record: HarvestConversationRecord;
       if (options?.customDeps?.navigateAndExtract) {
-        record = await options.customDeps.navigateAndExtract(targetTabId, '', 'gemini');
+        record = await options.customDeps.navigateAndExtract(targetTabId, '', detectedSite || 'gemini');
       } else {
-        record = await sendExtractWithRecovery(targetTabId);
+        record = await sendExtractWithRecovery(targetTabId, { site: detectedSite });
       }
 
       const meta = record.metadata;
@@ -117,7 +142,7 @@ export class HarvestOrchestrator {
         conversation_id: meta.conversationId
       };
 
-      // 3. Upsert into database
+      // 3. Upsert into database with full turns and structured metadata
       await this.db.upsertConversation({
         site: meta.site,
         account_label: meta.accountLabel,
@@ -126,23 +151,30 @@ export class HarvestOrchestrator {
         url: meta.url,
         discovered_at: Date.now(),
         content_extracted_at: Date.now(),
-        download_status: options?.download !== false ? 'in_progress' : 'pending'
+        download_status: options?.download !== false ? 'in_progress' : 'done',
+        messages: record.messages,
+        metadata: record.metadata
       });
 
-      // 4. Package ZIP
-      const zipFilename = ZipBuilder.generateZipFilename(meta);
-      const buildZipFn = options?.customDeps?.buildZip || (r => ZipBuilder.buildZip(r));
-      const zipBlob = await buildZipFn(record);
-
-      // 5. Download ZIP if requested
+      let zipFilename: string | undefined;
+      let zipBlob: Blob | undefined;
       let downloadId: number | string | undefined;
+
+      // 4. Package & Download ZIP only if requested
       if (options?.download !== false) {
+        zipFilename = ZipBuilder.generateZipFilename(meta);
+        const buildZipFn = options?.customDeps?.buildZip || (r => ZipBuilder.buildZip(r));
+        zipBlob = await buildZipFn(record);
+
         const downloadZipFn =
           options?.customDeps?.downloadZip ||
           ((blob, filename) => ZipBuilder.downloadZip(blob, filename, { saveAs: options?.saveAs }));
         downloadId = await downloadZipFn(zipBlob, zipFilename);
 
         await this.db.markDownloaded(keyObj, { zip_name: zipFilename });
+      } else {
+        // Sync-only: mark downloaded/done in DB without building throwaway ZIP
+        await this.db.markDownloaded(keyObj, {});
       }
 
       return {

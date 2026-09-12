@@ -178,7 +178,22 @@ export async function sendExtractWithRecovery(
       msg.includes('Could not establish connection');
 
     if (isDisconnected && typeof chrome !== 'undefined' && chrome?.scripting?.executeScript) {
-      const site = deps?.site;
+      let site = deps?.site;
+      if (!site && chrome?.tabs?.get && tabId > 0) {
+        try {
+          const tab = await chrome.tabs.get(tabId);
+          if (tab?.url) {
+            if (tab.url.includes('gemini.google.com')) site = 'gemini';
+            else if (tab.url.includes('chatgpt.com')) site = 'chatgpt';
+            else if (tab.url.includes('claude.ai')) site = 'claude';
+            else if (tab.url.includes('deepseek.com')) site = 'deepseek';
+            else if (tab.url.includes('x.com') || tab.url.includes('twitter.com')) site = 'grok';
+            else if (tab.url.includes('meta.ai')) site = 'meta';
+          }
+        } catch {
+          // Ignore tab lookup failure
+        }
+      }
       const primaryScript = (site && site in PLATFORM_SCRIPT_BUNDLES)
         ? PLATFORM_SCRIPT_BUNDLES[site as HarvestPlatform]
         : FALLBACK_SCRIPT_BUNDLE;

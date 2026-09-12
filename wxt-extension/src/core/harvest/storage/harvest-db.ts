@@ -259,7 +259,9 @@ export class HarvestDB {
           attempts: Math.max(existing?.attempts ?? 0, row.attempts ?? 0),
           last_error: row.last_error ?? existing?.last_error,
           content_extracted_at: row.content_extracted_at ?? existing?.content_extracted_at,
-          url: row.url || existing?.url || ''
+          url: row.url || existing?.url || '',
+          messages: row.messages ?? existing?.messages,
+          metadata: row.metadata ?? existing?.metadata
         };
 
         const putReq = store.put(merged);

@@ -84,6 +84,8 @@ export interface ConversationLedgerRow {
   downloaded_at?: number;
   last_error?: string;
   attempts?: number;
+  messages?: HarvestTurn[];
+  metadata?: HarvestConversationMetadata;
 }
 
 export type ConversationRecord = ConversationLedgerRow;

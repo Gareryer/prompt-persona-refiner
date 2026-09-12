@@ -336,7 +336,18 @@ export default defineBackground(() => {
             download: true,
             saveAs: false
           });
-          sendResponse(result);
+          if (!result.success) {
+            sendResponse({ success: false, error: result.error || 'Export failed' });
+            return;
+          }
+          sendResponse({
+            success: true,
+            downloadId: result.downloadId,
+            zipFilename: result.zipFilename,
+            conversationId: result.record?.metadata?.conversationId,
+            title: result.record?.metadata?.title,
+            messageCount: result.record?.messages?.length ?? 0
+          });
         } catch (err: any) {
           sendResponse({ success: false, error: err?.message || String(err) });
         }
@@ -354,7 +365,16 @@ export default defineBackground(() => {
             tabId: targetTabId,
             download: false
           });
-          sendResponse(result);
+          if (!result.success) {
+            sendResponse({ success: false, error: result.error || 'Sync failed' });
+            return;
+          }
+          sendResponse({
+            success: true,
+            conversationId: result.record?.metadata?.conversationId,
+            title: result.record?.metadata?.title,
+            messageCount: result.record?.messages?.length ?? 0
+          });
         } catch (err: any) {
           sendResponse({ success: false, error: err?.message || String(err) });
         }
