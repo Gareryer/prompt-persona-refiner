@@ -7,6 +7,7 @@ export interface ScraperToolbarProps {
   onExportClick?: () => Promise<void> | void;
   onSyncClick?: () => Promise<void> | void;
   initialExpanded?: boolean;
+  initialOrientation?: 'horizontal' | 'vertical';
 }
 
 export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
@@ -14,9 +15,13 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
   onSettingsClick,
   onExportClick,
   onSyncClick,
-  initialExpanded = false
+  initialExpanded = false,
+  initialOrientation
 }) => {
   const [isExpanded, setIsExpanded] = useState(initialExpanded);
+  const [orientation, setOrientation] = useState<'horizontal' | 'vertical'>(
+    initialOrientation || 'horizontal'
+  );
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -24,22 +29,60 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const updateOrientation = () => {
+    if (typeof window === 'undefined') return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    const rightMargin = rect ? window.innerWidth - rect.right : 200;
+    const isVertical = rightMargin < 170 || window.innerWidth < 850;
+    setOrientation(isVertical ? 'vertical' : 'horizontal');
+  };
+
   // Remain open when clicked until the user clicks outside the toolbar
+  // Uses e.composedPath() to cleanly traverse Shadow DOM boundaries
   useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsExpanded(false);
+    if (!isExpanded) return;
+
+    const handleOutsideClick = (e: MouseEvent | PointerEvent) => {
+      const path = e.composedPath ? e.composedPath() : [];
+      if (
+        containerRef.current &&
+        (path.includes(containerRef.current) || containerRef.current.contains(e.target as Node))
+      ) {
+        return;
+      }
+      setIsExpanded(false);
+    };
+
+    const handleResize = () => {
+      updateOrientation();
+    };
+
+    const timer = setTimeout(() => {
+      if (typeof document !== 'undefined') {
+        document.addEventListener('pointerdown', handleOutsideClick);
+      }
+    }, 0);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize, { passive: true });
+    }
+
+    return () => {
+      clearTimeout(timer);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('pointerdown', handleOutsideClick);
+      }
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', handleResize);
       }
     };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-    };
-  }, []);
+  }, [isExpanded]);
 
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isExpanded && !initialOrientation) {
+      updateOrientation();
+    }
     setIsExpanded(prev => !prev);
   };
 
@@ -120,15 +163,17 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
     ? 'Allie Settings & Personas (Active persona loaded)'
     : 'Allie Settings & Personas';
 
+  const tooltipPosition = orientation === 'vertical' ? 'left' : 'top';
+
   return (
     <div
       ref={containerRef}
-      className={`allie-scraper-toolbar-wrapper ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}
+      className={`allie-scraper-toolbar-wrapper ${isExpanded ? 'is-expanded' : 'is-collapsed'} is-${orientation}`}
       data-allie="scraper-toolbar"
     >
       {!isExpanded ? (
         /* Collapsed State: Single Style 4 Standard Icon Button */
-        <ChatGPTTooltip text="Allie Harvester & Settings" position="top">
+        <ChatGPTTooltip text="Allie Harvester & Settings" position={tooltipPosition}>
           <button
             type="button"
             className="allie-toolbar-btn allie-toolbar-trigger"
@@ -153,9 +198,13 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
         </ChatGPTTooltip>
       ) : (
         /* Expanded State: Elevated Stadium Pill Capsule */
-        <div className="allie-toolbar-pill" role="toolbar" aria-label="Allie Scraper Actions">
+        <div
+          className={`allie-toolbar-pill is-${orientation}`}
+          role="toolbar"
+          aria-label="Allie Scraper Actions"
+        >
           {/* 1. Settings Button */}
-          <ChatGPTTooltip text={settingsTooltip} position="top">
+          <ChatGPTTooltip text={settingsTooltip} position={tooltipPosition}>
             <button
               type="button"
               className="allie-toolbar-btn allie-settings-btn"
@@ -186,7 +235,7 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
           </ChatGPTTooltip>
 
           {/* 2. Export / Download Button */}
-          <ChatGPTTooltip text={exportSuccess ? 'Export Complete!' : 'Export Chat (ZIP Archive)'} position="top">
+          <ChatGPTTooltip text={exportSuccess ? 'Export Complete!' : 'Export Chat (ZIP Archive)'} position={tooltipPosition}>
             <button
               type="button"
               className={`allie-toolbar-btn allie-export-btn ${isExporting ? 'loading' : ''} ${exportSuccess ? 'success' : ''}`}
@@ -220,7 +269,7 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
           </ChatGPTTooltip>
 
           {/* 3. Sync / Re-scrape Button */}
-          <ChatGPTTooltip text={syncSuccess ? 'Sync Complete!' : 'Sync & Re-scrape Chat to IndexedDB'} position="top">
+          <ChatGPTTooltip text={syncSuccess ? 'Sync Complete!' : 'Sync & Re-scrape Chat to IndexedDB'} position={tooltipPosition}>
             <button
               type="button"
               className={`allie-toolbar-btn allie-sync-btn ${isSyncing ? 'spinning' : ''} ${syncSuccess ? 'success' : ''}`}
@@ -254,7 +303,7 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
           </ChatGPTTooltip>
 
           {/* 4. Collapse Toggle Button */}
-          <ChatGPTTooltip text="Collapse Toolbar" position="top">
+          <ChatGPTTooltip text="Collapse Toolbar" position={tooltipPosition}>
             <button
               type="button"
               className="allie-toolbar-btn allie-collapse-btn"

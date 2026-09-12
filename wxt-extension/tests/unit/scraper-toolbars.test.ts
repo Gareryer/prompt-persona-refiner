@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ScraperToolbar as GeminiScraperToolbar } from '../../entrypoints/gemini.content/components/ScraperToolbar';
@@ -76,6 +76,12 @@ describe('Platform-Specific M3 ScraperToolbars (WXT Modular Architecture)', () =
   ];
 
   beforeEach(() => {
+    vi.useFakeTimers();
+    (globalThis as any).window = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      innerWidth: 1024
+    };
     (globalThis as any).document = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn()
@@ -86,6 +92,10 @@ describe('Platform-Specific M3 ScraperToolbars (WXT Modular Architecture)', () =
         lastError: null
       }
     };
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   toolbars.forEach(({ name, component: Toolbar }) => {
@@ -171,15 +181,18 @@ describe('Platform-Specific M3 ScraperToolbars (WXT Modular Architecture)', () =
         expect(html).toContain('allie-toolbar-trigger');
       });
 
-      it('collapses on document mousedown outside the toolbar container', () => {
-        let mousedownHandler: ((e: any) => void) | null = null;
+      it('collapses on document pointerdown outside the toolbar container', () => {
+        let pointerdownHandler: ((e: any) => void) | null = null;
         (globalThis as any).document.addEventListener = vi.fn((event: string, handler: any) => {
-          if (event === 'mousedown') mousedownHandler = handler;
+          if (event === 'pointerdown') pointerdownHandler = handler;
         });
 
         const harness = createHookHarness();
         let element: any = harness.render(Toolbar, { initialExpanded: true });
         expect(element.props.className).toContain('is-expanded');
+
+        // Fast-forward setTimeout(..., 0)
+        vi.runAllTimers();
 
         // Mock containerRef
         const mockContainer = {
@@ -187,16 +200,55 @@ describe('Platform-Specific M3 ScraperToolbars (WXT Modular Architecture)', () =
         };
         harness.refs[0]!.current = mockContainer;
 
-        // Click inside -> stays open
-        expect(mousedownHandler).toBeDefined();
-        mousedownHandler!({ target: 'inside-target' });
+        expect(pointerdownHandler).toBeDefined();
+
+        // Click inside via composedPath -> stays open
+        pointerdownHandler!({
+          target: 'inside-target',
+          composedPath: () => [mockContainer]
+        });
         element = harness.render(Toolbar, {});
         expect(element.props.className).toContain('is-expanded');
 
-        // Click outside -> collapses
-        mousedownHandler!({ target: 'outside-target' });
+        // Click outside via composedPath -> collapses
+        pointerdownHandler!({
+          target: 'outside-target',
+          composedPath: () => ['outside-host']
+        });
         element = harness.render(Toolbar, {});
         expect(element.props.className).toContain('is-collapsed');
+      });
+
+      it('supports initialOrientation="vertical" with is-vertical class and left tooltips', () => {
+        const harness = createHookHarness();
+        const element: any = harness.render(Toolbar, {
+          initialExpanded: true,
+          initialOrientation: 'vertical'
+        });
+        expect(element.props.className).toContain('is-vertical');
+
+        const pill = element.props.children;
+        expect(pill.props.className).toContain('is-vertical');
+
+        // In vertical orientation, tooltips use position="left"
+        const settingsTooltip = pill.props.children[0];
+        expect(settingsTooltip.props.position).toBe('left');
+      });
+
+      it('supports initialOrientation="horizontal" with is-horizontal class and top tooltips', () => {
+        const harness = createHookHarness();
+        const element: any = harness.render(Toolbar, {
+          initialExpanded: true,
+          initialOrientation: 'horizontal'
+        });
+        expect(element.props.className).toContain('is-horizontal');
+
+        const pill = element.props.children;
+        expect(pill.props.className).toContain('is-horizontal');
+
+        // In horizontal orientation, tooltips use position="top"
+        const settingsTooltip = pill.props.children[0];
+        expect(settingsTooltip.props.position).toBe('top');
       });
 
       it('renders all action buttons when initialExpanded is true', () => {

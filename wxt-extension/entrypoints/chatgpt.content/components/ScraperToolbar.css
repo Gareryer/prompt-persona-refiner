@@ -89,6 +89,20 @@
   animation: allie-chatgpt-pill-enter var(--allie-transition-standard, 150ms cubic-bezier(0.4, 0, 0.2, 1));
 }
 
+.allie-toolbar-pill.is-vertical {
+  flex-direction: column;
+  width: 38px;
+  height: auto;
+  padding: 4px 0;
+  gap: 2px;
+}
+
+.allie-toolbar-pill.is-vertical .allie-toolbar-btn {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+}
+
 @keyframes allie-chatgpt-pill-enter {
   0% {
     opacity: 0;

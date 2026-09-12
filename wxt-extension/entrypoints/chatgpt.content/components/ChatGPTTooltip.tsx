@@ -74,6 +74,22 @@ export const ChatGPTTooltip: React.FC<ChatGPTTooltipProps> = ({
     setIsVisible(false);
   };
 
+  const handleFocus = (e: React.FocusEvent) => {
+    const el = e.target as HTMLElement;
+    if (el && typeof el.matches === 'function') {
+      try {
+        if (el.matches(':focus-visible')) {
+          handleShow();
+          return;
+        }
+      } catch {}
+    }
+  };
+
+  const handleDismiss = () => {
+    handleHide();
+  };
+
   if (!text || !children) {
     return <>{children}</>;
   }
@@ -95,8 +111,10 @@ export const ChatGPTTooltip: React.FC<ChatGPTTooltipProps> = ({
       className="allie-tooltip-container"
       onMouseEnter={handleShow}
       onMouseLeave={handleHide}
-      onFocus={handleShow}
+      onFocus={handleFocus}
       onBlur={handleHide}
+      onClick={handleDismiss}
+      onPointerDown={handleDismiss}
     >
       {children}
       {isVisible && (

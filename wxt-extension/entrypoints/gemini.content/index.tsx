@@ -385,6 +385,8 @@ export default defineContentScript({
             toggleUi.remove();
             toggleUi = null;
           }
+          document.querySelectorAll('allie-refine-toggle, allie-gemini-refine-toggle')
+            .forEach((el) => el.remove());
 
           toggleUi = await createShadowRootUi(ctx, {
             name: 'allie-refine-toggle',
@@ -430,6 +432,8 @@ export default defineContentScript({
             settingsUi.remove();
             settingsUi = null;
           }
+          document.querySelectorAll('allie-settings-button, allie-gemini-settings-button, allie-chatgpt-settings-button, allie-claude-settings-button')
+            .forEach((el) => el.remove());
 
           resizeObserver?.disconnect();
           resizeObserver = new ResizeObserver(() => {

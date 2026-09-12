@@ -45,6 +45,22 @@ export const ClaudeTooltip: React.FC<ClaudeTooltipProps> = ({
     setIsVisible(false);
   };
 
+  const handleFocus = (e: React.FocusEvent) => {
+    const el = e.target as HTMLElement;
+    if (el && typeof el.matches === 'function') {
+      try {
+        if (el.matches(':focus-visible')) {
+          handleShow();
+          return;
+        }
+      } catch {}
+    }
+  };
+
+  const handleDismiss = () => {
+    handleHide();
+  };
+
   if (!text || !children) {
     return <>{children}</>;
   }
@@ -54,8 +70,10 @@ export const ClaudeTooltip: React.FC<ClaudeTooltipProps> = ({
       className="allie-tooltip-container"
       onMouseEnter={handleShow}
       onMouseLeave={handleHide}
-      onFocus={handleShow}
+      onFocus={handleFocus}
       onBlur={handleHide}
+      onClick={handleDismiss}
+      onPointerDown={handleDismiss}
     >
       {children}
       {isVisible && (
