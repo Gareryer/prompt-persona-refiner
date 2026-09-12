@@ -11,37 +11,44 @@ import { ScraperToolbar as ClaudeScraperToolbar } from '../../entrypoints/claude
 function createHookHarness() {
   const clientInternals = (React as any).__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
   const states = new Map<number, any>();
-  const refs = new Map<number, any>();
-  let hookIndex = 0;
+  const refs: Array<{ current: any }> = [];
+  const effectCleanups: Array<() => void> = [];
+  let stateIndex = 0;
+  let refIndex = 0;
 
   const dispatcher = {
     useState: (initial: any) => {
-      const id = hookIndex++;
+      const id = stateIndex++;
       if (!states.has(id)) {
         states.set(id, typeof initial === 'function' ? initial() : initial);
       }
       const setState = (newVal: any) => {
-        const val = typeof newVal === 'function' ? newVal(states.get(id)) : newVal;
+        const currentVal = states.get(id);
+        const val = typeof newVal === 'function' ? newVal(currentVal) : newVal;
         states.set(id, val);
       };
       return [states.get(id), setState];
     },
     useRef: (initial: any) => {
-      const id = hookIndex++;
-      if (!refs.has(id)) {
-        refs.set(id, { current: initial });
+      const id = refIndex++;
+      if (id >= refs.length) {
+        refs.push({ current: initial });
       }
-      return refs.get(id);
+      return refs[id];
     },
-    useEffect: (_fn: () => void | (() => void)) => {
-      // noop in static render harness
+    useEffect: (fn: () => void | (() => void)) => {
+      const cleanup = fn();
+      if (typeof cleanup === 'function') {
+        effectCleanups.push(cleanup);
+      }
     }
   };
 
   const prev = clientInternals?.H;
 
   function render<P>(component: React.FC<P>, props: P) {
-    hookIndex = 0;
+    stateIndex = 0;
+    refIndex = 0;
     if (clientInternals) {
       clientInternals.H = dispatcher;
     }
@@ -54,7 +61,11 @@ function createHookHarness() {
     }
   }
 
-  return { render };
+  function cleanup() {
+    effectCleanups.forEach(c => c());
+  }
+
+  return { render, cleanup, refs, states };
 }
 
 describe('Platform-Specific M3 ScraperToolbars (WXT Modular Architecture)', () => {
@@ -65,6 +76,10 @@ describe('Platform-Specific M3 ScraperToolbars (WXT Modular Architecture)', () =
   ];
 
   beforeEach(() => {
+    (globalThis as any).document = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn()
+    };
     (globalThis as any).chrome = {
       runtime: {
         sendMessage: vi.fn(),
@@ -90,6 +105,98 @@ describe('Platform-Specific M3 ScraperToolbars (WXT Modular Architecture)', () =
         expect(html).not.toContain('allie-export-btn');
         expect(html).not.toContain('allie-sync-btn');
         expect(html).not.toContain('allie-toolbar-pill');
+      });
+
+      it('does not attach onMouseEnter or onMouseLeave to the root wrapper (no hover expansion)', () => {
+        const harness = createHookHarness();
+        const element: any = harness.render(Toolbar, {});
+
+        expect(element.props.onMouseEnter).toBeUndefined();
+        expect(element.props.onMouseLeave).toBeUndefined();
+        expect(element.props.className).toContain('is-collapsed');
+      });
+
+      it('wraps collapsed trigger in platform tooltip for hover display', () => {
+        const harness = createHookHarness();
+        const element: any = harness.render(Toolbar, {});
+
+        const tooltip = element.props.children;
+        expect(tooltip.props.text).toBe('Allie Harvester & Settings');
+        expect(tooltip.props.position).toBe('top');
+
+        const triggerBtn = tooltip.props.children;
+        expect(triggerBtn.props.className).toContain('allie-toolbar-trigger');
+        expect(triggerBtn.props['aria-label']).toBe('Open Allie Toolbar');
+      });
+
+      it('toggles to expanded state when the trigger button is clicked and remains open', () => {
+        const harness = createHookHarness();
+        let element: any = harness.render(Toolbar, {});
+        expect(element.props.className).toContain('is-collapsed');
+
+        const tooltip = element.props.children;
+        const triggerBtn = tooltip.props.children;
+
+        const mockEvent = { preventDefault: vi.fn(), stopPropagation: vi.fn() };
+        triggerBtn.props.onClick(mockEvent);
+
+        expect(mockEvent.preventDefault).toHaveBeenCalled();
+        expect(mockEvent.stopPropagation).toHaveBeenCalled();
+
+        element = harness.render(Toolbar, {});
+        expect(element.props.className).toContain('is-expanded');
+        const html = renderToStaticMarkup(element);
+        expect(html).toContain('allie-toolbar-pill');
+        expect(html).toContain('allie-collapse-btn');
+      });
+
+      it('toggles back to collapsed state when the collapse button is clicked', () => {
+        const harness = createHookHarness();
+        let element: any = harness.render(Toolbar, { initialExpanded: true });
+        expect(element.props.className).toContain('is-expanded');
+
+        const pill = element.props.children;
+        const collapseTooltip = pill.props.children[3];
+        const collapseBtn = collapseTooltip.props.children;
+
+        const mockEvent = { preventDefault: vi.fn(), stopPropagation: vi.fn() };
+        collapseBtn.props.onClick(mockEvent);
+
+        expect(mockEvent.preventDefault).toHaveBeenCalled();
+        expect(mockEvent.stopPropagation).toHaveBeenCalled();
+
+        element = harness.render(Toolbar, {});
+        expect(element.props.className).toContain('is-collapsed');
+        const html = renderToStaticMarkup(element);
+        expect(html).toContain('allie-toolbar-trigger');
+      });
+
+      it('collapses on document mousedown outside the toolbar container', () => {
+        let mousedownHandler: ((e: any) => void) | null = null;
+        (globalThis as any).document.addEventListener = vi.fn((event: string, handler: any) => {
+          if (event === 'mousedown') mousedownHandler = handler;
+        });
+
+        const harness = createHookHarness();
+        let element: any = harness.render(Toolbar, { initialExpanded: true });
+        expect(element.props.className).toContain('is-expanded');
+
+        // Mock containerRef
+        const mockContainer = {
+          contains: vi.fn((target: any) => target === 'inside-target')
+        };
+        harness.refs[0]!.current = mockContainer;
+
+        // Click inside -> stays open
+        expect(mousedownHandler).toBeDefined();
+        mousedownHandler!({ target: 'inside-target' });
+        element = harness.render(Toolbar, {});
+        expect(element.props.className).toContain('is-expanded');
+
+        // Click outside -> collapses
+        mousedownHandler!({ target: 'outside-target' });
+        element = harness.render(Toolbar, {});
+        expect(element.props.className).toContain('is-collapsed');
       });
 
       it('renders all action buttons when initialExpanded is true', () => {

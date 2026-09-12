@@ -17,52 +17,30 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
   initialExpanded = false
 }) => {
   const [isExpanded, setIsExpanded] = useState(initialExpanded);
-  const [isLockedOpen, setIsLockedOpen] = useState(initialExpanded);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
 
-  const hoverTimerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Collapse on outside click
+  // Remain open when clicked until the user clicks outside the toolbar
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsExpanded(false);
-        setIsLockedOpen(false);
       }
     };
     document.addEventListener('mousedown', handleOutsideClick);
     return () => {
       document.removeEventListener('mousedown', handleOutsideClick);
-      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
     };
   }, []);
-
-  const handleMouseEnter = () => {
-    if (hoverTimerRef.current) {
-      clearTimeout(hoverTimerRef.current);
-      hoverTimerRef.current = null;
-    }
-    setIsExpanded(true);
-  };
-
-  const handleMouseLeave = () => {
-    if (isLockedOpen) return;
-    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
-    hoverTimerRef.current = setTimeout(() => {
-      setIsExpanded(false);
-    }, 300);
-  };
 
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const nextState = !isExpanded;
-    setIsExpanded(nextState);
-    setIsLockedOpen(nextState);
+    setIsExpanded(prev => !prev);
   };
 
   const handleSettingsClick = (e: React.MouseEvent) => {
@@ -146,8 +124,6 @@ export const ScraperToolbar: React.FC<ScraperToolbarProps> = ({
     <div
       ref={containerRef}
       className={`allie-scraper-toolbar-wrapper ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       data-allie="scraper-toolbar"
     >
       {!isExpanded ? (

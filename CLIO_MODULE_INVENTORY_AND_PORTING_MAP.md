@@ -1,6 +1,6 @@
 # Clio Codebase Full Inventory & WXT Modular Porting Blueprint
 
-> **Document Status**: **ACTIVE & PRODUCTION-VERIFIED** (Phase 1–5 Complete, 428/428 Vitest Tests Passing, Clean Build).
+> **Document Status**: **ACTIVE & PRODUCTION-VERIFIED** (Phase 1–8 Complete, 527/527 Vitest Tests Passing across 30 suites, Clean Typecheck & Production Build).
 > **Document Purpose**: Comprehensive technical reference auditing every module, class, function, selector, state machine, and data flow in [Clio](https://github.com/martymcenroe/Clio) (v1.4.1 / v1.6.2), paired with a modular target architecture for clean-room TypeScript porting into the `wxt-extension` framework.
 > **Architecture Core Pattern**: **Platform-Specific Adapters** for DOM discovery, scroller quirks, and HTML extraction/sanitization paired with a **Unified Subsystem** for persistence (IndexedDB), media harvesting, packaging (JSZip), and batch queue orchestration.
 
@@ -43,14 +43,14 @@
 
 Clio is an open-source, privacy-first browser extension that extracts complete multi-turn conversations from **Google Gemini**, **Anthropic Claude**, and **OpenAI ChatGPT** into structured JSON archives with local image asset bundles.
 
-### Current Implementation Status: **Phase 1–5 Complete**
+### Current Implementation Status: **Phase 1–8 Complete**
 - **Layer 1 (Unified Subsystem)**: **100% COMPLETE**. Storage (IndexedDB `clio-archive`), Media Extraction (fail-open images), Packaging (JSZip, `chrome.downloads`), Auto-Scroller engine, Work Queue state machine, Batch Tab Worker, and Orchestrator facade are fully built, hardened, and exported.
 - **Layer 2 (Platform-Specific Adapters)**:
-  - **Google Gemini**: **100% COMPLETE & VERIFIED** (Production reference implementation with paired container extraction, thinking trace isolation, LaTeX math synthesis, UI chrome stripping, and sidebar enumeration).
-  - **OpenAI ChatGPT**: **100% COMPLETE & VERIFIED** (Production implementation with VirtualMessageCache, ancestor scroll-root detection, CodeMirror 6 line preservation, reasoning header extraction, and sidebar enumeration).
-  - **Anthropic Claude**: **100% COMPLETE & VERIFIED** (Production implementation with 2-row CSS Grid isolation, in-place chronological tool call harvesting, artifact widget chrome stripping, Clio #37 / #39 / #43 resilience, and dual REST/DOM enumeration).
+  - **Google Gemini**: **100% COMPLETE & VERIFIED** (Production reference implementation with paired container extraction, thinking trace isolation, LaTeX math synthesis, UI chrome stripping, M3 Scraper Toolbar, and sidebar enumeration).
+  - **OpenAI ChatGPT**: **100% COMPLETE & VERIFIED** (Production implementation with VirtualMessageCache, ancestor scroll-root detection, CodeMirror 6 line preservation, reasoning header extraction, M3 Scraper Toolbar, and sidebar enumeration).
+  - **Anthropic Claude**: **100% COMPLETE & VERIFIED** (Production implementation with 2-row CSS Grid isolation, in-place chronological tool call harvesting, artifact widget chrome stripping, Clio #37 / #39 / #43 resilience, M3 Scraper Toolbar, and dual REST/DOM enumeration).
   - **DeepSeek, Grok, Meta**: **PENDING** (Architecture ready in Section 7.3).
-- **Verification**: **478/478 Vitest unit tests passing** across 27 test suites, zero TypeScript typecheck errors, and production bundle compiling cleanly in WXT with dedicated modular bundles for Gemini, ChatGPT, and Claude.
+- **Verification**: **527/527 Vitest unit tests passing** across 30 test suites, zero TypeScript typecheck errors, and production bundle compiling cleanly in WXT with dedicated modular bundles and M3 Scraper Action Toolbars across Gemini, ChatGPT, and Claude.
 
 ---
 
@@ -64,23 +64,25 @@ wxt-extension/
 ├── wxt.config.ts                        [MODIFIED: Added 'scripting' permission for MV3]
 │
 ├── entrypoints/
+│    ├── background.ts                   [MODIFIED: Added HARVEST_EXPORT/SYNC handlers; removed duplicate handler]
+│    │
 │    ├── gemini.content/                 [MODIFIED: Added onReanchor Angular swap detection]
 │    │    ├── index.tsx                  [Gemini modular entrypoint with 60fps tracking]
 │    │    ├── gemini.css                 [Host layout styles & scoped Shadow DOM rules]
 │    │    ├── theme/tokens.css           [Material 3 encapsulated CSS tokens]
-│    │    └── components/                [RefineToggle, SettingsButton, GeminiTooltip]
+│    │    └── components/                [RefineToggle, SettingsButton, ScraperToolbar, GeminiTooltip]
 │    │
 │    ├── chatgpt.content/                [NEW: Modular WXT content script for ChatGPT]
 │    │    ├── index.tsx                  [Dual-surface composer resolution & scroll tracking]
 │    │    ├── chatgpt.css                [Host layout styles & scoped Shadow DOM rules]
 │    │    ├── theme/tokens.css           [OpenAI Söhne & Emerald encapsulated tokens]
-│    │    └── components/                [RefineToggle, SettingsButton, ChatGPTTooltip]
+│    │    └── components/                [RefineToggle, SettingsButton, ScraperToolbar, ChatGPTTooltip]
 │    │
 │    ├── claude.content/                 [NEW: Modular WXT content script for Claude]
 │    │    ├── index.tsx                  [Tiptap capture-phase Enter & bubble widening]
 │    │    ├── claude.css                 [Host layout styles & scoped Shadow DOM rules]
 │    │    ├── theme/tokens.css           [Warm Ivory & Terracotta encapsulated tokens]
-│    │    └── components/                [RefineToggle, SettingsButton, ClaudeTooltip]
+│    │    └── components/                [RefineToggle, SettingsButton, ScraperToolbar, ClaudeTooltip]
 │    │
 │    └── content.ts                      [MODIFIED: Scoped strictly to DeepSeek, Grok, Meta]
 │
@@ -110,6 +112,12 @@ wxt-extension/
 │    │    ├── chatgpt.adapter.ts         [MODIFIED: Backward compatibility re-export]
 │    │    └── claude.adapter.ts          [MODIFIED: Backward compatibility re-export]
 │    │
+│    ├── core/rating/
+│    │    └── rating-ui.ts               [MODIFIED: Fixed updateRatingUI selector and dataset state sync]
+│    │
+│    ├── services/
+│    │    └── message-dispatcher.service.ts [NEW: Testable MessageDispatcherService with ProtocolMap]
+│    │
 │    └── core/harvest/                   [NEW: Complete Unified Subsystem]
 │         ├── index.ts                   [NEW: Public Facade Entrypoint]
 │         ├── types.ts                   [NEW: Schemas, HarvestTurn, LedgerRow, Metadata]
@@ -138,14 +146,19 @@ wxt-extension/
      ├── fixtures/mock-dom.ts            [MODIFIED: DOM position, siblings, Shadow DOM]
      └── unit/
           ├── gemini-components.test.ts  [15 tests for Gemini injected components]
-          ├── chatgpt-components.test.ts [NEW: 17 tests for ChatGPT injected components]
-          ├── claude-components.test.ts  [NEW: 17 tests for Claude injected components]
+          ├── chatgpt-components.test.ts [17 tests for ChatGPT injected components]
+          ├── claude-components.test.ts  [17 tests for Claude injected components]
+          ├── scraper-toolbars.test.ts   [NEW: 18 tests for collapsible M3 toolbar state, pill expansion, and platform actions]
+          ├── clio-parity-attachments.test.ts [NEW: 5 tests for in-scroll file chips, images, and artifact extraction]
+          ├── clio-parity-ordering.test.ts    [NEW: 6 tests for chronological turn ordering parity]
+          ├── rating-engine.test.ts      [MODIFIED: 12 tests including updateRatingUI selector & state sync]
+          ├── messaging.test.ts          [MODIFIED: 15 tests including MessageDispatcherService contracts]
           ├── gemini-harvester.test.ts   [44 tests for Gemini container pairing]
           ├── chatgpt-harvester.test.ts  [33 tests for ChatGPT virtual cache & ancestor scrollers]
-          ├── claude-harvester.test.ts   [43 tests for Claude 2-row grid & edge cases]
+          ├── claude-harvester.test.ts   [55 tests for Claude 2-row grid & edge cases]
           ├── media-and-zip.test.ts      [46 tests for images, data URLs, JSZip]
           ├── auto-scroller.test.ts      [52 tests for scrollers & mutation loops]
-          └── harvest-db-and-batch.test.ts [MODIFIED: 42 tests including dedicated script targeting]
+          └── harvest-db-and-batch.test.ts [42 tests including dedicated script targeting]
 ```
 
 ### 2.2 Untouched Core Areas (Clean Decoupling)
@@ -279,6 +292,14 @@ During the Gemini implementation, 11 critical real-world edge cases were discove
     - **Narrow Bubble Widening**: Uses `resolveAnchor` parent-walking algorithm with width ratio > 1.3 to escape 70% max-width user bubbles.
     - **Nested `.row-start-1` Guard**: All response body scrapers enforce `!el.closest('.row-start-2')` preventing false-positive thinking block stripping (Clio PR #40).
     - **Angular Swap Detection**: Watches for transient `<pending-request>` to permanent `<model-response>` swap ensuring injected UI survives long stream completions.
+13. **Platform-Specific M3 Scraper Action Toolbars (`ScraperToolbar.tsx`)**:
+    - Standardized on Style 4 Standard collapsible trigger (`more_vert` 3-dots icon button) when idle.
+    - Expands on hover or click into an elevated stadium pill capsule housing Settings (gear icon with active persona indicator), Export (`HARVEST_EXPORT_ACTIVE_TAB` &rarr; ZIP package), Sync (`HARVEST_SYNC_ACTIVE_TAB` &rarr; IndexedDB re-scrape), and Collapse controls.
+    - Native design tokens and tooltips (`GeminiTooltip`, `ChatGPTTooltip`, `ClaudeTooltip`) ensure visual harmony with zero cross-entrypoint bundle pollution.
+14. **Rating UI Selector Alignment & Message Dispatcher Contracts**:
+    - Fixed selector mismatch in `updateRatingUI`: migrated from non-existent `.allie-rating-star` to `.allie-stars-container` and `setStarsRating()`, keeping `dataset.rated` and `dataset.currentRating` synchronized.
+    - Pruned duplicate `CHECK_RATING_ELIGIBILITY` stub in `background.ts` shadowing the canonical storage-backed handler.
+    - Expanded unit contract tests for `MessageDispatcherService` (`messaging.test.ts`), verifying persona CRUD, tab prompt injections, and Supabase publish bridges.
 
 ---
 
@@ -405,7 +426,23 @@ Because our WXT extension has existing adapters for DeepSeek, Grok, and Meta:
 - **Files**: `src/adapters/chatbots/claude/selectors.ts`, `src/adapters/chatbots/claude/turn-scraper.ts`, `src/adapters/chatbots/claude/adapter.ts`, `src/adapters/chatbots/claude/index.ts`, `src/adapters/chatbots/claude.adapter.ts`.
 - **Tests**: 55 tests in `tests/unit/claude-harvester.test.ts` (including 12 hardened adversarial tests).
 
+### Phase 7: WXT Modular Parity & ChatWait / Clio DOM Hardening
+- **Status**: **COMPLETE & PRODUCTION-VERIFIED**.
+- **Files**: `entrypoints/chatgpt.content/*`, `entrypoints/claude.content/*`, `entrypoints/gemini.content/*`, `entrypoints/content.ts`, `src/core/harvest/batch/tab-worker.ts`.
+- **Key Deliverables**: Dual-surface composer resolution, true scroll-root resolution, Tiptap capture-phase Enter interception, user bubble widening, and `PLATFORM_SCRIPT_BUNDLES` dedicated re-injection.
+- **Tests**: 17 tests in `tests/unit/chatgpt-components.test.ts`, 17 tests in `tests/unit/claude-components.test.ts`, 15 tests in `tests/unit/gemini-components.test.ts`.
+
+### Phase 8: M3 Action Toolbars, Rating Fix & Messaging Contracts
+- **Status**: **COMPLETE & PRODUCTION-VERIFIED**.
+- **Files**: `ScraperToolbar.tsx` and `.css` across `gemini.content`, `chatgpt.content`, and `claude.content`; `entrypoints/background.ts`; `src/core/rating/rating-ui.ts`; `src/services/message-dispatcher.service.ts`.
+- **Key Deliverables**: Collapsible M3 scraper toolbar (Style 4 trigger &rarr; stadium pill capsule for Settings, Export, Sync, Collapse), `HARVEST_EXPORT_ACTIVE_TAB` and `HARVEST_SYNC_ACTIVE_TAB` background handlers, `updateRatingUI` `.allie-stars-container` star selector fix, and `MessageDispatcherService` contract suite.
+- **Tests**: 18 tests in `tests/unit/scraper-toolbars.test.ts`, 5 tests in `tests/unit/clio-parity-attachments.test.ts`, 6 tests in `tests/unit/clio-parity-ordering.test.ts`, 12 tests in `tests/unit/rating-engine.test.ts`, 15 tests in `tests/unit/messaging.test.ts`.
+
 ### Total Verification Summary
-- **Tests**: **440 passed, 0 failed** across 25 test suites (272 dedicated harvester tests + 168 existing extension tests).
-- **Typecheck**: `tsc --noEmit` exited with 0 errors.
-- **Production Build**: `wxt build` generated clean Chrome MV3 bundle in 16.9s (2.95 MB).
+- **Tests**: **527 passed, 0 failed** across 30 test suites (100% pass rate).
+- **Typecheck**: `tsc --noEmit` clean (0 errors).
+- **Production Build**: `wxt build` generates clean Chrome MV3 bundle containing 4 isolated, partitioned content scripts:
+  - `content-scripts/gemini.js` (428 KB)
+  - `content-scripts/chatgpt.js` (428 KB)
+  - `content-scripts/claude.js` (428 KB)
+  - `content-scripts/content.js` (403 KB)
