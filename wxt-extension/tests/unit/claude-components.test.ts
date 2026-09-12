@@ -5,6 +5,12 @@ import { RefineToggle } from '../../entrypoints/claude.content/components/Refine
 import { SettingsButton } from '../../entrypoints/claude.content/components/SettingsButton';
 import { ClaudeTooltip } from '../../entrypoints/claude.content/components/ClaudeTooltip';
 import { CLAUDE_TOKENS, getAllieCssVariables } from '../../src/adapters/chatbots/claude/tokens';
+import { setupMockDom } from '../fixtures/mock-dom';
+import {
+  getActiveComposerContainer,
+  getTrailingActionsContainer,
+  appendRefineToggleToAnchor
+} from '../../entrypoints/claude.content/composer-dom';
 
 /**
  * Lightweight React Hook test harness for node/SSR environments.
@@ -361,6 +367,164 @@ describe('Claude Content Injected Components & Design Tokens', () => {
       expect(lightVars['--allie-accent']).toBe('#cc785c');
       expect(lightVars['--allie-bg-primary']).toBe('#faf9f5');
       expect(lightVars['--allie-text-primary']).toBe('#141312');
+    });
+  });
+
+  describe('Claude Empty-State Mounting & Chin Exclusion', () => {
+    beforeEach(() => {
+      setupMockDom();
+      if (typeof document !== 'undefined' && document.body) {
+        document.body.innerHTML = '';
+      }
+    });
+
+    it('excludes Claude disclaimer chin when resolving active composer container', () => {
+      document.body.innerHTML = `
+        <fieldset class="composer-fieldset">
+          <div class="input-pill">
+            <div class="ProseMirror" contenteditable="true"></div>
+          </div>
+          <div class="group/chin-trail">
+            <div data-disclaimer="true">
+              <a href="https://support.anthropic.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on">Claude is AI</a>
+            </div>
+            <button data-testid="model-selector-dropdown">Claude 3.7 Sonnet</button>
+          </div>
+        </fieldset>
+      `;
+
+      const input = document.querySelector<HTMLElement>('.ProseMirror');
+      expect(input).toBeTruthy();
+
+      const container = getActiveComposerContainer(input);
+      expect(container).toBeTruthy();
+      expect(container!.classList.contains('input-pill')).toBe(true);
+      expect(container!.classList.contains('composer-fieldset')).toBe(false);
+      expect(container!.querySelector('[data-disclaimer="true"]')).toBeNull();
+    });
+
+    it('resolves trailing actions container in empty state via mic/voice button parent', () => {
+      document.body.innerHTML = `
+        <div class="input-pill">
+          <div class="ProseMirror" contenteditable="true"></div>
+          <div class="trailing-actions">
+            <button aria-label="Voice input">mic</button>
+          </div>
+        </div>
+      `;
+
+      const inputContainer = document.querySelector<HTMLElement>('.input-pill');
+      const trailing = getTrailingActionsContainer(inputContainer, null);
+      expect(trailing).toBeTruthy();
+      expect(trailing!.classList.contains('trailing-actions')).toBe(true);
+    });
+
+    it('resolves trailing actions container in empty state filtering out leading attach button', () => {
+      document.body.innerHTML = `
+        <div class="input-pill">
+          <div class="leading-actions">
+            <button aria-label="Add content (+)">plus</button>
+          </div>
+          <div class="ProseMirror" contenteditable="true"></div>
+          <div class="trailing-actions">
+            <button aria-label="Speech mode">speech</button>
+          </div>
+        </div>
+      `;
+
+      const inputContainer = document.querySelector<HTMLElement>('.input-pill');
+      const trailing = getTrailingActionsContainer(inputContainer, null);
+      expect(trailing).toBeTruthy();
+      expect(trailing!.classList.contains('trailing-actions')).toBe(true);
+    });
+
+    it('resolves trailing actions container via flex fallback when no buttons exist', () => {
+      document.body.innerHTML = `
+        <div class="input-pill">
+          <div class="ProseMirror" contenteditable="true"></div>
+          <div class="flex items-center gap-1"></div>
+        </div>
+      `;
+
+      const inputContainer = document.querySelector<HTMLElement>('.input-pill');
+      const trailing = getTrailingActionsContainer(inputContainer, null);
+      expect(trailing).toBeTruthy();
+      expect(trailing!.classList.contains('gap-1')).toBe(true);
+    });
+
+    it('prioritizes submit button parent over mic button when text is present', () => {
+      document.body.innerHTML = `
+        <div class="input-pill">
+          <div class="ProseMirror" contenteditable="true">Hello Claude</div>
+          <div class="mic-parent">
+            <button aria-label="Voice input">mic</button>
+          </div>
+          <div class="submit-parent">
+            <button aria-label="Send message" data-testid="send-button">send</button>
+          </div>
+        </div>
+      `;
+
+      const inputContainer = document.querySelector<HTMLElement>('.input-pill');
+      const submitBtn = document.querySelector<HTMLElement>('button[data-testid="send-button"]');
+      const trailing = getTrailingActionsContainer(inputContainer, submitBtn);
+      expect(trailing).toBeTruthy();
+      expect(trailing!.classList.contains('submit-parent')).toBe(true);
+    });
+
+    it('inserts RefineToggle before first button in anchor in empty state', () => {
+      document.body.innerHTML = `
+        <div class="trailing-actions">
+          <button id="mic-btn" aria-label="Voice input">mic</button>
+        </div>
+      `;
+
+      const anchor = document.querySelector<HTMLElement>('.trailing-actions')!;
+      const ui = document.createElement('div');
+      ui.id = 'refine-toggle-host';
+
+      appendRefineToggleToAnchor(anchor, ui, null);
+
+      const childElements = Array.from(anchor.children).filter(c => c.nodeType === 1);
+      expect(childElements.length).toBe(2);
+      expect(childElements[0]!.id).toBe('refine-toggle-host');
+      expect(childElements[1]!.id).toBe('mic-btn');
+    });
+
+    it('inserts RefineToggle before submit button when submit button is present in anchor', () => {
+      document.body.innerHTML = `
+        <div class="trailing-actions">
+          <button id="other-btn">other</button>
+          <button id="send-btn" aria-label="Send">send</button>
+        </div>
+      `;
+
+      const anchor = document.querySelector<HTMLElement>('.trailing-actions')!;
+      const submitBtn = document.querySelector<HTMLElement>('#send-btn')!;
+      const ui = document.createElement('div');
+      ui.id = 'refine-toggle-host';
+
+      appendRefineToggleToAnchor(anchor, ui, submitBtn);
+
+      const childElements = Array.from(anchor.children).filter(c => c.nodeType === 1);
+      expect(childElements.length).toBe(3);
+      expect(childElements[0]!.id).toBe('other-btn');
+      expect(childElements[1]!.id).toBe('refine-toggle-host');
+      expect(childElements[2]!.id).toBe('send-btn');
+    });
+
+    it('appends RefineToggle to anchor when no buttons are inside anchor', () => {
+      document.body.innerHTML = `<div class="trailing-actions"></div>`;
+
+      const anchor = document.querySelector<HTMLElement>('.trailing-actions')!;
+      const ui = document.createElement('div');
+      ui.id = 'refine-toggle-host';
+
+      appendRefineToggleToAnchor(anchor, ui, null);
+
+      const childElements = Array.from(anchor.children).filter(c => c.nodeType === 1);
+      expect(childElements.length).toBe(1);
+      expect(childElements[0]!.id).toBe('refine-toggle-host');
     });
   });
 });

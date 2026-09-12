@@ -4,6 +4,11 @@ import { ClaudeAdapter } from '../../src/adapters/chatbots/claude/adapter';
 import { CLAUDE_SELECTORS, findElement } from '../../src/adapters/chatbots/claude/selectors';
 import { contentObserver } from '../../src/content/observer';
 import { RefineToggle, SettingsButton, ScraperToolbar } from './components';
+import {
+  getActiveComposerContainer as resolveActiveComposerContainer,
+  getTrailingActionsContainer as resolveTrailingActionsContainer,
+  appendRefineToggleToAnchor
+} from './composer-dom';
 
 import tokensCss from './theme/tokens.css?inline';
 import claudeCss from './claude.css?inline';
@@ -73,41 +78,14 @@ export default defineContentScript({
       });
     }
 
-    // Resolves active Claude ProseMirror composer container
+    // Resolves active Claude ProseMirror input pill container, strictly EXCLUDING the disclaimer chin
     function getActiveComposerContainer(): HTMLElement | null {
-      const input = adapter.getActiveInput();
-      if (input && input.offsetParent !== null) {
-        const fieldset = input.closest('fieldset');
-        if (fieldset) return fieldset;
-        const container = input.closest('div[class*="relative"]') as HTMLElement;
-        if (container) return container;
-        return input.parentElement || input;
-      }
-
-      const proseMirror = document.querySelector<HTMLElement>('.ProseMirror');
-      if (proseMirror && proseMirror.offsetParent !== null) {
-        return proseMirror.closest('fieldset') || proseMirror.parentElement || proseMirror;
-      }
-
-      return null;
+      return resolveActiveComposerContainer(adapter.getActiveInput());
     }
 
-    // Resolves trailing action buttons container in Claude composer
+    // Resolves trailing action buttons container in Claude composer (send button when typing, mic/audio when empty)
     function getTrailingActionsContainer(): HTMLElement | null {
-      const submitBtn = adapter.getSubmitButton();
-      if (submitBtn && submitBtn.parentElement) {
-        return submitBtn.parentElement;
-      }
-
-      const inputContainer = getActiveComposerContainer();
-      if (inputContainer) {
-        const trailing = inputContainer.querySelector<HTMLElement>('div.flex.items-center.gap-2') ||
-                         inputContainer.querySelector<HTMLElement>('div.flex.items-center.justify-between') ||
-                         inputContainer.querySelector<HTMLElement>('div.flex.items-center');
-        if (trailing) return trailing;
-      }
-
-      return null;
+      return resolveTrailingActionsContainer(getActiveComposerContainer(), adapter.getSubmitButton());
     }
 
     // Dynamic theme synchronizer matching Claude's html[data-theme] or html.dark
@@ -173,7 +151,20 @@ export default defineContentScript({
       if (rect.width === 0 && rect.height === 0) return;
 
       const targetLeft = `${rect.right + 12}px`;
-      const targetTop = `${rect.top + rect.height / 2 - 18}px`;
+
+      // Bottom-anchored positioning: align with bottom action bar / trailing buttons, excluding the disclaimer chin
+      const trailingEl = adapter.getSubmitButton() || getTrailingActionsContainer();
+      let targetTop: string;
+      if (trailingEl && trailingEl.isConnected) {
+        const btnRect = trailingEl.getBoundingClientRect();
+        if (btnRect.height > 0 && btnRect.bottom > 0) {
+          targetTop = `${btnRect.top + btnRect.height / 2 - 20}px`;
+        } else {
+          targetTop = `${rect.bottom - 44}px`;
+        }
+      } else {
+        targetTop = `${rect.bottom - 44}px`;
+      }
 
       settingsUi.shadowHost.style.setProperty('--allie-settings-left', targetLeft);
       settingsUi.shadowHost.style.setProperty('--allie-settings-top', targetTop);
@@ -395,12 +386,7 @@ export default defineContentScript({
             position: 'inline',
             anchor: trailingAnchor,
             append: (anchor, ui) => {
-              const submitBtn = adapter.getSubmitButton();
-              if (submitBtn && submitBtn.parentElement === anchor) {
-                anchor.insertBefore(ui, submitBtn);
-              } else {
-                anchor.appendChild(ui);
-              }
+              appendRefineToggleToAnchor(anchor, ui, adapter.getSubmitButton());
             },
             css: [tokensCss, claudeCss, refineToggleCss, claudeTooltipCss].join('\n'),
             onMount(container, _shadow, shadowHost) {

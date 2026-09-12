@@ -147,7 +147,21 @@ export default defineContentScript({
       if (rect.width === 0 && rect.height === 0) return;
 
       const targetLeft = `${rect.right + 12}px`;
-      const targetTop = `${rect.top + rect.height / 2 - 20}px`;
+
+      // Bottom-anchored positioning: align with bottom action bar / submit button
+      const submitBtn = findElement<HTMLElement>(GEMINI_SELECTORS.submitButton) ||
+                        findElement<HTMLElement>(GEMINI_SELECTORS.trailingActions);
+      let targetTop: string;
+      if (submitBtn && submitBtn.isConnected) {
+        const btnRect = submitBtn.getBoundingClientRect();
+        if (btnRect.height > 0 && btnRect.bottom > 0) {
+          targetTop = `${btnRect.top + btnRect.height / 2 - 20}px`;
+        } else {
+          targetTop = `${rect.bottom - 44}px`;
+        }
+      } else {
+        targetTop = `${rect.bottom - 44}px`;
+      }
 
       settingsUi.shadowHost.style.setProperty('--allie-settings-left', targetLeft);
       settingsUi.shadowHost.style.setProperty('--allie-settings-top', targetTop);

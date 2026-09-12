@@ -34,6 +34,11 @@
   box-shadow: var(--allie-tooltip-shadow, 0 2px 8px rgba(0, 0, 0, 0.4));
 }
 
+.allie-tooltip-bubble.allie-tooltip-fixed {
+  position: fixed !important;
+  z-index: 999999 !important;
+}
+
 .allie-tooltip-top {
   bottom: calc(100% + 6px);
   left: 50%;

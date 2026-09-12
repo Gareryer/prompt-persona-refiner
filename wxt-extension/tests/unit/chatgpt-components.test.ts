@@ -137,6 +137,14 @@ describe('ChatGPT Content Injected Components & Design Tokens', () => {
       expect(onToggle).not.toHaveBeenCalled();
     });
 
+    it('wraps with ChatGPTTooltip configured with position="bottom" and useFixed to render outside composer', () => {
+      const harness = createHookHarness();
+      const vnode = harness.render(RefineToggle, {});
+      const tooltip = (vnode as any).props.children;
+      expect(tooltip.props.position).toBe('bottom');
+      expect(tooltip.props.useFixed).toBe(true);
+    });
+
     it('renders status styling for idle, loading, success, and error', () => {
       const idleHtml = renderToStaticMarkup(React.createElement(RefineToggle, { status: 'idle' }));
       expect(idleHtml).toContain('Refine');
@@ -341,6 +349,32 @@ describe('ChatGPT Content Injected Components & Design Tokens', () => {
       const tooltipBubble = (vnode as any).props.children[1];
       expect(tooltipBubble).toBeTruthy();
       expect(tooltipBubble.props.children).toBe('Immediate Tooltip');
+    });
+
+    it('supports useFixed prop with fixed positioning styling and container ref', () => {
+      const harness = createHookHarness();
+      let vnode = harness.render(ChatGPTTooltip, {
+        text: 'Fixed Tooltip',
+        position: 'bottom',
+        delayMs: 0,
+        useFixed: true,
+        children: React.createElement('span', null, 'Target')
+      });
+
+      (vnode as any).props.onMouseEnter();
+
+      vnode = harness.render(ChatGPTTooltip, {
+        text: 'Fixed Tooltip',
+        position: 'bottom',
+        delayMs: 0,
+        useFixed: true,
+        children: React.createElement('span', null, 'Target')
+      });
+
+      const tooltipBubble = (vnode as any).props.children[1];
+      expect(tooltipBubble).toBeTruthy();
+      expect(tooltipBubble.props.className).toContain('allie-tooltip-fixed');
+      expect(tooltipBubble.props.className).toContain('allie-tooltip-bottom');
     });
   });
 

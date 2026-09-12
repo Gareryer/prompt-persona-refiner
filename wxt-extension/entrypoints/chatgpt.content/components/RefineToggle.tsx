@@ -55,7 +55,7 @@ export const RefineToggle: React.FC<RefineToggleProps> = ({
 
   return (
     <div className="allie-toggle-wrapper">
-      <ChatGPTTooltip text={tooltipText || defaultTooltip} position="top">
+      <ChatGPTTooltip text={tooltipText || defaultTooltip} position="bottom" useFixed={true}>
         <button
           type="button"
           className={`allie-toggle-button ${isEnabled ? 'active' : ''} ${status !== 'idle' ? `status-${status}` : ''}`}
