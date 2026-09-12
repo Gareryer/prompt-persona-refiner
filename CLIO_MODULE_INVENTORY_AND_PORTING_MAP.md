@@ -1,6 +1,6 @@
 # Clio Codebase Full Inventory & WXT Modular Porting Blueprint
 
-> **Document Status**: **ACTIVE & PRODUCTION-VERIFIED** (Phase 1–8 Complete, 527/527 Vitest Tests Passing across 30 suites, Clean Typecheck & Production Build).
+> **Document Status**: **ACTIVE & PRODUCTION-VERIFIED** (Phase 1–8 Complete, 542/542 Vitest Tests Passing across 30 suites, Clean Typecheck & Production Build).
 > **Document Purpose**: Comprehensive technical reference auditing every module, class, function, selector, state machine, and data flow in [Clio](https://github.com/martymcenroe/Clio) (v1.4.1 / v1.6.2), paired with a modular target architecture for clean-room TypeScript porting into the `wxt-extension` framework.
 > **Architecture Core Pattern**: **Platform-Specific Adapters** for DOM discovery, scroller quirks, and HTML extraction/sanitization paired with a **Unified Subsystem** for persistence (IndexedDB), media harvesting, packaging (JSZip), and batch queue orchestration.
 
@@ -50,7 +50,7 @@ Clio is an open-source, privacy-first browser extension that extracts complete m
   - **OpenAI ChatGPT**: **100% COMPLETE & VERIFIED** (Production implementation with VirtualMessageCache, ancestor scroll-root detection, CodeMirror 6 line preservation, reasoning header extraction, M3 Scraper Toolbar, and sidebar enumeration).
   - **Anthropic Claude**: **100% COMPLETE & VERIFIED** (Production implementation with 2-row CSS Grid isolation, in-place chronological tool call harvesting, artifact widget chrome stripping, Clio #37 / #39 / #43 resilience, M3 Scraper Toolbar, and dual REST/DOM enumeration).
   - **DeepSeek, Grok, Meta**: **PENDING** (Architecture ready in Section 7.3).
-- **Verification**: **527/527 Vitest unit tests passing** across 30 test suites, zero TypeScript typecheck errors, and production bundle compiling cleanly in WXT with dedicated modular bundles and M3 Scraper Action Toolbars across Gemini, ChatGPT, and Claude.
+- **Verification**: **542/542 Vitest unit tests passing** across 30 test suites, zero TypeScript typecheck errors, and production bundle compiling cleanly in WXT with dedicated modular bundles and M3 Scraper Action Toolbars across Gemini, ChatGPT, and Claude.
 
 ---
 
@@ -148,7 +148,7 @@ wxt-extension/
           ├── gemini-components.test.ts  [15 tests for Gemini injected components]
           ├── chatgpt-components.test.ts [17 tests for ChatGPT injected components]
           ├── claude-components.test.ts  [17 tests for Claude injected components]
-          ├── scraper-toolbars.test.ts   [NEW: 18 tests for collapsible M3 toolbar state, pill expansion, and platform actions]
+          ├── scraper-toolbars.test.ts   [NEW: 39 tests for collapsible M3 toolbar state, click-to-expand, outside-click collapse, and actions]
           ├── clio-parity-attachments.test.ts [NEW: 5 tests for in-scroll file chips, images, and artifact extraction]
           ├── clio-parity-ordering.test.ts    [NEW: 6 tests for chronological turn ordering parity]
           ├── rating-engine.test.ts      [MODIFIED: 12 tests including updateRatingUI selector & state sync]
@@ -435,11 +435,11 @@ Because our WXT extension has existing adapters for DeepSeek, Grok, and Meta:
 ### Phase 8: M3 Action Toolbars, Rating Fix & Messaging Contracts
 - **Status**: **COMPLETE & PRODUCTION-VERIFIED**.
 - **Files**: `ScraperToolbar.tsx` and `.css` across `gemini.content`, `chatgpt.content`, and `claude.content`; `entrypoints/background.ts`; `src/core/rating/rating-ui.ts`; `src/services/message-dispatcher.service.ts`.
-- **Key Deliverables**: Collapsible M3 scraper toolbar (Style 4 trigger &rarr; stadium pill capsule for Settings, Export, Sync, Collapse), `HARVEST_EXPORT_ACTIVE_TAB` and `HARVEST_SYNC_ACTIVE_TAB` background handlers, `updateRatingUI` `.allie-stars-container` star selector fix, and `MessageDispatcherService` contract suite.
-- **Tests**: 18 tests in `tests/unit/scraper-toolbars.test.ts`, 5 tests in `tests/unit/clio-parity-attachments.test.ts`, 6 tests in `tests/unit/clio-parity-ordering.test.ts`, 12 tests in `tests/unit/rating-engine.test.ts`, 15 tests in `tests/unit/messaging.test.ts`.
+- **Key Deliverables**: Collapsible M3 scraper toolbar (Style 4 trigger &rarr; click-to-expand stadium pill capsule with outside-click collapse for Settings, Export, Sync, Collapse), `HARVEST_EXPORT_ACTIVE_TAB` and `HARVEST_SYNC_ACTIVE_TAB` background handlers, `updateRatingUI` `.allie-stars-container` star selector fix, and `MessageDispatcherService` contract suite.
+- **Tests**: 39 tests in `tests/unit/scraper-toolbars.test.ts`, 5 tests in `tests/unit/clio-parity-attachments.test.ts`, 6 tests in `tests/unit/clio-parity-ordering.test.ts`, 12 tests in `tests/unit/rating-engine.test.ts`, 15 tests in `tests/unit/messaging.test.ts`.
 
 ### Total Verification Summary
-- **Tests**: **527 passed, 0 failed** across 30 test suites (100% pass rate).
+- **Tests**: **542 passed, 0 failed** across 30 test suites (100% pass rate).
 - **Typecheck**: `tsc --noEmit` clean (0 errors).
 - **Production Build**: `wxt build` generates clean Chrome MV3 bundle containing 4 isolated, partitioned content scripts:
   - `content-scripts/gemini.js` (428 KB)
