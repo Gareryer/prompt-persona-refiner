@@ -37,22 +37,36 @@ export class TextSanitizer {
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
-    // 1. Strip script, style, noscript, and interactive UI chrome (buttons, icons, action bars)
+    // 1. Strip script, style, noscript, and interactive UI chrome (buttons, icons, action bars, A11y, expanders)
     if (typeof cloned.querySelectorAll === 'function') {
       const junk = cloned.querySelectorAll(
-        'script, style, noscript, button, svg, [role="button"], .message-actions, message-actions, .response-actions, .action-bar, .inactive-draft, [data-is-hidden="true"]'
+        'script, style, noscript, button, svg, [role="button"], .message-actions, message-actions, .response-actions, .action-bar, .inactive-draft, [data-is-hidden="true"], .sr-only, .visually-hidden, [aria-hidden="true"], [role="status"], [role="alert"], [data-testid*="expand"], [data-testid*="collapse"], .show-more, .show-less, [class*="disclaimer"]'
       );
       junk.forEach(node => node.remove());
     }
 
-    // 2. Synthesize mathematical equations (KaTeX / MathJax / MathML) to pristine LaTeX
+    // 2. Normalize citation badges and convert chips to markdown links
+    this.formatCitations(cloned);
+
+    // 3. Synthesize mathematical equations (KaTeX / MathJax / MathML) to pristine LaTeX
     this.formatMath(cloned);
 
-    // 3. Format code blocks before reading textContent
+    // 4. Format HTML tables into GitHub Flavored Markdown (GFM) pipe tables
+    this.formatTables(cloned);
+
+    // 5. Format code blocks before reading textContent
     this.formatCodeBlocks(cloned);
 
-    // 4. Extract textContent or formatted text
+    // 6. Extract textContent or formatted text
     let text = cloned.textContent || '';
+
+    // 7. Strip screen reader prefixes, private-use unicode glyphs, and UI expander residuals
+    text = text
+      .replace(/^(?:You said|Gemini said|ChatGPT said|Claude said):\s*/gim, '')
+      .replace(/^(?:You said|Gemini said|ChatGPT said|Claude said)\s*\n+/gim, '')
+      .replace(/[\uE000-\uF8FF]/g, '')
+      .replace(/\bShow more\s*Show less\b/gi, '')
+      .replace(/\bShow more\b|\bShow less\b/gi, '');
 
     // 5. Normalize lines: preserve intentional code indentation and list hierarchy
     // while stripping common HTML indentation, trailing spaces, and collapsing excess blank lines
@@ -125,6 +139,113 @@ export class TextSanitizer {
           } catch {
             // Ignore
           }
+        }
+      }
+    }
+  }
+
+  /**
+   * Normalizes citation badges and converts citation chips into markdown links or clean text.
+   */
+  static formatCitations(root: HTMLElement | Element): void {
+    if (typeof root.querySelectorAll !== 'function') return;
+
+    // 1. Strip numeric badges (+1, [1], etc.) inside citation links
+    const citationBadges = Array.from(
+      root.querySelectorAll(
+        'a[class*="citation"] span, a[data-testid*="citation"] span, [class*="citation-pill"] span, .citation-index, span[class*="badge"]'
+      )
+    );
+    for (const b of citationBadges) {
+      const text = b.textContent?.trim() || '';
+      if (/^\+?\d+$/.test(text) || /^\[\d+\]$/.test(text)) {
+        b.remove();
+      }
+    }
+
+    // 2. Convert citation links with valid external href to markdown links [Title](url)
+    const citations = Array.from(
+      root.querySelectorAll('a[class*="citation"], a[data-testid*="citation"], [class*="citation-pill"] a')
+    );
+    for (const c of citations) {
+      if (!c.parentNode || (typeof root.contains === 'function' && !root.contains(c))) continue;
+      const href = c.getAttribute('href');
+      const text = (c.textContent || '').replace(/\s+/g, ' ').trim();
+      if (href && text && !text.startsWith('http')) {
+        const mdLink = `[${text}](${href})`;
+        if (typeof root.ownerDocument?.createTextNode === 'function') {
+          const textNode = root.ownerDocument.createTextNode(mdLink);
+          c.parentNode.replaceChild(textNode, c);
+        } else {
+          try {
+            (c as HTMLElement).textContent = mdLink;
+          } catch {
+            // Ignore
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Converts HTML <table> elements into GitHub Flavored Markdown (GFM) pipe tables.
+   */
+  static formatTables(root: HTMLElement | Element): void {
+    if (typeof root.querySelectorAll !== 'function') return;
+
+    const tables = Array.from(root.querySelectorAll('table'));
+    for (const table of tables) {
+      if (!table.parentNode || (typeof root.contains === 'function' && !root.contains(table))) continue;
+      if (table.closest?.('pre, code, .cm-content')) continue;
+
+      const rows = Array.from(table.querySelectorAll('tr'));
+      if (rows.length === 0) continue;
+
+      const tableData: string[][] = [];
+      for (const row of rows) {
+        const cells = Array.from(row.querySelectorAll('th, td'));
+        if (cells.length === 0) continue;
+        const rowData = cells.map(cell => {
+          return (cell.textContent || '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .replace(/\|/g, '\\|');
+        });
+        tableData.push(rowData);
+      }
+
+      if (tableData.length === 0) continue;
+
+      const colCount = Math.max(...tableData.map(r => r.length));
+      if (colCount === 0) continue;
+
+      const normalizedRows = tableData.map(r => {
+        const copy = [...r];
+        while (copy.length < colCount) copy.push('');
+        return copy;
+      });
+
+      const headerRow = normalizedRows[0];
+      if (!headerRow) continue;
+      const separatorRow = new Array(colCount).fill('---');
+      const bodyRows = normalizedRows.slice(1);
+
+      const markdownLines: string[] = [
+        `| ${headerRow.join(' | ')} |`,
+        `| ${separatorRow.join(' | ')} |`,
+        ...bodyRows.map(r => `| ${r.join(' | ')} |`)
+      ];
+
+      const markdownTable = `\n\n${markdownLines.join('\n')}\n\n`;
+
+      if (typeof root.ownerDocument?.createTextNode === 'function') {
+        const textNode = root.ownerDocument.createTextNode(markdownTable);
+        table.parentNode.replaceChild(textNode, table);
+      } else {
+        try {
+          (table as HTMLElement).textContent = markdownTable;
+        } catch {
+          // Ignore
         }
       }
     }
