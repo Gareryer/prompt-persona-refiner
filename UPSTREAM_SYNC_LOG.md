@@ -3,8 +3,8 @@
 > **Upstream Repository**: [https://github.com/martymcenroe/Clio](https://github.com/martymcenroe/Clio)  
 > **Git Remote**: `upstream-clio` (`https://github.com/martymcenroe/Clio.git`)  
 > **Target Subsystem**: `wxt-extension/src/core/harvest/` & `wxt-extension/src/adapters/chatbots/`  
-> **Current Pinned Upstream HEAD**: `e1ee105` (September 12, 2026)  
-> **Previous Baseline**: `bdf321e` (September 8, 2026)
+> **Current Pinned Upstream HEAD**: `cfa862d` (September 14, 2026)  
+> **Previous Baseline**: `e1ee105` (September 12, 2026)
 
 ---
 
@@ -54,11 +54,17 @@ git diff bdf321e..upstream-clio/main -- extensions/src/
 | `7595df0` | 2026-09-08 | #349 (Closes #348, #346) | **Retire unreachable bucket in sweep comparison**<br>• Conditioned null distribution on observed union and tests co-occurrence. | **Zero Blast Radius** (Upstream benchmark statistics script). |
 | `e1ee105` | 2026-09-08 | #351 | **Re-runnable block-one characterisation analyses**<br>• Batch runner orchestrating sweep characterisation scripts. | **Zero Blast Radius** (Upstream benchmark runner script). |
 
+### Daily Tracking Audit: September 14, 2026 (`e1ee105` → `cfa862d`)
+
+| Commit | Date | PR / Issues | Summary & Upstream Findings | Blast Radius / WXT Porting Target |
+| :--- | :--- | :--- | :--- | :--- |
+| `cfa862d` | 2026-09-13 | #353 (Closes #352) | **Handoff session artifacts 2026-09-13**<br>• Phase-0 and block-one read-out session. 3 lessons appended to `docs/lessons-learned.md`: tool limitation vs. significance test conflict, `git merge --ff-only \| tail -1` false success, and inter-turn promises to operator. | **Zero Blast Radius** (Upstream docs only — `docs/lessons-learned.md`). |
+
 ---
 
 ## 3. Sync Status Checklist
 
-- [x] Git remote `upstream-clio` configured and fetched (`e1ee105`).
+- [x] Git remote `upstream-clio` configured and fetched (`cfa862d`).
 - [x] Phase 2: Layer 1 Unified Subsystem updates (`VirtualMessageCache`, `TextSanitizer`, `MediaExtractor`, `AutoScroller`).
 - [x] Phase 3: Layer 2 Platform Adapter updates (`ChatGPTTurnScraper`, `ordersFromCapture`, selectors).
 - [x] Phase 4: Conformance Vitest suites (#262, #263, #264, #272, #279) passing (527 / 527 tests).
