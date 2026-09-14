@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import JSZip from 'jszip';
 import { setupMockDom } from '../fixtures/mock-dom';
 import { TextSanitizer } from '@/core/harvest/extraction/text-sanitizer';
 import { ChatGPTAdapter } from '@/adapters/chatbots/chatgpt/adapter';
@@ -6,6 +7,7 @@ import { ClaudeAdapter } from '@/adapters/chatbots/claude/adapter';
 import { GeminiAdapter } from '@/adapters/chatbots/gemini/adapter';
 import { ZipBuilder } from '@/core/harvest/packaging/zip-builder';
 import { UnifiedAnalyzer } from '@/core/memory/analyzers/unified-analyzer';
+import { validatePersonaV4, type PersonaV4 } from '@/core/memory/schemas';
 import type { HarvestConversationRecord, HarvestTurn } from '@/core/harvest/types';
 
 setupMockDom();
@@ -220,5 +222,166 @@ describe('Phase 4: End-to-End Clean Persona Extraction & Synthesis Verification'
     expect(prompt).not.toContain('null');
     expect(prompt).not.toContain('Thinking');
     expect(prompt).not.toContain('Show more');
+  });
+
+  it('Multi-Platform Archival: buildZip bundles sanitized turns with nullified thinking and valid GFM tables', async () => {
+    const multiPlatformRecord: HarvestConversationRecord = {
+      metadata: {
+        site: 'chatgpt',
+        accountLabel: 'Default',
+        conversationId: 'session-multi-plat-123',
+        title: 'Multi-Platform Harvest Archive',
+        url: 'https://chatgpt.com/c/multi-plat-123',
+        extractedAt: new Date().toISOString(),
+        messageCount: 4,
+        imageCount: 0
+      },
+      messages: [
+        {
+          id: 'turn-1',
+          turnIndex: 0,
+          role: 'user',
+          content: 'How should we pace this hook?',
+          rawText: 'How should we pace this hook?',
+          timestamp: 1000
+        },
+        {
+          id: 'turn-2',
+          turnIndex: 1,
+          role: 'assistant',
+          content: '| Phase | Duration | Action |\n|---|---|---|\n| Hook | 0-3s | Visual disruption |',
+          rawText: '| Phase | Duration | Action |\n|---|---|---|\n| Hook | 0-3s | Visual disruption |',
+          thinking: 'Thought for 8 seconds',
+          timestamp: 2000
+        },
+        {
+          id: 'turn-3',
+          turnIndex: 2,
+          role: 'user',
+          content: 'Explain Argentina tactical tempo strategy',
+          rawText: 'Explain Argentina tactical tempo strategy',
+          timestamp: 3000
+        },
+        {
+          id: 'turn-4',
+          turnIndex: 3,
+          role: 'assistant',
+          content: 'Argentina controlled tempo through tactical pauses.',
+          rawText: 'Argentina controlled tempo through tactical pauses.',
+          thinking: 'Thought for 1m 14s',
+          timestamp: 4000
+        }
+      ]
+    };
+
+    const zipBlob = await ZipBuilder.buildZip(multiPlatformRecord);
+    expect(zipBlob).toBeInstanceOf(Blob);
+    expect(zipBlob.size).toBeGreaterThan(0);
+
+    const loadedZip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
+    const conversationFile = loadedZip.file('conversation.json');
+    expect(conversationFile).not.toBeNull();
+
+    const conversationJsonText = await conversationFile!.async('string');
+    const parsed = JSON.parse(conversationJsonText);
+
+    expect(parsed.metadata.title).toBe('Multi-Platform Harvest Archive');
+    expect(parsed.messages).toHaveLength(4);
+
+    // Assert ALL thinking traces are nullified by default
+    for (const msg of parsed.messages) {
+      expect(msg.thinking).toBeNull();
+      expect(msg.rawText).toBe(msg.content);
+      expect(msg.content).not.toContain('Thought for');
+    }
+
+    // Assert table integrity in message 1
+    expect(parsed.messages[1].content).toContain('| Phase | Duration | Action |');
+  });
+
+  it('End-to-End Persona Synthesis: UnifiedAnalyzer.analyze produces validated 7-dimension persona compliant with PersonaV4Schema', async () => {
+    const turns: HarvestTurn[] = [
+      {
+        id: 't-1',
+        turnIndex: 0,
+        role: 'user',
+        content: 'Design an AI persona for an expert cloud architect with focus on AWS resilience.',
+        rawText: 'Design an AI persona for an expert cloud architect with focus on AWS resilience.',
+        timestamp: 1000
+      },
+      {
+        id: 't-2',
+        turnIndex: 1,
+        role: 'assistant',
+        content: 'I recommend a resilient systems architect persona adhering to the Well-Architected Framework.',
+        rawText: 'I recommend a resilient systems architect persona adhering to the Well-Architected Framework.',
+        thinking: null,
+        timestamp: 2000
+      }
+    ];
+
+    const mockGoldenPersona: PersonaV4 = {
+      persona: {
+        instruction: 'You are a Principal Cloud Architect specializing in AWS high-availability and fault tolerance.',
+        version: 4
+      },
+      context: {
+        instruction: 'Focus on distributed cloud systems, AWS Well-Architected Framework, and multi-region failover.',
+        version: 4,
+        metadata: { domain: 'Tech', scope_tags: ['AWS', 'Distributed Systems'] }
+      },
+      tone: {
+        instruction: 'Authoritative, technical, and precise. Avoid speculative claims and generic introductions.',
+        version: 4,
+        metadata: { style_tags: ['Authoritative', 'Technical'] }
+      },
+      framework: {
+        instruction: 'Apply deductive root-cause analysis and five-pillar architectural evaluations.',
+        version: 4,
+        metadata: { reasoning_type: 'Analytical' }
+      },
+      constraints: {
+        instruction: 'NEVER compromise security or data integrity. ALWAYS specify SLAs and RTO/RPO targets.',
+        version: 4,
+        metadata: { prohibitions: ['Never ignore RTO/RPO'], requirements: ['Specify SLAs'] }
+      },
+      format: {
+        instruction: 'Format outputs with Markdown tables, bulleted architectural decisions, and Mermaid diagrams.',
+        version: 4,
+        metadata: { output_type: 'Markdown' }
+      },
+      exemplar: {
+        instruction: 'User: How do we achieve active-active failover?\nAssistant: Use Route 53 latency routing with DynamoDB Global Tables.',
+        version: 4
+      },
+      metadata: {
+        suggested_name: 'Cloud Resilience Architect',
+        suggested_title: 'Principal Cloud Systems Engineer',
+        domain: 'Tech',
+        primary_intent: 'Architect fault-tolerant multi-region cloud infrastructures'
+      }
+    };
+
+    const mockLlmClient = {
+      isConfigured: () => true,
+      call: vi.fn().mockImplementation(async (prompt: string) => {
+        // Verify prompt is completely clean
+        expect(prompt).toContain('PERSONA ARCHITECT');
+        expect(prompt).toContain('User: Design an AI persona for an expert cloud architect with focus on AWS resilience.');
+        expect(prompt).not.toContain('Thinking');
+        expect(prompt).not.toContain('Show more');
+        return { json: mockGoldenPersona };
+      })
+    };
+
+    const synthesized = await UnifiedAnalyzer.analyze({ messages: turns }, mockLlmClient);
+    expect(synthesized).toBeDefined();
+
+    const validation = validatePersonaV4(synthesized);
+    expect(validation.success).toBe(true);
+    expect(validation.data?.metadata?.suggested_name).toBe('Cloud Resilience Architect');
+    expect(validation.data?.persona?.instruction).toContain('Principal Cloud Architect');
+    expect(validation.data?.framework?.metadata?.reasoning_type).toBe('Analytical');
+    expect(validation.data?.format?.metadata?.output_type).toBe('Markdown');
   });
 });
