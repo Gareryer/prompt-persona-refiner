@@ -13,8 +13,9 @@ Content scripts in modern browser extensions face unique technical hurdles when 
 1. **Aggressive CSS Resets**: Host platforms apply global rules (e.g. `* { box-sizing: border-box; }`, high-specificity Tailwind classes) that destroy standard injected HTML elements.
 2. **Dynamic Client-Side Routing**: SPA frameworks navigate between chats without triggering browser page reloads, detaching un-anchored listeners.
 3. **Context Invalidation Crashes**: When an extension auto-reloads during development or updates, existing content scripts are orphaned. Unmanaged event listeners throw fatal `Extension context invalidated` errors.
+4. **Keystroke & Input Hijacking**: Chatbot composers (ProseMirror, Lexical, Angular Quill) intercept keyboard events before native browser handlers fire.
 
-**Allie Persona & Prompt Refiner** addresses these challenges using **WXT's `defineContentScript`** and **`createShadowRootUi`**.
+**Allie Persona & Prompt Refiner** addresses these challenges using **WXT's `defineContentScript`**, **`createShadowRootUi`**, and modular **`IChatbotAdapter`** implementations.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -30,9 +31,9 @@ Content scripts in modern browser extensions face unique technical hurdles when 
 │     ├── MutationObserver hooks into chat message container                                             │
 │     └── Debounced extraction and turn tracking (250ms debounce)                                        │
 │                                                                                                        │
-│  3. Submit Interception: adapter.interceptSubmit(async (rawPrompt) => {...})                           │
-│     ├── Hooks Enter keydown and Submit button clicks                                                   │
-│     └── Triggers refinement pipeline before allowing native send event                                 │
+│  3. Keystroke & Submit Interception:                                                                   │
+│     ├── Capture-phase keydown listener for Ctrl+Shift+R and Enter                                      │
+│     └── Triggers refinement pipeline before allowing native submit event                               │
 │                                                                                                        │
 │  4. Shadow DOM UI Mounting: createShadowRootUi(ctx, { ... })                                           │
 │     ┌──────────────────────────────────────────────────────────────────────────────────────────────┐  │
@@ -84,7 +85,19 @@ export default defineContentScript({
     // 1. Initialize content observer
     contentObserver.init();
 
-    // 2. Universal Submit Interception
+    // 2. Keyboard Shortcut Listeners (Capture Phase)
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      // Ctrl+Shift+R or Cmd+Shift+R to trigger refinement
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'r' || e.key === 'R')) {
+        e.preventDefault();
+        e.stopPropagation();
+        await contentObserver.executeRefinement();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    ctx.onInvalidated(() => window.removeEventListener('keydown', handleKeyDown, { capture: true }));
+
+    // 3. Universal Submit Interception
     let unregisterSubmit: (() => void) | null = null;
     if (typeof adapter.interceptSubmit === 'function') {
       unregisterSubmit = adapter.interceptSubmit(async (_rawPrompt: string) => {
@@ -104,7 +117,7 @@ export default defineContentScript({
       });
     }
 
-    // 3. Mount Shadow DOM Floating Refiner Badge
+    // 4. Mount Shadow DOM Floating Refiner Badge
     try {
       const ui = await createShadowRootUi(ctx, {
         name: 'prompt-refiner-overlay',
@@ -141,22 +154,39 @@ export default defineContentScript({
 
 ---
 
-## 3. Shadow DOM CSS Isolation (`cssInjectionMode: 'ui'`)
+## 3. Keyboard Shortcut & Keystroke Protocols
 
-WXT's `cssInjectionMode: 'ui'` mode ensures that any CSS imported within the content script bundle is **not** injected into the host page `<head>`. Instead, WXT compiles and scopes the styles directly inside the created Shadow Root.
-
-### Advantages:
-1. **0 Host Style Bleed**: The host page's Tailwind or CSS resets cannot alter the extension's badges, modals, or buttons.
-2. **0 Extension Style Leaks**: The extension's CSS cannot interfere with the host chat application's layout or font rules.
-3. **Dynamic Host Theme Matching**: The injected root listens to background theme changes via `ThemeController` and updates internal CSS custom properties (`--refiner-bg`, `--refiner-text`).
+| Keystroke Trigger | Context | Action Handled |
+| :--- | :--- | :--- |
+| **`Ctrl+Shift+R` / `Cmd+Shift+R`** | Host Page Composer | Intercepts active input, compiles 7-dimension persona context, and injects refined prompt. |
+| **`Enter` (without Shift)** | Submit Interception | If `autoRefineOnEnter: true`, intercepts form submission to refine before sending. |
+| **`Alt+M`** | Global Extension | Invokes `chrome.commands` to toggle the native Chrome Side Panel open/closed. |
 
 ---
 
-## 4. Lifecycle Resilience & Invalidation Safety (`ctx.onInvalidated`)
+## 4. Input Synchronization Across Web Frameworks
 
-In standard extensions, reloading an unpacked extension breaks active tabs until refreshed. 
+Because different chatbots bind input differently, updating values requires triggering internal framework watchers:
 
-With WXT's `ContentScriptContext` (`ctx`):
-- All long-running timers wrap in `ctx.setTimeout()` / `ctx.setInterval()`.
-- MutationObservers automatically disconnect on invalidation.
-- The `onRemove` callback passed to `createShadowRootUi` invokes `root.unmount()`, stripping injected DOM nodes cleanly without leaving orphaned elements behind.
+```typescript
+export function syncInputText(element: HTMLElement, text: string): void {
+  if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) {
+    element.value = text;
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+    element.dispatchEvent(new Event('change', { bubbles: true }));
+  } else if (element.isContentEditable) {
+    // Angular Quill, ProseMirror, Lexical
+    element.innerHTML = `<p>${escapeHtml(text)}</p>`;
+    element.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+  }
+}
+```
+
+---
+
+## 5. Lifecycle Resilience & Invalidation Safety (`ctx.onInvalidated`)
+
+WXT's `ContentScriptContext` (`ctx`) guarantees that when the extension updates or reloads:
+- DOM observers automatically disconnect.
+- Keyboard capture handlers unbind cleanly.
+- `ui.mount()` unmounts React roots cleanly, preventing detached DOM node leaks.

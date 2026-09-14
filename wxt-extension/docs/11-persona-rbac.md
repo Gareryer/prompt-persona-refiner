@@ -42,84 +42,98 @@ At the core of **Allie Persona & Prompt Refiner** is the **Persona V4 Memory Eng
 
 ---
 
-## 2. Dimension Breakdown & Specifications
+## 2. The 3 Persona Creation Sources
 
-### 2.1 Dimension 1: `persona` (Identity & Role)
-- **Definition**: The authoritative identity assumed by the model.
-- **Enums**: `domain: ['Tech', 'Creative', 'Business', 'Education', 'Health', 'Lifestyle', 'Other']`.
-- **Instruction Example**: *"Senior Distributed Systems Architect with 15+ years building high-throughput event-driven microservices in Go and Rust."*
+Personas can be populated into the engine through three distinct ingestion pipelines:
 
-### 2.2 Dimension 2: `context` (Environment & Assumptions)
-- **Definition**: The active situational context, tools, and background assumptions surrounding the user's project.
-- **Instruction Example**: *"Building a Chrome Extension under Manifest V3 with WXT v0.21, React 19, and Vite 6. Target browsers: Chrome, Firefox, Safari."*
-
-### 2.3 Dimension 3: `tone` (Personality & Voice)
-- **Definition**: The linguistic personality and pacing of the output.
-- **Enums**: `style: ['Professional', 'Direct', 'Technical', 'Friendly', 'Empathetic', 'Authoritative', 'Academic', 'Objective']`.
-- **Instruction Example**: *"Direct, highly technical, concise. Zero pleasantries or introductory conversational filler."*
-
-### 2.4 Dimension 4: `framework` (Reasoning Methodology)
-- **Definition**: The mental model or cognitive structure used to break down and solve problems.
-- **Enums**: `reasoning: ['First-Principles', 'Chain-of-Thought', 'Tree-of-Thought', 'Step-by-Step', 'Analytical', 'Socratic', 'Deductive']`.
-- **Instruction Example**: *"Deconstruct problems from first principles. State underlying physics and invariants before proposing high-level abstractions."*
-
-### 2.5 Dimension 5: `constraints` (Negative Prompt Rules)
-- **Definition**: Non-negotiable boundaries, forbidden patterns, and strict anti-patterns.
-- **Instruction Example**: *"Never suggest deprecated Manifest V2 APIs. Never recommend eval() or inline scripts. Always eliminate unnecessary abstractions."*
-
-### 2.6 Dimension 6: `format` (Structural Schema)
-- **Definition**: The exact physical syntax and typographical structure required.
-- **Enums**: `outputType: ['Markdown', 'Plaintext', 'JSON', 'Code', 'HTML', 'Structured', 'Custom']`.
-- **Instruction Example**: *"Output code blocks first with line-by-line comments explaining why, followed by a concise markdown comparison table."*
-
-### 2.7 Dimension 7: `exemplar` (Few-Shot Pattern Anchors)
-- **Definition**: High-value input-output demonstration pairs that ground model behavior.
-- **Instruction Example**: 
-  - *Input*: "How do I save state?"
-  - *Output*: "Use `@wxt-dev/storage` with `storage.defineItem('local:key', { defaultValue })` to survive MV3 worker restarts."
-
----
-
-## 3. Dynamic Pinning & Context Assembly
-
-Dimensions can be selectively activated or pinned on a per-session basis:
-
-```typescript
-export interface DimensionContent {
-  instruction: string;
-  version?: number;
-  pinned?: boolean;             // When true, persists across session turns
-  pinnedData?: Record<string, any>;
-  generation?: number;          // Tracks evolutionary refinement iterations
-  confidence?: number;          // 0.0 to 1.0 confidence score
-  updatedAt?: number;
-}
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       Persona Creation Lifecycles                                      │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                        │
+│  ① Manual Creation                                                                                     │
+│     User fills the 7-dimension form in the Chrome Side Panel (direct editing).                         │
+│                                                                                                        │
+│  ② Extraction from Existing System Prompt                                                              │
+│     User pastes a raw multi-paragraph system prompt; LLM decomposes text into the 7 dimensions.       │
+│                                                                                                        │
+│  ③ Automatic Synthesis from Conversation Turns                                                         │
+│     Content script scrapes user prompts + model responses; LLM infers implicit constraints & domain.   │
+│                                                                                                        │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Context Compilation Priority
-When `buildV4RefinementContext()` compiles prompt prefixes:
-1. **Pinned Persona Dimensions** override extracted session traits.
-2. **Session Extracted Context** fills unpinned dimension gaps.
-3. **Global User Settings** supply baseline fallback styling.
+---
+
+## 3. Dimension Specifications & Zod Contracts
+
+```typescript
+// wxt-extension/src/core/memory/schemas.ts
+export const DimensionContentSchema = z.object({
+  instruction: z.string().min(1, 'Persona instruction is required'),
+  version: z.number().optional().default(4),
+  pinned: z.boolean().optional(),
+  pinnedData: z.record(z.any()).optional(),
+  generation: z.number().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  updatedAt: z.number().optional()
+});
+
+export const PersonaV4Schema = z.object({
+  id: z.string().uuid(),
+  metadata: z.object({
+    suggested_name: z.string().default('AI Persona'),
+    suggested_title: z.string().optional().default('Specialist'),
+    domain: z.enum(['Tech', 'Creative', 'Business', 'Education', 'Health', 'Lifestyle', 'Other']),
+    author: z.string().optional(),
+    tags: z.array(z.string()).default([]),
+    version: z.string().default('1.0.0'),
+    is_public: z.boolean().default(false),
+    rating: z.number().optional(),
+    rating_count: z.number().optional(),
+    forked_from: z.string().uuid().optional() // Provenance tracking on community import
+  }),
+  dimensions: z.object({
+    persona: DimensionContentSchema,
+    context: DimensionContentSchema,
+    tone: DimensionContentSchema,
+    framework: DimensionContentSchema,
+    constraints: DimensionContentSchema,
+    format: DimensionContentSchema,
+    exemplar: DimensionContentSchema
+  }),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime()
+});
+```
 
 ---
 
-## 4. Role-Based Access Control (RBAC) Matrix
+## 4. Fork-on-Import Community Marketplace Model
 
-When users interact with community personas via Supabase, operations are governed by a 4-tier Role-Based Access Control model:
-
-| Role | Auth State | Capabilities & Permissions |
-| :--- | :--- | :--- |
-| **Guest / Anonymous User** | Unauthenticated | • Create and edit local personas on client device.<br>• Discover and download public community personas.<br>• Refine prompts locally using personal API keys. |
-| **Community Member** | Authenticated (JWT) | • All Guest permissions.<br>• Cloud backup of private persona library.<br>• Submit 1-5 star ratings and reviews on public personas.<br>• Publish authored personas to community marketplace. |
-| **Persona Author** | Authenticated (Owner) | • All Member permissions.<br>• Modify, update versions, or delete authored community personas.<br>• View download and rating analytics for authored templates. |
-| **Platform Moderator** | Authenticated (Admin) | • Hide, edit, or delete any reported or malicious community persona.<br>• Ban abusive accounts and purge spam submissions. |
+When a user browses the Supabase community directory and imports a public persona:
+1. **Immutable Upstream Template**: The author's original public persona remains untouched.
+2. **Local Deep Clone**: The extension generates a new local UUID and stamps `metadata.forked_from = originalId`.
+3. **Independent Evolution**: The user can modify all 7 dimensions locally without affecting other community members.
 
 ---
 
-## 5. Supabase Row-Level Security (RLS) Policies
+## 5. Role-Based Access Control (RBAC) Matrix
 
-Access control is enforced at the database kernel level in PostgreSQL via RLS:
+| Capability | Guest / Anonymous | Free User | Pro User | Template Author | Admin / Moderator |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Local Persona CRUD** | ✅ Full | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+| **Local 7-Dimension Refinement** | ✅ Full | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+| **Search Public Marketplace** | ✅ Full | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+| **Cloud Persona Backup** | ❌ None | ✅ Up to 10 | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited |
+| **Publish to Community** | ❌ None | ✅ Max 3 | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited |
+| **Edit/Delete Owned Template**| ❌ None | ✅ Owned Only| ✅ Owned Only| ✅ Owned Only| ✅ Any Template |
+| **Submit 1-5 Star Ratings** | ❌ None | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Purge Abusive Content** | ❌ None | ❌ None | ❌ None | ❌ None | ✅ Full Admin |
+
+---
+
+## 6. Supabase Row-Level Security (RLS) Policies
 
 ```sql
 -- Enforce author-only modification of community personas
@@ -135,6 +149,6 @@ CREATE POLICY "Authors can delete own personas"
   FOR DELETE
   USING (auth.uid() = user_id);
 
--- Prevent rating tampering (1 rating per user per persona)
+-- Rating uniqueness: 1 rating per user per persona
 CREATE UNIQUE INDEX idx_user_persona_rating ON public.ratings(user_id, persona_id);
 ```

@@ -9,13 +9,13 @@
 
 ## 1. Overview & WXT Storage Engine
 
-Standard Chrome extension storage (`chrome.storage.local`) suffers from lack of type safety, missing default value guarantees, manual JSON serialization, and callback boilerplate. 
+Standard Chrome extension storage (`chrome.storage.local`) lacks runtime type validation, default fallback guarantees, and reactive event hooks. 
 
-**Allie Persona & Prompt Refiner** utilizes **WXT Storage (`@wxt-dev/storage`)**, which provides:
-- **Type-Safe Item Definitions**: Every storage entry is defined with a TypeScript type and fallback default.
+**Allie Persona & Prompt Refiner** relies on **WXT Storage (`@wxt-dev/storage`)**, which delivers:
+- **Type-Safe Item Definitions**: Every key is defined with an immutable TypeScript contract and fallback default.
 - **Unified Namespacing**: Seamless prefixing across `local:`, `session:`, `sync:`, and `managed:`.
-- **Reactive Watchers**: Component-level subscriptions that trigger automatic UI updates when storage items mutate.
-- **Atomic Migrations**: Declarative migration chains that transform data across schema version bumps.
+- **Reactive Watchers**: Component-level subscriptions (`item.watch()`) driving real-time React 19 UI updates.
+- **TanStack Query Cache Sync**: Keeps async client state synchronized across background and frontend windows without HTTP refetches.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -29,54 +29,76 @@ Standard Chrome extension storage (`chrome.storage.local`) suffers from lack of 
 │ • Survives browser restarts       │ • Multi-context access enabled    │ • Profile-bound                │
 ├───────────────────────────────────┼───────────────────────────────────┼────────────────────────────────┤
 │ Items:                            │ Items:                            │ Items:                         │
-│ - local:active_persona            │ - session:refinementCounter       │ - sync:user_settings           │
-│ - local:personas                  │ - session:activeSessionId         │ - sync:theme_preference        │
-│ - local:persona_drafts            │ - session:splitViewActive         │                                │
-│ - local:api_keys (Encrypted)      │ - session:active_extraction_locks │                                │
+│ - local:settings:ai               │ - session:refinementCounter       │ - sync:user_settings           │
+│ - local:settings:ui               │ - session:activeSessionId         │ - sync:theme_preference        │
+│ - local:personas                  │ - session:splitViewActive         │                                │
+│ - local:security:keys             │ - session:active_extraction_locks │                                │
 │ - session_{sessionId}             │                                   │                                │
 └───────────────────────────────────┴───────────────────────────────────┴────────────────────────────────┘
 ```
 
 ---
 
-## 2. Defined Storage Items & Schemas (`src/lib/storage/items.ts`)
+## 2. Defined Storage Items & Schema Contracts (`src/lib/storage/items.ts`)
 
+### 2.1 AI Settings Schema
 ```typescript
-import { storage } from 'wxt/storage';
-import type { PersonaV4 } from '@/core/memory/schemas';
-import type { UserSettings, PersonaDraft, RatingRecord, SyncAction } from './items';
+export interface AISettings {
+  provider: 'gemini' | 'openai' | 'anthropic' | 'openrouter';
+  model: string;
+  selectedModels: Record<string, string>;
+  autoRefine: boolean;
+  confidenceThreshold: number;
+  contextMenuEnabled: boolean;
+}
 
-// 1. Currently Active Persona
-export const activePersonaItem = storage.defineItem<PersonaV4 | null>('local:active_persona', {
-  defaultValue: null,
-  version: 4
+export const aiSettingsItem = storage.defineItem<AISettings>('local:settings:ai', {
+  defaultValue: {
+    provider: 'gemini',
+    model: 'gemini-2.5-flash',
+    selectedModels: {},
+    autoRefine: false,
+    confidenceThreshold: 0.6,
+    contextMenuEnabled: true
+  },
+  version: 2
 });
+```
 
-// 2. User Persona Library Dictionary
+### 2.2 UI Settings Schema
+```typescript
+export interface UISettings {
+  theme: 'system' | 'light' | 'dark';
+  sidebarCollapsed: boolean;
+  onboardingCompleted: boolean;
+  extensionVersion: string;
+  activeTab: string;
+}
+
+export const uiSettingsItem = storage.defineItem<UISettings>('local:settings:ui', {
+  defaultValue: {
+    theme: 'system',
+    sidebarCollapsed: false,
+    onboardingCompleted: false,
+    extensionVersion: '1.0.0',
+    activeTab: 'personas'
+  },
+  version: 1
+});
+```
+
+### 2.3 Personas & History
+```typescript
 export const personasLibraryItem = storage.defineItem<Record<string, PersonaV4>>('local:personas', {
   defaultValue: {},
   version: 4
 });
 
-// 3. Global User Settings
-export const userSettingsItem = storage.defineItem<UserSettings>('local:user_settings', {
-  defaultValue: {
-    theme: 'system',
-    activeModelProvider: 'gemini',
-    activeModelName: 'gemini-2.5-flash',
-    autoRefineOnEnter: false,
-    cloudSyncEnabled: false
-  },
-  version: 1
+export const activePersonaItem = storage.defineItem<PersonaV4 | null>('local:active_persona', {
+  defaultValue: null,
+  version: 4
 });
 
-// 4. Rating & Feedback History
-export const ratingsHistoryItem = storage.defineItem<RatingRecord[]>('local:ratings_history', {
-  defaultValue: [],
-  version: 1
-});
-
-// 5. Offline Sync Delta Queue
 export const syncQueueItem = storage.defineItem<SyncAction[]>('local:sync_queue', {
   defaultValue: [],
   version: 1
@@ -85,11 +107,42 @@ export const syncQueueItem = storage.defineItem<SyncAction[]>('local:sync_queue'
 
 ---
 
-## 3. Multi-Context Session Storage Access Level
+## 3. Storage + TanStack Query Synchronization Pattern
 
-By default in Manifest V3, `chrome.storage.session` is restricted exclusively to the Background Service Worker. Content scripts cannot read session storage.
+To achieve instant UI reactivity across multiple open tabs and sidepanels without stale state:
 
-To allow low-latency context sharing between the service worker and content scripts without message-passing round trips, the background worker invokes `setAccessLevel` synchronously on boot:
+```typescript
+// wxt-extension/src/hooks/usePersonasQuery.ts
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { personasLibraryItem } from '@/lib/storage/items';
+
+export function usePersonasQuery() {
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ['personas'],
+    queryFn: () => personasLibraryItem.getValue(),
+    staleTime: Infinity // Keep cached indefinitely
+  });
+
+  // Watch for background storage updates
+  useEffect(() => {
+    const unwatch = personasLibraryItem.watch((newPersonas) => {
+      queryClient.setQueryData(['personas'], newPersonas);
+    });
+    return () => unwatch();
+  }, [queryClient]);
+
+  return query;
+}
+```
+
+---
+
+## 4. Multi-Context Session Storage Access Level
+
+In Manifest V3, `chrome.storage.session` is inaccessible to content scripts by default. On boot, the background worker elevates access:
 
 ```typescript
 // wxt-extension/entrypoints/background.ts
@@ -97,82 +150,13 @@ if (typeof chrome !== 'undefined' && (chrome?.storage?.session as any)?.setAcces
   (chrome.storage.session as any).setAccessLevel({
     accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS'
   }).catch((err: any) => {
-    bgLog('warn', 'Failed to set session storage access level', { error: err?.message });
+    bgLog('warn', 'Failed to set session access level', { error: err?.message });
   });
 }
 ```
 
 ---
 
-## 4. Reactive Storage Watchers in React 19
-
-WXT storage items provide a native `.watch()` observer. The Side Panel and Popup subscribe to storage mutations, eliminating manual polling or custom event broadcasters:
-
-```tsx
-// wxt-extension/entrypoints/sidepanel/App.tsx
-import React, { useEffect, useState } from 'react';
-import { activePersonaItem } from '@/lib/storage/items';
-import type { PersonaV4 } from '@/core/memory/schemas';
-
-export const PersonaHeader: React.FC = () => {
-  const [activePersona, setActivePersona] = useState<PersonaV4 | null>(null);
-
-  useEffect(() => {
-    // 1. Initial async read
-    activePersonaItem.getValue().then(setActivePersona);
-
-    // 2. Subscribe to reactive mutations
-    const unwatch = activePersonaItem.watch((newPersona) => {
-      setActivePersona(newPersona);
-    });
-
-    return () => unwatch();
-  }, []);
-
-  return (
-    <header className="persona-header">
-      <h3>{activePersona?.metadata?.suggested_name || 'Default Persona'}</h3>
-    </header>
-  );
-};
-```
-
----
-
 ## 5. Quota Management & `unlimitedStorage`
 
-The standard Chrome storage quota limits extensions to **10 MB** for `chrome.storage.local` and **100 KB** for `chrome.storage.sync`. 
-
-Because users may store extensive prompt turn histories, multiple persona libraries, and cached exemplars, `wxt.config.ts` declares the **`unlimitedStorage`** permission:
-
-```typescript
-// wxt-extension/wxt.config.ts
-manifest: {
-  permissions: [
-    'storage',
-    'unlimitedStorage',
-    'tabs',
-    'sidePanel'
-  ]
-}
-```
-
-This bypasses browser disk quotas, allowing the local IndexedDB and `chrome.storage.local` repositories to grow to gigabytes without write failures.
-
----
-
-## 6. Migration Handling
-
-WXT provides built-in migration hooks to gracefully transform data across schema version bumps:
-
-```typescript
-export const legacyMigratedPersonas = storage.defineItem<Record<string, PersonaV4>>('local:personas', {
-  defaultValue: {},
-  version: 4,
-  migrations: {
-    2: (oldVal: any) => migrateV1ToV2(oldVal),
-    3: (oldVal: any) => migrateV2ToV3(oldVal),
-    4: (oldVal: any) => migrateV3ToV4(oldVal) // Converts flat structures to 7 dimensions
-  }
-});
-```
+Standard quota limits extensions to **10 MB** of local storage. `wxt.config.ts` declares **`unlimitedStorage`** to ensure rich multi-turn conversation logs and persona libraries never exceed browser limits.

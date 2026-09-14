@@ -63,6 +63,8 @@ export interface IChatbotAdapter {
   onReanchor?(element: HTMLElement): void;
   resolveAnchor?(element: HTMLElement): HTMLElement;
   getSubmitButton?(): HTMLElement | null;
+  getSelectors?(): Record<string, string[] | readonly string[] | string>;
+  getStyleTokens?(): Record<string, any>;
 
   // Refinement Interception
   interceptSubmit?(onRefine: (prompt: string) => Promise<boolean> | boolean): () => void;
@@ -71,88 +73,43 @@ export interface IChatbotAdapter {
 
 ---
 
-## 3. Deep Dive: Platform-Specific Adapter Implementations
+## 3. Selector Fallback Strategy & Platform Implementations
 
-### 3.1 Google Gemini Adapter (`src/adapters/chatbots/gemini/`)
-- **Host**: `gemini.google.com`
-- **Framework**: Angular Custom Elements
-- **DOM Peculiarities**:
-  - During response streaming, Gemini renders text in a transient `<pending-request>` wrapper. When generation completes, Angular tears down this DOM tree and reconstructs a permanent `<model-response>` element.
-  - The adapter implements `onReanchor(element: HTMLElement)` to re-attach injected rating and prompt-diff overlays across the Angular node replacement.
-- **Input Composer**: Hooks into `rich-textarea .ql-editor[contenteditable="true"]`.
-- **Text Insertion**:
-  ```typescript
-  setInputText(text: string): boolean {
-    const input = this.getActiveInput();
-    if (!input) return false;
-    input.innerHTML = `<p>${escapeHtml(text)}</p>`;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    return true;
-  }
-  ```
-
-### 3.2 ChatGPT Adapter (`src/adapters/chatbots/chatgpt/`)
-- **Hosts**: `chatgpt.com`, `chat.openai.com`
-- **Framework**: React 18/19 Virtualized DOM
-- **DOM Peculiarities**:
-  - Turns are recycled as the user scrolls. Direct DOM references (`turnEl === previousTurnEl`) fail across scroll boundaries.
-  - The adapter tracks turns using stable unique identifiers: `data-message-id` attributes and `article[data-testid^="conversation-turn-"]`.
-- **Input Composer**: Targets `textarea#prompt-textarea`.
-- **Submit Hook**: Binds to `button[data-testid="send-button"]` and `keydown` (`Enter` without `Shift`).
-
-### 3.3 Claude Adapter (`src/adapters/chatbots/claude/`)
-- **Host**: `claude.ai`
-- **Framework**: React + ProseMirror / Tiptap
-- **DOM Peculiarities**:
-  - ProseMirror consumes `Enter` keystrokes inside internal event maps before global window keydown handlers fire. Submit interception hooks into capture-phase listeners (`addEventListener('keydown', handler, { capture: true })`).
-  - Message bubble nodes (`[data-cds="UserMessage"]`) have constrained widths. The adapter implements `resolveAnchor()` to walk up the parent hierarchy (`findByWidening`) to find the full-width row container.
-
-### 3.4 DeepSeek, Grok, & Meta AI Adapters
-- **DeepSeek (`chat.deepseek.com`)**: Dispatches synthetic `InputEvent('input', { bubbles: true, inputType: 'insertText' })` to trigger Vue reactive binding updates.
-- **Grok (`grok.com`, `x.com/i/grok`)**: Tracks message turns via `[data-testid="grok-message-turn"]`.
-- **Meta AI (`meta.ai`)**: Synchronizes with Meta's Lexical editor state tree by simulating character input events.
-
----
-
-## 4. Adapter Registry & Resolution (`src/adapters/chatbots/registry.ts`)
-
-When a content script boots in any tab, the adapter registry iterates registered adapters and returns the first match based on the active `window.location.hostname`:
+To survive unannounced host DOM changes, adapters utilize cascading selector arrays:
 
 ```typescript
-// wxt-extension/src/adapters/chatbots/registry.ts
-import { geminiAdapter } from './gemini.adapter';
-import { chatgptAdapter } from './chatgpt.adapter';
-import { claudeAdapter } from './claude.adapter';
-import { deepseekAdapter } from './deepseek.adapter';
-import { grokAdapter } from './grok.adapter';
-import { metaAdapter } from './meta.adapter';
-import type { IChatbotAdapter } from './types';
-
-const registeredAdapters: IChatbotAdapter[] = [
-  geminiAdapter,
-  chatgptAdapter,
-  claudeAdapter,
-  deepseekAdapter,
-  grokAdapter,
-  metaAdapter
-];
-
-export function resolveChatbotAdapter(hostname = location.hostname): IChatbotAdapter | null {
-  for (const adapter of registeredAdapters) {
-    if (adapter.matches(hostname)) {
-      return adapter;
-    }
-  }
-  return null;
-}
+export const GEMINI_SELECTORS = {
+  input: [
+    'rich-textarea .ql-editor[contenteditable="true"]',
+    'div[contenteditable="true"][role="textbox"]',
+    'textarea.textarea'
+  ],
+  submitButton: [
+    'button.send-button',
+    'button[aria-label*="Send"]',
+    'mat-icon[data-mat-icon-name="send"]'
+  ],
+  turnContainer: [
+    'user-query, model-response',
+    '.conversation-container .turn',
+    '[data-test-id="turn"]'
+  ]
+};
 ```
 
 ---
 
-## 5. Adding a New Platform Adapter
+## 4. Rapid 4-Step Onboarding Guide for New Platforms (< 30 Mins)
 
-To extend support to a new chatbot platform (e.g. Perplexity, Mistral Le Chat):
-1. Implement the `IChatbotAdapter` contract in `src/adapters/chatbots/<platform>.adapter.ts`.
-2. Add the hostname to `wxt.config.ts` under `manifest.host_permissions` and `content_scripts.matches`.
-3. Register the instance in `src/adapters/chatbots/registry.ts`.
-4. Add unit test suites in `tests/adapters/<platform>.test.ts`.
+When a new chatbot emerges (e.g. Perplexity, Mistral Le Chat):
+
+1. **Step 1: Inspect Host DOM & Create Adapter File**:
+   - Inspect input element, submit button, and message turn classes.
+   - Create `src/adapters/chatbots/<platform>.adapter.ts` implementing `IChatbotAdapter`.
+2. **Step 2: Implement Input Setter with Synthetic Events**:
+   - Verify whether the composer uses `value`, `innerHTML`, or synthetic `InputEvent('input', { bubbles: true })`.
+3. **Step 3: Register in Manifest & Registry**:
+   - Add hostname to `manifest.host_permissions` and `matches` in `wxt.config.ts`.
+   - Add instance to `registeredAdapters` array in `src/adapters/chatbots/registry.ts`.
+4. **Step 4: Add Unit Suite in `tests/adapters/`**:
+   - Add DOM fixture test ensuring `getActiveInput()` and `scrapeTurns()` pass cleanly.

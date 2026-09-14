@@ -9,7 +9,7 @@
 
 ## 1. Threat Model & Trust Boundaries
 
-Browser extensions operate in one of the most hostile runtime environments in software engineering: content scripts are injected directly into complex third-party web pages (`chatgpt.com`, `gemini.google.com`, `claude.ai`) containing megabytes of proprietary scripts, web workers, and continuous DOM mutations.
+Browser extensions operate in a hostile runtime environment: content scripts are injected directly into complex third-party web pages (`chatgpt.com`, `gemini.google.com`, `claude.ai`) containing megabytes of proprietary scripts and continuous DOM mutations.
 
 **Allie Persona & Prompt Refiner** establishes strict security perimeters across three trust domains:
 
@@ -112,18 +112,30 @@ export async function encryptApiKey(plaintext: string): Promise<string> {
 }
 ```
 
-### 2.2 Volatile Ephemeral Lifetime Guarantee
-- Plaintext API keys are **never** returned to the content script or injected DOM.
-- When an API request is initiated, the Background Service Worker decrypts the key in volatile heap memory, includes it in the HTTPS request header, and allows garbage collection immediately following request dispatch.
+---
+
+## 3. Chrome Web Store Permission Justification Matrix
+
+During Chrome Web Store review, every declared permission must be strictly justified:
+
+| Permission | Technical Requirement in Allie Refiner | Review Justification |
+| :--- | :--- | :--- |
+| **`storage`** | `@wxt-dev/storage` schemas | Required to store user personas, settings, and encrypted API keys locally. |
+| **`unlimitedStorage`** | Archival & conversation history | Allows local conversation turn history and persona libraries to exceed the default 10MB quota. |
+| **`sidePanel`** | `entrypoints/sidepanel/` | Required to provide the persistent 3-tab workspace UI in Chrome's native sidepanel. |
+| **`tabs`** | URL parsing & session resolution | Inspects active tab URLs to map sessions (e.g. `/app/<id>` on Gemini) and send responses. |
+| **`clipboardWrite`** | Copy refined prompt action | Allows the user to click "Copy Refined Prompt" to system clipboard. |
+| **`downloads`** | Harvest export engine | Allows users to download compressed `.zip` and `.json` archives of their conversation exports. |
+| **`scripting`** | Dynamic content script fallbacks | Used to ensure content script observers recover if tabs were opened prior to installation. |
 
 ---
 
-## 3. Manifest V3 Content Security Policy (CSP) Compliance
+## 4. Manifest V3 Content Security Policy (CSP) Compliance
 
 WXT enforces full compliance with Chrome Web Store MV3 security policies:
 
 1. **No Remote Code Execution**: All application logic (React 19, Zod, JSZip, UI components) is compiled locally into the extension package at build time. No external `<script src="https://...">` tags are permitted.
-2. **Disallowance of `eval()`**: The use of `eval()`, `new Function()`, and WebAssembly string compilation is strictly disabled. All template interpolation uses typed string builders rather than runtime eval routines.
+2. **Disallowance of `eval()`**: The use of `eval()`, `new Function()`, and WebAssembly string compilation is strictly disabled.
 3. **Restricted Script Source**: Manifest declares:
    ```json
    "content_security_policy": {
@@ -133,36 +145,12 @@ WXT enforces full compliance with Chrome Web Store MV3 security policies:
 
 ---
 
-## 4. DOM Isolation & Injection Defense
+## 5. Threat Mitigation Matrix
 
-### 4.1 Isolated World Execution
-Content scripts execute inside the Chromium **Isolated World**. While the script shares DOM tree access with the host page, JavaScript variables, prototypes, and execution contexts are completely segregated. 
-- Host page scripts cannot inspect extension variables.
-- Malicious host scripts cannot tamper with `Array.prototype` or `Object.prototype` within the content script context.
-
-### 4.2 Shadow DOM Encapsulation
-Injected overlays are mounted inside an open Shadow Root using `createShadowRootUi`. This provides:
-- **CSS Style Confinement**: Host styles cannot alter extension buttons or prompt diff overlays.
-- **Event Scoping**: Internal extension clicks and interactions remain scoped to the Shadow Root unless explicitly forwarded.
-
-### 4.3 HTML Sanitization & Diff Escaping
-Prompt comparison diffs render HTML highlights representing additions and deletions. To eliminate stored XSS risks, all user prompt content is sanitized via strict character entity replacement before injection:
-
-```typescript
-export function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-```
-
----
-
-## 5. Permission Minimization & Network Bounds
-
-In accordance with the Principle of Least Privilege:
-- **No `<all_urls>` Wildcards**: The extension restricts `matches` and `host_permissions` strictly to supported AI chatbot domains (`gemini.google.com`, `chatgpt.com`, `claude.ai`, `chat.deepseek.com`, `grok.com`, `meta.ai`) and authorized model APIs.
-- **Sensitive Web APIs Excluded**: No access requested for `webRequestBlocking`, `cookies`, or arbitrary tab management.
+| Threat | Impact | Mitigation Strategy in Allie Refiner |
+| :--- | :--- | :--- |
+| **API Key Theft from Disk** | High | Keys encrypted via AES-GCM (256-bit) using PBKDF2 with unique installation salt. Plaintext keys never touch disk. |
+| **Host DOM Sniffing** | High | Content scripts execute in Chromium Isolated World. Decrypted keys never leave the Background Service Worker. |
+| **CSS Injection / Style Bleed** | Medium | Injected UI is encapsulated inside an isolated Shadow Root via `createShadowRootUi`. |
+| **Stored XSS via Prompts** | High | All prompt diffs and scraped texts are sanitized via `escapeHtml()` before rendering to DOM. |
+| **Tampering with Community Data**| Critical | Supabase PostgreSQL enforces strict Row-Level Security (RLS). Users can only modify owned personas. |

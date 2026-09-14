@@ -1,29 +1,39 @@
 # 00 - Allie Persona & Prompt Refiner: System Overview
 
 > **Project Identity**: `allie-persona-prompt-refiner`  
-> **Architecture Target**: Web Extension Manifest V3 (MV3)  
+> **Architecture Target**: Web Extension Manifest V3 (MV3) · Service-Oriented Architecture (SOA)  
 > **Framework Stack**: [WXT (Web Extension Toolbox) v0.21.4](https://wxt.dev/) · React 19 · TypeScript 5.7+ · Vite 6 · Zod v4  
 > **Supported Host Platforms**: Google Gemini, ChatGPT, Claude, DeepSeek, Grok, Meta AI  
-> **Authoritative Root**: `wxt-extension/`
+> **Authoritative Root**: `wxt-extension/`  
+> **Status**: Production Reference Specification
 
 ---
 
-## 1. Executive Summary
+## 1. Executive Summary & Design Origins
 
-**Allie Persona & Prompt Refiner** is an enterprise-grade, browser-integrated AI engineering platform packaged as a cross-browser WebExtension. It bridges the gap between raw user intent and structured prompt engineering by running an automated, context-aware memory engine directly within browser chat sessions.
+**Allie Persona & Prompt Refiner** is an enterprise-grade, browser-integrated AI context orchestration platform. Its architectural foundation synthesizes lessons learned from five leading production WebExtension codebases:
+1. **Superfill.ai**: Service-Oriented Architecture with RPC proxy services, `@webext-core/messaging`, TanStack Query + `storage.watch()` reactive state sync, and AES-256-GCM encryption.
+2. **Text Polish**: Universal content script submit interception and inline diff visualization.
+3. **Sidepanel Template**: Clean React 19 sidepanel window routing and split-view management.
+4. **BewlyBewly**: Multi-platform CSS isolation and deep Shadow DOM containment.
+5. **GPT-Runner**: Cross-provider LLM API gateway and multi-turn conversational harvesting.
 
-### Core Value Proposition
-1. **Universal Multi-Chatbot Ingestion**: Seamlessly intercepts, observes, and refines prompts across 6 premier AI chat interfaces (`gemini.google.com`, `chatgpt.com`, `claude.ai`, `chat.deepseek.com`, `grok.com`, `meta.ai`).
-2. **7-Dimension Persona Memory (V4)**: Automatically extracts, aggregates, and persists user identity, domain expertise, preferred tone, reasoning frameworks, hard negative constraints, output formats, and exemplar patterns.
-3. **Clean-Room Shadow DOM Presentation**: Injects non-intrusive floating badges, refinement overlays, and rating controls inside an isolated Shadow DOM (`createShadowRootUi`), completely eliminating host-application CSS collision and style bleed.
-4. **Secure Multi-Provider LLM Gateway**: Executes real-time extraction and prompt refinement via user-configured API endpoints (Google Gemini, OpenAI, Anthropic, OpenRouter) or cloud-synchronized community templates via Supabase.
-5. **Zero-Trust Client Cryptography**: Encrypts all user API credentials locally using browser Web Crypto APIs (AES-GCM 256-bit with PBKDF2 key derivation) before persisting to `chrome.storage.local`.
+**Core Chosen Pattern**: **Service-Oriented Architecture (SOA)** with **Local-First Persistence** and **Clean-Room Shadow DOM UI Injection**.
 
 ---
 
-## 2. High-Level Architecture & Execution Contexts
+## 2. Key Architectural Principles
 
-Browser extensions under Manifest V3 operate across strictly segregated execution worlds. WXT structures `allie-persona-prompt-refiner` into four primary runtime contexts:
+1. **Local-First (Zero Cloud Lock-In)**: All primary user data—personas, custom prompt dimensions, scraped turn histories, and encrypted keys—reside permanently on the local machine in `chrome.storage.local` and IndexedDB. Cloud synchronization with Supabase is strictly opt-in.
+2. **Platform-Agnostic Core Engine**: Domain logic, prompt refinement synthesis, and 7-dimension persona memory are strictly decoupled from host DOM manipulations. Chatbots (Gemini, ChatGPT, Claude, DeepSeek, Grok, Meta AI) are managed via dedicated `IChatbotAdapter` implementations.
+3. **End-to-End Type Safety**: Strict TypeScript 5.7+ compiler settings with `noImplicitAny` and zero `any` casts terminators. Runtime type boundaries are guarded by Zod schemas.
+4. **Zero-Trust BYOK Security**: Users bring their own API keys (BYOK). Keys are encrypted locally using Web Crypto AES-GCM (256-bit) with PBKDF2 key derivation. No external server ever inspects or handles plaintext user credentials.
+5. **Clean Presentation Isolation**: In-page UI surfaces mount inside an open Shadow Root (`createShadowRootUi`). Host application CSS resets cannot bleed into extension widgets, and extension styles cannot leak into host chat containers.
+6. **Progressive Enhancement**: When offline or when LLM API quotas expire, the extension gracefully falls back to deterministic rule-based prompt assembly and local queueing.
+
+---
+
+## 3. High-Level Multi-Context Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
@@ -46,9 +56,9 @@ Browser extensions under Manifest V3 operate across strictly segregated executio
 │                                                                                         │
 │   ┌────────────────────────────────┐         ┌──────────────────────────────────────┐   │
 │   │ User Surfaces (React 19)       │         │ Background Service Worker (MV3)      │   │
-│   │  - Side Panel (Full Workspace) │◄───┬───►│  - Memory Orchestrator               │   │
+│   │  - Side Panel (Full Workspace) │◄───┬───►│  - Memory Orchestrator (SOA)         │   │
 │   │  - Action Popup (Quick Switch) │    │    │  - API Proxy & LLM Gateway           │   │
-│   │  - Options (Keys & Cloud Sync) │    │    │  - Web Crypto Vault (AES-GCM)        │   │
+│   │  - Options (Keys & Cloud Sync) │    │    │  - Web Crypto Vault (AES-GCM 256)    │   │
 │   └────────────────────────────────┘    │    │  - Supabase Sync Client              │   │
 │                                         │    │  - Harvest & Export Engine           │   │
 │                                         │    └──────────────────┬───────────────────┘   │
@@ -69,108 +79,45 @@ Browser extensions under Manifest V3 operate across strictly segregated executio
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Context Breakdown
+---
 
-| Context | Entrypoint | Primary Responsibility | Isolation Guarantee |
+## 4. Technology Stack & Provenance
+
+| Layer | Technology | Version | Architectural Provenance & Rationale |
 | :--- | :--- | :--- | :--- |
-| **Service Worker** | `entrypoints/background.ts` | Central daemon. Manages LLM calls, memory orchestration, crypto operations, Supabase sync, and extension alarms. | Runs headlessly. Ephemeral lifecycle (~30s idle timeout). |
-| **Content Scripts** | `entrypoints/content.ts`<br>`entrypoints/*.content/` | Observes host chat DOM, scrapes conversation turns, intercepts send actions, mounts UI. | Isolated JS world. No direct access to host JS variables; protected from host script inspection. |
-| **Injected Shadow UI** | `src/components/injections/` | In-page interactive badges, prompt refinement comparison diffs, rating stars. | Encapsulated inside Shadow Root (`mode: 'open'`). 100% immune to host CSS resets. |
-| **Side Panel UI** | `entrypoints/sidepanel/` | Persistent multi-tab control center: Persona builder, 7-dimension memory viewer, history logger. | Dedicated extension HTML window with full Chrome Extension API access. |
-| **Action Popup** | `entrypoints/popup/` | Quick-toggle menu: active persona selector, refinement on/off switch, shortcut hints. | Ephemeral popup window rendered when clicking toolbar icon. |
-| **Options Page** | `entrypoints/options/` | Full-screen settings: API keys, model parameter sliders, cloud sync credentials, data export. | Dedicated extension page rendered in a browser tab. |
+| **Extension Framework** | WXT | v0.21.4 | Vite-based build toolchain, auto-entrypoints, multi-target MV3 support |
+| **UI Framework** | React | v19.0.0 | React 19 Concurrent Root, modern hooks, zero legacy lifecycle methods |
+| **Language** | TypeScript | v5.7+ | Strict typing, full IDE inference across IPC protocols |
+| **Styling** | Tailwind CSS / Scoped CSS | v4.x | Inline scoped injection (`cssInjectionMode: 'ui'`) inside Shadow Root |
+| **Component Primitives** | shadcn/ui & Radix | Latest | Accessible, unstyled primitives customizable via CSS variables |
+| **Validation** | Zod | v3.24 / v4 | Runtime boundary verification for 7-dimension Persona schemas |
+| **Local Storage** | `@wxt-dev/storage` | Latest | Type-safe `storage.defineItem` with reactive `.watch()` subscriptions |
+| **State Management** | TanStack Query + Hooks | v5.x | Asynchronous server/local state caching with zero-refetch stale times |
+| **Archival & Export** | JSZip | v3.10.1 | Client-side compression for multi-turn conversational export |
+| **Unit Testing** | Vitest + fake-indexeddb | v3.0.0 | High-velocity headless unit testing with mock WebExtension globals |
 
 ---
 
-## 3. Core System Subsystems
+## 5. Specification Document Index (19-Part Suite)
 
-### 3.1 7-Dimension Persona Memory V4 (`src/core/memory/`)
-The foundational data engine models user context across 7 deterministic dimensions, defined and validated at runtime using Zod:
-1. **`persona`**: Role title, domain identity, core competencies, and professional background.
-2. **`context`**: Current working environment, active project scope, tool stack, and business constraints.
-3. **`tone`**: Communication personality (e.g., *Direct, Objective, Technical, Instructive, Empathetic*).
-4. **`framework`**: Structural reasoning methodology (e.g., *First-Principles, Chain-of-Thought, Socratic, SCQA*).
-5. **`constraints`**: Strict negative constraints (e.g., *No fluff, no sycophantic apologies, code-first*).
-6. **`format`**: Concrete output layout (e.g., *Markdown tables, strict JSON, bulleted checklist, syntax-highlighted code*).
-7. **`exemplar`**: Few-shot demonstration pairs showing ideal input-to-output transformations.
-
-### 3.2 Universal Chatbot Platform Adapters (`src/adapters/chatbots/`)
-A unified interface contract (`IChatbotAdapter`) standardizes interactions across disparate chatbot single-page applications:
-- **`GeminiAdapter`**: Navigates Angular Web Components, intercepts input area, scrapes transient `<pending-request>` and permanent `<model-response>` elements.
-- **`ChatGPTAdapter`**: Interacts with React virtualized turn lists, tracking persistent turn UUIDs across re-renders.
-- **`ClaudeAdapter`**: Hooks into ProseMirror / Tiptap contenteditable editors, escaping inline bubble wrappers via parent-widening DOM traversals.
-- **`DeepSeekAdapter`**, **`GrokAdapter`**, **`MetaAdapter`**: Dispatches synthetic `InputEvent` pulses to trigger internal framework state synchronization.
-
-### 3.3 Prompt Refiner & Context Assembler (`src/core/refiner/`, `src/core/memory/`)
-- Assembles active persona dimensions into optimized system directives and prefix injections.
-- Performs automated diff computation (`src/content/diff.ts`) comparing the user's raw prompt with the refined version before injection.
-
-### 3.4 Web Crypto & Key Security Vault (`src/core/crypto/`)
-- Protects LLM API tokens (Gemini, OpenAI, Anthropic, OpenRouter) with client-side **AES-GCM 256-bit encryption**.
-- Master encryption keys are derived using PBKDF2 with SHA-256 and unique salt per installation.
-- Raw decrypted keys are kept solely in volatile memory within the Background Service Worker during active API calls and are never transmitted to content scripts or host pages.
-
-### 3.5 Supabase Community & Cloud Sync (`src/core/supabase/`)
-- Connects to Supabase BaaS for cloud persona backups, public persona sharing, and community rating.
-- Utilizes Row-Level Security (RLS) policies to ensure users can only modify their own public/private personas.
-
-### 3.6 Harvest & Interaction Export Engine (`src/core/harvest/`)
-- Background orchestrator for scraping and indexing complete conversation histories across active tabs.
-- Generates compressed multi-format archives (JSON, CSV, Markdown) packaged client-side using `jszip`.
-
----
-
-## 4. Technology Stack & Key Dependencies
-
-```json
-{
-  "framework": "WXT (Web Extension Toolbox) v0.21.4",
-  "buildTool": "Vite v6.2.0 + Rollup",
-  "language": "TypeScript v5.7.0 (Strict Mode, 0 Errors)",
-  "runtimeUI": "React v19.0.0 + ReactDOM v19.0.0",
-  "validation": "Zod v3.24.0 / v4",
-  "archiving": "JSZip v3.10.1",
-  "testing": "Vitest v3.0.0 + fake-indexeddb v6.2.5",
-  "targetManifest": "Manifest V3 (Chrome, Edge, Firefox, Safari)"
-}
-```
-
----
-
-## 5. Verification Gates & Current Audit Health
-
-All code in `wxt-extension/` adheres to five strict operational verification gates:
-
-- **Gate 1 (Static Contract)**: `bun run typecheck` (`tsc --noEmit`) passes with **0 errors**.
-- **Gate 2 (Behavioral Parity)**: `bun run test` runs Vitest with **14 test suites and 96/96 unit tests green (100% passing)**.
-- **Gate 3 (Runtime Boundary)**: Top-level synchronous event listener registration inside `defineBackground()`; fully typed storage via `@wxt-dev/storage`.
-- **Gate 4 (Build Integrity)**: `bun run build` generates a clean, production-ready 2.30 MB `chrome-mv3` bundle in under 14 seconds.
-- **Gate 5 (Presentation Isolation)**: React 19 Shadow DOM encapsulation via `createShadowRootUi` guaranteeing zero host CSS leakage.
-
----
-
-## 6. Architecture & Specification Documentation Suite
-
-This file (`00-overview.md`) serves as the root document of the complete 19-part specification suite for `wxt-extension/`:
-
-| Index | Specification Document | Domain Coverage |
-| :--- | :--- | :--- |
-| **00** | `00-overview.md` | Executive summary, high-level architecture, verification gates |
-| **00** | `00-system-design.md` | Detailed multi-process topology, state machines, sequence diagrams |
-| **01** | `01-frontend.md` | React 19 UI surfaces (Sidepanel, Popup, Options, Shadow DOM) |
-| **02** | `02-backend.md` | MV3 Background Service Worker lifecycle, alarms, offscreen workers |
-| **03** | `03-api.md` | External LLM provider integrations, streaming protocols, fetch proxies |
-| **04** | `04-database.md` | Embedded client databases (IndexedDB, Dexie), schema versioning |
-| **05** | `05-storage.md` | `@wxt-dev/storage` schemas, migrations, reactive watchers, quotas |
-| **06** | `06-messaging.md` | Cross-context IPC bus, `ProtocolMap`, typed ports, error handling |
-| **07** | `07-security.md` | MV3 CSP compliance, AES-GCM crypto vault, token safety, XSS guards |
-| **09** | `09-content-scripts.md` | Shadow DOM injection (`createShadowRootUi`), observer lifecycle |
-| **11** | `11-persona-rbac.md` | 7-dimension Persona V4 engine, user roles, Supabase RLS policies |
-| **12** | `12-platform-adapters.md` | Modular chatbot adapters (Gemini, ChatGPT, Claude, DeepSeek, Grok, Meta) |
-| **13** | `13-project-structure.md` | Directory organization, auto-imports, build conventions, aliases |
-| **15** | `15-deployment.md` | Store packaging (`wxt zip`), CI/CD publishing (Chrome, AMO, Edge) |
-| **16** | `16-analytics.md` | Privacy-preserving telemetry, GA4 Measurement Protocol, error logging |
-| **17** | `17-i18n.md` | Type-safe translation strings (`@wxt-dev/i18n`), multi-language schema |
-| **18** | `18-testing-strategy.md` | Vitest unit testing, WXT mock environments, Playwright E2E suites |
-| **19** | `19-onboarding.md` | Extension install lifecycle, interactive walkthroughs, first-run wizard |
-| **20** | `20-offline.md` | Offline-first guarantees, local cache sync queues, offline fallbacks |
+| Index | Document | Scope & System Coverage | Status |
+| :--- | :--- | :--- | :--- |
+| **00** | [`00-overview.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/00-overview.md) | Executive summary, SOA pattern, design principles, tech stack | 🟢 Complete |
+| **00** | [`00-system-design.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/00-system-design.md) | SOA topology, dataflow, request lifecycles, sequence diagrams | 🟢 Complete |
+| **01** | [`01-frontend.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/01-frontend.md) | React 19 UI surfaces, Sidepanel, Options, Shadow DOM injection | 🟢 Complete |
+| **02** | [`02-backend.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/02-backend.md) | MV3 Background Service Worker daemon, Supabase Auth & Edge Functions | 🟢 Complete |
+| **03** | [`03-api.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/03-api.md) | Multi-provider LLM integrations, Vercel AI SDK, streaming, proxying | 🟢 Complete |
+| **04** | [`04-database.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/04-database.md) | Local IndexedDB models, Supabase PostgreSQL schema, RLS policies | 🟢 Complete |
+| **05** | [`05-storage.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/05-storage.md) | WXT Storage definitions, TanStack Query sync, schema migrations | 🟢 Complete |
+| **06** | [`06-messaging.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/06-messaging.md) | `@webext-core/messaging` protocol maps, RPC vs Event patterns | 🟢 Complete |
+| **07** | [`07-security.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/07-security.md) | BYOK AES-256-GCM vault, memory wiping, CSP, XSS sanitization | 🟢 Complete |
+| **09** | [`09-content-scripts.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/09-content-scripts.md) | Injected Shadow DOM, selectors, submit hooks, `ctx.onInvalidated` | 🟢 Complete |
+| **11** | [`11-persona-rbac.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/11-persona-rbac.md) | 7-Dimension Persona V4 engine, extraction pipelines, community RBAC | 🟢 Complete |
+| **12** | [`12-platform-adapters.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/12-platform-adapters.md) | `IChatbotAdapter` pattern, onboarding guide, Gemini/ChatGPT/Claude | 🟢 Complete |
+| **13** | [`13-project-structure.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/13-project-structure.md) | Directory conventions, path aliases, WXT/Vite compilation | 🟢 Complete |
+| **15** | [`15-deployment.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/15-deployment.md) | Store packaging (`wxt zip`), Chrome Web Store API, Firefox AMO CI | 🟢 Complete |
+| **16** | [`16-analytics.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/16-analytics.md) | GA4 Measurement Protocol, privacy-preserving zero-PII telemetry | 🟢 Complete |
+| **17** | [`17-i18n.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/17-i18n.md) | Type-safe `@wxt-dev/i18n`, `_locales` translation strings, RTL | 🟢 Complete |
+| **18** | [`18-testing-strategy.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/18-testing-strategy.md) | 5 Quality Gates, Vitest unit suite (14 suites, 96 tests), Playwright | 🟢 Complete |
+| **19** | [`19-onboarding.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/19-onboarding.md) | FTUX lifecycle, 3-step Options wizard, in-situ discovery tooltips | 🟢 Complete |
+| **20** | [`20-offline.md`](file:///c:/Users/dartd/Prompt%20Persona%20and%20Refiner/wxt-extension/docs/20-offline.md) | Local-First guarantees, sync delta queue, deterministic fallback | 🟢 Complete |

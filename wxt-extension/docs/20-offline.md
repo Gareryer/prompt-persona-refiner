@@ -2,14 +2,14 @@
 
 > **Target Layer**: Offline Resilience & Asynchronous Cloud Synchronization  
 > **Storage Primitives**: `chrome.storage.local` (Local SSOT) & `local:sync_queue`  
-> **Network Protocol**: `navigator.onLine` + Background Drain Replay Queue  
+> **Network Protocol**: `navigator.onLine` + Active Health Ping (`NetworkService`)  
 > **Classification**: Offline Operations & Delta Sync Specification
 
 ---
 
 ## 1. Offline-First Principles in WebExtensions
 
-Unlike traditional Single Page Applications hosted on remote web servers that fail completely when an internet connection drops, browser extensions are **natively offline-first**. 
+Unlike traditional web applications, browser extensions are **natively offline-first**. 
 
 All compiled assets (HTML shells, React 19 component trees, Vite bundles, CSS stylesheets, and icon assets) reside permanently on the local client disk within the browser's extension installation folder (`.output/chrome-mv3`).
 
@@ -26,7 +26,7 @@ In **Allie Persona & Prompt Refiner**, the local client database (`chrome.storag
 │   Commit Immediately to Local Storage (chrome.storage.local) ──► Instant UI Response (0ms Latency)     │
 │                                │                                                                       │
 │                                ▼                                                                       │
-│   Check Connectivity State (navigator.onLine)                                                          │
+│   Check Connectivity State (NetworkService.isOnline())                                                 │
 │                                │                                                                       │
 │                ┌───────────────┴───────────────┐                                                       │
 │                ▼ ONLINE                        ▼ OFFLINE                                               │
@@ -46,27 +46,70 @@ In **Allie Persona & Prompt Refiner**, the local client database (`chrome.storag
 
 ---
 
-## 2. Feature Availability Matrix (Online vs. Offline)
+## 2. Active Network Detection Engine (`NetworkService`)
 
-| Capability / Subsystem | Offline Availability | Behavior when Disconnected |
-| :--- | :--- | :--- |
-| **Persona Library Management** | 🟢 **100% Functional** | Create, edit, clone, delete, and organize personas in local storage. |
-| **7-Dimension Memory Editing** | 🟢 **100% Functional** | Adjust tones, reasoning frameworks, and constraints with immediate persistence. |
-| **History & Scraped Turns** | 🟢 **100% Functional** | Browse previous conversation sessions and prompt refinement logs. |
-| **Export Persona Data** | 🟢 **100% Functional** | Export persona collections to local JSON / CSV files via client-side download. |
-| **Rule-Based Refinement Fallback**| 🟢 **100% Functional** | Deterministically compiles persona prefixes and constraints without an LLM. |
-| **AI Model Prompt Refinement** | 🔴 *Requires Internet* | Displays connection error banner; suggests deterministic rule-based assembly. |
-| **Community Persona Discovery** | 🔴 *Requires Internet* | Caches previously downloaded community personas; hides marketplace search. |
-| **Community Ratings Submission** | 🟡 *Queued Offline* | Saved locally to `sync_queue` and published to Supabase upon reconnection. |
+`navigator.onLine` can return false positives (e.g. connected to a Wi-Fi router without WAN internet access). The `NetworkService` verifies true internet reachability via lightweight periodic ping checks:
+
+```typescript
+// wxt-extension/src/core/orchestration/network-service.ts
+type NetworkStatus = 'online' | 'offline' | 'unknown';
+
+export class NetworkService {
+  private status: NetworkStatus = 'unknown';
+  private listeners: Set<(online: boolean) => void> = new Set();
+  private checkInterval: number | null = null;
+
+  constructor() {
+    this.initialize();
+  }
+
+  private initialize(): void {
+    this.status = navigator.onLine ? 'online' : 'offline';
+
+    window.addEventListener('online', () => this.setStatus('online'));
+    window.addEventListener('offline', () => this.setStatus('offline'));
+
+    // Active health ping every 30 seconds to catch captive portals
+    this.checkInterval = window.setInterval(() => {
+      this.performActiveCheck();
+    }, 30000);
+  }
+
+  private async performActiveCheck(): Promise<void> {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch('https://www.gstatic.com/generate_204', {
+        method: 'HEAD',
+        mode: 'no-cors',
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      this.setStatus('online');
+    } catch {
+      this.setStatus('offline');
+    }
+  }
+
+  private setStatus(newStatus: NetworkStatus): void {
+    if (this.status !== newStatus) {
+      this.status = newStatus;
+      const isOnline = newStatus === 'online';
+      this.listeners.forEach((cb) => cb(isOnline));
+    }
+  }
+
+  public isOnline(): boolean {
+    return this.status === 'online';
+  }
+}
+```
 
 ---
 
 ## 3. The Offline Delta Queue (`local:sync_queue`)
 
-When the user performs an action that targets cloud synchronization (such as publishing an updated persona or submitting a template rating) while disconnected, the mutation is serialized as a `SyncAction`:
-
 ```typescript
-// wxt-extension/src/lib/storage/items.ts
 export interface SyncAction {
   id: string;               // Unique Action UUID
   action: 'create' | 'update' | 'delete';
@@ -76,55 +119,14 @@ export interface SyncAction {
 }
 ```
 
-### Queue Management:
-- Actions are appended atomically to `storage.defineItem<SyncAction[]>('local:sync_queue')`.
-- If an entity is updated multiple times while offline, mutations are squashed: subsequent `update` actions merge into the existing payload, reducing network overhead upon reconnection.
+### Queue Drainer Logic:
+When connectivity is restored, the Background Service Worker drains `local:sync_queue` in chronological sequence, pushing queued actions to Supabase with Last-Write-Wins (LWW) conflict resolution.
 
 ---
 
-## 4. Background Queue Drainer & Conflict Resolution
+## 4. Offline Fallback Prompt Refinement Compiler
 
-When the browser detects network restoration (`navigator.onLine === true` or an `online` window event), the Background Service Worker initiates a drain cycle:
-
-```typescript
-// wxt-extension/src/core/supabase/sync-service.ts
-export async function drainSyncQueue(): Promise<void> {
-  if (!navigator.onLine) return;
-
-  const queue = await syncQueueItem.getValue();
-  if (!queue || queue.length === 0) return;
-
-  bgLog('info', `Draining sync queue (${queue.length} pending actions)...`);
-
-  const remainingActions: SyncAction[] = [];
-
-  for (const item of queue) {
-    try {
-      if (item.entity === 'persona') {
-        await syncPersonaToCloud(item.action, item.payload);
-      } else if (item.entity === 'rating') {
-        await syncRatingToCloud(item.payload);
-      }
-    } catch (err: any) {
-      bgLog('warn', 'Failed to sync queue item, preserving for retry', { id: item.id, err: err.message });
-      remainingActions.push(item);
-    }
-  }
-
-  await syncQueueItem.setValue(remainingActions);
-  bgLog('info', `Sync queue drain complete. Remaining: ${remainingActions.length}`);
-}
-```
-
-### Conflict Resolution Strategy: Last-Write-Wins (LWW)
-- In the event of conflicting edits between client devices, the mutation with the higher `updated_at` epoch timestamp takes precedence.
-- If a cloud record has been modified by another session while the client was offline, the local record is preserved in a backup slot (`local:persona_conflict_backup`) before the cloud update is pulled.
-
----
-
-## 5. Offline Rule-Based Prompt Refinement Fallback
-
-If a user hits `Ctrl+Shift+R` to refine a prompt while offline or when the external LLM provider returns a network failure (`status: 0`), the extension provides a deterministic prompt compiler:
+If an LLM API request fails due to network outage, the extension compiles the active persona's dimensions into a deterministic instruction prefix locally:
 
 ```
 [PERSONA CONTEXT: Senior Systems Architect]
@@ -135,5 +137,3 @@ If a user hits `Ctrl+Shift+R` to refine a prompt while offline or when the exter
 USER REQUEST:
 {raw_prompt}
 ```
-
-This ensures that the user's structured persona directives are applied to the prompt even without an active internet connection or available LLM API quota.

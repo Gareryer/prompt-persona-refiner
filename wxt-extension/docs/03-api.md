@@ -9,7 +9,7 @@
 
 ## 1. Overview & Multi-Provider Architecture
 
-**Allie Persona & Prompt Refiner** features a vendor-neutral AI communication gateway designed to interact directly with leading generative AI foundation model providers.
+**Allie Persona & Prompt Refiner** features a vendor-neutral AI communication gateway designed to interact directly with leading generative AI foundation model providers without mandatory intermediary cloud servers.
 
 Because the extension runs with privileged Manifest V3 `host_permissions`, external API requests bypass browser Cross-Origin Resource Sharing (CORS) constraints when executed from within the **Background Service Worker**.
 
@@ -50,8 +50,6 @@ Because the extension runs with privileged Manifest V3 `host_permissions`, exter
 
 ## 2. Declared Network Permissions (`wxt.config.ts`)
 
-To ensure unblocked network dispatch without intermediary proxy servers, `wxt.config.ts` declares specific host permissions:
-
 ```typescript
 // wxt-extension/wxt.config.ts
 host_permissions: [
@@ -69,97 +67,120 @@ host_permissions: [
 
 ### 3.1 Google Gemini API
 - **Base URL**: `https://generativelanguage.googleapis.com/v1beta/models`
-- **Default Models**: `gemini-2.5-flash` (Refinement latency $\le 800\text{ms}$), `gemini-2.5-pro` (Complex persona synthesis).
-- **Authentication**: API Key passed via `x-goog-api-key` header or `?key=` query parameter.
-- **Request Envelope**:
+- **Default Models**: `gemini-2.5-flash`, `gemini-2.5-pro`.
+- **Authentication**: `x-goog-api-key: <KEY>` or `?key=<KEY>`.
+- **Envelope**:
   ```json
   {
-    "contents": [
-      {
-        "role": "user",
-        "parts": [{ "text": "Raw user prompt to refine..." }]
-      }
-    ],
-    "systemInstruction": {
-      "parts": [{ "text": "REFINEMENT_SYSTEM_PROMPT + 7-Dimension Persona Context" }]
-    },
+    "contents": [{ "role": "user", "parts": [{ "text": "..." }] }],
+    "systemInstruction": { "parts": [{ "text": "REFINEMENT_SYSTEM_PROMPT" }] },
     "generationConfig": {
       "temperature": 0.3,
       "topP": 0.95,
-      "maxOutputTokens": 2048,
-      "responseMimeType": "text/plain"
+      "maxOutputTokens": 2048
     }
   }
   ```
 
 ### 3.2 OpenAI API
 - **Base URL**: `https://api.openai.com/v1/chat/completions`
-- **Default Models**: `gpt-4o-mini`, `gpt-4o`.
-- **Authentication**: Bearer token via `Authorization: Bearer <OPENAI_API_KEY>`.
-- **Structured Output Protocol**: Utilizes `response_format: { type: "json_object" }` during conversation turn memory extraction to guarantee strict adherence to the Persona V4 schema.
+- **Default Models**: `gpt-4o`, `gpt-4o-mini`.
+- **Authentication**: `Authorization: Bearer <KEY>`.
+- **Structured Outputs**: `response_format: { type: "json_object" }` for memory extraction.
 
 ### 3.3 Anthropic Claude API
 - **Base URL**: `https://api.anthropic.com/v1/messages`
 - **Default Models**: `claude-3-7-sonnet-20250219`, `claude-3-5-haiku-20241022`.
-- **Authentication**: `x-api-key: <ANTHROPIC_API_KEY>`, `anthropic-version: 2023-06-01`.
-- **Message Protocol**: System prompt separated into top-level `system` property, with turns mapped to `{ role: 'user' | 'assistant', content: string }`.
+- **Headers**: `x-api-key: <KEY>`, `anthropic-version: 2023-06-01`.
 
 ### 3.4 OpenRouter Universal Gateway
 - **Base URL**: `https://openrouter.ai/api/v1/chat/completions`
-- **Purpose**: Fallback gateway allowing users to tap open-weights and alternative frontier models (DeepSeek R1/V3, Meta Llama 3.3 70B, Mistral Large).
-- **Headers**: Includes `HTTP-Referer: https://github.com/allie-persona-prompt-refiner` and `X-Title: Allie Refiner`.
+- **Purpose**: Universal router for DeepSeek R1/V3, Llama 3.3, Mistral Large.
+- **Headers**: `HTTP-Referer: https://github.com/allie-persona-prompt-refiner`, `X-Title: Allie Refiner`.
 
 ---
 
-## 4. Supabase Cloud BaaS Integration
-
-Supabase provides optional cloud synchronization for users wishing to back up personas or publish templates to the public community directory:
-
-### 4.1 Endpoints & Table Contracts
-
-| Table | Endpoint | RLS Policy | Purpose |
-| :--- | :--- | :--- | :--- |
-| `public.personas` | `/rest/v1/personas` | `select: true`, `insert/update: auth.uid() == user_id` | Persona template storage and community discovery |
-| `public.ratings` | `/rest/v1/ratings` | `insert: true`, `select: true` | Aggregated prompt satisfaction scores |
-| `public.persona_tags` | `/rest/v1/persona_tags` | `select: true` | Taxonomy categorization (Tech, Creative, Business) |
-
-### 4.2 Auth Flow
-Authentication utilizes OAuth 2.0 PKCE via `chrome.identity.launchWebAuthFlow`, storing the returned JWT session securely in `chrome.storage.local`.
-
----
-
-## 5. Error Classification & Normalization (`getUserFriendlyError`)
-
-Upstream error responses are intercepted and mapped into actionable user instructions:
+## 4. Error Classification & Structured Normalization
 
 ```typescript
-// wxt-extension/src/core/orchestration/api-proxy.ts
-export function getUserFriendlyError(status: number, rawError: any, provider: string): string {
-  switch (status) {
-    case 429:
-      return `Rate limit exceeded. ${provider} API is temporarily overloaded. Please wait a moment.`;
-    case 401:
-      return `Invalid API key. Please check your ${provider} key in Extension Options.`;
-    case 403:
-      return `Access denied. Your ${provider} key lacks permissions for the selected model.`;
-    case 404:
-      return `Model not found. Please re-verify the model name in Extension Options.`;
-    case 500:
-    case 502:
-    case 503:
-    case 504:
-      return `${provider} server error (${status}). Service is temporarily down.`;
-    case 0:
-      return `Network error. Please check your internet connection.`;
-    default:
-      return `${provider} error (${status}): ${rawError?.message || 'Unknown error'}`;
+export class LLMError extends Error {
+  constructor(
+    message: string,
+    public code: LLMErrorCode,
+    public provider: string,
+    public status?: number,
+    public cause?: unknown
+  ) {
+    super(message);
+    this.name = 'LLMError';
+  }
+}
+
+export type LLMErrorCode =
+  | 'INVALID_API_KEY'
+  | 'RATE_LIMIT'
+  | 'MODEL_NOT_FOUND'
+  | 'CONTEXT_TOO_LONG'
+  | 'CONTENT_FILTERED'
+  | 'NETWORK_ERROR'
+  | 'SERVER_ERROR'
+  | 'UNKNOWN';
+
+export function parseProviderError(status: number, rawError: any, provider: string): LLMError {
+  if (status === 401) {
+    return new LLMError('Invalid API key', 'INVALID_API_KEY', provider, status);
+  }
+  if (status === 429) {
+    return new LLMError('Rate limit exceeded', 'RATE_LIMIT', provider, status);
+  }
+  if (status === 404) {
+    return new LLMError('Model not found', 'MODEL_NOT_FOUND', provider, status);
+  }
+  if (status >= 500) {
+    return new LLMError('Provider server error', 'SERVER_ERROR', provider, status);
+  }
+  return new LLMError('Unknown provider error', 'UNKNOWN', provider, status, rawError);
+}
+```
+
+---
+
+## 5. API Key Validation Sandbox (`validateApiKey`)
+
+Before persisting a new API key, the Options page executes a lightweight verification ping:
+
+```typescript
+export async function validateApiKey(provider: string, apiKey: string): Promise<{ valid: boolean; error?: string }> {
+  try {
+    if (provider === 'gemini') {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      return { valid: res.ok };
+    } else if (provider === 'openai') {
+      const res = await fetch('https://api.openai.com/v1/models', {
+        headers: { Authorization: `Bearer ${apiKey}` }
+      });
+      return { valid: res.ok };
+    }
+    return { valid: true };
+  } catch (err: any) {
+    return { valid: false, error: err.message };
   }
 }
 ```
 
 ---
 
-## 6. Streaming & Concurrency Protocol
+## 6. Streaming & Token Consumption Metrics
 
-1. **Streaming Support**: Streaming LLM responses are processed via `fetch` with `ReadableStreamDefaultReader` on `response.body`. Text chunks are pushed through active `chrome.runtime.Port` connections directly to the sidepanel and injected diff views.
-2. **Abort & Cancellation**: Each request generates an `AbortController`. If a user re-submits or navigates away, `abortController.abort()` cancels the outbound fetch connection immediately, preventing wasteful token burn and duplicate state commits.
+Refinement responses capture latency and token consumption metrics:
+
+```typescript
+export interface RefinementMetrics {
+  durationMs: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  model: string;
+  provider: string;
+}
+```
+Tokens are streamed via `ReadableStream` chunks through active `chrome.runtime.Port` connections, providing real-time progressive typing in the injected preview and sidepanel.

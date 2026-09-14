@@ -1,7 +1,8 @@
 # 01 - Frontend Architecture & UI Surfaces
 
 > **Target Environment**: WebExtension MV3 Multi-Surface UI  
-> **Framework Stack**: React 19 (`@wxt-dev/module-react` / `@vitejs/plugin-react`), TypeScript 5.7+, Tailwind & Scoped CSS  
+> **Framework Stack**: React 19 (`@vitejs/plugin-react`) · Tailwind CSS v4 · shadcn/ui · TypeScript 5.7+  
+> **Form & State Tooling**: React Hook Form · TanStack Query v5 · Zod v4  
 > **Isolation Pattern**: WXT `createShadowRootUi` Shadow DOM Boundary  
 > **Authoritative Root**: `wxt-extension/entrypoints/` & `wxt-extension/src/components/`
 
@@ -9,9 +10,9 @@
 
 ## 1. Overview & Frontend Philosophy
 
-The frontend architecture of **Allie Persona & Prompt Refiner** is split across two fundamentally different runtime environments:
-1. **Isolated Extension Windows**: Privileged extension contexts with native access to WebExtension APIs (`chrome.*` / `browser.*`). These include the persistent **Chrome Side Panel**, the ephemeral **Action Popup**, and the full-page **Options & Settings Tab**.
-2. **In-Page Injected Surfaces (Shadow DOM)**: UI components dynamically injected into hostile host chat environments (`gemini.google.com`, `chatgpt.com`, `claude.ai`, etc.). These surfaces must be 100% immune to external CSS contamination, resistant to host DOM mutation wipes, and cleanly unmountable when extension contexts invalidate.
+The frontend architecture of **Allie Persona & Prompt Refiner** is partitioned across two distinct execution environments:
+1. **Privileged Extension Windows**: Dedicated extension contexts with native access to WebExtension APIs (`chrome.*` / `browser.*`), including the persistent **Chrome Side Panel**, the **Action Popup**, and the **Options & Settings Tab**.
+2. **In-Page Injected Surfaces (Shadow DOM)**: UI components dynamically mounted into host chat interfaces (`gemini.google.com`, `chatgpt.com`, `claude.ai`, etc.). These surfaces must be 100% immune to external CSS contamination, resistant to host DOM mutation wipes, and cleanly unmountable on extension invalidation.
 
 ```
                                   ┌─────────────────────────────────────────────────────────┐
@@ -39,7 +40,7 @@ The frontend architecture of **Allie Persona & Prompt Refiner** is split across 
 
 ---
 
-## 2. Directory Layout & Component Hierarchy
+## 2. Directory Layout & Routing Conventions
 
 ```
 wxt-extension/
@@ -47,179 +48,136 @@ wxt-extension/
 │   ├── sidepanel/                     # Primary Workspace Window
 │   │   ├── index.html                 # HTML Mount Target
 │   │   ├── main.tsx                   # React 19 Bootstrapper (createRoot)
-│   │   ├── App.tsx                    # Sidepanel Master Controller (3 Tabs)
-│   │   ├── sidepanel.css              # Custom Variables & Dark/Light Themes
-│   │   └── components/                # Dimension Editors & History Cards
-│   ├── popup/                         # Action Toolbar Popup
+│   │   ├── App.tsx                    # Sidepanel Master Controller
+│   │   ├── routes/                    # Tab & Sub-View Routes
+│   │   │   ├── HomeRoute.tsx          # Quick Status & Active Persona Card
+│   │   │   ├── PersonasRoute.tsx      # 7-Dimension Editor & Library
+│   │   │   ├── HistoryRoute.tsx       # Scraped Turns & Refinement Diffs
+│   │   │   └── SettingsRoute.tsx      # Models, Temperatures, Cloud Sync
+│   │   ├── sidepanel.css              # Design Tokens & Theming CSS Variables
+│   │   └── components/                # Dimension Accordions & Card Grids
+│   ├── popup/                         # Action Toolbar Popup (Max 400px x 500px)
 │   │   ├── index.html
 │   │   ├── main.tsx
 │   │   └── App.tsx                    # Quick-Toggle & Status Indicator
 │   ├── options/                       # Global Extension Settings
 │   │   ├── index.html
 │   │   ├── main.tsx
-│   │   └── App.tsx                    # API Keys, Storage Limits & Sync
+│   │   ├── App.tsx
+│   │   └── sections/                  # Settings Navigation Sections
+│   │       ├── ApiKeysSection.tsx     # Web Crypto Vault Key Inputs
+│   │       ├── ModelConfigSection.tsx # Sliders (Temperature, Top-P)
+│   │       └── CloudSyncSection.tsx   # Supabase Credentials & Account
 │   └── content.ts                     # Universal Injected Script Entrypoint
 └── src/
     ├── components/
+    │   ├── ui/                        # shadcn/ui Primitives (Radix Core)
+    │   │   ├── button.tsx
+    │   │   ├── dialog.tsx
+    │   │   ├── dropdown-menu.tsx
+    │   │   ├── tabs.tsx
+    │   │   └── tooltip.tsx
     │   └── injections/                # Host Page Overlay Components
-    │       ├── RefinerBadge.tsx       # Floating Trigger Badge
-    │       ├── RatingOverlay.tsx      # Inline Rating Widget
-    │       ├── injections.css         # Scoped Styles for Shadow DOM
-    │       └── types.ts
-    └── core/theme/                    # Shared Dynamic Theme Controller
-        └── theme-controller.ts        # Syncs Theme Across Extension & Injections
+    │       ├── RefinerBadge.tsx       # Floating Action Badge
+    │       ├── RatingOverlay.tsx      # Inline Rating Bar
+    │       ├── DiffModal.tsx          # Prompt Comparison Dialog
+    │       └── injections.css         # Scoped Styles for Shadow DOM
+    └── core/theme/                    # Dynamic Theme Controller
+        └── theme-controller.ts
 ```
 
 ---
 
-## 3. Surface 1: Chrome Side Panel (`entrypoints/sidepanel/`)
+## 3. Design System & CSS Variables (shadcn/ui New-York Style)
 
-The Side Panel is the core operational workspace for the user. Mounted via Chrome's native Side Panel API (`chrome.sidePanel`), it remains persistent while the user navigates between chats, prompts, and platforms.
+The design system standardizes on HSL color tokens aligned with shadcn/ui:
 
-### 3.1 Tab Structure (`App.tsx`)
-1. **Personas Tab (`activeTab === 'personas'`)**:
-   - **Active Persona Card**: Visualizes currently active persona, domain tags, author, and version.
-   - **7-Dimension Memory Inspector**: Interactive accordion / card views for all 7 dimensions:
-     - `Persona`: Role, title, domain, background instruction.
-     - `Context`: Working domain, active tech stack, environment assumptions.
-     - `Tone`: Slider / dropdown for styles (*Direct, Formal, Technical, Casual*).
-     - `Framework`: Reasoning structure (*First-Principles, Chain-of-Thought*).
-     - `Constraints`: Negative prompt rules and forbidden idioms.
-     - `Format`: Output formatting directives (*Markdown Tables, Code First*).
-     - `Exemplar`: Input-to-output few-shot pattern pairs.
-   - **Persona Manager**: Create, clone, export, and delete personas.
-2. **History Tab (`activeTab === 'history'`)**:
-   - Scraped turn inspection with platform badge (Gemini, ChatGPT, Claude, etc.).
-   - Refinement comparison: raw prompt vs refined prompt with colored diff highlights.
-   - User satisfaction ratings and timestamped turn IDs.
-3. **Settings Tab (`activeTab === 'settings'`)**:
-   - Provider selector (Gemini API, OpenAI, Anthropic, OpenRouter).
-   - Real-time model parameter sliders (Temperature, Top-P, Max Output Tokens).
-   - Supabase community sync status and sync button.
+```css
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 5.9% 10%;
+  --radius: 0.5rem;
+}
 
-### 3.2 Live Port Synchronization
-The sidepanel maintains a persistent bi-directional communication port with the Background Service Worker:
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+}
+```
 
-```typescript
-// entrypoints/sidepanel/App.tsx
-useEffect(() => {
-  const port = chrome.runtime.connect({ name: 'sidepanel' });
-  
-  port.onMessage.addListener((msg) => {
-    if (msg.type === 'MEMORY_UPDATED') {
-      setActiveMemory(msg.payload);
-    } else if (msg.type === 'REFINEMENT_COMPLETE') {
-      setLatestRefinement(msg.payload);
-    }
+---
+
+## 4. Form Validation with React Hook Form & Zod
+
+Persona editing forms leverage `react-hook-form` paired with `@hookform/resolvers/zod`:
+
+```tsx
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { PersonaV4Schema, type PersonaV4 } from '@/core/memory/schemas';
+
+export const PersonaEditForm: React.FC<{ initial?: PersonaV4; onSave: (data: PersonaV4) => void }> = ({
+  initial,
+  onSave
+}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<PersonaV4>({
+    resolver: zodResolver(PersonaV4Schema),
+    defaultValues: initial
   });
 
-  return () => port.disconnect();
-}, []);
+  return (
+    <form onSubmit={handleSubmit(onSave)} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Persona Name</label>
+        <input {...register('metadata.suggested_name')} className="w-full rounded border p-2 text-sm" />
+        {errors.metadata?.suggested_name && (
+          <p className="text-xs text-destructive">{errors.metadata.suggested_name.message}</p>
+        )}
+      </div>
+      {/* 7 Dimensions Inputs */}
+      <button type="submit" disabled={isSubmitting} className="btn-primary">
+        Save Persona
+      </button>
+    </form>
+  );
+};
 ```
 
 ---
 
-## 4. Surface 2: In-Page Injected UI (`src/components/injections/`)
+## 5. Shadow DOM Isolation Invariant (`createShadowRootUi`)
 
-Injected UI elements render on top of the host chatbot interface.
-
-### 4.1 Shadow DOM Isolation via `createShadowRootUi`
-Host applications (such as ChatGPT or Gemini) apply aggressive CSS resets (e.g. `* { box-sizing: border-box; margin: 0; }` or custom CSS custom property overrides). Injected components **must** be rendered inside a Shadow Root:
-
-```typescript
-// entrypoints/content.ts
-import { createShadowRootUi } from 'wxt/client';
-import ReactDOM from 'react-dom/client';
-import { RefinerBadge } from '@/components/injections/RefinerBadge';
-
-export default defineContentScript({
-  matches: [
-    'https://chat.deepseek.com/*',
-    'https://grok.com/*',
-    'https://x.com/i/grok*',
-    'https://*.meta.ai/*'
-  ],
-  cssInjectionMode: 'ui',
-  runAt: 'document_idle',
-  async main(ctx) {
-    const ui = await createShadowRootUi(ctx, {
-      name: 'prompt-refiner-overlay',
-      position: 'inline',
-      anchor: 'body',
-      append: 'last',
-      onMount(container) {
-        const root = ReactDOM.createRoot(container);
-        root.render(
-          React.createElement('div', { className: 'allie-refiner-container' },
-            React.createElement(RefinerBadge, {
-              onRefine: async () => {
-                await contentObserver.executeRefinement();
-              }
-            })
-          )
-        );
-        return root;
-      },
-      onRemove(root) {
-        root?.unmount();
-      }
-    });
-
-    ui.mount();
-  }
-});
-```
-
-### 4.2 Lifecycle & Memory Leak Elimination (`ctx.onInvalidated`)
-When an extension updates or reloads, existing content scripts enter an "invalidated" state. Any active intervals, DOM observers, or event listeners will throw `Error: Extension context invalidated`. 
-WXT's `ContentScriptContext` (`ctx`) guarantees clean teardown:
-- `ctx.onInvalidated(() => { ... })` unregisters submit interceptors.
-- `ui.mount()` registers automatic cleanup on extension reload.
-
----
-
-## 5. Surface 3: Action Toolbar Popup (`entrypoints/popup/`)
-
-- **Size Constraints**: Constrained to a standard extension popup dimensions (max 400px width, 600px height).
-- **Core Function**:
-  - Quick toggle to enable/disable automated prompt refinement on the active tab.
-  - Active persona dropdown selector with one-click persona switching.
-  - Keyboard shortcut cheat sheet (`Ctrl+Shift+R` / `Alt+M`).
-  - Shortcut button to open the full Chrome Side Panel.
-
----
-
-## 6. Surface 4: Options & Settings Dashboard (`entrypoints/options/`)
-
-- **Rendering Mode**: Full-page tab (`chrome.runtime.openOptionsPage()`).
-- **Core Sections**:
-  1. **LLM Provider API Vault**:
-     - Masked password fields for Gemini, OpenAI, Anthropic, and OpenRouter API keys.
-     - "Test Connection" button validating credentials against live endpoints.
-     - Client-side AES-GCM encryption status badge.
-  2. **Persona Management & Backup**:
-     - Full JSON / CSV import and export of user persona libraries.
-     - "Restore Factory Personas" safety action.
-  3. **Cloud Synchronization (Supabase)**:
-     - Supabase Project URL and Anon Key configuration.
-     - Account login / session indicator with community persona synchronization toggle.
-
----
-
-## 7. State Management & Reactivity Matrix
-
-| State Scope | Storage Mechanism | Reactivity Pattern | Consumers |
-| :--- | :--- | :--- | :--- |
-| **Active Persona** | `@wxt-dev/storage` (`local:active_persona`) | `storage.watch()` hook | Sidepanel, Popup, Content Script |
-| **Persona Library** | `@wxt-dev/storage` (`local:personas`) | `storage.watch()` hook | Sidepanel, Options |
-| **Session Memory** | `chrome.storage.session` | Chrome Storage Change Event | Background Service Worker, Sidepanel |
-| **Theme (Light/Dark)** | `chrome.storage.local` (`theme`) | `ThemeController` subscriber | All surfaces (Sidepanel, Popup, Injected UI) |
-| **API Keys** | Encrypted `chrome.storage.local` | On-demand decryption | Background Service Worker only |
-
----
-
-## 8. Verification & Quality Gates
-
-- **Static Type Safety**: React 19 JSX components and hooks pass `bun run typecheck` (`tsc --noEmit`) with **zero errors**.
-- **Component Tests**: Tested via Vitest using `@testing-library/react` and JSDOM / FakeIndexedDB.
-- **CSS Encapsulation Test**: Shadow DOM boundary verified against aggressive external host CSS selectors.
+Host chat platforms enforce aggressive resets. To guarantee presentation isolation:
+- Styles are injected exclusively into the Shadow Root via `cssInjectionMode: 'ui'` using `injections.css?inline`.
+- React Portals (e.g. modals, tooltips) are constrained to render inside the Shadow Root container rather than `document.body` to avoid style de-scoping.

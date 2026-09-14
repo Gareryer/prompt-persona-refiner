@@ -45,7 +45,7 @@ All cross-context operations in **Allie Persona & Prompt Refiner** route through
 
 ## 2. Strong Type Contracts (`ProtocolMap`)
 
-Every inter-context message request and response pair is codified in `ProtocolMap`:
+Every message request and response pair is codified in `ProtocolMap`:
 
 ```typescript
 // wxt-extension/src/lib/messaging/protocol.ts
@@ -131,9 +131,7 @@ export type MessageType = keyof ProtocolMap;
 
 ---
 
-## 3. Client Messaging Wrapper (`src/lib/messaging/client.ts`)
-
-Components and content scripts invoke the background worker through a typed helper:
+## 3. Client Messaging Wrapper with Timeout Guards (`src/lib/messaging/client.ts`)
 
 ```typescript
 // wxt-extension/src/lib/messaging/client.ts
@@ -141,14 +139,20 @@ import type { ProtocolMap } from './protocol';
 
 export async function sendMessage<K extends keyof ProtocolMap>(
   type: K,
-  payload?: ProtocolMap[K]['request']
+  payload?: ProtocolMap[K]['request'],
+  timeoutMs = 15000
 ): Promise<ProtocolMap[K]['response']> {
   return new Promise((resolve, reject) => {
     if (typeof chrome === 'undefined' || !chrome.runtime?.sendMessage) {
       return reject(new Error('Extension runtime not available'));
     }
 
+    const timer = setTimeout(() => {
+      reject(new Error(`Message timeout after ${timeoutMs}ms: ${String(type)}`));
+    }, timeoutMs);
+
     chrome.runtime.sendMessage({ type, payload }, (response) => {
+      clearTimeout(timer);
       if (chrome.runtime.lastError) {
         return reject(new Error(chrome.runtime.lastError.message));
       }
@@ -160,29 +164,20 @@ export async function sendMessage<K extends keyof ProtocolMap>(
 
 ---
 
-## 4. Background Message Dispatcher (`src/services/message-dispatcher.service.ts`)
+## 4. Tab Targeting & Broadcasts (`chrome.tabs.sendMessage`)
 
-In `background.ts`, requests are processed through `handleMessage`:
+To send events from the background daemon directly to a specific active tab (e.g. triggering prompt insertion or toggling split-view):
 
 ```typescript
-// wxt-extension/src/services/message-dispatcher.service.ts
-export async function dispatchMessage(
-  message: { type: string; payload?: any },
-  sender: chrome.runtime.MessageSender
-): Promise<any> {
-  switch (message.type) {
-    case 'CHECK_API_KEY':
-      return await checkApiKeyStatus();
-    case 'REFINE_PROMPT':
-      return await handleRefinement(message.payload);
-    case 'EXTRACT_PERSONA':
-      return await handleExtraction(message.payload);
-    case 'GET_PERSONAS':
-      return await personasRepository.getAll();
-    case 'SAVE_PERSONA':
-      return await personasRepository.save(message.payload.id, message.payload.persona);
-    default:
-      throw new Error(`Unhandled message type: ${message.type}`);
+export async function sendTabMessage(tabId: number, type: string, payload: any = {}): Promise<void> {
+  try {
+    await chrome.tabs.sendMessage(tabId, { type, payload });
+  } catch (err: any) {
+    if (err.message.includes('Receiving end does not exist')) {
+      // Content script has not loaded yet on this tab, safe to ignore
+      return;
+    }
+    throw err;
   }
 }
 ```
@@ -191,26 +186,7 @@ export async function dispatchMessage(
 
 ## 5. Long-Lived Streaming Ports (`chrome.runtime.Port`)
 
-For continuous events (such as streaming tokens during prompt refinement or pushing turn updates to the sidepanel), one-shot `sendMessage` is replaced by dedicated bidirectional ports:
-
-```typescript
-// Background Connection Listener
-chrome.runtime.onConnect.addListener((port) => {
-  if (port.name === 'sidepanel') {
-    handleSidepanelConnect(port);
-  }
-});
-```
-
-### Event Streaming Protocols:
-- **`MEMORY_UPDATED`**: Emitted to all open sidepanels when session turns are scraped and 7-dimension memory updates.
-- **`REFINEMENT_COMPLETE`**: Emitted when external LLM finishes generating a refined prompt, triggering live diff view updates.
-- **`CLOSE_SIDEPANEL`**: Dispatched to gracefully tear down open split views.
-
----
-
-## 6. Failure Modes & Resilience Patterns
-
-1. **"Receiving end does not exist"**: Handled via try-catch guards. Occurs when messaging a tab whose content script has not yet initialized.
-2. **"Extension context invalidated"**: Silenced gracefully when extension reloads via `ctx.onInvalidated()`.
-3. **Async Return Safety**: All handlers explicitly return `true` inside `chrome.runtime.onMessage` to prevent premature port closure.
+For continuous events (streaming tokens during refinement or pushing real-time memory updates):
+- **`sidepanel` Port**: Bound on mount in `entrypoints/sidepanel/App.tsx`.
+- **`MEMORY_UPDATED`**: Dispatched to active sidepanels when session memory mutations occur.
+- **`REFINEMENT_COMPLETE`**: Dispatched with full prompt diff when generation completes.
