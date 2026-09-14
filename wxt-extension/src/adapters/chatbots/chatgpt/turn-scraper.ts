@@ -120,8 +120,26 @@ export class ChatGPTTurnScraper {
       });
     }
 
-    // 5. Re-index turnIndex sequentially (0, 1, 2, ...) to ensure a monotonic sequence
-    return rawTurns.map((turn, idx) => ({
+    // 5. Deduplicate adjacent identical turns (same role and non-empty content) from virtualization glitches
+    const dedupedTurns: HarvestTurn[] = [];
+    for (const turn of rawTurns) {
+      const prev = dedupedTurns[dedupedTurns.length - 1];
+      if (
+        prev &&
+        prev.role === turn.role &&
+        prev.content.trim() === turn.content.trim() &&
+        turn.content.trim().length > 0
+      ) {
+        if (!prev.attachments && turn.attachments) {
+          prev.attachments = turn.attachments;
+        }
+        continue;
+      }
+      dedupedTurns.push(turn);
+    }
+
+    // 6. Re-index turnIndex sequentially (0, 1, 2, ...) to ensure a monotonic sequence
+    return dedupedTurns.map((turn, idx) => ({
       ...turn,
       turnIndex: idx
     }));
@@ -143,12 +161,12 @@ export class ChatGPTTurnScraper {
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
-    // Strip file attachment cards and upload pills from prompt body so filenames don't bleed into text
+    // Strip file attachment cards, upload pills, and screen-reader headings from prompt body
     if (typeof cloned.querySelectorAll === 'function') {
-      const fileCards = cloned.querySelectorAll(
-        '[data-testid="library-file-icon"], [data-testid*="file"], [class*="attachment"], [class*="file-card"], .file-attachment'
+      const junk = cloned.querySelectorAll(
+        '[data-testid="library-file-icon"], [data-testid*="file"], [class*="attachment"], [class*="file-card"], .file-attachment, h2.sr-only, .sr-only, [class*="sr-only"], [data-find-omitted], [class*="visually-hidden"]'
       );
-      fileCards.forEach(node => {
+      junk.forEach(node => {
         const cardContainer = (node as HTMLElement).closest?.('[class*="attachment"], [class*="file"]') || node;
         cardContainer.remove();
       });
@@ -195,10 +213,10 @@ export class ChatGPTTurnScraper {
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
-    // Strip reasoning header element from cloned body so it does not bleed into response prose
+    // Strip reasoning header and screen-reader accessibility elements from cloned body
     if (typeof cloned.querySelectorAll === 'function') {
       const reasoningJunk = cloned.querySelectorAll(
-        `${reasoningSelector}, button[aria-label*="thought" i], button[aria-label*="reason" i], [class*="thought"], [data-testid*="thought"]`
+        `${reasoningSelector}, button[aria-label*="thought" i], button[aria-label*="reason" i], [class*="thought"], [data-testid*="thought"], h2.sr-only, .sr-only, [class*="sr-only"], [data-find-omitted], [class*="visually-hidden"]`
       );
       reasoningJunk.forEach(node => node.remove());
     }

@@ -37,10 +37,10 @@ export class TextSanitizer {
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
-    // 1. Strip script, style, noscript, and interactive UI chrome (buttons, icons, action bars, A11y, expanders)
+    // 1. Strip script, style, noscript, and interactive UI chrome (buttons, icons, action bars, A11y, expanders, screen-reader headings)
     if (typeof cloned.querySelectorAll === 'function') {
       const junk = cloned.querySelectorAll(
-        'script, style, noscript, button, svg, [role="button"], .message-actions, message-actions, .response-actions, .action-bar, .inactive-draft, [data-is-hidden="true"], .sr-only, .visually-hidden, [aria-hidden="true"], [role="status"], [role="alert"], [data-testid*="expand"], [data-testid*="collapse"], .show-more, .show-less, [class*="disclaimer"]'
+        'script, style, noscript, button, svg, [role="button"], .message-actions, message-actions, .response-actions, .action-bar, .inactive-draft, [data-is-hidden="true"], .sr-only, [class*="sr-only"], .visually-hidden, [class*="visually-hidden"], .cdk-visually-hidden, .screen-reader-user-query-label, [class*="screen-reader"], [data-find-omitted], [aria-hidden="true"], [role="status"], [role="alert"], [data-testid*="expand"], [data-testid*="collapse"], .show-more, .show-less, [class*="disclaimer"]'
       );
       junk.forEach(node => node.remove());
     }
@@ -62,13 +62,13 @@ export class TextSanitizer {
 
     // 7. Strip screen reader prefixes, private-use unicode glyphs, and UI expander residuals
     text = text
-      .replace(/^(?:You said|Gemini said|ChatGPT said|Claude said):\s*/gim, '')
-      .replace(/^(?:You said|Gemini said|ChatGPT said|Claude said)\s*\n+/gim, '')
+      .replace(/^(?:You said|Gemini said|ChatGPT said|Claude said|Claude responded)(?::|\s)\s*/gim, '')
+      .replace(/^(?:You said|Gemini said|ChatGPT said|Claude said|Claude responded)\s*$/gim, '')
       .replace(/[\uE000-\uF8FF]/g, '')
       .replace(/\bShow more\s*Show less\b/gi, '')
       .replace(/\bShow more\b|\bShow less\b/gi, '');
 
-    // 5. Normalize lines: preserve intentional code indentation and list hierarchy
+    // 8. Normalize lines: preserve intentional code indentation and list hierarchy
     // while stripping common HTML indentation, trailing spaces, and collapsing excess blank lines
     const parts = text.split(/(```[\s\S]*?```)/g);
     text = parts
@@ -95,6 +95,52 @@ export class TextSanitizer {
       .replace(/\r\n/g, '\n')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
+
+    // 9. Strip any residual leading preview echo
+    return this.stripEchoDuplication(text);
+  }
+
+  /**
+   * Detects and strips screen-reader preview echoes that duplicate the start of the message body.
+   * Handles both ellipsis-truncated previews (e.g., "[preview]… \n\n [preview][rest]")
+   * and full-prompt echoes (e.g., "[short prompt] \n\n [short prompt]").
+   */
+  static stripEchoDuplication(text: string): string {
+    if (!text || text.length < 15) return text;
+
+    // 1. Truncated ellipsis preview echo check (with newline or space boundary)
+    const ellipsisMatch = text.match(/^([^\n]{10,300}?)(?:\u2026|\.{3})\s*[\n\s]+([\s\S]+)$/);
+    if (ellipsisMatch && ellipsisMatch[1] && ellipsisMatch[2]) {
+      const preview = ellipsisMatch[1].trim();
+      const remainder = ellipsisMatch[2].trim();
+      const checkLen = Math.min(preview.length, 35);
+      if (checkLen >= 10 && remainder.startsWith(preview.slice(0, checkLen))) {
+        return remainder;
+      }
+    }
+
+    // 2. Exact repeated initial paragraph/line check
+    const blockMatch = text.match(/^([^\n]{15,300})\n+([\s\S]+)$/);
+    if (blockMatch && blockMatch[1] && blockMatch[2]) {
+      const firstLine = blockMatch[1].trim();
+      const remainder = blockMatch[2].trim();
+      if (remainder.startsWith(firstLine)) {
+        return remainder;
+      }
+    }
+
+    // 3. Exact back-to-back duplicate sentence check for short prompts (single line)
+    if (!text.includes('\n') && text.length >= 20) {
+      const half = Math.floor(text.length / 2);
+      // Check if text is "Part Part"
+      for (let len = half; len >= 10; len--) {
+        const first = text.slice(0, len).trim();
+        const second = text.slice(len).trim();
+        if (first === second && first.length >= 10) {
+          return first;
+        }
+      }
+    }
 
     return text;
   }

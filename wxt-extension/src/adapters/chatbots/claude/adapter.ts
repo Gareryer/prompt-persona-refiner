@@ -335,7 +335,7 @@ export class ClaudeAdapter extends BaseChatbotAdapter implements IChatbotAdapter
     // 1. Strip artifact widget chrome & pad labels (Clio #43)
     this.stripArtifactWidgetChrome(clonedNode);
 
-    // 2. Strip interactive UI chrome (action bars, buttons, icons, feedback widgets)
+    // 2. Strip interactive UI chrome (action bars, buttons, icons, feedback widgets, screen-reader headings)
     const junk = clonedNode.querySelectorAll(
       [
         '.message-actions',
@@ -345,7 +345,13 @@ export class ClaudeAdapter extends BaseChatbotAdapter implements IChatbotAdapter
         'button[aria-label*="Retry" i]',
         'button',
         'svg',
-        '[role="button"]'
+        '[role="button"]',
+        '.sr-only',
+        '[class*="sr-only"]',
+        '.visually-hidden',
+        '[class*="visually-hidden"]',
+        '[data-find-omitted]',
+        'h2.sr-only'
       ].join(', ')
     );
     junk.forEach(node => node.remove());

@@ -161,17 +161,21 @@ export class GeminiContainerPairer {
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
-    // Strip luminous-collapsed-bubble to prevent duplicate user prompt extraction
+    // Strip collapsed bubbles, visually hidden elements, and screen-reader preview labels
     if (typeof cloned.querySelectorAll === 'function') {
-      const bubbles = cloned.querySelectorAll('.luminous-collapsed-bubble, [class*="collapsed-bubble"]');
-      bubbles.forEach(node => node.remove());
+      const junk = cloned.querySelectorAll(
+        '.luminous-collapsed-bubble, [class*="collapsed-bubble"], .cdk-visually-hidden, [class*="visually-hidden"], .screen-reader-user-query-label, [class*="screen-reader"], h5.screen-reader-user-query-label'
+      );
+      junk.forEach(node => node.remove());
     }
 
     if (adapter && typeof adapter.sanitizeTurnNode === 'function') {
       adapter.sanitizeTurnNode(cloned);
     }
 
-    const content = TextSanitizer.extractTextContent(cloned);
+    // Prefer inner .query-text container if present to cleanly bypass outer container heading noise
+    const userTarget = (cloned.querySelector && cloned.querySelector<HTMLElement>('.query-text')) || cloned;
+    const content = TextSanitizer.extractTextContent(userTarget);
 
     return {
       id: `gemini-u-${sequenceNum}`,
@@ -217,6 +221,14 @@ export class GeminiContainerPairer {
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
+    // Strip visually hidden headings (e.g. <h2 class="cdk-visually-hidden">Gemini said</h2>)
+    if (typeof cloned.querySelectorAll === 'function') {
+      const srJunk = cloned.querySelectorAll(
+        '.cdk-visually-hidden, [class*="visually-hidden"], h2.cdk-visually-hidden, .sr-only, [class*="sr-only"]'
+      );
+      srJunk.forEach(node => node.remove());
+    }
+
     // If isolating thinking, strip the ENTIRE thinking container/headers/toggles from cloned response body
     if (isolateThinking && typeof cloned.querySelectorAll === 'function') {
       const thinkingWrappers = cloned.querySelectorAll(
@@ -234,8 +246,10 @@ export class GeminiContainerPairer {
       adapter.sanitizeTurnNode(cloned);
     }
 
-    // 4. Extract sanitized content
-    const content = TextSanitizer.extractTextContent(cloned);
+    // 4. Extract sanitized content (prefer inner .model-response-text or [data-role="model"])
+    const assistantTarget =
+      (cloned.querySelector && cloned.querySelector<HTMLElement>('.model-response-text, [data-role="model"]')) || cloned;
+    const content = TextSanitizer.extractTextContent(assistantTarget);
 
     // 5. Extract model slug / name if available
     const modelSlug = this.extractModelSlug(element);

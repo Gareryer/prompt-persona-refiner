@@ -1226,6 +1226,42 @@ describe('Phase 5: Claude Harvester Adapter & 2-Row CSS Grid Scraper', () => {
       expect(assistantTurn.content).not.toContain('Thought for 1m 14s');
       expect(assistantTurn.content).not.toContain('Claude can make mistakes');
     });
+
+    it('strips accessibility sr-only preview headings and excludes secondary text cards from turns', async () => {
+      const user = document.createElement('div');
+      user.setAttribute('data-testid', 'user-message');
+      user.innerHTML = `
+        <h2 class="sr-only select-none" data-find-omitted="">You said: Explain tactical tempo</h2>
+        <p>Explain tactical tempo</p>
+      `;
+
+      const assistant = document.createElement('div');
+      assistant.className = 'font-claude-response';
+      assistant.innerHTML = `
+        <h2 class="sr-only select-none" data-find-omitted="">Claude responded: Argentina tempo control</h2>
+        <div class="row-start-2 font-claude-response-body">
+          <p>Argentina tempo control relies on compact lines and midfield pauses.</p>
+        </div>
+      `;
+
+      const card = document.createElement('div');
+      card.className = 'font-claude-response text-secondary';
+      card.innerHTML = '<p>Remove signs of AI-generated writing</p>';
+
+      document.body.appendChild(user);
+      document.body.appendChild(assistant);
+      document.body.appendChild(card);
+
+      const turns = await adapter.scrapeHarvestTurns();
+      expect(turns.length).toBe(2);
+
+      expect(turns[0]?.content).toBe('Explain tactical tempo');
+      expect(turns[0]?.content).not.toContain('You said');
+
+      expect(turns[1]?.content).toBe('Argentina tempo control relies on compact lines and midfield pauses.');
+      expect(turns[1]?.content).not.toContain('Claude responded');
+      expect(turns.some(t => t.content.includes('Remove signs of AI-generated writing'))).toBe(false);
+    });
   });
 });
 

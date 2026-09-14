@@ -374,6 +374,30 @@ console.log(answer);</code></pre>
       });
     });
 
+    it('strips Gemini screen-reader headings and prevents prompt duplication or "Gemini said" leaks', async () => {
+      const container = document.createElement('div');
+      container.className = 'conversation-container';
+      container.innerHTML = `
+        <user-query>
+          <h5 class="cdk-visually-hidden screen-reader-user-query-label"><span>You said</span> What is the capital of France?</h5>
+          <div class="query-text">What is the capital of France?</div>
+        </user-query>
+        <model-response>
+          <h2 class="cdk-visually-hidden">Gemini said</h2>
+          <div class="model-response-text">The capital of France is Paris.</div>
+        </model-response>
+      `;
+      document.body.appendChild(container);
+
+      const turns = await adapter.scrapeHarvestTurns();
+      expect(turns).toHaveLength(2);
+
+      expect(turns[0]!.content).toBe('What is the capital of France?');
+      expect(turns[0]!.content).not.toContain('You said');
+      expect(turns[1]!.content).toBe('The capital of France is Paris.');
+      expect(turns[1]!.content).not.toContain('Gemini said');
+    });
+
     it('isolates Chain-of-Thought thinking traces and excludes them from assistant body content', async () => {
       const container = document.createElement('div');
       container.className = 'conversation-container';

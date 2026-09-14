@@ -107,6 +107,48 @@ describe('Phase 1: Enhanced TextSanitizer & Hygiene Pipeline', () => {
       expect(result).toBe('How do I configure nginx?');
     });
 
+    it('strips .cdk-visually-hidden and .screen-reader-user-query-label (Gemini DOM landmarks)', () => {
+      const container = document.createElement('div');
+      container.innerHTML = `
+        <h5 class="cdk-visually-hidden screen-reader-user-query-label"><span>You said</span> How do I configure nginx?</h5>
+        <div class="query-text"><p>How do I configure nginx?</p></div>
+      `;
+
+      const result = TextSanitizer.extractTextContent(container);
+      expect(result).not.toContain('You said');
+      expect(result).toBe('How do I configure nginx?');
+    });
+
+    it('strips Gemini said prefix even without colon or newline', () => {
+      const container = document.createElement('div');
+      container.innerHTML = `
+        <h2 class="cdk-visually-hidden">Gemini said</h2>
+        <div class="model-response-text"><p>Here is how you configure nginx.</p></div>
+      `;
+
+      const result = TextSanitizer.extractTextContent(container);
+      expect(result).not.toContain('Gemini said');
+      expect(result).toBe('Here is how you configure nginx.');
+    });
+
+    it('strips Claude responded: accessibility preview heading echo', () => {
+      const container = document.createElement('div');
+      container.innerHTML = `
+        <h2 class="sr-only select-none" data-find-omitted="">Claude responded: The stat backs up part of what you're seeing: across these four games…</h2>
+        <div class="font-claude-response"><p>The stat backs up part of what you're seeing: across these four games, Argentina have scored 11 goals total.</p></div>
+      `;
+
+      const result = TextSanitizer.extractTextContent(container);
+      expect(result).not.toContain('Claude responded');
+      expect(result).toBe("The stat backs up part of what you're seeing: across these four games, Argentina have scored 11 goals total.");
+    });
+
+    it('strips plain-text truncated preview echo via stripEchoDuplication', () => {
+      const text = "What most football analyst hasn't realized is that Argentina players doesn't have the physicality…\n\nWhat most football analyst hasn't realized is that Argentina players doesn't have the physicality to go full 90min in all 8 games within a month.";
+      const cleaned = TextSanitizer.stripEchoDuplication(text);
+      expect(cleaned).toBe("What most football analyst hasn't realized is that Argentina players doesn't have the physicality to go full 90min in all 8 games within a month.");
+    });
+
     it('strips [aria-hidden="true"] and [role="status"] elements', () => {
       const container = document.createElement('div');
       container.innerHTML = `

@@ -107,17 +107,27 @@ export class ClaudeTurnScraper {
     const adapter = options.adapter;
 
     // 1. Query candidate user and assistant elements matching ANY selector strategy
-    const rawUserNodes = queryAllMatching<HTMLElement>(CLAUDE_SELECTORS.userMessage, root);
-    const rawAssistantNodes = queryAllMatching<HTMLElement>(CLAUDE_SELECTORS.assistantMessage, root);
+    let rawUserNodes = queryAllMatching<HTMLElement>(CLAUDE_SELECTORS.userMessage, root);
+    let rawAssistantNodes = queryAllMatching<HTMLElement>(CLAUDE_SELECTORS.assistantMessage, root);
+
+    // If transcript rows are present in the DOM, constrain candidate selection to those rows
+    // to prevent picking up sidebars, project headers, or tool drawers.
+    const transcriptRows = typeof root.querySelectorAll === 'function'
+      ? Array.from(root.querySelectorAll<HTMLElement>('[data-testid="transcript-row"]'))
+      : [];
+    if (transcriptRows.length > 0) {
+      rawUserNodes = rawUserNodes.filter(u => transcriptRows.some(row => row.contains(u)));
+      rawAssistantNodes = rawAssistantNodes.filter(a => transcriptRows.some(row => row.contains(a)));
+    }
 
     // Filter out ancestor wrapper containers to retain only innermost message elements
     const userNodes = rawUserNodes.filter(
       u => !rawUserNodes.some(other => other !== u && u.contains(other))
     );
 
-    const assistantNodes = rawAssistantNodes.filter(
-      a => !rawAssistantNodes.some(other => other !== a && a.contains(other))
-    );
+    const assistantNodes = rawAssistantNodes
+      .filter(a => !a.classList?.contains('text-secondary'))
+      .filter(a => !rawAssistantNodes.some(other => other !== a && a.contains(other)));
 
     // 2. Combine and sort all message nodes in strict DOM document order
     let allCandidates: { el: HTMLElement; isUser: boolean }[] = [
@@ -149,8 +159,26 @@ export class ClaudeTurnScraper {
       }
     });
 
-    // 4. Stably re-index turnIndex sequentially (0, 1, 2, ...)
-    return rawTurns.map((turn, idx) => ({
+    // 4. Deduplicate adjacent identical turns (e.g. from container overlap or DOM cloning)
+    const dedupedTurns: HarvestTurn[] = [];
+    for (const turn of rawTurns) {
+      const prev = dedupedTurns[dedupedTurns.length - 1];
+      if (
+        prev &&
+        prev.role === turn.role &&
+        prev.content.trim() === turn.content.trim() &&
+        turn.content.trim().length > 0
+      ) {
+        if (!prev.attachments && turn.attachments) {
+          prev.attachments = turn.attachments;
+        }
+        continue;
+      }
+      dedupedTurns.push(turn);
+    }
+
+    // 5. Stably re-index turnIndex sequentially (0, 1, 2, ...)
+    return dedupedTurns.map((turn, idx) => ({
       ...turn,
       turnIndex: idx
     }));
@@ -170,6 +198,14 @@ export class ClaudeTurnScraper {
     const cloned = typeof element.cloneNode === 'function'
       ? (element.cloneNode(true) as HTMLElement)
       : element;
+
+    // Strip screen-reader accessibility headings (e.g. <h2 class="sr-only select-none">You said: ...</h2>)
+    if (typeof cloned.querySelectorAll === 'function') {
+      const srHeadings = cloned.querySelectorAll(
+        'h2.sr-only, .sr-only, [class*="sr-only"], [data-find-omitted], [class*="visually-hidden"]'
+      );
+      srHeadings.forEach(node => node.remove());
+    }
 
     if (adapter && typeof adapter.sanitizeTurnNode === 'function') {
       adapter.sanitizeTurnNode(cloned);
@@ -386,6 +422,13 @@ export class ClaudeTurnScraper {
           ? (r2.cloneNode(true) as HTMLElement)
           : r2;
 
+        if (typeof clonedResponse.querySelectorAll === 'function') {
+          const srHeadings = clonedResponse.querySelectorAll(
+            'h2.sr-only, .sr-only, [class*="sr-only"], [data-find-omitted], [class*="visually-hidden"]'
+          );
+          srHeadings.forEach(node => node.remove());
+        }
+
         if (adapter && typeof adapter.sanitizeTurnNode === 'function') {
           adapter.sanitizeTurnNode(clonedResponse);
         } else {
@@ -414,6 +457,13 @@ export class ClaudeTurnScraper {
         // ignore
       }
 
+      if (typeof clonedElement.querySelectorAll === 'function') {
+        const srHeadings = clonedElement.querySelectorAll(
+          'h2.sr-only, .sr-only, [class*="sr-only"], [data-find-omitted], [class*="visually-hidden"]'
+        );
+        srHeadings.forEach(node => node.remove());
+      }
+
       if (adapter && typeof adapter.sanitizeTurnNode === 'function') {
         adapter.sanitizeTurnNode(clonedElement);
       } else {
@@ -430,6 +480,13 @@ export class ClaudeTurnScraper {
       const clonedResponse = typeof target.cloneNode === 'function'
         ? (target.cloneNode(true) as HTMLElement)
         : target;
+
+      if (typeof clonedResponse.querySelectorAll === 'function') {
+        const srHeadings = clonedResponse.querySelectorAll(
+          'h2.sr-only, .sr-only, [class*="sr-only"], [data-find-omitted], [class*="visually-hidden"]'
+        );
+        srHeadings.forEach(node => node.remove());
+      }
 
       if (adapter && typeof adapter.sanitizeTurnNode === 'function') {
         adapter.sanitizeTurnNode(clonedResponse);

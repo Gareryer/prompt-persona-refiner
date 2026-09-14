@@ -285,7 +285,14 @@ export class ChatGPTAdapter extends BaseChatbotAdapter implements IChatbotAdapte
           '[data-testid*="feedback"]',
           'button',
           'svg',
-          '[role="button"]'
+          '[role="button"]',
+          '.sr-only',
+          '[class*="sr-only"]',
+          '.visually-hidden',
+          '[class*="visually-hidden"]',
+          '.cdk-visually-hidden',
+          '[data-find-omitted]',
+          'h2.sr-only'
         ].join(', ')
       );
       junk.forEach(node => node.remove());

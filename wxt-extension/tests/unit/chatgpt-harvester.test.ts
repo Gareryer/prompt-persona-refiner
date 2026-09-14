@@ -768,5 +768,41 @@ describe('Phase 1: ChatGPT Harvester Adapter & Virtualization Engine', () => {
       expect(userTurn.content).not.toContain('File');
       expect(userTurn.content).not.toContain('Show more');
     });
+
+    it('strips screen-reader accessibility headings and deduplicates identical adjacent turns', async () => {
+      const main = document.createElement('main');
+      main.innerHTML = `
+        <article data-testid="conversation-turn-0">
+          <div data-message-author-role="user" data-message-id="msg-u1">
+            <h2 class="sr-only">You said: Plan video series</h2>
+            <p>Plan video series</p>
+          </div>
+        </article>
+        <article data-testid="conversation-turn-1">
+          <div data-message-author-role="assistant" data-message-id="msg-a1">
+            <h2 class="sr-only">ChatGPT said: Here is a 5-part video series plan</h2>
+            <p>Here is a 5-part video series plan</p>
+          </div>
+        </article>
+        <!-- Duplicate assistant turn rendered due to DOM update -->
+        <article data-testid="conversation-turn-1-dup">
+          <div data-message-author-role="assistant" data-message-id="msg-a1-dup">
+            <p>Here is a 5-part video series plan</p>
+          </div>
+        </article>
+      `;
+      document.body.appendChild(main);
+
+      const turns = await adapter.scrapeHarvestTurns();
+      expect(turns.length).toBe(2);
+
+      expect(turns[0]!.role).toBe('user');
+      expect(turns[0]!.content).toBe('Plan video series');
+      expect(turns[0]!.content).not.toContain('You said');
+
+      expect(turns[1]!.role).toBe('assistant');
+      expect(turns[1]!.content).toBe('Here is a 5-part video series plan');
+      expect(turns[1]!.content).not.toContain('ChatGPT said');
+    });
   });
 });
