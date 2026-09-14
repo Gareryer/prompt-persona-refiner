@@ -143,6 +143,17 @@ export class ChatGPTTurnScraper {
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
+    // Strip file attachment cards and upload pills from prompt body so filenames don't bleed into text
+    if (typeof cloned.querySelectorAll === 'function') {
+      const fileCards = cloned.querySelectorAll(
+        '[data-testid="library-file-icon"], [data-testid*="file"], [class*="attachment"], [class*="file-card"], .file-attachment'
+      );
+      fileCards.forEach(node => {
+        const cardContainer = (node as HTMLElement).closest?.('[class*="attachment"], [class*="file"]') || node;
+        cardContainer.remove();
+      });
+    }
+
     if (adapter && typeof adapter.sanitizeTurnNode === 'function') {
       adapter.sanitizeTurnNode(cloned);
     }
@@ -154,15 +165,15 @@ export class ChatGPTTurnScraper {
       turnIndex,
       role: 'user',
       content,
-      rawText: element.textContent?.trim() || '',
+      rawText: content,
       attachments: attachments.length > 0 ? attachments : undefined,
       timestamp: Date.now()
     };
   }
 
   /**
-   * Extracts an assistant turn with OpenAI reasoning header isolation,
-   * model slug extraction, CodeMirror code preservation, and attachments.
+   * Extracts an assistant turn with model slug extraction, CodeMirror code preservation,
+   * attachments, and reasoning header stripping.
    */
   static extractAssistantTurn(
     element: HTMLElement,
@@ -170,32 +181,25 @@ export class ChatGPTTurnScraper {
     messageId: string,
     adapter?: IHarvesterAdapter
   ): HarvestTurn {
-    // 1. Extract OpenAI reasoning header (e.g. "Reasoned for 8 seconds", "Thought for 12 seconds")
-    let thinking: string | null = null;
     const turnContainer = element.closest?.('[data-testid^="conversation-turn-"]') as HTMLElement | null;
     const reasoningSelector = CHATGPT_SELECTORS.reasoningHeader.join(', ');
-    const reasoningEl =
-      element.querySelector<HTMLElement>(reasoningSelector) ||
-      turnContainer?.querySelector<HTMLElement>(reasoningSelector);
 
-    if (reasoningEl && reasoningEl.textContent?.trim()) {
-      thinking = reasoningEl.textContent.replace(/\s+/g, ' ').trim();
-    }
-
-    // 2. Extract model slug
+    // 1. Extract model slug
     const modelSlug = this.extractModelSlug(element);
 
-    // 3. Extract attachments (e.g. DALL-E images and generated file download controls)
+    // 2. Extract attachments (e.g. DALL-E images and generated file download controls)
     const attachments = this.findAttachments(turnContainer || element, turnIndex);
 
-    // 4. Clone element to sanitize body without mutating live DOM
+    // 3. Clone element to sanitize body without mutating live DOM
     const cloned = typeof element.cloneNode === 'function'
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
     // Strip reasoning header element from cloned body so it does not bleed into response prose
     if (typeof cloned.querySelectorAll === 'function') {
-      const reasoningJunk = cloned.querySelectorAll(reasoningSelector);
+      const reasoningJunk = cloned.querySelectorAll(
+        `${reasoningSelector}, button[aria-label*="thought" i], button[aria-label*="reason" i], [class*="thought"], [data-testid*="thought"]`
+      );
       reasoningJunk.forEach(node => node.remove());
     }
 
@@ -204,7 +208,7 @@ export class ChatGPTTurnScraper {
       adapter.sanitizeTurnNode(cloned);
     }
 
-    // 5. Extract sanitized content with CodeMirror code blocks converted to markdown fences
+    // 4. Extract sanitized content with CodeMirror code blocks converted to markdown fences
     const content = TextSanitizer.extractTextContent(cloned);
 
     return {
@@ -212,8 +216,8 @@ export class ChatGPTTurnScraper {
       turnIndex,
       role: 'assistant',
       content,
-      rawText: element.textContent?.trim() || '',
-      thinking,
+      rawText: content,
+      thinking: null,
       modelSlug: modelSlug || undefined,
       attachments: attachments.length > 0 ? attachments : undefined,
       timestamp: Date.now()

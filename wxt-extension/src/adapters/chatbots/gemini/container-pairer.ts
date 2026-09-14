@@ -161,6 +161,12 @@ export class GeminiContainerPairer {
       ? (element.cloneNode(true) as HTMLElement)
       : element;
 
+    // Strip luminous-collapsed-bubble to prevent duplicate user prompt extraction
+    if (typeof cloned.querySelectorAll === 'function') {
+      const bubbles = cloned.querySelectorAll('.luminous-collapsed-bubble, [class*="collapsed-bubble"]');
+      bubbles.forEach(node => node.remove());
+    }
+
     if (adapter && typeof adapter.sanitizeTurnNode === 'function') {
       adapter.sanitizeTurnNode(cloned);
     }
@@ -172,7 +178,7 @@ export class GeminiContainerPairer {
       turnIndex,
       role: 'user',
       content,
-      rawText: element.textContent?.trim() || '',
+      rawText: content,
       attachments: images.length > 0 ? images : undefined,
       timestamp: Date.now()
     };
@@ -195,7 +201,10 @@ export class GeminiContainerPairer {
 
     if (thinkingEl) {
       const thinkingText = TextSanitizer.extractTextContent(thinkingEl);
-      if (thinkingText.trim()) {
+      const isToggleHeaderOnly =
+        /^(?:thinking|thinking process|thought for)\b/i.test(thinkingText.trim()) &&
+        thinkingText.trim().length < 30;
+      if (thinkingText.trim() && !isToggleHeaderOnly) {
         thinking = thinkingText.trim();
       }
     }
@@ -236,8 +245,8 @@ export class GeminiContainerPairer {
       turnIndex,
       role: 'assistant',
       content,
-      rawText: element.textContent?.trim() || '',
-      thinking,
+      rawText: content,
+      thinking: isolateThinking ? thinking : null,
       modelSlug: modelSlug || undefined,
       attachments: images.length > 0 ? images : undefined,
       timestamp: Date.now()

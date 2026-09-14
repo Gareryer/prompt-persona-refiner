@@ -67,7 +67,10 @@ export const GEMINI_SELECTORS = {
   thinkingContainer: [
     'model-thoughts',
     '[data-test-id="model-thoughts"]',
-    '.thinking-container'
+    '.thinking-container',
+    '.thinking-overlay',
+    'thinking-overlay',
+    '[class*="thinking-overlay"]'
   ],
   thinkingToggle: [
     '[data-test-id="model-thoughts"] button',
@@ -78,7 +81,9 @@ export const GEMINI_SELECTORS = {
   thinkingContent: [
     'model-thoughts .thoughts-body',
     '.thinking-content',
-    '.thought-process'
+    '.thought-process',
+    '.thinking-overlay',
+    'thinking-overlay'
   ],
   loadingIndicator: [
     'mat-progress-spinner',

@@ -43,7 +43,9 @@ export function stripArtifactWidgetChrome(root: HTMLElement): void {
     '.font-ui.rounded-2xl.rounded-t-3xl',
     '[class*="rounded-2xl"][class*="rounded-t-3xl"]',
     '.font-ui[class*="rounded-2xl"]',
-    '[data-testid*="artifact"]'
+    '[data-testid*="artifact"]',
+    '[class*="disclaimer"]',
+    '[aria-label*="Claude can make mistakes" i]'
   ].join(', ');
 
   const artifactCards: HTMLElement[] = Array.from(root.querySelectorAll<HTMLElement>(cardSelectors));
@@ -180,7 +182,7 @@ export class ClaudeTurnScraper {
       turnIndex,
       role: 'user',
       content,
-      rawText: element.textContent?.trim() || '',
+      rawText: content,
       attachments: images.length > 0 ? images : undefined,
       timestamp: Date.now()
     };
@@ -213,13 +215,26 @@ export class ClaudeTurnScraper {
     const toolButtonSelector = CLAUDE_SELECTORS.toolUseButton.join(', ');
     const toolButtonsSet = new Set<HTMLElement>();
 
+    const isThoughtToggle = (text: string): boolean => {
+      const clean = text.replace(/[\uE000-\uF8FF]/g, '').trim();
+      return /^(?:thought for\s+\d+[\w\s]*|thinking\s*\.{0,3}|thinking process)$/i.test(clean);
+    };
+
     if (row1Nodes.length > 0) {
       for (const r of row1Nodes) {
         if (r.matches && CLAUDE_SELECTORS.toolUseButton.some(sel => { try { return r.matches(sel); } catch { return false; } })) {
-          toolButtonsSet.add(r);
+          const txt = r.textContent?.replace(/\s+/g, ' ').trim() || '';
+          if (!isThoughtToggle(txt)) {
+            toolButtonsSet.add(r);
+          }
         }
         try {
-          r.querySelectorAll<HTMLElement>(toolButtonSelector).forEach(b => toolButtonsSet.add(b));
+          r.querySelectorAll<HTMLElement>(toolButtonSelector).forEach(b => {
+            const txt = b.textContent?.replace(/\s+/g, ' ').trim() || '';
+            if (!isThoughtToggle(txt)) {
+              toolButtonsSet.add(b);
+            }
+          });
         } catch {
           // ignore
         }
@@ -228,7 +243,10 @@ export class ClaudeTurnScraper {
       try {
         element.querySelectorAll<HTMLElement>(toolButtonSelector).forEach(b => {
           if (!b.closest('.row-start-2') && !b.closest('.font-claude-response-body')) {
-            toolButtonsSet.add(b);
+            const txt = b.textContent?.replace(/\s+/g, ' ').trim() || '';
+            if (!isThoughtToggle(txt)) {
+              toolButtonsSet.add(b);
+            }
           }
         });
       } catch {
@@ -258,7 +276,7 @@ export class ClaudeTurnScraper {
 
         if (isSelfTool) {
           const btnText = rNode.textContent?.replace(/\s+/g, ' ').trim() || '';
-          if (btnText) {
+          if (btnText && !isThoughtToggle(btnText)) {
             const formatted = btnText.startsWith('[Tool]:') ? btnText : `[Tool]: ${btnText}`;
             thinkingParts.push(formatted);
           }
@@ -277,6 +295,11 @@ export class ClaudeTurnScraper {
               clonedR.querySelectorAll<HTMLElement>(sel).forEach(btn => {
                 const btnText = btn.textContent?.replace(/\s+/g, ' ').trim();
                 if (btnText) {
+                  if (isThoughtToggle(btnText)) {
+                    // Strip collapsed disclosure button ("Thought for 1m 14s")
+                    btn.remove();
+                    return;
+                  }
                   const marker = clonedR.ownerDocument?.createElement('div') ||
                     (typeof document !== 'undefined' ? document.createElement('div') : null);
                   if (marker) {
@@ -296,7 +319,7 @@ export class ClaudeTurnScraper {
         }
 
         const part = TextSanitizer.extractTextContent(clonedR);
-        if (part) {
+        if (part && !isThoughtToggle(part)) {
           thinkingParts.push(part);
         }
       }
@@ -432,7 +455,7 @@ export class ClaudeTurnScraper {
       turnIndex,
       role: 'assistant',
       content: finalContent,
-      rawText: element.textContent?.trim() || '',
+      rawText: finalContent,
       thinking,
       modelSlug: modelSlug || undefined,
       attachments: images.length > 0 ? images : undefined,

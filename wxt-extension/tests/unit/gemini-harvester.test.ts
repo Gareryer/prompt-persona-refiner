@@ -631,5 +631,26 @@ print(os.getcwd())</code></pre>
       const turns = await adapter.scrapeHarvestTurns();
       expect(turns).toEqual([]);
     });
+
+    it('strips luminous-collapsed-bubble to prevent duplicate user prompt extraction', async () => {
+      const container = document.createElement('div');
+      container.className = 'conversation-container';
+      container.innerHTML = `
+        <user-query>
+          <div class="luminous-collapsed-bubble">Explain quantum superposition</div>
+          <div class="query-content">Explain quantum superposition</div>
+        </user-query>
+        <model-response>
+          <div class="model-response-text">Quantum superposition is a fundamental principle of quantum mechanics.</div>
+        </model-response>
+      `;
+      document.body.appendChild(container);
+
+      const turns = await adapter.scrapeHarvestTurns();
+      expect(turns).toHaveLength(2);
+      expect(turns[0]!.role).toBe('user');
+      expect(turns[0]!.content).toBe('Explain quantum superposition');
+      expect(turns[0]!.rawText).toBe('Explain quantum superposition');
+    });
   });
 });

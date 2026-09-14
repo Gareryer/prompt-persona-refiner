@@ -264,7 +264,7 @@ describe('Phase 1: ChatGPT Harvester Adapter & Virtualization Engine', () => {
       const assistantTurn = turns[1]!;
       expect(assistantTurn.role).toBe('assistant');
       expect(assistantTurn.modelSlug).toBe('o1-preview');
-      expect(assistantTurn.thinking).toBe('Reasoned for 8 seconds');
+      expect(assistantTurn.thinking).toBeNull();
       // Crucial: "Reasoned for 8 seconds" must NOT bleed into response content
       expect(assistantTurn.content).not.toContain('Reasoned for 8 seconds');
       expect(assistantTurn.content).toBe('The puzzle solution is that the green house is in the middle.');
@@ -608,7 +608,7 @@ describe('Phase 1: ChatGPT Harvester Adapter & Virtualization Engine', () => {
 
       const turns = await adapter.scrapeHarvestTurns();
       expect(turns.length).toBe(1);
-      expect(turns[0]!.thinking).toBe('Thought for 15 seconds');
+      expect(turns[0]!.thinking).toBeNull();
       expect(turns[0]!.content).toBe('Here is the analyzed outcome.');
       expect(turns[0]!.content).not.toContain('Thought for 15 seconds');
     });
@@ -740,6 +740,33 @@ describe('Phase 1: ChatGPT Harvester Adapter & Virtualization Engine', () => {
       // Must NOT return sidebarScroll!
       expect(scroller).not.toBe(sidebarScroll);
       expect(scroller === main || scroller === document.body).toBe(true);
+    });
+
+    it('isolates attachment cards from prompt text and keeps rawText synchronized with clean content', async () => {
+      const main = document.createElement('main');
+      main.innerHTML = `
+        <article data-testid="conversation-turn-0">
+          <div data-message-author-role="user" data-message-id="msg-user-attach">
+            <div class="file-attachment">
+              <span data-testid="library-file-icon"></span>
+              <span class="file-name">VID_20260607_191404_846.mp4</span>
+              <span class="file-type-badge">File</span>
+            </div>
+            <p>I want to repurpose this niche to an explainer.</p>
+            <button data-testid="expand-button">Show more</button>
+          </div>
+        </article>
+      `;
+      document.body.appendChild(main);
+
+      const turns = await adapter.scrapeHarvestTurns();
+      expect(turns.length).toBe(1);
+      const userTurn = turns[0]!;
+      expect(userTurn.content).toBe('I want to repurpose this niche to an explainer.');
+      expect(userTurn.rawText).toBe('I want to repurpose this niche to an explainer.');
+      expect(userTurn.content).not.toContain('VID_20260607');
+      expect(userTurn.content).not.toContain('File');
+      expect(userTurn.content).not.toContain('Show more');
     });
   });
 });

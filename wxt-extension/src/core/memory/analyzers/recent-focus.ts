@@ -16,18 +16,54 @@ export const RecentFocus = {
   inputSource: 'both',
   _lookbackCount: 3,
 
-  getPrompt(recentMessages: ScrapedMessageTurn[]): string {
-    const conversationText = recentMessages.map((pair) => {
-      let text = `--- Turn ${pair.id} ---\n`;
-      if (pair.user?.prompt) text += `User: ${pair.user.prompt}\n`;
-      if (pair.model?.response) {
-        text += `Assistant: ${pair.model.response.substring(0, 600)}${pair.model.response.length > 600 ? '...' : ''}\n`;
+  getPrompt(recentMessages: (ScrapedMessageTurn | any)[]): string {
+    let conversationText = '';
+    const isSequential = recentMessages.some(m => m && typeof m === 'object' && 'role' in m && 'content' in m);
+
+    if (isSequential) {
+      const pairs: string[] = [];
+      let currentTurn = 1;
+      let currentUserPrompt = '';
+
+      for (const msg of recentMessages) {
+        if (!msg) continue;
+        if (msg.role === 'user') {
+          if (currentUserPrompt) {
+            pairs.push(`--- Turn ${currentTurn++} ---\nUser: ${currentUserPrompt.trim()}\n`);
+          }
+          currentUserPrompt = msg.content || msg.rawText || '';
+        } else if (msg.role === 'assistant' || msg.role === 'model') {
+          let text = `--- Turn ${currentTurn++} ---\n`;
+          if (currentUserPrompt) {
+            text += `User: ${currentUserPrompt.trim()}\n`;
+            currentUserPrompt = '';
+          }
+          const resp = (msg.content || '').trim();
+          if (resp) {
+            text += `Assistant: ${resp.substring(0, 600)}${resp.length > 600 ? '...' : ''}\n`;
+          }
+          pairs.push(text);
+        }
       }
-      if (pair.rating?.value) {
-        text += `[User rated this response: ${pair.rating.value}/5 stars]\n`;
+      if (currentUserPrompt) {
+        pairs.push(`--- Turn ${currentTurn++} ---\nUser: ${currentUserPrompt.trim()}\n`);
       }
-      return text;
-    }).join('\n');
+      conversationText = pairs.join('\n');
+    } else {
+      conversationText = recentMessages.map((pair, idx) => {
+        const turnId = pair.id ?? idx + 1;
+        let text = `--- Turn ${turnId} ---\n`;
+        if (pair.user?.prompt) text += `User: ${pair.user.prompt.trim()}\n`;
+        if (pair.model?.response) {
+          const resp = pair.model.response.trim();
+          text += `Assistant: ${resp.substring(0, 600)}${resp.length > 600 ? '...' : ''}\n`;
+        }
+        if (pair.rating?.value) {
+          text += `[User rated this response: ${pair.rating.value}/5 stars]\n`;
+        }
+        return text;
+      }).join('\n');
+    }
 
     const recentRatings = recentMessages.filter(m => m.rating?.value);
     const ratingContext = recentRatings.length > 0 ? `

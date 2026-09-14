@@ -310,7 +310,14 @@ export class GeminiAdapter extends BaseChatbotAdapter implements IChatbotAdapter
           '.action-bar',
           'button',
           'svg',
-          '[role="button"]'
+          '[role="button"]',
+          '.luminous-collapsed-bubble',
+          '[class*="collapsed-bubble"]',
+          '.thinking-overlay',
+          'thinking-overlay',
+          '[class*="thinking-overlay"]',
+          '.good-response',
+          '.bad-response'
         ].join(', ')
       );
       junk.forEach(node => node.remove());

@@ -11,12 +11,48 @@ export const UnifiedAnalyzer = {
   id: 'unified_analyzer',
   inputSource: 'both',
 
-  _formatConversation(messages: ScrapedMessageTurn[]): string {
-    return messages.map((pair) => {
-      let text = `--- Turn ${pair.id} ---\n`;
-      if (pair.user?.prompt) text += `User: ${pair.user.prompt}\n`;
+  _formatConversation(messages: (ScrapedMessageTurn | any)[]): string {
+    if (!Array.isArray(messages) || messages.length === 0) return '';
+
+    // Check if messages is an array of flat sequential turns (e.g. HarvestTurn[])
+    const isSequential = messages.some(m => m && typeof m === 'object' && 'role' in m && 'content' in m);
+    if (isSequential) {
+      const pairs: string[] = [];
+      let currentTurn = 1;
+      let currentUserPrompt = '';
+
+      for (const msg of messages) {
+        if (!msg) continue;
+        if (msg.role === 'user') {
+          if (currentUserPrompt) {
+            pairs.push(`--- Turn ${currentTurn++} ---\nUser: ${currentUserPrompt.trim()}\n`);
+          }
+          currentUserPrompt = msg.content || msg.rawText || '';
+        } else if (msg.role === 'assistant' || msg.role === 'model') {
+          let text = `--- Turn ${currentTurn++} ---\n`;
+          if (currentUserPrompt) {
+            text += `User: ${currentUserPrompt.trim()}\n`;
+            currentUserPrompt = '';
+          }
+          const resp = (msg.content || '').trim();
+          if (resp) {
+            text += `Assistant: ${resp.substring(0, 500)}${resp.length > 500 ? '...' : ''}\n`;
+          }
+          pairs.push(text);
+        }
+      }
+      if (currentUserPrompt) {
+        pairs.push(`--- Turn ${currentTurn++} ---\nUser: ${currentUserPrompt.trim()}\n`);
+      }
+      return pairs.join('\n');
+    }
+
+    return messages.map((pair, idx) => {
+      const turnId = pair.id ?? idx + 1;
+      let text = `--- Turn ${turnId} ---\n`;
+      if (pair.user?.prompt) text += `User: ${pair.user.prompt.trim()}\n`;
       if (pair.model?.response) {
-        const resp = pair.model.response;
+        const resp = pair.model.response.trim();
         text += `Assistant: ${resp.substring(0, 500)}${resp.length > 500 ? '...' : ''}\n`;
       }
       if (pair.rating?.value) {

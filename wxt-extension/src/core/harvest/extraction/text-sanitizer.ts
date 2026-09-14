@@ -170,7 +170,10 @@ export class TextSanitizer {
     for (const c of citations) {
       if (!c.parentNode || (typeof root.contains === 'function' && !root.contains(c))) continue;
       const href = c.getAttribute('href');
-      const text = (c.textContent || '').replace(/\s+/g, ' ').trim();
+      let text = (c.textContent || '').replace(/\s+/g, ' ').trim();
+      text = text.replace(/\+\d+$/, '').trim();
+      text = text.replace(/^\[\d+\]\s*/, '').trim();
+
       if (href && text && !text.startsWith('http')) {
         const mdLink = `[${text}](${href})`;
         if (typeof root.ownerDocument?.createTextNode === 'function') {

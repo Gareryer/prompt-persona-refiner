@@ -194,5 +194,22 @@ describe('Phase 2 Memory Engine Deep Methods', () => {
       expect(prompt).toContain('context (Domain, Scope Boundaries, Terminology)');
       expect(prompt).toContain('REQUIRED OUTPUT JSON FORMAT');
     });
+
+    it('formats sequential conversation turns cleanly without thinking trace or UI noise', () => {
+      const turns = [
+        { role: 'user', content: 'What is Argentina tactical tempo strategy?' },
+        {
+          role: 'assistant',
+          content: 'Argentina controlled tempo through tactical pauses.',
+          thinking: 'Let me think about Scaloni tactics for 1m 14s'
+        }
+      ];
+
+      const formatted = UnifiedAnalyzer._formatConversation(turns as any);
+      expect(formatted).toContain('User: What is Argentina tactical tempo strategy?');
+      expect(formatted).toContain('Assistant: Argentina controlled tempo through tactical pauses.');
+      expect(formatted).not.toContain('Let me think about Scaloni tactics');
+      expect(formatted).not.toContain('1m 14s');
+    });
   });
 });

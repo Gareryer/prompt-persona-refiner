@@ -466,6 +466,29 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
       expect(jsonStr).not.toContain('"blob"');
     });
 
+    it('nullifies thinking and keeps rawText synchronized with content in sanitizeRecordForJson', () => {
+      const record: HarvestConversationRecord = {
+        metadata: { ...mockMetadata },
+        messages: [
+          {
+            id: 't-1',
+            turnIndex: 0,
+            role: 'assistant',
+            content: 'Here is the tactical breakdown.',
+            rawText: 'Here is the tactical breakdown. Thought for 1m 14s Button',
+            thinking: 'Thought for 1m 14s',
+            timestamp: 12345
+          }
+        ]
+      };
+
+      const sanitized: any = ZipBuilder.sanitizeRecordForJson(record, { dropThinking: true });
+      expect(sanitized.messages[0].thinking).toBeNull();
+      expect(sanitized.messages[0].content).toBe('Here is the tactical breakdown.');
+      expect(sanitized.messages[0].rawText).toBe('Here is the tactical breakdown.');
+      expect(sanitized.messages[0].rawText).not.toContain('Thought for 1m 14s');
+    });
+
     it('buildZip and createZip generate a valid JSZip archive bundling conversation.json and images', async () => {
       const record = createSampleRecord();
       const zipBlob = await ZipBuilder.buildZip(record);

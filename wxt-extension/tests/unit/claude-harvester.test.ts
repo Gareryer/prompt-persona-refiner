@@ -1191,6 +1191,41 @@ describe('Phase 5: Claude Harvester Adapter & 2-Row CSS Grid Scraper', () => {
       expect(turns[0]?.thinking).not.toContain('[Tool]: [Tool]:');
       expect(turns[0]?.content).toBe('Test tool completed.');
     });
+
+    it('filters collapsed thought toggle buttons and keeps rawText synchronized with clean content', async () => {
+      const user = document.createElement('div');
+      user.setAttribute('data-testid', 'user-message');
+      user.innerHTML = '<p>Explain Argentina tactical tempo strategy</p>';
+
+      const assistant = document.createElement('div');
+      assistant.className = 'font-claude-response';
+      assistant.innerHTML = `
+        <div class="row-start-1">
+          <button class="group/row" aria-label="Thought details">Thought for 1m 14s</button>
+        </div>
+        <div class="row-start-2 font-claude-response-body">
+          <p>Argentina controlled match tempo through structured possession phases.</p>
+          <div class="disclaimer">Claude can make mistakes. Please double-check responses.</div>
+        </div>
+      `;
+
+      document.body.appendChild(user);
+      document.body.appendChild(assistant);
+
+      const turns = await adapter.scrapeHarvestTurns();
+      expect(turns.length).toBe(2);
+
+      const userTurn = turns[0]!;
+      expect(userTurn.content).toBe('Explain Argentina tactical tempo strategy');
+      expect(userTurn.rawText).toBe('Explain Argentina tactical tempo strategy');
+
+      const assistantTurn = turns[1]!;
+      expect(assistantTurn.thinking).toBeNull();
+      expect(assistantTurn.content).toBe('Argentina controlled match tempo through structured possession phases.');
+      expect(assistantTurn.rawText).toBe('Argentina controlled match tempo through structured possession phases.');
+      expect(assistantTurn.content).not.toContain('Thought for 1m 14s');
+      expect(assistantTurn.content).not.toContain('Claude can make mistakes');
+    });
   });
 });
 

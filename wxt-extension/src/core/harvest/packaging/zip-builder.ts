@@ -28,6 +28,8 @@ export interface ZipBuilderOptions {
   compressionLevel?: number;
   /** Extra auxiliary files to include in the zip archive (e.g. metadata or readme) */
   extraFiles?: Record<string, string | Blob | Uint8Array | ArrayBuffer>;
+  /** Whether to nullify internal thinking traces for persona archiving. Default: false */
+  dropThinking?: boolean;
 }
 
 export interface DownloadZipOptions {
@@ -39,21 +41,33 @@ export interface DownloadZipOptions {
 
 export class ZipBuilder {
   /**
-   * Sanitizes a HarvestConversationRecord for JSON serialization by stripping binary Blob references.
+   * Sanitizes a HarvestConversationRecord for JSON serialization by stripping binary Blob references,
+   * optionally nullifying internal thinking traces, and ensuring rawText matches sanitized markdown content.
    */
-  static sanitizeRecordForJson(record: HarvestConversationRecord): Record<string, unknown> {
+  static sanitizeRecordForJson(
+    record: HarvestConversationRecord,
+    options?: { dropThinking?: boolean }
+  ): Record<string, unknown> {
     const sanitizeAttachment = (att: HarvestAttachment) => {
       const { blob: _blob, dataUrl: _dataUrl, ...rest } = att;
       return rest;
     };
 
+    const dropThinking = options?.dropThinking ?? false;
+
     const sanitizedMessages = record.messages.map((turn: HarvestTurn) => {
-      if (!turn.attachments || !Array.isArray(turn.attachments)) {
-        return turn;
+      const cleanTurn: HarvestTurn = {
+        ...turn,
+        rawText: turn.content,
+        ...(dropThinking ? { thinking: null } : {})
+      };
+
+      if (!cleanTurn.attachments || !Array.isArray(cleanTurn.attachments)) {
+        return cleanTurn;
       }
       return {
-        ...turn,
-        attachments: turn.attachments.map(sanitizeAttachment)
+        ...cleanTurn,
+        attachments: cleanTurn.attachments.map(sanitizeAttachment)
       };
     });
 
@@ -76,7 +90,7 @@ export class ZipBuilder {
     const zip = new JSZip();
 
     // 1. Serialize sanitized conversation.json
-    const cleanRecord = this.sanitizeRecordForJson(record);
+    const cleanRecord = this.sanitizeRecordForJson(record, { dropThinking: options?.dropThinking });
     const jsonString = JSON.stringify(cleanRecord, null, 2);
     zip.file('conversation.json', jsonString);
 
