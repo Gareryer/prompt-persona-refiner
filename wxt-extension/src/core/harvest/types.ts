@@ -40,6 +40,11 @@ export interface HarvestTurn {
   role: 'user' | 'assistant' | 'system';
   content: string;
   rawText?: string;
+  /**
+   * @deprecated Internal reasoning / Chain-of-Thought (CoT) traces are decoupled and excluded
+   * from persona synthesis and exported archives to prevent meta-cognition token waste.
+   * Kept for legacy schema compatibility; nullified in modern harvests.
+   */
   thinking?: string | null;
   modelSlug?: string;
   attachments?: HarvestAttachment[];

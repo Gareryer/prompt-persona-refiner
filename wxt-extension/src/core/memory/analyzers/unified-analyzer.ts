@@ -5,13 +5,13 @@
  */
 
 import { ComponentSchemas } from '../component-schemas';
-import type { ScrapedMessageTurn } from './recent-focus';
+import type { ScrapedMessageTurn, ConversationTurnInput } from './recent-focus';
 
 export const UnifiedAnalyzer = {
   id: 'unified_analyzer',
   inputSource: 'both',
 
-  _formatConversation(messages: (ScrapedMessageTurn | any)[]): string {
+  _formatConversation(messages: ConversationTurnInput[]): string {
     if (!Array.isArray(messages) || messages.length === 0) return '';
 
     // Check if messages is an array of flat sequential turns (e.g. HarvestTurn[])
@@ -22,19 +22,21 @@ export const UnifiedAnalyzer = {
       let currentUserPrompt = '';
 
       for (const msg of messages) {
-        if (!msg) continue;
+        if (!msg || !('role' in msg)) continue;
         if (msg.role === 'user') {
           if (currentUserPrompt) {
             pairs.push(`--- Turn ${currentTurn++} ---\nUser: ${currentUserPrompt.trim()}\n`);
           }
           currentUserPrompt = msg.content || msg.rawText || '';
         } else if (msg.role === 'assistant' || msg.role === 'model') {
+          const resp = (msg.content || '').trim();
+          if (!currentUserPrompt && !resp) continue;
+
           let text = `--- Turn ${currentTurn++} ---\n`;
           if (currentUserPrompt) {
             text += `User: ${currentUserPrompt.trim()}\n`;
             currentUserPrompt = '';
           }
-          const resp = (msg.content || '').trim();
           if (resp) {
             text += `Assistant: ${resp.substring(0, 500)}${resp.length > 500 ? '...' : ''}\n`;
           }
@@ -48,25 +50,27 @@ export const UnifiedAnalyzer = {
     }
 
     return messages.map((pair, idx) => {
-      const turnId = pair.id ?? idx + 1;
+      const p = pair as ScrapedMessageTurn;
+      const turnId = p.id ?? idx + 1;
       let text = `--- Turn ${turnId} ---\n`;
-      if (pair.user?.prompt) text += `User: ${pair.user.prompt.trim()}\n`;
-      if (pair.model?.response) {
-        const resp = pair.model.response.trim();
+      if (p.user?.prompt) text += `User: ${p.user.prompt.trim()}\n`;
+      if (p.model?.response) {
+        const resp = p.model.response.trim();
         text += `Assistant: ${resp.substring(0, 500)}${resp.length > 500 ? '...' : ''}\n`;
       }
-      if (pair.rating?.value) {
-        text += `[User Rating: ${pair.rating.value}/5 stars]\n`;
+      if (p.rating?.value) {
+        text += `[User Rating: ${p.rating.value}/5 stars]\n`;
       }
       return text;
     }).join('\n');
   },
 
-  _getRatingContext(messages: ScrapedMessageTurn[]): string {
-    const ratedCount = messages.filter(m => m.rating?.value).length;
+  _getRatingContext(messages: ConversationTurnInput[]): string {
+    const rated = messages.filter((m): m is ScrapedMessageTurn => 'rating' in m && Boolean(m.rating?.value));
+    const ratedCount = rated.length;
     if (ratedCount === 0) return '';
 
-    const avgRating = (messages.reduce((sum, m) => sum + (m.rating?.value || 0), 0) / ratedCount).toFixed(1);
+    const avgRating = (rated.reduce((sum, m) => sum + (m.rating?.value || 0), 0) / ratedCount).toFixed(1);
 
     return `
 RATING CONTEXT:
@@ -85,13 +89,15 @@ Use ratings to identify what approaches work best for this user.
   },
 
   getPrompt(
-    messages: ScrapedMessageTurn[],
+    messages: ConversationTurnInput[],
     enabledComponents: string[] | null = null,
     includeSchemaHints: boolean = false
   ): string {
     const conversationText = this._formatConversation(messages);
     const ratingContext = this._getRatingContext(messages);
-    const recentMessages = messages.slice(-3);
+    const isSequential = messages.some(m => m && typeof m === 'object' && 'role' in m && 'content' in m);
+    const lookback = isSequential ? 6 : 3;
+    const recentMessages = messages.slice(-lookback);
     const recentText = this._formatConversation(recentMessages);
 
     const allDimensions = [
@@ -190,7 +196,7 @@ CRITICAL: Return ONLY the valid JSON object with ALL 8 top-level keys.`;
   },
 
   async analyze(
-    scrapedData: { messages?: ScrapedMessageTurn[] },
+    scrapedData: { messages?: ConversationTurnInput[] },
     llmClient: any,
     options: { enabledComponents?: string[] | null } = {}
   ): Promise<Record<string, any> | null> {

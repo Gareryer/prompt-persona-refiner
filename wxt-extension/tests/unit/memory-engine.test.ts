@@ -8,7 +8,8 @@ import {
   ComponentSchemas,
   MEMORY_SCHEMA_VERSION,
   SESSION_KEY_PREFIX,
-  MEMORY_SIZE_LIMITS
+  MEMORY_SIZE_LIMITS,
+  type ConversationTurnInput
 } from '../../src/core/memory';
 
 describe('Phase 2 Memory Engine Deep Methods', () => {
@@ -179,6 +180,30 @@ describe('Phase 2 Memory Engine Deep Methods', () => {
       expect(prompt).toContain('Help with WXT build');
       expect(prompt).toContain('ANALYZE THE IMMEDIATE CONTEXT');
     });
+
+    it('handles sequential HarvestTurn inputs and analyzes them cleanly', async () => {
+      const turns: ConversationTurnInput[] = [
+        { id: 't1', turnIndex: 0, role: 'user', content: 'How do I test WXT?', timestamp: 1000 },
+        { id: 't2', turnIndex: 1, role: 'assistant', content: 'Use Vitest with mock DOM.', timestamp: 2000 },
+        { id: 't3', turnIndex: 2, role: 'user', content: 'What about Chrome APIs?', timestamp: 3000 },
+        { id: 't4', turnIndex: 3, role: 'assistant', content: 'Mock chrome runtime.', timestamp: 4000 }
+      ];
+
+      const prompt = RecentFocus.getPrompt(turns);
+      expect(prompt).toContain('User: How do I test WXT?');
+      expect(prompt).toContain('Assistant: Use Vitest with mock DOM.');
+      expect(prompt).toContain('User: What about Chrome APIs?');
+      expect(prompt).toContain('Assistant: Mock chrome runtime.');
+
+      const mockLlm = {
+        isConfigured: () => true,
+        call: vi.fn().mockResolvedValue({ json: { activeTask: 'Testing WXT' } })
+      };
+
+      const result = await RecentFocus.analyze({ messages: turns }, mockLlm);
+      expect(result?.activeTask).toBe('Testing WXT');
+      expect(result?.turnsAnalyzed).toBe(2);
+    });
   });
 
   describe('UnifiedAnalyzer', () => {
@@ -196,16 +221,16 @@ describe('Phase 2 Memory Engine Deep Methods', () => {
     });
 
     it('formats sequential conversation turns cleanly without thinking trace or UI noise', () => {
-      const turns = [
+      const turns: ConversationTurnInput[] = [
         { role: 'user', content: 'What is Argentina tactical tempo strategy?' },
         {
           role: 'assistant',
           content: 'Argentina controlled tempo through tactical pauses.',
-          thinking: 'Let me think about Scaloni tactics for 1m 14s'
+          rawText: 'Argentina controlled tempo through tactical pauses.'
         }
       ];
 
-      const formatted = UnifiedAnalyzer._formatConversation(turns as any);
+      const formatted = UnifiedAnalyzer._formatConversation(turns);
       expect(formatted).toContain('User: What is Argentina tactical tempo strategy?');
       expect(formatted).toContain('Assistant: Argentina controlled tempo through tactical pauses.');
       expect(formatted).not.toContain('Let me think about Scaloni tactics');

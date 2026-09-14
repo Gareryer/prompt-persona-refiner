@@ -4,6 +4,8 @@
  * @module memory/analyzers/recent-focus
  */
 
+import type { HarvestTurn } from '../../harvest/types';
+
 export interface ScrapedMessageTurn {
   id: string | number;
   user?: { prompt?: string };
@@ -11,12 +13,17 @@ export interface ScrapedMessageTurn {
   rating?: { value?: number };
 }
 
+export type ConversationTurnInput =
+  | ScrapedMessageTurn
+  | HarvestTurn
+  | { role: 'user' | 'assistant' | 'model' | 'system'; content: string; rawText?: string };
+
 export const RecentFocus = {
   id: 'recent_focus',
   inputSource: 'both',
   _lookbackCount: 3,
 
-  getPrompt(recentMessages: (ScrapedMessageTurn | any)[]): string {
+  getPrompt(recentMessages: ConversationTurnInput[]): string {
     let conversationText = '';
     const isSequential = recentMessages.some(m => m && typeof m === 'object' && 'role' in m && 'content' in m);
 
@@ -26,7 +33,7 @@ export const RecentFocus = {
       let currentUserPrompt = '';
 
       for (const msg of recentMessages) {
-        if (!msg) continue;
+        if (!msg || !('role' in msg)) continue;
         if (msg.role === 'user') {
           if (currentUserPrompt) {
             pairs.push(`--- Turn ${currentTurn++} ---\nUser: ${currentUserPrompt.trim()}\n`);
@@ -50,7 +57,8 @@ export const RecentFocus = {
       }
       conversationText = pairs.join('\n');
     } else {
-      conversationText = recentMessages.map((pair, idx) => {
+      const scrapedMessages = recentMessages.filter((m): m is ScrapedMessageTurn => Boolean(m && !('role' in m)));
+      conversationText = scrapedMessages.map((pair, idx) => {
         const turnId = pair.id ?? idx + 1;
         let text = `--- Turn ${turnId} ---\n`;
         if (pair.user?.prompt) text += `User: ${pair.user.prompt.trim()}\n`;
@@ -65,7 +73,7 @@ export const RecentFocus = {
       }).join('\n');
     }
 
-    const recentRatings = recentMessages.filter(m => m.rating?.value);
+    const recentRatings = recentMessages.filter((m): m is ScrapedMessageTurn => Boolean(m && 'rating' in m && m.rating?.value));
     const ratingContext = recentRatings.length > 0 ? `
 RECENT RATINGS:
 ${recentRatings.length} of the last ${recentMessages.length} responses have been rated.
@@ -107,12 +115,14 @@ ANALYZE THE IMMEDIATE CONTEXT AND RETURN ONLY JSON:
 }`;
   },
 
-  async analyze(scrapedData: { messages?: ScrapedMessageTurn[] }, llmClient: any): Promise<Record<string, any> | null> {
+  async analyze(scrapedData: { messages?: ConversationTurnInput[] }, llmClient: any): Promise<Record<string, any> | null> {
     if (!scrapedData?.messages?.length) {
       return null;
     }
 
-    const recentMessages = scrapedData.messages.slice(-this._lookbackCount);
+    const isSequential = scrapedData.messages.some(m => m && typeof m === 'object' && 'role' in m && 'content' in m);
+    const lookback = isSequential ? this._lookbackCount * 2 : this._lookbackCount;
+    const recentMessages = scrapedData.messages.slice(-lookback);
     if (!recentMessages.length) return null;
 
     if (!llmClient?.isConfigured?.() && !llmClient?.call) {
@@ -125,7 +135,7 @@ ANALYZE THE IMMEDIATE CONTEXT AND RETURN ONLY JSON:
 
       return {
         ...(result?.json || result || {}),
-        turnsAnalyzed: recentMessages.length,
+        turnsAnalyzed: isSequential ? Math.ceil(recentMessages.length / 2) : recentMessages.length,
         analyzedAt: Date.now()
       };
     } catch (error) {

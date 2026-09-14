@@ -41,7 +41,7 @@ export const ComponentSchemas = {
     ],
     reasoning: [
       'Deductive', 'Inductive', 'Chain-of-Thought', 'Tree-of-Thought',
-      'Step-by-Step', 'Analytical', 'Creative', 'Socratic'
+      'Step-by-Step', 'Analytical', 'Creative', 'Socratic', 'First-Principles'
     ],
     outputType: [
       'Markdown', 'Plaintext', 'JSON', 'Code', 'HTML', 'Structured', 'Custom'

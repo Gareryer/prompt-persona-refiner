@@ -446,15 +446,15 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
 
     it('sanitizeRecordForJson strips binary Blobs while preserving all transcript metadata and attachments', () => {
       const record = createSampleRecord();
-      const sanitized = ZipBuilder.sanitizeRecordForJson(record) as any;
+      const sanitized = ZipBuilder.sanitizeRecordForJson(record);
 
       // Messages and turn structure preserved
       expect(sanitized.messages).toHaveLength(2);
-      expect(sanitized.messages[0].content).toBe('Explain qubits');
-      expect(sanitized.messages[1].thinking).toBe('Quantum superposition model');
+      expect(sanitized.messages[0]!.content).toBe('Explain qubits');
+      expect(sanitized.messages[1]!.thinking).toBe('Quantum superposition model');
 
       // Attachment properties preserved, but blob is stripped
-      const att = sanitized.messages[0].attachments[0];
+      const att = sanitized.messages[0]!.attachments![0]!;
       expect(att.type).toBe('image');
       expect(att.filename).toBe('images/001.png');
       expect(att.originalSrc).toBe('https://example.com/qubit.png');
@@ -482,11 +482,11 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
         ]
       };
 
-      const sanitized: any = ZipBuilder.sanitizeRecordForJson(record, { dropThinking: true });
-      expect(sanitized.messages[0].thinking).toBeNull();
-      expect(sanitized.messages[0].content).toBe('Here is the tactical breakdown.');
-      expect(sanitized.messages[0].rawText).toBe('Here is the tactical breakdown.');
-      expect(sanitized.messages[0].rawText).not.toContain('Thought for 1m 14s');
+      const sanitized = ZipBuilder.sanitizeRecordForJson(record, { dropThinking: true });
+      expect(sanitized.messages[0]!.thinking).toBeNull();
+      expect(sanitized.messages[0]!.content).toBe('Here is the tactical breakdown.');
+      expect(sanitized.messages[0]!.rawText).toBe('Here is the tactical breakdown.');
+      expect(sanitized.messages[0]!.rawText).not.toContain('Thought for 1m 14s');
     });
 
     it('buildZip and createZip generate a valid JSZip archive bundling conversation.json and images', async () => {
@@ -506,6 +506,7 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
       const parsed = JSON.parse(conversationJsonText);
       expect(parsed.metadata.title).toBe('Quantum Computing Discussion - Gemini');
       expect(parsed.messages[0].content).toBe('Explain qubits');
+      expect(parsed.messages[1].thinking).toBeNull(); // Default export decouples thinking traces
 
       // 2. images/001.png verification
       const imageFile = loadedZip.file('images/001.png');

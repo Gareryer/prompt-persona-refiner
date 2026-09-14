@@ -39,16 +39,24 @@ export interface DownloadZipOptions {
   revokeDelayMs?: number;
 }
 
+export interface SanitizedHarvestAttachment extends Omit<HarvestAttachment, 'blob' | 'dataUrl'> {}
+
+export interface SanitizedHarvestConversationRecord {
+  metadata: HarvestConversationMetadata;
+  messages: HarvestTurn[];
+  images?: SanitizedHarvestAttachment[];
+}
+
 export class ZipBuilder {
   /**
    * Sanitizes a HarvestConversationRecord for JSON serialization by stripping binary Blob references,
-   * optionally nullifying internal thinking traces, and ensuring rawText matches sanitized markdown content.
+   * nullifying internal thinking traces by default, and ensuring rawText matches sanitized markdown content.
    */
   static sanitizeRecordForJson(
     record: HarvestConversationRecord,
     options?: { dropThinking?: boolean }
-  ): Record<string, unknown> {
-    const sanitizeAttachment = (att: HarvestAttachment) => {
+  ): SanitizedHarvestConversationRecord {
+    const sanitizeAttachment = (att: HarvestAttachment): SanitizedHarvestAttachment => {
       const { blob: _blob, dataUrl: _dataUrl, ...rest } = att;
       return rest;
     };
@@ -89,8 +97,10 @@ export class ZipBuilder {
   ): Promise<Blob> {
     const zip = new JSZip();
 
-    // 1. Serialize sanitized conversation.json
-    const cleanRecord = this.sanitizeRecordForJson(record, { dropThinking: options?.dropThinking });
+    // 1. Serialize sanitized conversation.json (defaults dropThinking: true for archives)
+    const cleanRecord = this.sanitizeRecordForJson(record, {
+      dropThinking: options?.dropThinking ?? true
+    });
     const jsonString = JSON.stringify(cleanRecord, null, 2);
     zip.file('conversation.json', jsonString);
 

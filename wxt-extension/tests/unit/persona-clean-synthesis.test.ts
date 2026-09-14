@@ -6,7 +6,7 @@ import { ClaudeAdapter } from '@/adapters/chatbots/claude/adapter';
 import { GeminiAdapter } from '@/adapters/chatbots/gemini/adapter';
 import { ZipBuilder } from '@/core/harvest/packaging/zip-builder';
 import { UnifiedAnalyzer } from '@/core/memory/analyzers/unified-analyzer';
-import type { HarvestConversationRecord } from '@/core/harvest/types';
+import type { HarvestConversationRecord, HarvestTurn } from '@/core/harvest/types';
 
 setupMockDom();
 
@@ -174,18 +174,22 @@ describe('Phase 4: End-to-End Clean Persona Extraction & Synthesis Verification'
   });
 
   it('End-to-End Synthesis: UnifiedAnalyzer produces pure, high-fidelity prompt from sanitized dialogue', async () => {
-    const turns = [
+    const turns: HarvestTurn[] = [
       {
         id: '1',
+        turnIndex: 0,
         role: 'user',
-        content: 'I need an expert prompt persona for a senior distributed systems architect on AWS.'
+        content: 'I need an expert prompt persona for a senior distributed systems architect on AWS.',
+        timestamp: Date.now()
       },
       {
         id: '2',
+        turnIndex: 1,
         role: 'assistant',
         content: 'You should define clear architecture guidelines with emphasis on fault tolerance and eventual consistency.',
         thinking: null,
-        rawText: 'You should define clear architecture guidelines with emphasis on fault tolerance and eventual consistency.'
+        rawText: 'You should define clear architecture guidelines with emphasis on fault tolerance and eventual consistency.',
+        timestamp: Date.now()
       }
     ];
 
@@ -201,15 +205,15 @@ describe('Phase 4: End-to-End Clean Persona Extraction & Synthesis Verification'
         messageCount: 2,
         imageCount: 0
       },
-      messages: turns as any
+      messages: turns
     };
 
-    const sanitizedJson: any = ZipBuilder.sanitizeRecordForJson(record, { dropThinking: true });
-    expect(sanitizedJson.messages[1].thinking).toBeNull();
-    expect(sanitizedJson.messages[1].rawText).toBe(turns[1]!.content);
+    const sanitizedJson = ZipBuilder.sanitizeRecordForJson(record, { dropThinking: true });
+    expect(sanitizedJson.messages[1]!.thinking).toBeNull();
+    expect(sanitizedJson.messages[1]!.rawText).toBe(turns[1]!.content);
 
     // Verify UnifiedAnalyzer prompt construction
-    const prompt = UnifiedAnalyzer.getPrompt(turns as any);
+    const prompt = UnifiedAnalyzer.getPrompt(turns);
     expect(prompt).toContain('PERSONA ARCHITECT');
     expect(prompt).toContain('User: I need an expert prompt persona for a senior distributed systems architect on AWS.');
     expect(prompt).toContain('Assistant: You should define clear architecture guidelines with emphasis on fault tolerance and eventual consistency.');
