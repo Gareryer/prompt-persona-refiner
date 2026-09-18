@@ -46,12 +46,12 @@ export const ReportModal: React.FC<ReportModalProps> = ({
 
   return (
     <div className="persona-modal" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} title="Close">
+      <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="report-modal-title" onClick={e => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose} title="Close" aria-label="Close modal">
           <span className="material-symbols-outlined">close</span>
         </button>
 
-        <h2>Report Persona</h2>
+        <h2 id="report-modal-title">Report Persona</h2>
 
         {/* Content */}
         <div style={{ padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -62,7 +62,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
           </div>
 
           {errorMsg && (
-            <div style={{ background: 'var(--color-error-container, #fce8e6)', color: 'var(--color-error, #d93025)', padding: 8, borderRadius: 6, fontSize: 12 }}>
+            <div role="alert" style={{ background: 'var(--color-error-container)', color: 'var(--color-on-error-container)', padding: 8, borderRadius: 6, fontSize: 12 }}>
               {errorMsg}
             </div>
           )}

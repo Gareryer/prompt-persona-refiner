@@ -47,12 +47,12 @@ export const PromptPreviewModal: React.FC<PromptPreviewModalProps> = ({
 
   return (
     <div className="persona-modal" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} title="Close">
+      <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="prompt-preview-title" onClick={e => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose} title="Close" aria-label="Close modal">
           <span className="material-symbols-outlined">close</span>
         </button>
 
-        <h2>{prompt.title}</h2>
+        <h2 id="prompt-preview-title">{prompt.title}</h2>
         <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: -12, marginBottom: 16 }}>
           Category: <span className="version-badge">{prompt.category}</span>
         </div>

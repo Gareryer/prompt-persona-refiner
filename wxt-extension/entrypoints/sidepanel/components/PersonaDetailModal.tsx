@@ -33,12 +33,12 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
 
   return (
     <div className="persona-modal" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} title="Close">
+      <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="persona-detail-title" onClick={e => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose} title="Close" aria-label="Close modal">
           <span className="material-symbols-outlined">close</span>
         </button>
 
-        <h2>{name}</h2>
+        <h2 id="persona-detail-title">{name}</h2>
         <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: -12, marginBottom: 16 }}>
           By {author} · ID: {personaId}
         </div>
@@ -77,7 +77,7 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
           {/* Dimension Details */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {/* Persona Role */}
-            <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
+            <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low)', borderRadius: 6, border: '1px solid var(--color-outline-variant)' }}>
               <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Role & Identity</div>
               <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>
                 {persona.persona?.instruction || 'No instruction defined.'}
@@ -86,7 +86,7 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
 
             {/* Context & Scope */}
             {persona.context?.instruction && (
-              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
+              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low)', borderRadius: 6, border: '1px solid var(--color-outline-variant)' }}>
                 <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Domain Knowledge & Scope</div>
                 <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{persona.context.instruction}</p>
                 {persona.context.metadata?.scope_tags && (
@@ -101,7 +101,7 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
 
             {/* Tone & Style */}
             {persona.tone?.instruction && (
-              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
+              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low)', borderRadius: 6, border: '1px solid var(--color-outline-variant)' }}>
                 <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Tone & Communication Style</div>
                 <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{persona.tone.instruction}</p>
                 {persona.tone.metadata?.style_tags && (
@@ -116,7 +116,7 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
 
             {/* Framework */}
             {persona.framework?.instruction && (
-              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
+              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low)', borderRadius: 6, border: '1px solid var(--color-outline-variant)' }}>
                 <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Reasoning Framework</div>
                 <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{persona.framework.instruction}</p>
               </div>
@@ -124,7 +124,7 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
 
             {/* Constraints */}
             {persona.constraints?.instruction && (
-              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
+              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low)', borderRadius: 6, border: '1px solid var(--color-outline-variant)' }}>
                 <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Invariants & Constraints</div>
                 <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{persona.constraints.instruction}</p>
               </div>
@@ -132,7 +132,7 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
 
             {/* Output Format */}
             {persona.format?.instruction && (
-              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
+              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low)', borderRadius: 6, border: '1px solid var(--color-outline-variant)' }}>
                 <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Output Format & Rules</div>
                 <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{persona.format.instruction}</p>
               </div>
@@ -140,7 +140,7 @@ export const PersonaDetailModal: React.FC<PersonaDetailModalProps> = ({
 
             {/* Few-Shot Exemplars */}
             {persona.exemplar?.instruction && (
-              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low, #222)', borderRadius: 6, border: '1px solid var(--color-outline, #333)' }}>
+              <div className="card" style={{ padding: 10, background: 'var(--color-surface-container-low)', borderRadius: 6, border: '1px solid var(--color-outline-variant)' }}>
                 <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--color-accent, #8ab4f8)', marginBottom: 4 }}>Few-Shot Examples & Patterns</div>
                 <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{persona.exemplar.instruction}</p>
               </div>

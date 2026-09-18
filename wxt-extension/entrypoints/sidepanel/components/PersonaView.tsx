@@ -489,7 +489,15 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
                   onChange={e => setSearchQuery(e.target.value)}
                 />
                 {searchQuery && (
-                  <button id="search-clear-btn" className="search-clear" onClick={() => setSearchQuery('')} title="Clear">✕</button>
+                  <button
+                    id="search-clear-btn"
+                    className="search-clear"
+                    onClick={() => setSearchQuery('')}
+                    title="Clear"
+                    aria-label="Clear search"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
+                  </button>
                 )}
               </div>
               <button
@@ -1552,7 +1560,7 @@ export const PersonaView: React.FC<PersonaViewProps> = ({
               onClick={handleCreate}
             >
               <span className="btn-content">
-                <span className="material-symbols-outlined">publish</span> Publish
+                <span className="material-symbols-outlined">save</span> Save Persona
               </span>
             </button>
           )}

@@ -22,6 +22,7 @@
     --color-bg: #000000;
     --color-surface: #1e1f20;
     --color-surface-container: #0e0e0e;
+    --color-surface-container-low: #141414;
     --color-surface-container-high: #2d2e2f;
 
     /* Text */
@@ -32,6 +33,8 @@
     --color-accent-container: rgba(168, 199, 250, 0.15);
     --color-on-accent: #041e49;
     --color-toggle-knob: #041e49;
+    --color-primary-container: rgba(168, 199, 250, 0.15);
+    --color-on-primary-container: #a8c7fa;
 
     /* Interactive States */
     --color-hover: rgba(227, 227, 227, 0.08);
@@ -46,6 +49,8 @@
     /* Status Colors */
     --color-success: #81c995;
     --color-error: #f28b82;
+    --color-error-container: rgba(242, 139, 130, 0.15);
+    --color-on-error-container: #f28b82;
     --color-warning: #fdd663;
 
     /* Shadows (subtle in dark mode) */
@@ -69,6 +74,7 @@
         --color-bg: #f0f4f8;
         --color-surface: #ffffff;
         --color-surface-container: #e9eef6;
+        --color-surface-container-low: #f7f9fc;
         --color-surface-container-high: #dde3ea;
 
         /* Text */
@@ -79,6 +85,8 @@
         --color-accent-container: rgba(11, 87, 208, 0.12);
         --color-on-accent: #ffffff;
         --color-toggle-knob: #ffffff;
+        --color-primary-container: rgba(11, 87, 208, 0.12);
+        --color-on-primary-container: #0b57d0;
 
         /* Interactive States */
         --color-hover: rgba(31, 31, 31, 0.08);
@@ -93,7 +101,9 @@
         /* Status Colors */
         --color-success: #1e8e3e;
         --color-error: #d93025;
-        --color-warning: #f9ab00;
+        --color-error-container: #fce8e6;
+        --color-on-error-container: #d93025;
+        --color-warning: #8a4f00;
 
         /* Shadows (more visible in light mode) */
         --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -112,6 +122,7 @@
     --color-bg: #f0f4f8;
     --color-surface: #ffffff;
     --color-surface-container: #e9eef6;
+    --color-surface-container-low: #f7f9fc;
     --color-surface-container-high: #dde3ea;
 
     /* Text */
@@ -122,6 +133,8 @@
     --color-accent-container: rgba(11, 87, 208, 0.12);
     --color-on-accent: #ffffff;
     --color-toggle-knob: #ffffff;
+    --color-primary-container: rgba(11, 87, 208, 0.12);
+    --color-on-primary-container: #0b57d0;
 
     /* Interactive States */
     --color-hover: rgba(31, 31, 31, 0.08);
@@ -136,7 +149,9 @@
     /* Status Colors */
     --color-success: #1e8e3e;
     --color-error: #d93025;
-    --color-warning: #f9ab00;
+    --color-error-container: #fce8e6;
+    --color-on-error-container: #d93025;
+    --color-warning: #8a4f00;
 
     /* Shadows (more visible in light mode) */
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -461,6 +476,30 @@ body {
     /* No card background, list style */
     border-radius: 16px;
     overflow: hidden;
+}
+
+.accordion-header-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border-radius: 12px;
+    transition: background 0.2s ease, border-radius 0.2s ease;
+}
+
+.accordion-header-row:hover {
+    background: var(--color-hover);
+}
+
+.accordion.expanded .accordion-header-row {
+    border-radius: 24px;
+    background: var(--color-active, rgba(227, 227, 227, 0.12));
+}
+
+.accordion-header-row .accordion-header {
+    flex: 1;
+    min-width: 0;
+    padding-right: 8px;
+    background: transparent !important;
 }
 
 .accordion-header {
@@ -1148,7 +1187,8 @@ body {
     flex-shrink: 0;
 }
 
-.accordion-header > .toggle-switch {
+.accordion-header > .toggle-switch,
+.header-controls .toggle-switch {
     margin-left: 8px;
     flex-shrink: 0;
 }
@@ -1156,12 +1196,15 @@ body {
 .pin-toggle {
     cursor: pointer;
     color: var(--color-text-secondary);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 30px;
     height: 30px;
     border-radius: 50%;
+    border: none;
+    background: transparent;
+    padding: 0;
     transition: all 0.2s;
 }
 
@@ -3763,7 +3806,7 @@ body {
     color: var(--color-text-secondary);
     font-style: italic;
     padding: 4px 0 0;
-    border-left: 2px solid var(--color-outline);
+    border-left: 1px solid var(--color-outline);
     padding-left: 8px;
     margin-top: 4px;
 }
@@ -4229,7 +4272,7 @@ overflow: hidden;
     .diff-new {
         width: 100%;
         padding-left: 8px;
-        border-left: 2px solid var(--color-outline-variant);
+        border-left: 1px solid var(--color-outline-variant);
     }
 
     .diff-old {
@@ -4327,15 +4370,17 @@ overflow: hidden;
 
 /* Custom chips - always have remove button */
 .v4-chip.custom {
-    padding-right: 8px;
+    padding-right: 6px;
 }
 
 .v4-chip .chip-remove {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    min-width: 24px;
+    min-height: 24px;
+    width: 24px;
+    height: 24px;
     margin-left: 4px;
     padding: 0;
     border: none;
@@ -4478,5 +4523,15 @@ overflow: hidden;
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
+    }
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.05s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.05s !important;
+        scroll-behavior: auto !important;
     }
 }

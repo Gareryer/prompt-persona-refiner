@@ -183,9 +183,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
     setExpandedMap(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const toggleEnabled = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+  const toggleEnabled = (id: string, e?: React.SyntheticEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     setEnabledMap(prev => {
       const nextState = !prev[id];
       const next = { ...prev, [id]: nextState };
@@ -330,37 +331,47 @@ export const ContextView: React.FC<ContextViewProps> = ({
 
           return (
             <section key={dim.id} className={`accordion ${isExpanded ? 'expanded' : ''}`} data-section={dim.id}>
-              <button
-                className="accordion-header"
-                aria-expanded={isExpanded}
-                onClick={() => toggleExpand(dim.id)}
-              >
-                <span
-                  className="accordion-icon material-symbols-outlined"
-                  style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}
+              <div className="accordion-header-row">
+                <button
+                  type="button"
+                  className="accordion-header"
+                  aria-expanded={isExpanded}
+                  onClick={() => toggleExpand(dim.id)}
                 >
-                  chevron_right
-                </span>
-                <span className="accordion-title">{dim.title}</span>
+                  <span
+                    className="accordion-icon material-symbols-outlined"
+                    style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}
+                  >
+                    chevron_right
+                  </span>
+                  <span className="accordion-title">{dim.title}</span>
+                </button>
                 <div className="header-controls">
                   {!isEnabled && (
                     <span className="badge stale" title="Dimension disabled from refinement">
                       STALE
                     </span>
                   )}
-                  <span
+                  <button
+                    type="button"
                     className={`pin-toggle ${isPinned ? 'pinned' : ''}`}
                     title={isPinned ? `Unpin ${dim.title} to allow automatic updates` : `Pin ${dim.title} to prevent automatic updates`}
+                    aria-label={isPinned ? `Unpin ${dim.title}` : `Pin ${dim.title}`}
                     onClick={(e) => handleTogglePin(dim.id, e)}
                   >
                     <span className="material-symbols-outlined">{isPinned ? 'keep' : 'push_pin'}</span>
-                  </span>
+                  </button>
+                  <label className="toggle-switch" title={isEnabled ? `Disable ${dim.title}` : `Enable ${dim.title}`}>
+                    <input
+                      type="checkbox"
+                      checked={isEnabled}
+                      onChange={(e) => toggleEnabled(dim.id, e)}
+                      aria-label={`Toggle ${dim.title} dimension`}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
                 </div>
-                <label className="toggle-switch" onClick={(e) => toggleEnabled(dim.id, e)}>
-                  <input type="checkbox" checked={isEnabled} readOnly />
-                  <span className="toggle-slider"></span>
-                </label>
-              </button>
+              </div>
 
               {isExpanded && (
                 <div
@@ -450,9 +461,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               <button
                                 type="button"
                                 className="chip-remove"
+                                aria-label={`Remove scope tag ${tag}`}
                                 onClick={() => handleRemoveCustomTag('context', 'scope_tags', tag)}
                               >
-                                ×
+                                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
                               </button>
                             </span>
                           ))}
@@ -469,9 +481,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               type="button"
                               className="chip-add-btn"
                               title="Add tag"
+                              aria-label="Add scope tag"
                               onClick={() => handleAddCustomTag('context', 'scope_tags', 'scope_tags')}
                             >
-                              +
+                              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
                             </button>
                           </div>
                         </div>
@@ -506,14 +519,15 @@ export const ContextView: React.FC<ContextViewProps> = ({
                         <label className="chip-group-label">Banned Phrases</label>
                         <div className="chips-container">
                           {((metadata.banned_phrases as string[]) || []).map(phrase => (
-                            <span key={phrase} className="v4-chip custom selected" style={{ background: 'var(--color-error-container, #fce8e6)', color: 'var(--color-error, #d93025)' }}>
+                            <span key={phrase} className="v4-chip custom selected" style={{ background: 'var(--color-error-container)', color: 'var(--color-on-error-container)' }}>
                               {phrase}
                               <button
                                 type="button"
                                 className="chip-remove"
+                                aria-label={`Remove banned phrase ${phrase}`}
                                 onClick={() => handleRemoveCustomTag('tone', 'banned_phrases', phrase)}
                               >
-                                ×
+                                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
                               </button>
                             </span>
                           ))}
@@ -530,9 +544,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               type="button"
                               className="chip-add-btn"
                               title="Add phrase"
+                              aria-label="Add banned phrase"
                               onClick={() => handleAddCustomTag('tone', 'banned_phrases', 'banned_phrases')}
                             >
-                              +
+                              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
                             </button>
                           </div>
                         </div>
@@ -576,9 +591,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               <button
                                 type="button"
                                 className="chip-remove"
+                                aria-label={`Remove prohibition ${p}`}
                                 onClick={() => handleRemoveCustomTag('constraints', 'prohibitions', p)}
                               >
-                                ×
+                                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
                               </button>
                             </span>
                           ))}
@@ -595,9 +611,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               type="button"
                               className="chip-add-btn"
                               title="Add prohibition"
+                              aria-label="Add prohibition"
                               onClick={() => handleAddCustomTag('constraints', 'prohibitions', 'prohibitions')}
                             >
-                              +
+                              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
                             </button>
                           </div>
                         </div>
@@ -613,9 +630,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               <button
                                 type="button"
                                 className="chip-remove"
+                                aria-label={`Remove requirement ${req}`}
                                 onClick={() => handleRemoveCustomTag('constraints', 'requirements', req)}
                               >
-                                ×
+                                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
                               </button>
                             </span>
                           ))}
@@ -632,9 +650,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               type="button"
                               className="chip-add-btn"
                               title="Add requirement"
+                              aria-label="Add requirement"
                               onClick={() => handleAddCustomTag('constraints', 'requirements', 'requirements')}
                             >
-                              +
+                              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
                             </button>
                           </div>
                         </div>
@@ -686,9 +705,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               <button
                                 type="button"
                                 className="chip-remove"
+                                aria-label={`Remove structure rule ${rule}`}
                                 onClick={() => handleRemoveCustomTag('format', 'structure_rules', rule)}
                               >
-                                ×
+                                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
                               </button>
                             </span>
                           ))}
@@ -705,9 +725,10 @@ export const ContextView: React.FC<ContextViewProps> = ({
                               type="button"
                               className="chip-add-btn"
                               title="Add rule"
+                              aria-label="Add structure rule"
                               onClick={() => handleAddCustomTag('format', 'structure_rules', 'structure_rules')}
                             >
-                              +
+                              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
                             </button>
                           </div>
                         </div>
@@ -745,7 +766,12 @@ export const ContextView: React.FC<ContextViewProps> = ({
 
         {/* Custom Context Section */}
         <section className={`accordion ${expandedMap['injected_context'] ? 'expanded' : ''}`} data-section="injected_context">
-          <button className="accordion-header" onClick={() => toggleExpand('injected_context')}>
+          <button
+            type="button"
+            className="accordion-header"
+            aria-expanded={Boolean(expandedMap['injected_context'])}
+            onClick={() => toggleExpand('injected_context')}
+          >
             <span
               className="accordion-icon material-symbols-outlined"
               style={{ transform: expandedMap['injected_context'] ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}

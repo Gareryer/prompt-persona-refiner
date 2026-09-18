@@ -189,8 +189,14 @@ const SidepanelAppContent: React.FC = () => {
             <h1>Allie Persona & Prompt Refiner</h1>
           </div>
           <div className="header-actions">
-            <button id="theme-toggle-btn" className="header-action-btn" title="Toggle Theme" onClick={toggleTheme}>
-              <span className="material-symbols-outlined theme-toggle-icon">
+            <button
+              id="theme-toggle-btn"
+              className="header-action-btn"
+              title="Toggle Theme"
+              aria-label="Toggle dark/light theme"
+              onClick={toggleTheme}
+            >
+              <span className="material-symbols-outlined theme-toggle-icon" aria-hidden="true">
                 {theme === 'dark' ? 'light_mode' : 'dark_mode'}
               </span>
             </button>
@@ -198,10 +204,11 @@ const SidepanelAppContent: React.FC = () => {
               id="split-view-btn"
               className={`header-action-btn ${splitViewActive ? 'active' : ''}`}
               title={splitViewActive ? "Close Split View" : "Toggle Split View"}
+              aria-label={splitViewActive ? "Close Split View" : "Toggle Split View"}
               onClick={handleToggleSplitView}
               disabled={splitViewBusy}
             >
-              <span className="material-symbols-outlined">
+              <span className="material-symbols-outlined" aria-hidden="true">
                 {splitViewActive ? 'close' : 'split_scene'}
               </span>
             </button>
@@ -209,18 +216,19 @@ const SidepanelAppContent: React.FC = () => {
               id="open-options-btn"
               className="header-action-btn"
               title="Settings"
+              aria-label="Open Settings"
               onClick={() => sendRpcMessage('OPEN_OPTIONS_PAGE', undefined)}
             >
-              <span className="material-symbols-outlined">settings</span>
+              <span className="material-symbols-outlined" aria-hidden="true">settings</span>
             </button>
           </div>
         </div>
 
         <div className="session-info">
           <span id="session-id" className="session-id">Active Session: {activeSessionId}</span>
-          <div id="llm-status" className={`llm-status ${llmStatus.connected ? 'connected' : 'warning'}`}>
+          <div id="llm-status" role="status" aria-live="polite" className={`llm-status ${llmStatus.connected ? 'connected' : 'warning'}`}>
             <span className={`status-dot ${llmStatus.connected ? 'connected' : ''}`}></span>
-            <span className="status-icon material-symbols-outlined">
+            <span className="status-icon material-symbols-outlined" aria-hidden="true">
               {llmStatus.connected ? 'check_circle' : 'warning'}
             </span>
             <span className="status-text">
@@ -231,47 +239,69 @@ const SidepanelAppContent: React.FC = () => {
       </header>
 
       {/* Tab Navigation */}
-      <nav className="tab-nav">
+      <nav className="tab-nav" role="tablist" aria-label="Sidepanel Navigation">
         <button
+          role="tab"
+          id="tab-context"
+          aria-selected={activeTab === 'context'}
+          aria-controls="tabpanel-context"
           className={`tab-btn ${activeTab === 'context' ? 'active' : ''}`}
           onClick={() => setActiveTab('context')}
         >
-          <span className="material-symbols-outlined">psychology</span> Context
+          <span className="material-symbols-outlined" aria-hidden="true">psychology</span> Context
         </button>
         <button
+          role="tab"
+          id="tab-persona"
+          aria-selected={activeTab === 'persona'}
+          aria-controls="tabpanel-persona"
           className={`tab-btn ${activeTab === 'persona' ? 'active' : ''}`}
           onClick={() => setActiveTab('persona')}
         >
-          <span className="material-symbols-outlined">emoji_people</span> Persona
+          <span className="material-symbols-outlined" aria-hidden="true">emoji_people</span> Persona
         </button>
       </nav>
 
       {/* Tab Content Views */}
       <main className="panel-content">
-        {activeTab === 'context' && (
-          <ContextView
-            activePersona={activePersona}
-            onUpdatePersona={handleUpdateActivePersona}
-            onRebuild={handleRebuild}
-            isRebuilding={isRebuilding}
-            lastUpdated={lastUpdated}
-            onOpenSourcePrompt={() => setSourceModalOpen(true)}
-            onPinComponent={(dimId, pinned) => sendRpcMessage(pinned ? 'PIN_COMPONENT' : 'UNPIN_COMPONENT', { sessionId: 'Tab-1', componentId: dimId })}
-          />
-        )}
+        <div
+          role="tabpanel"
+          id="tabpanel-context"
+          aria-labelledby="tab-context"
+          hidden={activeTab !== 'context'}
+        >
+          {activeTab === 'context' && (
+            <ContextView
+              activePersona={activePersona}
+              onUpdatePersona={handleUpdateActivePersona}
+              onRebuild={handleRebuild}
+              isRebuilding={isRebuilding}
+              lastUpdated={lastUpdated}
+              onOpenSourcePrompt={() => setSourceModalOpen(true)}
+              onPinComponent={(dimId, pinned) => sendRpcMessage(pinned ? 'PIN_COMPONENT' : 'UNPIN_COMPONENT', { sessionId: 'Tab-1', componentId: dimId })}
+            />
+          )}
+        </div>
 
-        {activeTab === 'persona' && (
-          <PersonaView
-            personas={personas}
-            activeId={activePersonaId}
-            onSelectActive={(id) => setActivePersonaId(id)}
-            onSavePersona={handleSaveNewPersona}
-            onDeletePersona={handleDeletePersona}
-            onReportPersona={async (personaId, reason, details) => {
-              sendRpcMessage('REPORT_PERSONA', { personaId, reason, details });
-            }}
-          />
-        )}
+        <div
+          role="tabpanel"
+          id="tabpanel-persona"
+          aria-labelledby="tab-persona"
+          hidden={activeTab !== 'persona'}
+        >
+          {activeTab === 'persona' && (
+            <PersonaView
+              personas={personas}
+              activeId={activePersonaId}
+              onSelectActive={(id) => setActivePersonaId(id)}
+              onSavePersona={handleSaveNewPersona}
+              onDeletePersona={handleDeletePersona}
+              onReportPersona={async (personaId, reason, details) => {
+                sendRpcMessage('REPORT_PERSONA', { personaId, reason, details });
+              }}
+            />
+          )}
+        </div>
       </main>
 
       {/* Source Conversation Prompt Modal */}

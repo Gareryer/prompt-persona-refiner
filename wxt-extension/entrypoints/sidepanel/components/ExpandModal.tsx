@@ -31,7 +31,7 @@ export const ExpandModal: React.FC<ExpandModalProps> = ({
       justifyContent: 'center',
       padding: 16
     }}>
-      <div className="modal-content" style={{
+      <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="expand-modal-title" style={{
         background: 'var(--color-surface, #1e1f20)',
         border: '1px solid var(--color-outline, #444746)',
         borderRadius: 12,
@@ -44,8 +44,16 @@ export const ExpandModal: React.FC<ExpandModalProps> = ({
         padding: 16
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h3 style={{ margin: 0, color: 'var(--color-text-primary)', fontSize: 16 }}>{title}</h3>
-          <button className="btn-icon" onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', fontSize: 18 }}>✕</button>
+          <h3 id="expand-modal-title" style={{ margin: 0, color: 'var(--color-text-primary)', fontSize: 16 }}>{title}</h3>
+          <button
+            className="btn-icon"
+            onClick={onClose}
+            title="Close"
+            aria-label="Close modal"
+            style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
         </div>
         <textarea
           style={{

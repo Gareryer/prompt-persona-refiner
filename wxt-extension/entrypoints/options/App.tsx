@@ -78,7 +78,11 @@ export const OptionsApp: React.FC = () => {
       </header>
 
       {statusMsg && (
-        <div style={{ background: 'var(--accent-color)', color: 'white', padding: '10px 16px', borderRadius: 8, marginBottom: 20, textAlign: 'center', fontWeight: 500 }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ background: 'var(--accent-color)', color: 'white', padding: '10px 16px', borderRadius: 8, marginBottom: 20, textAlign: 'center', fontWeight: 500 }}
+        >
           {statusMsg}
         </div>
       )}

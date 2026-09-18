@@ -64,6 +64,9 @@ export const SourcePromptModal: React.FC<SourcePromptModalProps> = ({
     >
       <div
         className="modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="source-prompt-modal-title"
         onClick={e => e.stopPropagation()}
         style={{
           background: 'var(--color-surface, #1e1e1e)',
@@ -81,11 +84,11 @@ export const SourcePromptModal: React.FC<SourcePromptModalProps> = ({
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--color-outline, #333)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="material-symbols-outlined" style={{ color: 'var(--color-accent, #8ab4f8)' }}>data_object</span>
-            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Original Source Conversation</h3>
+            <span className="material-symbols-outlined" style={{ color: 'var(--color-accent, #8ab4f8)' }} aria-hidden="true">data_object</span>
+            <h3 id="source-prompt-modal-title" style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Original Source Conversation</h3>
           </div>
-          <button className="btn-icon" onClick={onClose} title="Close (Esc)">
-            <span className="material-symbols-outlined">close</span>
+          <button className="btn-icon" onClick={onClose} title="Close (Esc)" aria-label="Close modal (Esc)">
+            <span className="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
         </div>
 

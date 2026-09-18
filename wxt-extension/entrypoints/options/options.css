@@ -918,3 +918,13 @@ textarea:focus-visible {
         transform: translateX(100%);
     }
 }
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.05s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.05s !important;
+        scroll-behavior: auto !important;
+    }
+}
