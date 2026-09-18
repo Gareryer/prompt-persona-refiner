@@ -410,6 +410,16 @@ export const ContextView: React.FC<ContextViewProps> = ({
                         STALE
                       </span>
                     )}
+                    <span
+                      className={`verbatim-label ${isPinned ? 'locked' : ''}`}
+                      onClick={() => handleTogglePin(dim.id)}
+                      title={isPinned ? "Locked: protected from automated extraction overrides" : "Lock this dimension to protect from automated extraction overrides"}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 13 }}>
+                        {isPinned ? 'lock' : 'lock_open'}
+                      </span>
+                      <span>{isPinned ? 'Locked from auto-updates' : 'Auto-updates enabled'}</span>
+                    </span>
                     <label className="toggle-switch verbatim-switch" title="Toggle verbatim protection">
                       <input
                         type="checkbox"
