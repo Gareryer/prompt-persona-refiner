@@ -1,6 +1,7 @@
 /**
  * DOM fixture and lightweight in-memory DOM simulation for Vitest Node environment.
  */
+import { indexedDB as fakeIdb, IDBKeyRange as fakeKeyRange } from 'fake-indexeddb';
 
 export class MockNode {
   nodeType = 1;
@@ -745,15 +746,22 @@ export function setupMockDom() {
   (globalThis as any).HTMLTextAreaElement = class HTMLTextAreaElement extends MockElement {};
   (globalThis as any).HTMLInputElement = class HTMLInputElement extends MockElement {};
 
+  const idb = (globalThis as any).indexedDB || fakeIdb;
+  const idbKeyRange = (globalThis as any).IDBKeyRange || fakeKeyRange;
+
   const mockWindow = {
     location: {
       pathname: '/',
       href: 'https://gemini.google.com/'
     },
     document: mockDocument,
-    getComputedStyle: (el: any) => el?.style || {}
+    getComputedStyle: (el: any) => el?.style || {},
+    indexedDB: idb,
+    IDBKeyRange: idbKeyRange
   };
   (globalThis as any).window = mockWindow;
+  (globalThis as any).indexedDB = idb;
+  (globalThis as any).IDBKeyRange = idbKeyRange;
 
   if (typeof (globalThis as any).MutationObserver === 'undefined') {
     (globalThis as any).MutationObserver = MockMutationObserver;

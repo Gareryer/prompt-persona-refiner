@@ -43,24 +43,24 @@ export class HarvestDB {
 
   private getIdbFactory(): IDBFactory {
     if (this.customIdbFactory) return this.customIdbFactory;
-    if (typeof indexedDB !== 'undefined') return indexedDB;
-    if (typeof globalThis !== 'undefined' && (globalThis as any).indexedDB) {
-      return (globalThis as any).indexedDB;
-    }
     if (typeof window !== 'undefined' && window.indexedDB) {
       return window.indexedDB;
     }
+    if (typeof globalThis !== 'undefined' && (globalThis as any).indexedDB) {
+      return (globalThis as any).indexedDB;
+    }
+    if (typeof indexedDB !== 'undefined') return indexedDB;
     throw new Error('IndexedDB is not available in the current environment');
   }
 
   private getIdbKeyRange(): typeof IDBKeyRange | undefined {
-    if (typeof IDBKeyRange !== 'undefined') return IDBKeyRange;
-    if (typeof globalThis !== 'undefined' && (globalThis as any).IDBKeyRange) {
-      return (globalThis as any).IDBKeyRange;
-    }
     if (typeof window !== 'undefined' && (window as any).IDBKeyRange) {
       return (window as any).IDBKeyRange;
     }
+    if (typeof globalThis !== 'undefined' && (globalThis as any).IDBKeyRange) {
+      return (globalThis as any).IDBKeyRange;
+    }
+    if (typeof IDBKeyRange !== 'undefined') return IDBKeyRange;
     return undefined;
   }
 

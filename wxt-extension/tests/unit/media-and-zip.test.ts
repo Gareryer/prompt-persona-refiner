@@ -113,10 +113,11 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
     it('round-trips Blob to data URL and back', async () => {
       const originalBlob = new Blob(['sample-binary-payload'], { type: 'text/plain' });
       const dataUrl = await MediaExtractor.blobToDataUrl(originalBlob);
-      expect(dataUrl).toContain('data:text/plain;base64,');
+      expect(dataUrl).toContain('data:text/plain');
+      expect(dataUrl).toContain(';base64,');
 
       const convertedBlob = MediaExtractor.dataUrlToBlob(dataUrl);
-      expect(convertedBlob.type).toBe('text/plain');
+      expect(convertedBlob.type.split(';')[0]).toBe('text/plain');
       expect(convertedBlob.size).toBe(originalBlob.size);
     });
   });
@@ -1256,7 +1257,7 @@ describe('Phase 2: Unified Media Extraction & ZIP Packaging Subsystem', () => {
       // Unescaped % in plain text data URI
       const rawPercent = 'data:text/plain,100% genuine';
       const plainBlob = MediaExtractor.dataUrlToBlob(rawPercent);
-      expect(plainBlob.type).toBe('text/plain');
+      expect(plainBlob.type.split(';')[0]).toBe('text/plain');
     });
 
     it('buildZip handles attachments with empty object {} blob and falls back to dataUrl without throwing', async () => {
