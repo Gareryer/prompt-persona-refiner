@@ -20,6 +20,7 @@ import { handleRefinement, callLLMForExtraction } from '../src/core/orchestratio
 import { activeRefinements, activeExtractions } from '../src/core/orchestration/session-state';
 import { decryptApiKey, isEncrypted } from '../src/core/crypto/crypto-service';
 import { HarvestOrchestrator } from '../src/core/harvest/orchestrator';
+import { LegacyMigrator } from '../src/adapters/storage/legacy-migrator';
 
 export default defineBackground(() => {
   bgLog('info', 'Background service worker starting (WXT Modular Engine)...');
@@ -40,6 +41,29 @@ export default defineBackground(() => {
         accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS'
       }).catch(() => {});
     }
+
+    // Run automated legacy storage migration
+    try {
+      const storageAdapter = {
+        get: async (keys: string | string[]) => {
+          return new Promise<Record<string, any>>(resolve => {
+            chrome.storage.local.get(keys, res => resolve(res || {}));
+          });
+        },
+        set: async (items: Record<string, any>) => {
+          return new Promise<void>(resolve => {
+            chrome.storage.local.set(items, () => resolve());
+          });
+        }
+      };
+      const migResult = await LegacyMigrator.migrate(storageAdapter);
+      if (migResult.migrated) {
+        bgLog('info', 'Legacy storage migration completed successfully', migResult);
+      }
+    } catch (migErr: any) {
+      bgLog('warn', 'Legacy storage migration encountered error', { error: migErr?.message });
+    }
+
     if (details.reason === 'install') {
       bgLog('info', 'Extension installed - checking for API key');
       const { geminiApiKey } = await chrome.storage.local.get('geminiApiKey');
