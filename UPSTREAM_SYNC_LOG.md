@@ -3,8 +3,8 @@
 > **Upstream Repository**: [https://github.com/martymcenroe/Clio](https://github.com/martymcenroe/Clio)  
 > **Git Remote**: `upstream-clio` (`https://github.com/martymcenroe/Clio.git`)  
 > **Target Subsystem**: `wxt-extension/src/core/harvest/` & `wxt-extension/src/adapters/chatbots/`  
-> **Current Pinned Upstream HEAD**: `cfa862d` (September 18, 2026 — verified up-to-date)  
-> **Previous Baseline**: `cfa862d` (September 14, 2026)
+> **Current Pinned Upstream HEAD**: `c8efed7` (October 10, 2026)  
+> **Previous Baseline**: `cfa862d` (September 18, 2026)
 
 ---
 
@@ -66,14 +66,34 @@ git diff bdf321e..upstream-clio/main -- extensions/src/
 | :--- | :--- | :--- | :--- | :--- |
 | *(None)* | 2026-09-18 | N/A | **No upstream commits detected**<br>• `upstream-clio/main` remains at `cfa862d`. Upstream has pushed no new commits since the September 14 audit. | **Zero Blast Radius** (0 new commits). Complete parity maintained. |
 
+### Daily Tracking Audit: October 10, 2026 (`cfa862d` → `c8efed7`)
+
+| Commit | Date | PR / Issues | Summary & Upstream Findings | Blast Radius / WXT Porting Target |
+| :--- | :--- | :--- | :--- | :--- |
+| `8b66278` | 2026-09-21 | #368 (Closes #360, #367) | **Data-dl gitignore retrofit**<br>• Updated `.gitignore` to ignore `data-dl`. | **Zero Blast Radius** (Upstream gitignore only). |
+| `3eef08c` | 2026-09-21 | #372 | **Stop writing raw conversation DOM into fixtures**<br>• Fixture cleanup in test suites. | **Zero Blast Radius** (Upstream test fixtures). |
+| `e11ff2a` | 2026-09-22 | #374 (Closes #365, #373) | **Add ESLint & code hygiene cleanups**<br>• Added eslint config; cleaned up unused vars in `popup.js` / `content.js`, exported `findClaudeAssistantContainer` & `getTimestamp`, added error causes. Bumped version 1.9.0 -> 1.9.1. | **Zero Blast Radius** (Code hygiene / linter comments. WXT uses TypeScript + React 19 M3 modular architecture; 0 selector/scraper changes). |
+| `0f4f41a` | 2026-09-22 | #377 | **ADR-0216 landing script**<br>• Internal script for test workflow. | **Zero Blast Radius** (Upstream internal tooling). |
+| `606cc2a` | 2026-09-22 | #380 (Closes #379) | **Take timestamps from date**<br>• Internal script fix for powershell date parsing. | **Zero Blast Radius** (Upstream internal tooling). |
+| `49967a7` | 2026-09-22 | #381 (Closes #366) | **CI unit tests & linter action**<br>• GitHub Actions workflow for PR checks. | **Zero Blast Radius** (Upstream CI configuration). |
+| `c3ab0e3` | 2026-09-22 | #382 | **Script for main branch checks**<br>• Branch protection configuration script. | **Zero Blast Radius** (Upstream repo admin tooling). |
+| `ad41d3b` | 2026-09-22 | #386 (Closes #385) | **Handoff session artifacts 2026-09-22**<br>• Session artifact documentation. | **Zero Blast Radius** (Upstream documentation). |
+| `4c0af0b` | 2026-09-23 | #388 (Closes #387) | **Remove GEMINI.md**<br>• AGY reads single global instruction file upstream. | **Zero Blast Radius** (Upstream repo rules). |
+| `da29c48` | 2026-09-23 | #390 (Closes #389) | **Carry repo rules from CLAUDE.md**<br>• Agent instruction rule generation. | **Zero Blast Radius** (Upstream repo rules). |
+| `73ef0be` | 2026-09-23 | #392 (Closes #391) | **Drop local cleanup fork**<br>• Removed local slash command fork. | **Zero Blast Radius** (Upstream commands). |
+| `fce4ed0` | 2026-09-23 | #394 | **Remove repo-local Claude Code hooks**<br>• Hook maintenance. | **Zero Blast Radius** (Upstream agent hooks). |
+| `e099974` | 2026-09-23 | #396 (Closes #395) | **Regenerate rules from CLAUDE.md**<br>• Rule generator run. | **Zero Blast Radius** (Upstream repo rules). |
+| `c8efed7` | 2026-09-23 | #398 (Closes #397) | **Regenerate rules from CLAUDE.md**<br>• Rule generator run. | **Zero Blast Radius** (Upstream repo rules). |
+
 ---
 
 ## 3. Sync Status Checklist
 
-- [x] Git remote `upstream-clio` configured and fetched (`cfa862d` verified as latest upstream HEAD).
+- [x] Git remote `upstream-clio` configured and fetched (`c8efed7` verified as latest upstream HEAD).
 - [x] Phase 2: Layer 1 Unified Subsystem updates (`VirtualMessageCache`, `TextSanitizer`, `MediaExtractor`, `AutoScroller`).
 - [x] Phase 3: Layer 2 Platform Adapter updates (`ChatGPTTurnScraper`, `ordersFromCapture`, selectors).
-- [x] Phase 4: Conformance Vitest suites (#262, #263, #264, #272, #279) passing (597 / 597 tests across 32 suites).
+- [x] Phase 4: Conformance Vitest suites (#262, #263, #264, #272, #279) passing (600 / 600 tests across 33 suites).
 - [x] Phase 5: Verification & Sub-agent review complete; 100% upstream parity maintained.
+
 
 
