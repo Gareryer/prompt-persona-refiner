@@ -18,7 +18,7 @@ git fetch upstream-clio main
 git log upstream-clio/main -n 10 --oneline -- extensions/src/
 
 # 3. View net diff against current pinned baseline
-git diff bdf321e..upstream-clio/main -- extensions/src/
+git diff c8efed7..upstream-clio/main -- extensions/src/
 ```
 
 ---
